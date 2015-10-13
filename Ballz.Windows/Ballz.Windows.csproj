@@ -54,11 +54,12 @@
   <ItemGroup>
     <Content Include="Icon.ico" />
   </ItemGroup>
-	<ItemGroup>
-    <Content Include="Content\**\*.*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ballz.Content\Ballz.Content.csproj">
+      <Project>{4faaabb4-7837-4a11-afb4-38fd5ee265c6}</Project>
+      <Name>Ballz.Content</Name>
+    </ProjectReference>
+  </ItemGroup>
   <!-- Specify the search path explicitly so the ResolveAssemblyReferences task picks the right ones -->
   <Target Name="BeforeResolveReferences">
     <CreateProperty Value="$(MSBuildProgramFiles32)\MonoGame\v3.0\Assemblies\Windows;$(AssemblySearchPaths)">

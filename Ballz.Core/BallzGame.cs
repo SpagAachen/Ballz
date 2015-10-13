@@ -38,6 +38,8 @@ namespace Ballz
 				
 		}
 
+        Texture2D TextureSplashScreen;
+
 		/// <summary>
 		/// LoadContent will be called once per game and is the place to load
 		/// all of your content.
@@ -46,8 +48,9 @@ namespace Ballz
 		{
 			// Create a new SpriteBatch, which can be used to draw textures.
 			spriteBatch = new SpriteBatch (GraphicsDevice);
-
-			//TODO: use this.Content to load your game content here 
+            Content.RootDirectory = "Content";
+			//TODO: use this.Content to load your game content here
+            TextureSplashScreen = Content.Load<Texture2D>("Balls");
 		}
 
 		/// <summary>
@@ -77,7 +80,9 @@ namespace Ballz
 		{
 			graphics.GraphicsDevice.Clear (Color.CornflowerBlue);
 		
-			//TODO: Add your drawing code here
+            spriteBatch.Begin();
+            spriteBatch.Draw(TextureSplashScreen, Window.ClientBounds, Color.White);
+            spriteBatch.End();
             
 			base.Draw (gameTime);
 		}
