@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "CoreBallz", "CoreBallz\CoreBallz.shproj", "{D5FCA137-178B-486B-8677-5BF65FF1F5FE}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ballz.Core", "Ballz.Core\Ballz.Core.shproj", "{D5FCA137-178B-486B-8677-5BF65FF1F5FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinuxBallz", "LinuxBallz\LinuxBallz.csproj", "{07ED737B-57D1-4761-987B-7E1B4B13A6F6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Linux", "Ballz.Linux\Ballz.Linux.csproj", "{07ED737B-57D1-4761-987B-7E1B4B13A6F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsBallz", "WindowsBallz\WindowsBallz.csproj", "{4AF13BC6-0F0B-47D9-998F-34BED3EE603F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Windows", "Ballz.Windows\Ballz.Windows.csproj", "{4AF13BC6-0F0B-47D9-998F-34BED3EE603F}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		CoreBallz\CoreBallz.projitems*{d5fca137-178b-486b-8677-5bf65ff1f5fe}*SharedItemsImports = 13
-		CoreBallz\CoreBallz.projitems*{07ed737b-57d1-4761-987b-7e1b4b13a6f6}*SharedItemsImports = 4
-		CoreBallz\CoreBallz.projitems*{4af13bc6-0f0b-47d9-998f-34bed3ee603f}*SharedItemsImports = 4
+		Ballz.Core\Ballz.Core.projitems*{d5fca137-178b-486b-8677-5bf65ff1f5fe}*SharedItemsImports = 13
+		Ballz.Core\Ballz.Core.projitems*{07ed737b-57d1-4761-987b-7e1b4b13a6f6}*SharedItemsImports = 4
+		Ballz.Core\Ballz.Core.projitems*{4af13bc6-0f0b-47d9-998f-34bed3ee603f}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -33,6 +33,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = LinuxBallz\LinuxBallz.csproj
+		StartupItem = Ballz.Linux\Ballz.Linux.csproj
 	EndGlobalSection
 EndGlobal

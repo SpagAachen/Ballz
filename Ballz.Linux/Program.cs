@@ -1,6 +1,6 @@
 ﻿#region Using Statements
 using System;
-using CoreBallz;
+using Ballz;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,11 +24,11 @@ namespace Ballz.Linux
 	static class Program
 	#endif
     {
-		private static Ballz game;
+		private static BallzGame game;
 
 		internal static void RunGame ()
 		{
-			game = new Ballz ();
+			game = new BallzGame ();
 			game.Run ();
 		}
 

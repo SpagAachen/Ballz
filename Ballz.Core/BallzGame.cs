@@ -13,12 +13,12 @@ namespace Ballz
 	/// <summary>
 	/// This is the main type for your game.
 	/// </summary>
-	public class Ballz : Game
+	public class BallzGame : Game
 	{
 		GraphicsDeviceManager graphics;
 		SpriteBatch spriteBatch;
 
-		public Ballz ()
+		public BallzGame ()
 		{
 			graphics = new GraphicsDeviceManager (this);
 			Content.RootDirectory = "Content";	            

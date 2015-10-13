@@ -6,9 +6,12 @@
     <SharedGUID>{D5FCA137-178B-486B-8677-5BF65FF1F5FE}</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>CoreBallz</Import_RootNamespace>
+    <Import_RootNamespace>Ballz</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Ballz.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BallzGame.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Content\" />
   </ItemGroup>
 </Project>

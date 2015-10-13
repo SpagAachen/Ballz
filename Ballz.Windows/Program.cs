@@ -1,7 +1,5 @@
 ﻿using System;
 
-using CoreBallz;
-
 namespace Ballz.Windows
 {
 #if WINDOWS || LINUX
@@ -16,7 +14,7 @@ namespace Ballz.Windows
         [STAThread]
         static void Main()
         {
-            using (var game = new Ballz())
+            using (var game = new BallzGame())
                 game.Run();
         }
     }
