@@ -1,0 +1,6 @@
+language: csharp
+solution: Ballz.sln
+install:
+  - nuget restore Ballz.sln
+script:
+  - xbuild /p:Configuration=Release /p:TargetFrameworkVersion="v4.5" /p:ToolsVersion="4.0" Ballz.sln
