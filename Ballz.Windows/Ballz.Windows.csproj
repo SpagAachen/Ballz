@@ -3,8 +3,6 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{4AF13BC6-0F0B-47D9-998F-34BED3EE603F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -66,7 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ballz.Content\Ballz.Content.csproj">
-      <Project>{4faaabb4-7837-4a11-afb4-38fd5ee265c6}</Project>
+      <Project>{4FAAABB4-7837-4A11-AFB4-38FD5EE265C6}</Project>
       <Name>Ballz.Content</Name>
     </ProjectReference>
   </ItemGroup>
