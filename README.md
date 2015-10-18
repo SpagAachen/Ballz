@@ -8,7 +8,7 @@ You need to have the "Monogame Content Pipeline" installed as well as an IDE tha
 
 On Windows you may use Visualstudio or MonoDevelop both with the MonoGame Addin installed. 
 
-On Linux you should use MonoDevelop with the MonoGame Addin in copmbination with Mono-4.0 or higher.
+On Linux you should use MonoDevelop with the MonoGame Addin in combination with Mono-4.0 or higher.
 
 
 #### Compiling the Project:
