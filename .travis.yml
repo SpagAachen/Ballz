@@ -4,6 +4,10 @@ os:
   - linux
   - osx
   
+cache:
+  - bundler
+  - apt
+  
 language: csharp
 solution: Ballz.sln
 install:
