@@ -17,12 +17,24 @@ namespace Ballz
 	{
 		GraphicsDeviceManager graphics;
 		SpriteBatch spriteBatch;
+		static BallzGame instance;
 
-		public BallzGame ()
+		private BallzGame ()
 		{
 			graphics = new GraphicsDeviceManager (this);
 			Content.RootDirectory = "Content";	            
 			graphics.IsFullScreen = true;		
+		}
+
+		public static BallzGame The()
+		{
+			if (instance != null)
+				return instance;
+			else 
+			{
+				instance = new BallzGame ();
+				return instance;
+			}
 		}
 
 		/// <summary>

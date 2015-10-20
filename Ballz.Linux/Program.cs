@@ -28,7 +28,7 @@ namespace Ballz.Linux
 
 		internal static void RunGame ()
 		{
-			game = new BallzGame ();
+			game = BallzGame.The ();
 			game.Run ();
 		}
 

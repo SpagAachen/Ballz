@@ -10,5 +10,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BallzGame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Control\InputTranslator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Control\LogicControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Control\PhysicsControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Control\NetworkControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\World.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)View\RenderSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Entity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Player.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Terrain.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\Message.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Model\WorldSnapshot.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Control\" />
+    <Folder Include="$(MSBuildThisFileDirectory)View\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Model\" />
   </ItemGroup>
 </Project>
