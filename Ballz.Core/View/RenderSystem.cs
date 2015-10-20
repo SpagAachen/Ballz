@@ -10,7 +10,6 @@ namespace Ballz
 	{
 		public RenderSystem ()
 		{
-			throw new NotImplementedException ();
 		}
 
 		/// <summary>
@@ -19,7 +18,11 @@ namespace Ballz
 		/// <param name="_time">time since start of game (cf BallzGame draw).</param>
 		public void draw(GameTime _time)
 		{
-			throw new NotImplementedException ();
+		}
+
+		public void handleMessage(object _sender, Message _message)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }
