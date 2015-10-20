@@ -19,6 +19,13 @@ namespace Ballz
 		SpriteBatch spriteBatch;
 		static BallzGame instance;
 
+		public RenderSystem rendering;
+		public PhysicsControl physics;
+		public LogicControl	logic;
+		public InputTranslator input;
+		public NetworkControl network;
+		public World world;
+
 		private BallzGame ()
 		{
 			graphics = new GraphicsDeviceManager (this);

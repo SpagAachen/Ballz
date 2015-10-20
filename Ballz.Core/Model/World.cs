@@ -23,6 +23,16 @@ namespace Ballz
 		{
 			throw new NotImplementedException ();
 		}
+
+		public WorldSnapshot getDiscreteSnashot(GameTime _time)
+		{
+			throw new NotImplementedException ();
+		}
+
+		public void addDiscreteSnapshot(WorldSnapshot _snpsht)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 }
 

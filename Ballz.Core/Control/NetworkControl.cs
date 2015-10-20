@@ -17,6 +17,11 @@ namespace Ballz
 		{
 			throw new NotImplementedException ();
 		}
+
+		public void handleMessage(object _sender, Message _message)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 }
 

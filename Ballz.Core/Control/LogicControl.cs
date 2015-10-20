@@ -20,6 +20,11 @@ namespace Ballz
 			if (Message != null)
 				Message (this, new Ballz.Message (Ballz.Message.MessageType.LogicMessage));//example message
 		}
+
+		public void handleInputMessage(object _sender, Message _message)
+		{
+			throw new NotImplementedException ();
+		}
 	}
 }
 
