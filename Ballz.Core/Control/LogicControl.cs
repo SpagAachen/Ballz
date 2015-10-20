@@ -1,0 +1,25 @@
+﻿using System;
+
+namespace Ballz
+{
+	/// <summary>
+	/// Logic control Processes Messages and other system reactions with regard to the current gamestate.
+	/// It uses Message events to inform relevant classes.
+	/// </summary>
+	public class LogicControl
+	{
+		public LogicControl ()
+		{
+			throw new NotImplementedException ();
+		}
+
+		public event Message.MessageEventHandler Message;
+
+		protected virtual void raiseMessageEvent()
+		{
+			if (Message != null)
+				Message (this, new Ballz.Message (Ballz.Message.MessageType.LogicMessage));//example message
+		}
+	}
+}
+

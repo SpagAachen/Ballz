@@ -14,7 +14,7 @@ namespace Ballz.Windows
         [STAThread]
         static void Main()
         {
-            using (var game = new BallzGame())
+			using (var game = BallzGame.The())
                 game.Run();
         }
     }
