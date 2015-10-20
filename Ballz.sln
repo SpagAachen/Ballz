@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Content", "Ballz.Cont
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Test", "Ballz.Test\Ballz.Test.csproj", "{E0D1C20A-D501-4898-A65F-AED6D82C0D02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.RealCore", "Ballz.RealCore\Ballz.RealCore.csproj", "{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}"
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Ballz.Core\Ballz.Core.projitems*{d5fca137-178b-486b-8677-5bf65ff1f5fe}*SharedItemsImports = 13
