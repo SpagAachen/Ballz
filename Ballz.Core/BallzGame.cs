@@ -15,7 +15,7 @@ namespace Ballz
 	/// </summary>
 	public class BallzGame : Game
 	{
-		GraphicsDeviceManager graphics;
+		public GraphicsDeviceManager graphics;
 		SpriteBatch spriteBatch;
 		static BallzGame instance;
 

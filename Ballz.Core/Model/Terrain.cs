@@ -159,7 +159,7 @@ namespace Ballz
 				}
 			}
 
-			Texture2D sdf = new Texture2D (BallzGame.The ().graphics.GraphicsDevice, 
+			Texture2D sdf = new Texture2D (BallzGame.The().graphics.GraphicsDevice, 
 				terrainSize.Width, terrainSize.Height);
 			sdf.SetData (sdfPixels);
 
