@@ -10,7 +10,6 @@ namespace Ballz
 	{
 		public LogicControl ()
 		{
-			throw new NotImplementedException ();
 		}
 
 		public event Message.MessageEventHandler Message;

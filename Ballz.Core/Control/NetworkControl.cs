@@ -10,12 +10,10 @@ namespace Ballz
 	{
 		public NetworkControl ()
 		{
-			throw new NotImplementedException ();
 		}
 
 		public void update(GameTime _time)
 		{
-			throw new NotImplementedException ();
 		}
 
 		public void handleMessage(object _sender, Message _message)

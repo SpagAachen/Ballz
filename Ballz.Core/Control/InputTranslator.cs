@@ -11,7 +11,6 @@ namespace Ballz
 	{
 		public InputTranslator ()
 		{
-			throw new NotImplementedException ();
 		}
 
 		public event Message.MessageEventHandler Translate;
@@ -24,7 +23,6 @@ namespace Ballz
 
 		public void update(GameTime _time)
 		{
-			throw new NotImplementedException ();
 		}
 
 	}
