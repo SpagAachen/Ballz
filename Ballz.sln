@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ballz.Core", "Ballz.Core\Ballz.Core.shproj", "{D5FCA137-178B-486B-8677-5BF65FF1F5FE}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ballz.Core", "Ballz.Core\Ballz.Core.csproj", "{D5FCA137-178B-486B-8677-5BF65FF1F5FE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Linux", "Ballz.Linux\Ballz.Linux.csproj", "{07ED737B-57D1-4761-987B-7E1B4B13A6F6}"
 EndProject
@@ -13,15 +13,22 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Content", "Ballz.Cont
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Test", "Ballz.Test\Ballz.Test.csproj", "{E0D1C20A-D501-4898-A65F-AED6D82C0D02}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.RealCore", "Ballz.RealCore\Ballz.RealCore.csproj", "{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Ballz.Core\Ballz.Core.projitems*{d5fca137-178b-486b-8677-5bf65ff1f5fe}*SharedItemsImports = 13
+		Ballz.Core\Ballz.Core.projitems*{07ed737b-57d1-4761-987b-7e1b4b13a6f6}*SharedItemsImports = 4
+		Ballz.Core\Ballz.Core.projitems*{4af13bc6-0f0b-47d9-998f-34bed3ee603f}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|Linux = Debug|Linux
+		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
-		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|Linux = Release|Linux
+		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
@@ -65,16 +72,43 @@ Global
 		{4FAAABB4-7837-4A11-AFB4-38FD5EE265C6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4FAAABB4-7837-4A11-AFB4-38FD5EE265C6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4FAAABB4-7837-4A11-AFB4-38FD5EE265C6}.Release|x86.ActiveCfg = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = Ballz.Linux\Ballz.Linux.csproj
-	EndGlobalSection
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Ballz.Core\Ballz.Core.projitems*{d5fca137-178b-486b-8677-5bf65ff1f5fe}*SharedItemsImports = 13
-		Ballz.Core\Ballz.Core.projitems*{07ed737b-57d1-4761-987b-7e1b4b13a6f6}*SharedItemsImports = 4
-		Ballz.Core\Ballz.Core.projitems*{4af13bc6-0f0b-47d9-998f-34bed3ee603f}*SharedItemsImports = 4
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Debug|Linux.ActiveCfg = Debug|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Debug|Linux.Build.0 = Debug|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Debug|x86.Build.0 = Debug|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Release|Linux.ActiveCfg = Release|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Release|Linux.Build.0 = Release|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Release|x86.ActiveCfg = Release|Any CPU
+		{E0D1C20A-D501-4898-A65F-AED6D82C0D02}.Release|x86.Build.0 = Release|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Debug|Linux.ActiveCfg = Debug|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Debug|Linux.Build.0 = Debug|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Debug|x86.Build.0 = Debug|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Release|Linux.ActiveCfg = Release|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Release|Linux.Build.0 = Release|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Release|x86.ActiveCfg = Release|Any CPU
+		{A4CD1FA5-29F3-45F3-811D-7D9F4517E5F0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Ballz.Linux\Ballz.Linux.csproj
 	EndGlobalSection
 EndGlobal
