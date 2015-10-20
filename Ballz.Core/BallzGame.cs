@@ -78,7 +78,7 @@ namespace Ballz
 			spriteBatch = new SpriteBatch (GraphicsDevice);
             Content.RootDirectory = "Content";
 			//TODO: use this.Content to load your game content here
-            TextureSplashScreen = Content.Load<Texture2D>("Balls");
+            TextureSplashScreen = Content.Load<Texture2D>("Balls.jpg");
 		}
 
 		/// <summary>

@@ -1,5 +1,4 @@
-﻿#region Using Statements
-using System;
+﻿using System;
 using Ballz;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,22 +6,12 @@ using System.Linq;
 #if MONOMAC
 using MonoMac.AppKit;
 using MonoMac.Foundation;
-
-#elif __IOS__
-using MonoTouch.Foundation;
-using MonoTouch.UIKit;
 #endif
-#endregion
 
 namespace Ballz.Linux
 {
-	#if __IOS__
-	[Register("AppDelegate")]
-	class Program : UIApplicationDelegate
-	
-#else
+
 	static class Program
-	#endif
     {
 		private static BallzGame game;
 
@@ -35,7 +24,7 @@ namespace Ballz.Linux
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
-		#if !MONOMAC && !__IOS__		 
+		#if !MONOMAC	 
         [STAThread]
 		#endif
 		static void Main (string[] args)
@@ -47,19 +36,10 @@ namespace Ballz.Linux
 				NSApplication.SharedApplication.Delegate = new AppDelegate();
 				NSApplication.Main(args);
 			}
-			#elif __IOS__
-			UIApplication.Main(args, null, "AppDelegate");
 			#else
 			RunGame ();
 			#endif
 		}
-
-		#if __IOS__
-		public override void FinishedLaunching(UIApplication app)
-		{
-			RunGame();
-		}
-		#endif
 	}
 
 	#if MONOMAC

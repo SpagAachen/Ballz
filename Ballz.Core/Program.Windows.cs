@@ -2,7 +2,6 @@
 
 namespace Ballz.Windows
 {
-#if WINDOWS || LINUX
     /// <summary>
     /// The main class.
     /// </summary>
@@ -18,5 +17,4 @@ namespace Ballz.Windows
                 game.Run();
         }
     }
-#endif
 }
