@@ -8,7 +8,7 @@ using MonoMac.AppKit;
 using MonoMac.Foundation;
 #endif
 
-namespace Ballz.Linux
+namespace Ballz
 {
 
 	static class Program
