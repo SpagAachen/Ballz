@@ -117,6 +117,6 @@ Global
 		{C024C0B1-401B-4644-8918-D87C28716898} = {69783107-4572-4423-8F41-54A056AB9085}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = Ballz.Linux\Ballz.Linux.csproj
+		StartupItem = Ballz.Core\Ballz.Core.csproj
 	EndGlobalSection
 EndGlobal
