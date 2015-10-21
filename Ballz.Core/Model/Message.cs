@@ -12,7 +12,8 @@ namespace Ballz
 		public enum MessageType
 		{
 			LogicMessage,
-			PhysicsMessage
+			PhysicsMessage,
+			ShutDownMessage
 		};
 		public Message (MessageType _type)
 		{

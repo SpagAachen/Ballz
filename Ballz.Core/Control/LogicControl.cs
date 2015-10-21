@@ -22,7 +22,9 @@ namespace Ballz
 
 		public void handleInputMessage(object _sender, Message _message)
 		{
-			throw new NotImplementedException ();
+			if (_message.type.Equals (Ballz.Message.MessageType.ShutDownMessage))
+				BallzGame.The().Exit ();
+			//TODO: handle other messages
 		}
 	}
 }
