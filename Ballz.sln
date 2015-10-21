@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Ballz.Core", "Ballz.Core\Ballz.Core.csproj", "{D5FCA137-178B-486B-8677-5BF65FF1F5FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Core", "Ballz.Core\Ballz.Core.csproj", "{D5FCA137-178B-486B-8677-5BF65FF1F5FE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Content", "Ballz.Content\Ballz.Content.csproj", "{4FAAABB4-7837-4A11-AFB4-38FD5EE265C6}"
 EndProject
