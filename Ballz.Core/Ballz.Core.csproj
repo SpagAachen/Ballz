@@ -66,8 +66,6 @@
     <Compile Include="BallzGame.cs" />
     <Compile Include="Control\InputTranslator.cs" />
     <Compile Include="Control\LogicControl.cs" />
-    <Compile Include="Control\PhysicsControl.cs" />
-    <Compile Include="Control\NetworkControl.cs" />
     <Compile Include="Model\World.cs" />
     <Compile Include="Model\Entity.cs" />
     <Compile Include="Model\Player.cs" />
@@ -75,6 +73,9 @@
     <Compile Include="Model\Message.cs" />
     <Compile Include="Model\WorldSnapshot.cs" />
     <Compile Include="View\GameRenderer.cs" />
+    <Compile Include="View\MenuRenderer.cs" />
+    <Compile Include="Control\NetworkComponent.cs" />
+    <Compile Include="Control\PhysicsComponent.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Control\" />

@@ -16,26 +16,33 @@ namespace Ballz
 	public class BallzGame : Game
 	{
 		public GraphicsDeviceManager graphics;
-		SpriteBatch spriteBatch;
+		//SpriteBatch spriteBatch;
 		static BallzGame instance;
 
-		public GameRenderer rendering;
-		public PhysicsControl physics;
 		public LogicControl	logic;
-		public InputTranslator input;
-		public NetworkControl network;
 		public World world;
 
 		private BallzGame ()
 		{
+			
 			graphics = new GraphicsDeviceManager (this);
 			Content.RootDirectory = "Content";	            
 			graphics.IsFullScreen = true;	
 
-			rendering = new GameRenderer (this);
-			physics = new PhysicsControl (this);
-			input = new InputTranslator (this);
-			network = new NetworkControl (this);
+			// create the Game Components
+			GameRenderer gameRendering = new GameRenderer (this);
+			MenuRenderer menuRendering = new MenuRenderer (this);
+			PhysicsControl physics = new PhysicsControl (this);
+			InputTranslator input = new InputTranslator (this);
+			NetworkControl network = new NetworkControl (this);
+
+			Components.Add (input);
+			Components.Add (physics);
+			Components.Add (network);
+			Components.Add (menuRendering);
+			Components.Add (gameRendering);
+
+
 			logic = new LogicControl ();
 
 			//add eventhandlers to events
@@ -45,7 +52,7 @@ namespace Ballz
 
 			logic.Message += physics.handleMessage;
 			logic.Message += network.handleMessage;
-			logic.Message += rendering.handleMessage;
+			logic.Message += gameRendering.handleMessage;
 		}
 
 		public static BallzGame The()
@@ -68,11 +75,10 @@ namespace Ballz
 		protected override void Initialize ()
 		{
 			// TODO: Add your initialization logic here
+
 			base.Initialize ();
 				
-		}
-
-        Texture2D TextureSplashScreen;
+		}			
 
 		/// <summary>
 		/// LoadContent will be called once per game and is the place to load
@@ -80,11 +86,8 @@ namespace Ballz
 		/// </summary>
 		protected override void LoadContent ()
 		{
-			// Create a new SpriteBatch, which can be used to draw textures.
-			spriteBatch = new SpriteBatch (GraphicsDevice);
             Content.RootDirectory = "Content";
 			//TODO: use this.Content to load your game content here
-            TextureSplashScreen = Content.Load<Texture2D>("Balls");
 		}
 
 		/// <summary>
@@ -104,10 +107,6 @@ namespace Ballz
 		protected override void Draw (GameTime gameTime)
 		{
 			graphics.GraphicsDevice.Clear (Color.CornflowerBlue);
-		
-            spriteBatch.Begin();
-            spriteBatch.Draw(TextureSplashScreen, Window.ClientBounds, Color.White);
-            spriteBatch.End();
 
 			base.Draw (gameTime);
 		}
