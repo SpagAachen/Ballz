@@ -10,11 +10,11 @@ namespace Ballz
 	/// </summary>
 	public class InputTranslator : GameComponent
 	{
-		public BallzGame Game{ get;}
+		public BallzGame Thegame{ get;}
 		
 		public InputTranslator (BallzGame _game) : base(_game)
 		{
-			Game = _game;
+			Thegame = _game;
 		}
 
 		public override void Update (GameTime gameTime)
@@ -24,7 +24,7 @@ namespace Ballz
 			#if !__IOS__
 			if (GamePad.GetState (PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
 				Keyboard.GetState ().IsKeyDown (Keys.Escape)) {
-				Game.onInput(Message.MessageType.ShutDownMessage);
+				Thegame.onInput(Message.MessageType.ShutDownMessage);
 			}
 			#endif
 			// TODO: Add your update logic here	
