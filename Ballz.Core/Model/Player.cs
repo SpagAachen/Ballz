@@ -1,16 +1,17 @@
-﻿using System;
-
-namespace Ballz
+﻿namespace Ballz
 {
-	/// <summary>
-	/// Player is the concrete player (aka Ball).
-	/// </summary>
-	public class Player : Entity
-	{
-		public Player ()
-		{
-			throw new NotImplementedException ();
-		}
-	}
+   using System;
+
+
+   /// <summary>
+   /// Player is the concrete player (aka Ball).
+   /// </summary>
+   public class Player : Entity
+   {
+      public Player ()
+      {
+         throw new NotImplementedException ();
+      }
+   }
 }
 

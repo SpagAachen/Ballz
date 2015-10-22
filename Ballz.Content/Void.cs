@@ -1,12 +1,13 @@
-﻿using System;
-
-namespace Ballz.Content
+﻿namespace Ballz.Content
 {
-	public class Void
-	{
-		public Void ()
-		{
-		}
-	}
+   using System;
+
+
+   public class Void
+   {
+      public Void ()
+      {
+      }
+   }
 }
 
