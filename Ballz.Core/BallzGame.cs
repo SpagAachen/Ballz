@@ -46,9 +46,10 @@ namespace Ballz
 			logic = new LogicControl ();
 
 			//add eventhandlers to events
-			input.Translate += logic.handleInputMessage;
-			input.Translate += physics.handleMessage;
-			input.Translate += network.handleMessage;
+			Input += logic.handleInputMessage;
+			Input += physics.handleMessage;
+			Input += network.handleMessage;
+			Input += logic.handleInputMessage;
 
 			logic.Message += physics.handleMessage;
 			logic.Message += network.handleMessage;
@@ -64,6 +65,14 @@ namespace Ballz
 				instance = new BallzGame ();
 				return instance;
 			}
+		}
+
+		public event EventHandler<Message> Input;
+
+		public void onInput(Message.MessageType _inputMessage)
+		{
+			if(Input != null)
+				Input (this, new Message (_inputMessage)); //todo: use object pooling and specify message better
 		}
 
 		/// <summary>
