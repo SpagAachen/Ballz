@@ -8,9 +8,9 @@ namespace Ballz
 	/// Input translator takes care of all physical inputs with regards to specified keymappings etc.
 	/// It translates these inputs to corresponding Game Messages.
 	/// </summary>
-	public class InputTranslator
+	public class InputTranslator : GameComponent
 	{
-		public InputTranslator ()
+		public InputTranslator (Game _game) : base(_game)
 		{
 		}
 

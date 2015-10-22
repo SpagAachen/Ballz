@@ -6,9 +6,9 @@ namespace Ballz
 	/// <summary>
 	/// Network control Takes care of all network related stuff.
 	/// </summary>
-	public class NetworkControl
+	public class NetworkControl : GameComponent
 	{
-		public NetworkControl ()
+		public NetworkControl (Game _game) : base(_game)
 		{
 		}
 

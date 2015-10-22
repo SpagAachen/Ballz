@@ -6,9 +6,9 @@ namespace Ballz
 	/// <summary>
 	/// Physics control is called by BallzGame update to simulate discrete GamePhysics.
 	/// </summary>
-	public class PhysicsControl
+	public class PhysicsControl : GameComponent
 	{
-		public PhysicsControl ()
+		public PhysicsControl (Game _game) : base(_game)
 		{
 		}
 

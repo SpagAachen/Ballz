@@ -6,10 +6,11 @@ namespace Ballz
 	/// <summary>
 	/// Render system performs all rendering of the Game and is inteded as a module.
 	/// </summary>
-	public class RenderSystem
+	public class GameRenderer : DrawableGameComponent
 	{
-		public RenderSystem ()
+		public GameRenderer (Game _game) : base(_game)
 		{
+
 		}
 
 		/// <summary>

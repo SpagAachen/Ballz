@@ -19,11 +19,11 @@ namespace Ballz
 		SpriteBatch spriteBatch;
 		static BallzGame instance;
 
-		public RenderSystem rendering = new RenderSystem();
-		public PhysicsControl physics = new PhysicsControl();
-		public LogicControl	logic = new LogicControl();
-		public InputTranslator input = new InputTranslator();
-		public NetworkControl network = new NetworkControl();
+		public GameRenderer rendering;
+		public PhysicsControl physics;
+		public LogicControl	logic;
+		public InputTranslator input;
+		public NetworkControl network;
 		public World world;
 
 		private BallzGame ()
@@ -31,6 +31,12 @@ namespace Ballz
 			graphics = new GraphicsDeviceManager (this);
 			Content.RootDirectory = "Content";	            
 			graphics.IsFullScreen = true;	
+
+			rendering = new GameRenderer (this);
+			physics = new PhysicsControl (this);
+			input = new InputTranslator (this);
+			network = new NetworkControl (this);
+			logic = new LogicControl ();
 
 			//add eventhandlers to events
 			input.Translate += logic.handleInputMessage;
@@ -88,9 +94,6 @@ namespace Ballz
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update (GameTime gameTime)
 		{
-			input.update (gameTime);
-			physics.update (gameTime);
-			network.update (gameTime);
 			base.Update (gameTime);
 		}
 
@@ -105,8 +108,6 @@ namespace Ballz
             spriteBatch.Begin();
             spriteBatch.Draw(TextureSplashScreen, Window.ClientBounds, Color.White);
             spriteBatch.End();
-            
-			rendering.draw (gameTime);
 
 			base.Draw (gameTime);
 		}
