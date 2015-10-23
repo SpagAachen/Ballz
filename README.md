@@ -14,15 +14,11 @@ On Linux you should use MonoDevelop with the MonoGame Addin in combination with 
 #### Compiling the Project:
 The Project consists of one Solution called "Ballz.sln" and several projects in this solution
 
-("Ballz.Content", "Ballz.Core", "Ballz.Windows", "Ballz.Linux")
+("Ballz.Core", "Ballz.Windows", "Ballz.Linux", "Ballz.Test")
 
-In the Ballz.Content project you will find a file called Content.mgcb. Before you build the Ballz solution you have to open the Content.mgcb file with the MonoGame Content Pipeline and click build in the Content Pipeline tool.
-This should create .xnb files for the ressources in the Content project.
+The actual programming takes place in Ballz.Core. The Platform projects are used only for configuration purposes, as the Core project will automatically import the corresponding platform project to inherit the necessary references. Therefore building the platform projects will do nothing, you should build and run the Cor or Test projects.
 
-After you generated the .xnb files you can close the mgc project and select a build configuration in your IDE that corresponds to your Plattform and build type (Windows should work with the "mixedPlattforms" profile while on linux you need to use the "linux" profile). After that you should be able to build and run the project as you are used to. 
+Content still has to be precompiled manually via monogame content pipeline. we are currently working on the integration of mgcb and mg2fx in the project so you will hopefully soon be able to just hit the compile button.
+For now the essential content is just copied raw to the output directory as a temporal workaround.
 
-note: You cannot build the Ballz.windows solution on a linux system as there would be conflicts in the references. therefore the "linux" profile only builds the Ballz.linux project and the content project.
-
-the content project in the IDE is only used to copy generated .xnb files to the output directory of the other projects. You do not need to copy an raw ressources like jpg or ttf files manually as you only need the .xnb files which are copied automatically by the ballz.content project.
-
-As the plattform dependant projects Ballz.linux and Ballz.windows are not built on all plattforms, you should incorporate common gamecode in the Ballz.Core project.
+Everything you do should be done in the Core project so the configuration for other platforms is not compromised. Therefore you should add references only to the Core project and use preferably platform independant assemblies.
