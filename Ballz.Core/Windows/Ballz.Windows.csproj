@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Condition="'$(OS)' != 'Windows_NT'" Project="Linux/Ballz.Linux.csproj" />
-  <Import Condition="'$(OS)' == 'Windows_NT'" Project="Windows/Ballz.Windows.csproj" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0F30A63C-8123-40A8-8C5B-431941CDD4A4}</ProjectGuid>
+    <ProjectGuid>{C52CAF6E-5C09-4D37-92A2-1112351606FF}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>SharedCode</RootNamespace>
-    <AssemblyName>SharedCode</AssemblyName>
+    <RootNamespace>Ballz.Windows</RootNamespace>
+    <AssemblyName>Ballz.Windows</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -29,24 +27,22 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="MonoGame.Framework">
+      <HintPath>..\..\packages\MonoGame.Framework.Linux.3.3.0.0\lib\net40\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK">
+      <HintPath>..\..\packages\MonoGame.Framework.Linux.3.3.0.0\lib\net40\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="Tao.Sdl">
+      <HintPath>..\..\packages\MonoGame.Framework.Linux.3.3.0.0\lib\net40\Tao.Sdl.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <Compile Include="Control\InputTranslator.cs" />
-    <Compile Include="Control\LogicControl.cs" />
-    <Compile Include="Control\NetworkComponent.cs" />
-    <Compile Include="Control\PhysicsComponent.cs" />
-    <Compile Include="Model\Entity.cs" />
-    <Compile Include="Model\Message.cs" />
-    <Compile Include="Model\Player.cs" />
-    <Compile Include="Model\Terrain.cs" />
-    <Compile Include="Model\World.cs" />
-    <Compile Include="Model\WorldSnapshot.cs" />
-    <Compile Include="View\GameRenderer.cs" />
-    <Compile Include="View\MenuRenderer.cs" />
-    <Compile Include="BallzGame.cs" />
-    <Compile Include="Program.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Icon.png" />
-  </ItemGroup>
 </Project>
