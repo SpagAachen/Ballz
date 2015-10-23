@@ -48,6 +48,11 @@
     <Compile Include="View\MenuRenderer.cs" />
     <Compile Include="BallzGame.cs" />
     <Compile Include="Program.cs" />
+    <None Include="Content\Content.mgcb" />
+    <None Include="Content\Balls.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Content\Worlds\TestWorld.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
