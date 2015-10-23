@@ -52,5 +52,6 @@
     <None Include="OpenTK.dll.config" />
     <None Include="Tao.Sdl.dll.config" />
     <None Include="packages.config" />
-  </ItemGroup>
+  </ItemGroup><Target Name="Build">  
+  </Target>
 </Project>

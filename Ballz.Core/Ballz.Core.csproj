@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Condition="'$(OS)' != 'Windows_NT'" Project="Linux/Ballz.Linux.csproj" />
   <Import Condition="'$(OS)' == 'Windows_NT'" Project="Windows/Ballz.Windows.csproj" />
@@ -7,8 +7,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{0F30A63C-8123-40A8-8C5B-431941CDD4A4}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>SharedCode</RootNamespace>
-    <AssemblyName>SharedCode</AssemblyName>
+    <RootNamespace>Ballz.Core</RootNamespace>
+    <AssemblyName>Ballz</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -28,6 +28,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Ballz.Program</StartupObject>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

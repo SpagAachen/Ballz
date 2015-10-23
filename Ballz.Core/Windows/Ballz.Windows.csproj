@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -42,15 +42,17 @@
     </CustomCommands>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MonoGame.Framework">
+      <HintPath>..\..\packages\MonoGame.Framework.WindowsGL.3.4.0.459\lib\net40\MonoGame.Framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="OpenTK">
+      <HintPath>..\..\packages\MonoGame.Framework.WindowsGL.3.4.0.459\lib\net40\OpenTK.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
-    <Reference Include="MonoGame.Framework">
-      <HintPath>..\..\packages\MonoGame.Framework.Linux.3.3.0.0\lib\net40\MonoGame.Framework.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenTK">
-      <HintPath>..\..\packages\MonoGame.Framework.Linux.3.3.0.0\lib\net40\OpenTK.dll</HintPath>
-    </Reference>
     <Reference Include="Tao.Sdl">
       <HintPath>..\..\packages\MonoGame.Framework.Linux.3.3.0.0\lib\net40\Tao.Sdl.dll</HintPath>
     </Reference>
@@ -58,5 +60,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <Target Name="Build">  
+  </Target>
   <Import Project="..\..\packages\StyleCop.MSBuild.4.7.49.1\build\StyleCop.MSBuild.Targets" Condition="Exists('..\..\packages\StyleCop.MSBuild.4.7.49.1\build\StyleCop.MSBuild.Targets')" />
 </Project>
