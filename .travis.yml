@@ -14,3 +14,10 @@ install:
   - nuget restore Ballz.sln
 script:
   - xbuild /p:Configuration=Release /p:TargetFrameworkVersion="v4.5" /p:ToolsVersion="4.0" Ballz.sln
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/26fd25804ffa39864cc0
+    on_success: change
+    on_failure: always
