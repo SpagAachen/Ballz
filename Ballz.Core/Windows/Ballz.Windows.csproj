@@ -8,6 +8,8 @@
     <RootNamespace>Ballz.Windows</RootNamespace>
     <AssemblyName>Ballz.Windows</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -18,6 +20,13 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="Build" name="compileresources" command="mgcb /@:Content/Content.mgcb /outputDir:${TargetDir}/Content/" workingdir="../" />
+        <Command type="Custom" name="compileresources" command="mgcb /@:Content/Content.mgcb /outputDir:${TargetDir}/Content/" workingdir="../" />
+        <Command type="BeforeExecute" command="mgcb" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -26,6 +35,13 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="Build" name="compileresources" command="mgcb /@:Content/Content.mgcb /outputDir:${TargetDir}/Content/" workingdir="../" />
+        <Command type="Custom" name="compileresources" command="mgcb /@:Content/Content.mgcb /outputDir:${TargetDir}/Content/" workingdir="../" />
+        <Command type="BeforeExecute" command="mgcb" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
