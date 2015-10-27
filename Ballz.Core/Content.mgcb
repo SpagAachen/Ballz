@@ -1,7 +1,7 @@
 
 #----------------------------- Global Properties ----------------------------#
 
-/outputDir:./
+/outputDir:Content/
 /intermediateDir:obj
 /platform:Windows
 /config:
@@ -13,13 +13,13 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Fonts/Menufont.spritefont
+#begin Content/Fonts/Menufont.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
 /processorParam:TextureFormat=Color
-/build:Fonts/Menufont.spritefont
+/build:Content/Fonts/Menufont.spritefont
 
-#begin Textures/Balls.jpg
+#begin Content/Textures/Balls.jpg
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -29,9 +29,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Textures/Balls.jpg
+/build:Content/Textures/Balls.jpg
 
-#begin Worlds/TestWorld.png
+#begin Content/Worlds/TestWorld.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -41,5 +41,4 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Worlds/TestWorld.png
-
+/build:Content/Worlds/TestWorld.png

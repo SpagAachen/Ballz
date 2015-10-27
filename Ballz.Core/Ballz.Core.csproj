@@ -48,7 +48,7 @@
     <Compile Include="View\MenuRenderer.cs" />
     <Compile Include="BallzGame.cs" />
     <Compile Include="Program.cs" />
-    <None Include="Content\Content.mgcb" />
+    <None Include="Content.mgcb" />
     <None Include="Content\Worlds\TestWorld.png" />
     <None Include="Content\Textures\Balls.jpg" />
     <Compile Include="Model\MenuMessage.cs" />
