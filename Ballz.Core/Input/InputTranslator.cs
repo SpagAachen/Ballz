@@ -1,6 +1,7 @@
 ﻿using Ballz.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace Ballz.Input
 {
@@ -20,6 +21,13 @@ namespace Ballz.Input
 
         public Ballz Thegame { get; set; }
 
+        public event EventHandler<InputMessage> Input;
+
+        private void OnInput(InputMessage.MessageType inputMessage)
+        {
+            Input?.Invoke(this, new InputMessage(inputMessage)); //todo: use object pooling and specify message better
+        }
+
         public override void Update(GameTime gameTime)
         {
             // For Mobile devices, this logic will close the Game when the Back button is pressed
@@ -29,22 +37,22 @@ namespace Ballz.Input
                 Keyboard.GetState().IsKeyDown(Keys.Escape) && !down)
             {
                 down = true;
-                Thegame.OnInput(InputMessage.MessageType.ControlsBack);
+                OnInput(InputMessage.MessageType.ControlsBack);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Enter) && !down)
             {
                 down = true;
-                Thegame.OnInput(InputMessage.MessageType.ControlsAction);
+                OnInput(InputMessage.MessageType.ControlsAction);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Up) && !down)
             {
                 down = true;
-                Thegame.OnInput(InputMessage.MessageType.ControlsUp);
+                OnInput(InputMessage.MessageType.ControlsUp);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Down) && !down)
             {
                 down = true;
-                Thegame.OnInput(InputMessage.MessageType.ControlsDown);
+                OnInput(InputMessage.MessageType.ControlsDown);
             }
             if (Keyboard.GetState().GetPressedKeys().Length == 0)
             {

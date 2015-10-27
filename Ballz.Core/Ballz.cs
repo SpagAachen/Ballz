@@ -56,10 +56,12 @@ namespace Ballz
 
             Logic = new LogicControl();
 
+            Services.AddService<LogicControl>(Logic);
+            Services.AddService<InputTranslator>(input);
             //add eventhandlers to events
-            Input += Logic.HandleInputMessage;
-            Input += physics.HandleMessage;
-            Input += network.HandleMessage;
+            input.Input += Logic.HandleInputMessage;
+            input.Input += physics.HandleMessage;
+            input.Input += network.HandleMessage;
 
             Logic.Message += physics.HandleMessage;
             Logic.Message += network.HandleMessage;
@@ -73,13 +75,6 @@ namespace Ballz
                 return _instance;
             _instance = new Ballz();
             return _instance;
-        }
-
-        public event EventHandler<InputMessage> Input;
-
-        public void OnInput(InputMessage.MessageType inputMessage)
-        {
-            Input?.Invoke(this, new InputMessage(inputMessage)); //todo: use object pooling and specify message better
         }
 
         /// <summary>
