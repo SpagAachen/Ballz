@@ -24,7 +24,13 @@
 
       public void handleMessage (object _sender, Message _message)
       {
-         throw new NotImplementedException ();
+         //throw new NotImplementedException ();
+         if (_message.Kind == Message.MessageType.LogicMessage) 
+         {
+            //todo check content of logicmessage as soon as it is implemented
+            Enabled = !Enabled;
+            Visible = !Visible;
+         }
       }
    }
 }

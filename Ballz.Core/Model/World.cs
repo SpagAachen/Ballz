@@ -25,7 +25,7 @@
          throw new NotImplementedException ();
       }
 
-      public WorldSnapshot getDiscreteSnashot (GameTime _time)
+      public WorldSnapshot getDiscreteSnapshot (GameTime _time)
       {
          throw new NotImplementedException ();
       }

@@ -49,12 +49,32 @@
     <Compile Include="BallzGame.cs" />
     <Compile Include="Program.cs" />
     <None Include="Content\Content.mgcb" />
-    <None Include="Content\Balls.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Content\Worlds\TestWorld.png" />
+    <None Include="Content\Textures\Balls.jpg" />
+    <Compile Include="Model\MenuMessage.cs" />
+    <Compile Include="Model\InputMessage.cs" />
+    <Compile Include="Model\GameMenu.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Fonts\Menufont.spritefont">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Fonts\Menufont.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Textures\Balls.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Worlds\TestWorld.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Content\Fonts\" />
+    <Folder Include="Content\Textures\" />
+    <Folder Include="Content\Worlds\" />
   </ItemGroup>
 </Project>
