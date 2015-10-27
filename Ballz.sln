@@ -13,10 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Physics2DDotNet", "Physics2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Core", "Ballz.Core\Ballz.Core.csproj", "{0F30A63C-8123-40A8-8C5B-431941CDD4A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Linux", "Linux\Ballz.Linux.csproj", "{0AEF432C-2875-4448-A5D9-02D333790CC7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Windows", "Windows\Ballz.Windows.csproj", "{C52CAF6E-5C09-4D37-92A2-1112351606FF}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
