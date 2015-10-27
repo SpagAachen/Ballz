@@ -7,9 +7,9 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class Player : Entity
     {
-        public Player()
+        public Player() : base(EntityType.Player)
         {
-            throw new NotImplementedException();
+            Material = PhysicsMaterial.Ball;
         }
     }
 }

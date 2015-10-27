@@ -35,6 +35,8 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="GameSession\Session.cs" />
+    <Compile Include="GameSession\World\Material.cs" />
     <Compile Include="Input\InputTranslator.cs" />
     <Compile Include="Logic\LogicControl.cs" />
     <Compile Include="GameSession\Network\NetworkComponent.cs" />
