@@ -29,6 +29,7 @@ namespace Ballz.Menu
             }
         }
 
+        //The name
         public string Name { get; private set; }
 
         public LinkedList<GameMenu> Items { get; set; }
