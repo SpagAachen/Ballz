@@ -19,7 +19,7 @@ namespace Ballz.GameSession.World
         /// <summary>
         ///     Interpolates between discrete timestep Snapshots, and returns the interpolated Snapshot.
         /// </summary>
-        /// <param name="_time">The time that should be used for interpolation (absolute time since start of game).</param>
+        /// <param name="time">The time that should be used for interpolation (absolute time since start of game).</param>
         public WorldSnapshot GetSnapshot(GameTime time)
         {
             throw new NotImplementedException();
