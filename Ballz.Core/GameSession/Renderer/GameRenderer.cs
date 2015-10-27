@@ -1,13 +1,14 @@
-﻿namespace Ballz
+﻿namespace Ballz.GameSession.Renderer
 {
-   using System;
-   using Microsoft.Xna.Framework;
+    using System;
+    using Microsoft.Xna.Framework;
+    using Messages;
 
 
-   /// <summary>
-   /// Render system performs all rendering of the Game and is inteded as a module.
-   /// </summary>
-   public class GameRenderer : DrawableGameComponent
+    /// <summary>
+    /// Render system performs all rendering of the Game and is inteded as a module.
+    /// </summary>
+    public class GameRenderer : DrawableGameComponent
    {
       public GameRenderer (Game _game) : base (_game)
       {

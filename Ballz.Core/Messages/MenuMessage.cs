@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Ballz.Menu;
+using System;
 
-namespace Ballz
+namespace Ballz.Messages
 {
    public class MenuMessage : Message
    {

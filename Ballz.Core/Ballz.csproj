@@ -7,7 +7,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{0F30A63C-8123-40A8-8C5B-431941CDD4A4}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Ballz.Core</RootNamespace>
+    <RootNamespace>Ballz</RootNamespace>
     <AssemblyName>Ballz</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
@@ -34,26 +34,26 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Compile Include="Control\InputTranslator.cs" />
-    <Compile Include="Control\LogicControl.cs" />
-    <Compile Include="Control\NetworkComponent.cs" />
-    <Compile Include="Control\PhysicsComponent.cs" />
-    <Compile Include="Model\Entity.cs" />
-    <Compile Include="Model\Message.cs" />
-    <Compile Include="Model\Player.cs" />
-    <Compile Include="Model\Terrain.cs" />
-    <Compile Include="Model\World.cs" />
-    <Compile Include="Model\WorldSnapshot.cs" />
-    <Compile Include="View\GameRenderer.cs" />
-    <Compile Include="View\MenuRenderer.cs" />
-    <Compile Include="BallzGame.cs" />
+    <Compile Include="Input\InputTranslator.cs" />
+    <Compile Include="Logic\LogicControl.cs" />
+    <Compile Include="GameSession\Network\NetworkComponent.cs" />
+    <Compile Include="GameSession\Physics\PhysicsComponent.cs" />
+    <Compile Include="GameSession\World\Entity.cs" />
+    <Compile Include="Messages\Message.cs" />
+    <Compile Include="GameSession\World\Player.cs" />
+    <Compile Include="GameSession\World\Terrain.cs" />
+    <Compile Include="GameSession\World\World.cs" />
+    <Compile Include="GameSession\World\WorldSnapshot.cs" />
+    <Compile Include="GameSession\Renderer\GameRenderer.cs" />
+    <Compile Include="Renderer\MenuRenderer.cs" />
+    <Compile Include="Ballz.cs" />
     <Compile Include="Program.cs" />
     <None Include="Content.mgcb" />
     <None Include="Content\Worlds\TestWorld.png" />
     <None Include="Content\Textures\Balls.jpg" />
-    <Compile Include="Model\MenuMessage.cs" />
-    <Compile Include="Model\InputMessage.cs" />
-    <Compile Include="Model\GameMenu.cs" />
+    <Compile Include="Messages\MenuMessage.cs" />
+    <Compile Include="Messages\InputMessage.cs" />
+    <Compile Include="Menu\GameMenu.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
@@ -73,8 +73,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Content\Fonts\" />
-    <Folder Include="Content\Textures\" />
-    <Folder Include="Content\Worlds\" />
+    <Folder Include="GameSession\Logic\" />
+    <Folder Include="GameSession\Sound\" />
   </ItemGroup>
 </Project>

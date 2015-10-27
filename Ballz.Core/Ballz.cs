@@ -1,29 +1,34 @@
 ﻿namespace Ballz
 {
-   #region Using Statements
-   using System;
+    #region Using Statements
+    using System;
 
-   using Microsoft.Xna.Framework;
-   using Microsoft.Xna.Framework.Graphics;
-   using Microsoft.Xna.Framework.Storage;
-   using Microsoft.Xna.Framework.Input;
+    using Microsoft.Xna.Framework;
+    using Logic;
+    using BallzBalls.GameSession.World;
+    using GameSession.Renderer;
+    using Renderer;
+    using GameSession.Physics;
+    using Input;
+    using GameSession.Network;
+    using Messages;
 
-   #endregion
+    #endregion
 
 
-   /// <summary>
-   /// This is the main type for your game.
-   /// </summary>
-   public class BallzGame : Game
+    /// <summary>
+    /// This is the main type for your game.
+    /// </summary>
+    public class Ballz : Game
    {
       public GraphicsDeviceManager graphics;
       //SpriteBatch spriteBatch;
-      static BallzGame instance;
+      static Ballz instance;
 
       public LogicControl	logic;
       public World world;
 
-      private BallzGame ()
+      private Ballz ()
       {
 			
          graphics = new GraphicsDeviceManager (this);
@@ -60,12 +65,12 @@
          logic.Message += menuRendering.handleMessage;
       }
 
-      public static BallzGame The ()
+      public static Ballz The ()
       {
          if (instance != null)
             return instance;
          else {
-            instance = new BallzGame ();
+            instance = new Ballz ();
             return instance;
          }
       }

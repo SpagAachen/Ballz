@@ -1,4 +1,4 @@
-﻿namespace Ballz
+﻿namespace Ballz.GameSession.World
 {
    using System;
    using Microsoft.Xna.Framework;
@@ -160,7 +160,7 @@
             }
          }
 
-         Texture2D sdf = new Texture2D (BallzGame.The ().graphics.GraphicsDevice, 
+         Texture2D sdf = new Texture2D (Ballz.The ().graphics.GraphicsDevice, 
                             terrainSize.Width, terrainSize.Height);
          sdf.SetData (sdfPixels);
 

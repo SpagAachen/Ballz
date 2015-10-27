@@ -1,4 +1,4 @@
-﻿namespace Ballz
+﻿namespace Ballz.Messages
 {
    using System;
 

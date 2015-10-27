@@ -1,7 +1,7 @@
 ﻿namespace Ballz
 {
    using System;
-   using Ballz;
+   using global::Ballz;
    using System.Collections.Generic;
    using System.Linq;
 
@@ -14,11 +14,11 @@
 
    static class Program
    {
-      private static BallzGame game;
+      private static Ballz game;
 
       internal static void RunGame ()
       {
-         game = BallzGame.The ();
+         game = Ballz.The ();
          game.Run ();
       }
 

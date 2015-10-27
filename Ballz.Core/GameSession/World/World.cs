@@ -1,15 +1,16 @@
-﻿namespace Ballz
+﻿namespace BallzBalls.GameSession.World
 {
-   using System;
-   using Microsoft.Xna.Framework;
+    using System;
+    using Microsoft.Xna.Framework;
+    using Ballz.GameSession.world;
 
 
-   /// <summary>
-   /// The World manages an array of discrete Snapshots of the World.
-   /// It provides access for all other modules to these snapshots in the required way.
-   /// (e.g. the rendering system needs interpolated snapshots, while physics computes snapshots for discrete timesteps)
-   /// </summary>
-   public class World
+    /// <summary>
+    /// The World manages an array of discrete Snapshots of the World.
+    /// It provides access for all other modules to these snapshots in the required way.
+    /// (e.g. the rendering system needs interpolated snapshots, while physics computes snapshots for discrete timesteps)
+    /// </summary>
+    public class World
    {
       public World ()
       {

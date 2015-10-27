@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Ballz
+namespace Ballz.Menu
 {
    public class GameMenu : LinkedList<GameMenu>
    {

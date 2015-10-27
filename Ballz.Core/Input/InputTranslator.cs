@@ -1,20 +1,21 @@
-﻿namespace Ballz
+﻿namespace Ballz.Input
 {
-   using System;
-   using Microsoft.Xna.Framework;
-   using Microsoft.Xna.Framework.Input;
+    using System;
+    using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Input;
+    using Messages;
 
 
-   /// <summary>
-   /// Input translator takes care of all physical inputs with regards to specified keymappings etc.
-   /// It translates these inputs to corresponding Game Messages.
-   /// </summary>
-   public class InputTranslator : GameComponent
+    /// <summary>
+    /// Input translator takes care of all physical inputs with regards to specified keymappings etc.
+    /// It translates these inputs to corresponding Game Messages.
+    /// </summary>
+    public class InputTranslator : GameComponent
    {
 		bool down;
-		public BallzGame Thegame{ get; set;}
+		public Ballz Thegame{ get; set;}
 
-      public InputTranslator (BallzGame _game) : base (_game)
+      public InputTranslator (Ballz _game) : base (_game)
       {
 			down = false;
          Thegame = _game;

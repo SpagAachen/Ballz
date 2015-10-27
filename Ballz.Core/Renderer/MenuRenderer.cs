@@ -1,11 +1,12 @@
-﻿namespace Ballz
+﻿namespace Ballz.Renderer
 {
-	using System;
-	using Microsoft.Xna.Framework;
-	using Microsoft.Xna.Framework.Graphics;
+    using System;
+    using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Graphics;
+    using Menu;
+    using Messages;
 
-
-	public class MenuRenderer : DrawableGameComponent
+    public class MenuRenderer : DrawableGameComponent
 	{
 		Texture2D TextureSplashScreen;
 		SpriteBatch spriteBatch;
