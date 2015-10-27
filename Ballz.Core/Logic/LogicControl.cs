@@ -13,12 +13,11 @@ namespace Ballz.Logic
     {
         //private GameMenu ActiveMenu;
         private readonly Stack<GameMenu> activeMenu = new Stack<GameMenu>();
-        private readonly GameMenu menu;
         private GameState state;
-        /*foreach(var subMenu in menu.Items)
+        /*foreach(var subMenu in menuToPrepare.Items)
          {
             ++index;
-            if (subMenu.Selectable) //use the first selectable menu as active one ... 
+            if (subMenu.Selectable) //use the first selectable menuToPrepare as active one ... 
             {
                ActiveMenu.Push(subMenu);
                ActiveMenu.Peek().Current.Selected = true;
@@ -30,21 +29,21 @@ namespace Ballz.Logic
 
         public LogicControl()
         {
-            menu = GameMenu.Default;
-            //push the root menu
+            var menu = GameMenu.Default;
+            //push the root menuToPrepare
             activeMenu.Push(menu);
             PrepareMenu(menu);
             state = GameState.MenuState;
         }
 
-        private void PrepareMenu(GameMenu menu)
+        private void PrepareMenu(GameMenu menuToPrepare)
         {
             //if we have MenuItems select the first one
-            if (menu.Items.Count <= 0)
+            if (menuToPrepare.Items.Count <= 0)
                 return;
 
             //find the first selectable Menu item
-            var menuItem = menu.Items.First;
+            var menuItem = menuToPrepare.Items.First;
             while (menuItem.Next != null && !menuItem.Value.Selectable)
             {
                 menuItem = menuItem.Next;
@@ -130,7 +129,7 @@ namespace Ballz.Logic
                     }
                     break;
                 case InputMessage.MessageType.ControlsBack:
-                    if (activeMenu.Count == 1) // exit if we are in main menu
+                    if (activeMenu.Count == 1) // exit if we are in main menuToPrepare
                         Ballz.The().Exit();
                     else
                         activeMenu.Pop();

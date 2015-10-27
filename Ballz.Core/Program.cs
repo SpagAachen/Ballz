@@ -10,12 +10,12 @@ namespace Ballz
 
     internal static class Program
     {
-        private static Ballz _game;
+        private static Ballz game;
 
         internal static void RunGame()
         {
-            _game = Ballz.The();
-            _game.Run();
+            game = Ballz.The();
+            game.Run();
         }
 
         /// <summary>
