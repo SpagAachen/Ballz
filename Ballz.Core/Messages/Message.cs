@@ -11,7 +11,7 @@
             PhysicsMessage,
             MenuMessage,
             InputMessage
-        };
+        }
 
         public Message(MessageType type)
         {

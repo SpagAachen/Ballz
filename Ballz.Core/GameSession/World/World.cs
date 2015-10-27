@@ -1,5 +1,5 @@
 ﻿using System;
-using Ballz.GameSession.world;
+using Ballz.GameSession.World;
 using Microsoft.Xna.Framework;
 
 namespace Ballz.GameSession.World

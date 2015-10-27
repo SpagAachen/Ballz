@@ -106,7 +106,7 @@ namespace Ballz.GameSession.World
                     }
                     else
                     {
-                        var valueOnTop = sdfPixels[(y - 1)*terrainSize.Width + x].R - 128;
+                        var valueOnTop = sdfPixels[(y - 1) * terrainSize.Width + x].R - 128;
                         value = dirt 
                             ? Math.Max(0, Math.Min(valueOnTop + 1, 127)) 
                             : Math.Min(-1, Math.Max(valueOnTop - 1, -128));
@@ -141,7 +141,7 @@ namespace Ballz.GameSession.World
                     }
                     else
                     {
-                        var valueOnBottom = sdfPixels[(y + 1)*terrainSize.Width + x].R - 128;
+                        var valueOnBottom = sdfPixels[(y + 1) * terrainSize.Width + x].R - 128;
                         value = dirt 
                             ? Math.Max(0, Math.Min(valueOnBottom + 1, 127)) 
                             : Math.Min(-1, Math.Max(valueOnBottom - 1, -128));
@@ -166,8 +166,10 @@ namespace Ballz.GameSession.World
                 }
             }
 
-            var sdf = new Texture2D(Ballz.The().Graphics.GraphicsDevice,
-                terrainSize.Width, terrainSize.Height);
+            var sdf = new Texture2D(
+                Ballz.The().Graphics.GraphicsDevice,
+                terrainSize.Width,
+                terrainSize.Height);
             sdf.SetData(sdfPixels);
 
 

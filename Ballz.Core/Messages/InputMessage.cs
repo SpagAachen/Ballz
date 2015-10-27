@@ -11,7 +11,7 @@
             ControlsAction,
             ControlsBack,
             RawInput
-        };
+        }
 
         public InputMessage(MessageType type) : base(Message.MessageType.InputMessage)
         {

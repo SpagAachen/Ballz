@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Ballz.GameSession.world
+namespace Ballz.GameSession.World
 {
     /// <summary>
     ///     World snapshot represents a discrete snapshot of the game world.
