@@ -1,36 +1,32 @@
-﻿namespace Ballz
-{
-   using System;
-   using global::Ballz;
-   using System.Collections.Generic;
-   using System.Linq;
+﻿using System;
 
-   #if MONOMAC
+namespace Ballz
+{
+#if MONOMAC
    using MonoMac.AppKit;
    using MonoMac.Foundation;
    #endif
 
 
+    internal static class Program
+    {
+        private static Ballz game;
 
-   static class Program
-   {
-      private static Ballz game;
+        internal static void RunGame()
+        {
+            game = Ballz.The();
+            game.Run();
+        }
 
-      internal static void RunGame ()
-      {
-         game = Ballz.The ();
-         game.Run ();
-      }
-
-      /// <summary>
-      /// The main entry point for the application.
-      /// </summary>
-      #if !MONOMAC	 
+        /// <summary>
+        ///     The main entry point for the application.
+        /// </summary>
+#if !MONOMAC
         [STAThread]
-      #endif
-		static void Main (string[] args)
-      {
-         #if MONOMAC
+#endif
+        private static void Main(string[] args)
+        {
+#if MONOMAC
 			NSApplication.Init ();
 
 			using (var p = new NSAutoreleasePool ()) {
@@ -38,12 +34,12 @@
 				NSApplication.Main(args);
 			}
          #else
-         RunGame ();
-         #endif
-      }
-   }
+            RunGame();
+#endif
+        }
+    }
 
-   #if MONOMAC
+#if MONOMAC
 	class AppDelegate : NSApplicationDelegate
 	{
 		public override void FinishedLaunching (MonoMac.Foundation.NSObject notification)
@@ -64,4 +60,3 @@
 	}  
 	#endif
 }
-

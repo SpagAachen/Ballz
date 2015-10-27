@@ -10,7 +10,7 @@ namespace Ballz.Messages
          private set;
       }
 
-      public enum MessageType
+      new public enum MessageType
       {
          ControlsUp,
          ControlsDown,
@@ -21,9 +21,9 @@ namespace Ballz.Messages
          RawInput
       };
 
-      public InputMessage (MessageType _type) : base(Message.MessageType.InputMessage)
+      public InputMessage (MessageType type) : base(Message.MessageType.InputMessage)
       {
-         Kind = _type;
+         Kind = type;
       }
    }
 }
