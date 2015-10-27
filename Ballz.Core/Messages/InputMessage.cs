@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Ballz.Messages
+﻿namespace Ballz.Messages
 {
    public class InputMessage : Message
    {

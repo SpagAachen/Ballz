@@ -8,15 +8,15 @@ namespace Ballz.GameSession.Physics
     /// </summary>
     public class PhysicsControl : GameComponent
     {
-        public PhysicsControl(Game _game) : base(_game)
+        public PhysicsControl(Game game) : base(game)
         {
         }
 
-        public void update(GameTime _time)
+        public override void Update(GameTime time)
         {
         }
 
-        public void handleMessage(object _sender, Message _message)
+        public void HandleMessage(object sender, Message message)
         {
             //TODO: handle Messages
         }

@@ -12,10 +12,10 @@ namespace Ballz.Input
     {
         private bool down;
 
-        public InputTranslator(Ballz _game) : base(_game)
+        public InputTranslator(Ballz game) : base(game)
         {
             down = false;
-            Thegame = _game;
+            Thegame = game;
         }
 
         public Ballz Thegame { get; set; }

@@ -13,9 +13,9 @@
             InputMessage
         };
 
-        public Message(MessageType _type)
+        public Message(MessageType type)
         {
-            Kind = _type;
+            Kind = type;
         }
 
 

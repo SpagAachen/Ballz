@@ -25,7 +25,7 @@ namespace Ballz.GameSession.World
                 {
                     var curPixel = pixels[y*terrainSize.Width + x];
                     var dirt = curPixel.R == curPixel.G && curPixel.G == curPixel.B && curPixel.R == 255;
-                    var value = 0;
+                    int value;
 
                     if (x == 0)
                     {
@@ -40,12 +40,9 @@ namespace Ballz.GameSession.World
                     else
                     {
                         var valueOnTheLeft = sdfPixels[y*terrainSize.Width + x - 1].R - 128;
-                        if (dirt)
-                            value = Math.Max(0, Math.Min(valueOnTheLeft + 1, 127));
-                        else
-                        {
-                            value = Math.Min(-1, Math.Max(valueOnTheLeft - 1, -128));
-                        }
+                        value = dirt 
+                            ? Math.Max(0, Math.Min(valueOnTheLeft + 1, 127)) 
+                            : Math.Min(-1, Math.Max(valueOnTheLeft - 1, -128));
                     }
 
                     value += 128;
@@ -60,7 +57,7 @@ namespace Ballz.GameSession.World
                 {
                     var curPixel = pixels[y*terrainSize.Width + x];
                     var dirt = curPixel.R == curPixel.G && curPixel.G == curPixel.B && curPixel.R == 255;
-                    var value = 0;
+                    int value;
 
                     if (x == terrainSize.Width - 1)
                     {
@@ -75,12 +72,9 @@ namespace Ballz.GameSession.World
                     else
                     {
                         var valueOnTheRight = sdfPixels[y*terrainSize.Width + x + 1].R - 128;
-                        if (dirt)
-                            value = Math.Max(0, Math.Min(valueOnTheRight + 1, 127));
-                        else
-                        {
-                            value = Math.Min(-1, Math.Max(valueOnTheRight - 1, -128));
-                        }
+                        value = dirt 
+                            ? Math.Max(0, Math.Min(valueOnTheRight + 1, 127)) 
+                            : Math.Min(-1, Math.Max(valueOnTheRight - 1, -128));
                     }
 
                     value += 128;
@@ -98,7 +92,7 @@ namespace Ballz.GameSession.World
                 {
                     var curPixel = pixels[y*terrainSize.Width + x];
                     var dirt = curPixel.R == curPixel.G && curPixel.G == curPixel.B && curPixel.R == 255;
-                    var value = 0;
+                    int value;
 
                     if (y == 0)
                     {
@@ -113,12 +107,9 @@ namespace Ballz.GameSession.World
                     else
                     {
                         var valueOnTop = sdfPixels[(y - 1)*terrainSize.Width + x].R - 128;
-                        if (dirt)
-                            value = Math.Max(0, Math.Min(valueOnTop + 1, 127));
-                        else
-                        {
-                            value = Math.Min(-1, Math.Max(valueOnTop - 1, -128));
-                        }
+                        value = dirt 
+                            ? Math.Max(0, Math.Min(valueOnTop + 1, 127)) 
+                            : Math.Min(-1, Math.Max(valueOnTop - 1, -128));
                     }
 
                     value += 128;
@@ -136,7 +127,7 @@ namespace Ballz.GameSession.World
                 {
                     var curPixel = pixels[y*terrainSize.Width + x];
                     var dirt = curPixel.R == curPixel.G && curPixel.G == curPixel.B && curPixel.R == 255;
-                    var value = 0;
+                    int value;
 
                     if (y == terrainSize.Height - 1)
                     {
@@ -151,12 +142,9 @@ namespace Ballz.GameSession.World
                     else
                     {
                         var valueOnBottom = sdfPixels[(y + 1)*terrainSize.Width + x].R - 128;
-                        if (dirt)
-                            value = Math.Max(0, Math.Min(valueOnBottom + 1, 127));
-                        else
-                        {
-                            value = Math.Min(-1, Math.Max(valueOnBottom - 1, -128));
-                        }
+                        value = dirt 
+                            ? Math.Max(0, Math.Min(valueOnBottom + 1, 127)) 
+                            : Math.Min(-1, Math.Max(valueOnBottom - 1, -128));
                     }
 
                     value += 128;
