@@ -7,21 +7,21 @@ namespace Ballz.Renderer
 {
     public class MenuRenderer : DrawableGameComponent
     {
-        private GameMenu Menu;
+        private GameMenu menu;
         private SpriteFont menuFont;
         private SpriteBatch spriteBatch;
-        private Texture2D TextureSplashScreen;
+        private Texture2D textureSplashScreen;
 
-        public MenuRenderer(Game _game) : base(_game)
+        public MenuRenderer(Game game) : base(game)
         {
-            Menu = GameMenu.Default;
+            menu = GameMenu.Default;
         }
 
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             //load a texture for the background
-            TextureSplashScreen = Game.Content.Load<Texture2D>("Textures/Balls");
+            textureSplashScreen = Game.Content.Load<Texture2D>("Textures/Balls");
             //load fonts for the menu
             menuFont = Game.Content.Load<SpriteFont>("Fonts/Menufont");
 
@@ -33,14 +33,14 @@ namespace Ballz.Renderer
             base.UnloadContent();
         }
 
-        public void handleMessage(object _sender, Message _message)
+        public void HandleMessage(object sender, Message message)
         {
-            if (_message.Kind == Message.MessageType.MenuMessage)
+            if (message.Kind == Message.MessageType.MenuMessage)
             {
-                var msg = (MenuMessage) _message;
-                Menu = msg.Value;
+                var msg = (MenuMessage) message;
+                menu = msg.Value;
             }
-            if (_message.Kind == Message.MessageType.LogicMessage)
+            if (message.Kind == Message.MessageType.LogicMessage)
             {
                 //todo check content of logicmessage as soon as it is implemented
                 Enabled = !Enabled;
@@ -53,18 +53,18 @@ namespace Ballz.Renderer
         {
             spriteBatch.Begin();
             //draw a backgroundscreen
-            spriteBatch.Draw(TextureSplashScreen, Game.Window.ClientBounds, Color.White);
+            spriteBatch.Draw(textureSplashScreen, Game.Window.ClientBounds, Color.White);
 
             //draw the MenuTitle
-            spriteBatch.DrawString(menuFont, Menu.Name,
-                new Vector2(Game.Window.ClientBounds.Width/2 - menuFont.MeasureString(Menu.Name).X/2, 0), Color.Black);
+            spriteBatch.DrawString(menuFont, menu.Name,
+                new Vector2(Game.Window.ClientBounds.Width/2f - menuFont.MeasureString(menu.Name).X/2, 0), Color.Black);
 
             //draw other Menu Items
-            var itemOffset = menuFont.MeasureString(Menu.Name).Y + 30;
-            foreach (var item in Menu.Items)
+            var itemOffset = menuFont.MeasureString(menu.Name).Y + 30;
+            foreach (var item in menu.Items)
             {
-                spriteBatch.DrawString(menuFont, item.Name, new Vector2(Game.Window.ClientBounds.Width/8, itemOffset),
-                    (Menu.SelectedItem != null && Menu.SelectedItem.Value == item) ? Color.Red : Color.Black);
+                spriteBatch.DrawString(menuFont, item.Name, new Vector2(Game.Window.ClientBounds.Width/8f, itemOffset),
+                    (menu.SelectedItem != null && menu.SelectedItem.Value == item) ? Color.Red : Color.Black);
                 itemOffset += menuFont.MeasureString(item.Name).Y + 30;
             }
 

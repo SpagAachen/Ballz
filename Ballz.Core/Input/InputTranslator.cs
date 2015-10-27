@@ -12,10 +12,10 @@ namespace Ballz.Input
     {
         private bool down;
 
-        public InputTranslator(Ballz _game) : base(_game)
+        public InputTranslator(Ballz game) : base(game)
         {
             down = false;
-            Thegame = _game;
+            Thegame = game;
         }
 
         public Ballz Thegame { get; set; }
@@ -29,22 +29,22 @@ namespace Ballz.Input
                 Keyboard.GetState().IsKeyDown(Keys.Escape) && !down)
             {
                 down = true;
-                Thegame.onInput(InputMessage.MessageType.ControlsBack);
+                Thegame.OnInput(InputMessage.MessageType.ControlsBack);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Enter) && !down)
             {
                 down = true;
-                Thegame.onInput(InputMessage.MessageType.ControlsAction);
+                Thegame.OnInput(InputMessage.MessageType.ControlsAction);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Up) && !down)
             {
                 down = true;
-                Thegame.onInput(InputMessage.MessageType.ControlsUp);
+                Thegame.OnInput(InputMessage.MessageType.ControlsUp);
             }
             if (Keyboard.GetState().IsKeyDown(Keys.Down) && !down)
             {
                 down = true;
-                Thegame.onInput(InputMessage.MessageType.ControlsDown);
+                Thegame.OnInput(InputMessage.MessageType.ControlsDown);
             }
             if (Keyboard.GetState().GetPressedKeys().Length == 0)
             {
