@@ -166,7 +166,7 @@ namespace Ballz.GameSession.World
                 }
             }
 
-            var sdf = new Texture2D(Ballz.The().graphics.GraphicsDevice,
+            var sdf = new Texture2D(Ballz.The().Graphics.GraphicsDevice,
                 terrainSize.Width, terrainSize.Height);
             sdf.SetData(sdfPixels);
 
