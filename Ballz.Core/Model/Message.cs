@@ -8,23 +8,22 @@
    /// </summary>
    public class Message
    {
-      public delegate void MessageEventHandler (object sender, Message _eventArgs);
 
       public enum MessageType
       {
          LogicMessage,
          PhysicsMessage,
-         ShutDownMessage}
-
-      ;
+         MenuMessage,
+         InputMessage
+      };
 
       public Message (MessageType _type)
       {
-         type = _type;
+         Kind = _type;
       }
 
 
-      public MessageType type {
+      public MessageType Kind {
          get;
          private set;
       }

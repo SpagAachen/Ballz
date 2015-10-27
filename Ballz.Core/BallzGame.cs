@@ -32,6 +32,9 @@
 
          // create the Game Components
          GameRenderer gameRendering = new GameRenderer (this);
+         //initially we are in teh menuState and GameRendering needs to be disabled
+         gameRendering.Enabled = false;
+         gameRendering.Visible = false;
          MenuRenderer menuRendering = new MenuRenderer (this);
          PhysicsControl physics = new PhysicsControl (this);
          InputTranslator input = new InputTranslator (this);
@@ -50,11 +53,11 @@
          Input += logic.handleInputMessage;
          Input += physics.handleMessage;
          Input += network.handleMessage;
-         Input += logic.handleInputMessage;
 
          logic.Message += physics.handleMessage;
          logic.Message += network.handleMessage;
          logic.Message += gameRendering.handleMessage;
+         logic.Message += menuRendering.handleMessage;
       }
 
       public static BallzGame The ()
@@ -67,12 +70,12 @@
          }
       }
 
-      public event EventHandler<Message> Input;
+      public event EventHandler<InputMessage> Input;
 
-      public void onInput (Message.MessageType _inputMessage)
+      public void onInput (InputMessage.MessageType _inputMessage)
       {
          if (Input != null)
-            Input (this, new Message (_inputMessage)); //todo: use object pooling and specify message better
+            Input (this, new InputMessage (_inputMessage)); //todo: use object pooling and specify message better
       }
 
       /// <summary>

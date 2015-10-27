@@ -11,10 +11,12 @@
    /// </summary>
    public class InputTranslator : GameComponent
    {
-      public BallzGame Thegame{ get; }
+		bool down;
+		public BallzGame Thegame{ get; set;}
 
       public InputTranslator (BallzGame _game) : base (_game)
       {
+			down = false;
          Thegame = _game;
       }
 
@@ -24,8 +26,29 @@
          // Exit() is obsolete on iOS
          #if !__IOS__
          if (GamePad.GetState (PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-             Keyboard.GetState ().IsKeyDown (Keys.Escape)) {
-            Thegame.onInput (Message.MessageType.ShutDownMessage);
+             Keyboard.GetState ().IsKeyDown (Keys.Escape) && !down) 
+         {
+            down = true;
+            Thegame.onInput (InputMessage.MessageType.ControlsBack);
+         }
+         if(Keyboard.GetState().IsKeyDown(Keys.Enter) && !down)
+			{
+            down = true;
+            Thegame.onInput (InputMessage.MessageType.ControlsAction);
+			}
+         if(Keyboard.GetState().IsKeyDown(Keys.Up) && !down)
+         {
+            down = true;
+            Thegame.onInput (InputMessage.MessageType.ControlsUp);
+         }
+         if(Keyboard.GetState().IsKeyDown(Keys.Down) && !down)
+         {
+            down = true;
+            Thegame.onInput (InputMessage.MessageType.ControlsDown);
+         }
+         if(Keyboard.GetState().GetPressedKeys().Length == 0)
+         {
+            down = false;
          }
          #endif
          // TODO: Add your update logic here	
