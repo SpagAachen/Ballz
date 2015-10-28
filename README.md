@@ -6,7 +6,7 @@
 #### Prerequisits:
 You need to have the "Monogame Content Pipeline" installed as well as an IDE that supports MonoGame.
 
-On Windows you may use Visualstudio or MonoDevelop both with the MonoGame Addin installed. 
+On Windows you may use Visualstudio or MonoDevelop both with the MonoGame Addin installed. (However we are using C# 6.0 so you need Visualstudio 2015 or newer)
 
 On Linux you should use MonoDevelop with the MonoGame Addin in combination with Mono-4.0 or higher.
 
