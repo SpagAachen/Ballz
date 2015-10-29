@@ -8,6 +8,14 @@ You need to have the "Monogame Content Pipeline" installed as well as an IDE tha
 
 On Windows you have to use Visualstudio 2015 with the MonoGame Addin installed. Since we are using C# 6.0 older versions of Vistualstudio are not supported. Also Monodevelop is currently no option on windows as there is a bug with MD and MSBuild when using the mono runtime (which is required since the default Microsoft.Net runtime does not support C# 6.0)
 
+for information on the MD bug see bugzilla:
+
+https://bugzilla.xamarin.com/show_bug.cgi?id=29958
+
+or
+
+https://bugzilla.xamarin.com/show_bug.cgi?id=17539
+
 On Linux you should use MonoDevelop with the MonoGame Addin in combination with Mono-4.0 or higher.
 
 
