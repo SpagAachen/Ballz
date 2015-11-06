@@ -10,12 +10,13 @@
             LogicMessage,
             PhysicsMessage,
             MenuMessage,
-            InputMessage
+            InputMessage,
+            NetworkMessage
         }
 
         public Message(MessageType type)
         {
-            Kind = type;
+            this.Kind = type;
         }
 
 

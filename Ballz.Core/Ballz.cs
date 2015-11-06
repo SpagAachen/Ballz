@@ -1,5 +1,4 @@
 ﻿using System;
-using Ballz.GameSession.Network;
 using Ballz.GameSession.Physics;
 using Ballz.GameSession.Renderer;
 using Ballz.GameSession.World;
@@ -45,7 +44,7 @@ namespace Ballz
             var menuRendering = new MenuRenderer(this);
             var physics = new PhysicsControl(this);
             var input = new InputTranslator(this);
-            var network = new NetworkControl(this);
+            var network = new Network.Network(this);
 
             Components.Add(input);
             Components.Add(physics);

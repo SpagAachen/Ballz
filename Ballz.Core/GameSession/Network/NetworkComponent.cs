@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 namespace Ballz.GameSession.Network
 {
     /// <summary>
-    ///     Network control Takes care of all network related stuff.
+    /// Network component takes care of all network related stuff for a game session.
     /// </summary>
     public class NetworkControl : GameComponent
     {

@@ -42,12 +42,17 @@
     <Compile Include="GameSession\Network\NetworkComponent.cs" />
     <Compile Include="GameSession\Physics\PhysicsComponent.cs" />
     <Compile Include="GameSession\World\Entity.cs" />
+    <Compile Include="Messages\NetworkMessage.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="GameSession\World\Player.cs" />
     <Compile Include="GameSession\World\Terrain.cs" />
     <Compile Include="GameSession\World\World.cs" />
     <Compile Include="GameSession\World\WorldSnapshot.cs" />
     <Compile Include="GameSession\Renderer\GameRenderer.cs" />
+    <Compile Include="Network\Client.cs" />
+    <Compile Include="Network\Connection.cs" />
+    <Compile Include="Network\Network.cs" />
+    <Compile Include="Network\Server.cs" />
     <Compile Include="Renderer\MenuRenderer.cs" />
     <Compile Include="Ballz.cs" />
     <Compile Include="Program.cs" />
