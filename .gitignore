@@ -1,8 +1,5 @@
 # Created by https://www.gitignore.io/api/windows,linux,osx,visualstudio,monodevelop,vim
 
-# For now, ignore xnb files until we have a solution for our content pipeline
-*.xnb
-
 ### Windows ###
 # Windows image file caches
 Thumbs.db
