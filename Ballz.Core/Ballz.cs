@@ -27,6 +27,8 @@ namespace Ballz
 
         public LogicControl Logic { get; set; }
         public World World { get; set; }
+        
+        public GameSession.Session Match;
 
         private Ballz()
         {
@@ -34,37 +36,36 @@ namespace Ballz
             Content.RootDirectory = "Content";
             Graphics.IsFullScreen = true;
 
+
             // create the Game Components
-            var gameRendering = new GameRenderer(this)
-            {
-                Enabled = false,
-                Visible = false
-            };
-            //initially we are in teh menuState and GameRendering needs to be disabled
             var menuRendering = new MenuRenderer(this);
-            var physics = new PhysicsControl(this);
+            //var physics = new PhysicsControl(this);
             var input = new InputTranslator(this);
             var network = new Network.Network(this);
 
             Components.Add(input);
-            Components.Add(physics);
+            //Components.Add(physics);
             Components.Add(network);
             Components.Add(menuRendering);
-            Components.Add(gameRendering);
+            //Components.Add(gameRendering);
 
 
             Logic = new LogicControl();
 
             Services.AddService<LogicControl>(Logic);
             Services.AddService<InputTranslator>(input);
+
+            Match = new GameSession.Session(this);
+            Components.Add(Match);
+
             //add eventhandlers to events
             input.Input += Logic.HandleInputMessage;
-            input.Input += physics.HandleMessage;
+            //input.Input += physics.HandleMessage;
             input.Input += network.HandleMessage;
 
-            Logic.Message += physics.HandleMessage;
+            //Logic.Message += physics.HandleMessage;
             Logic.Message += network.HandleMessage;
-            Logic.Message += gameRendering.HandleMessage;
+            //Logic.Message += gameRendering.HandleMessage;
             Logic.Message += menuRendering.HandleMessage;
         }
 

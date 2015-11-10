@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -9,6 +10,7 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class Terrain
     {
+      public List<Vector2> outline;
         public Texture2D ExtractSignedDistanceField(Texture2D terrainTex)
         {
             var terrainSize = terrainTex.Bounds;

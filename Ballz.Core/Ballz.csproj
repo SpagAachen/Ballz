@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Condition="'$(OS)' != 'Windows_NT'" Project="../Linux/Ballz.Linux.csproj" />
   <Import Condition="'$(OS)' == 'Windows_NT'" Project="../Windows/Ballz.Windows.csproj" />
   <PropertyGroup>
@@ -84,5 +84,15 @@
   <ItemGroup>
     <Folder Include="GameSession\Logic\" />
     <Folder Include="GameSession\Sound\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Physics2DDotNet\Physics2DDotNet.csproj">
+      <Project>{C024C0B1-401B-4644-8918-D87C28716898}</Project>
+      <Name>Physics2DDotNet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AdvanceMath\AdvanceMath.csproj">
+      <Project>{A979FDB4-7AB7-444E-9632-77D69D22D743}</Project>
+      <Name>AdvanceMath</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Ballz.GameSession.World
 {
@@ -8,9 +9,19 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class WorldSnapshot
     {
-        public WorldSnapshot()
+      public List<Entity> Entities {
+         get;
+         private set;
+      }
+      public Terrain StaticGeometry
+      {
+         get;
+         set;
+      }
+      public WorldSnapshot(List<Entity> newEntitites, Terrain newTerrain)
         {
-            throw new NotImplementedException();
+            Entities = newEntitites;
+            StaticGeometry = newTerrain;
         }
     }
 }
