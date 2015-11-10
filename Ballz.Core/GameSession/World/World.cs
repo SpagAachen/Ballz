@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Ballz.GameSession.World;
 using Microsoft.Xna.Framework;
 
@@ -11,6 +12,9 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class World
     {
+        List<WorldSnapshot> snapshots = new List<WorldSnapshot>();
+        TimeSpan headTime = new TimeSpan(0,0,0);
+
         public World()
         {
             //throw new NotImplementedException();
@@ -22,7 +26,14 @@ namespace Ballz.GameSession.World
         /// <param name="time">The time that should be used for interpolation (absolute time since start of game).</param>
         public WorldSnapshot GetSnapshot(GameTime time)
         {
-            throw new NotImplementedException();
+            if (snapshots.Count > 1)
+            {
+                //todo: implement interpolation of snapshots here
+                //time.ElapsedGameTime.CompareTo(headTime);
+                return snapshots[0];
+            }
+            else
+                return snapshots[0];
         }
 
         public WorldSnapshot GetDiscreteSnapshot(GameTime time)
@@ -32,7 +43,9 @@ namespace Ballz.GameSession.World
 
         public void AddDiscreteSnapshot(WorldSnapshot snpsht)
         {
-            throw new NotImplementedException();
+            snapshots.Add(snpsht);
+            //the simulation time is for now 16 ms;
+            headTime.Add(new TimeSpan(0,0,0,0,16));
         }
     }
 }
