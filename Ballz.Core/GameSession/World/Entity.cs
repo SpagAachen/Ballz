@@ -13,7 +13,7 @@ namespace Ballz.GameSession.World
         public int ID
         {
             get;
-            private set;
+            set;
         }
         public enum EntityType
         {

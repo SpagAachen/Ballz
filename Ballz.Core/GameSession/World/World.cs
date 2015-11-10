@@ -12,8 +12,10 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class World
     {
-        List<WorldSnapshot> snapshots = new List<WorldSnapshot>();
+        readonly List<WorldSnapshot> snapshots = new List<WorldSnapshot>();
         TimeSpan headTime = new TimeSpan(0,0,0);
+        private const double IntervalMs = 16;
+        private const int SnapshotCount = 6;
 
         public World()
         {
@@ -28,9 +30,32 @@ namespace Ballz.GameSession.World
         {
             if (snapshots.Count > 1)
             {
-                //todo: implement interpolation of snapshots here
-                //time.ElapsedGameTime.CompareTo(headTime);
-                return snapshots[0];
+                var msSinceTime = headTime.Subtract(time.ElapsedGameTime).TotalMilliseconds;
+                if (msSinceTime <= 0)
+                    return snapshots[0];
+                var timeInShots = snapshots.Count - 1 - msSinceTime/IntervalMs;
+                var preIndex = (int) Math.Floor(timeInShots);
+                var postIndex = preIndex + 1;
+                var alpha = (float) (timeInShots - preIndex);
+                var preSnapshot = snapshots[preIndex];
+                var postSnapshot = snapshots[postIndex];
+                var interpolated = new List<Entity>();
+                foreach (var pre in preSnapshot.Entities)
+                {
+                    var post = postSnapshot.Entities.Find(e => e.ID == pre.ID);
+                    if (post == null)
+                        interpolated.Add(pre);
+                    else
+                        interpolated.Add(new Entity(pre.Kind)
+                        {
+                            ID = pre.ID,
+                            Material = pre.Material,
+                            Position = pre.Position*(1-alpha) + post.Position*alpha,
+                            Rotation = pre.Rotation*(1-alpha) + post.Rotation*alpha,
+                            Velocity = pre.Velocity*(1-alpha) + post.Velocity*alpha,
+                        });
+                }
+                return new WorldSnapshot(interpolated, preSnapshot.StaticGeometry);
             }
             else
                 return snapshots[0];
@@ -38,14 +63,19 @@ namespace Ballz.GameSession.World
 
         public WorldSnapshot GetDiscreteSnapshot(GameTime time)
         {
-            throw new NotImplementedException();
+            var msSinceTime = headTime.Subtract(time.ElapsedGameTime).TotalMilliseconds;
+            var timeInShots = snapshots.Count - 1 - msSinceTime / IntervalMs;
+            var preIndex = (int)Math.Floor(timeInShots);
+            return snapshots[preIndex];
         }
 
         public void AddDiscreteSnapshot(WorldSnapshot snpsht)
         {
             snapshots.Add(snpsht);
+            if (snapshots.Count > SnapshotCount)
+                snapshots.RemoveAt(0);
             //the simulation time is for now 16 ms;
-            headTime.Add(new TimeSpan(0,0,0,0,16));
+            headTime = headTime.Add(new TimeSpan(0,0,0,0,16));
         }
     }
 }
