@@ -31,6 +31,8 @@ namespace Ballz.GameSession.World
             if (snapshots.Count > 1)
             {
                 var msSinceTime = headTime.Subtract(time.ElapsedGameTime).TotalMilliseconds;
+                if (msSinceTime <= 0)
+                    return snapshots[0];
                 var timeInShots = snapshots.Count - 1 - msSinceTime/IntervalMs;
                 var preIndex = (int) Math.Floor(timeInShots);
                 var postIndex = preIndex + 1;
