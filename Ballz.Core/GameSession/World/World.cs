@@ -13,7 +13,7 @@ namespace Ballz.GameSession.World
     {
         public World()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         /// <summary>

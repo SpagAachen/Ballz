@@ -37,7 +37,8 @@ namespace Ballz.GameSession
 
             _game.Components.ComponentRemoved += cleanup;
             //Initialize();
-         theGame = _game;
+            theGame = _game;
+            theGame.World = new GameSession.World.World(); 
         }
 
         public void cleanup(object sender, GameComponentCollectionEventArgs args)
