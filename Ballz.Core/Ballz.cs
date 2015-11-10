@@ -7,6 +7,7 @@ using Ballz.Logic;
 using Ballz.Messages;
 using Ballz.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Ballz
 {
