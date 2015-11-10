@@ -58,6 +58,9 @@
     <Compile Include="Program.cs" />
     <None Include="app.config" />
     <None Include="Content.mgcb" />
+    <None Include="Content\Ball.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Content\Worlds\TestWorld.png" />
     <None Include="Content\Textures\Balls.jpg" />
     <Compile Include="Messages\MenuMessage.cs" />
