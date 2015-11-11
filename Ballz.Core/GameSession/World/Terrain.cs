@@ -10,172 +10,194 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class Terrain
     {
-      public List<Vector2> outline;
-        public Texture2D ExtractSignedDistanceField(Texture2D terrainTex)
-        {
-            var terrainSize = terrainTex.Bounds;
-            var pixels = new Color[terrainSize.Width*terrainSize.Height];
-            terrainTex.GetData(pixels);
+      	public List<Vector2> outline;
+
+		public Terrain ()
+		{
+		}
+
+		public struct IntVector2  {
+			public int x, y;
+
+			public IntVector2 (int x, int y) {
+				this.x = x;
+				this.y = y;
+			}   
+		}
 
 
-            var sdfPixels = new Color[terrainSize.Width*terrainSize.Height];
+		private void sdfOneIter(bool[] dirtPixels, float[] sdfPixels, int width, int height, IntVector2 dir)
+		{
+			// TODO(ks): allow other sdf-vectors besides -1/0/1 combinations
 
-            // Left-to-right
-            for (var y = 0; y < terrainSize.Height; ++y)
-            {
-                for (var x = 0; x < terrainSize.Width; ++x)
-                {
-                    var curPixel = pixels[y*terrainSize.Width + x];
-                    var dirt = curPixel.R == curPixel.G && curPixel.G == curPixel.B && curPixel.R == 255;
-                    int value;
+			var from = new IntVector2 (dir.x > 0 ? 0 : width-1, dir.y > 0 ? 0 : height-1);
+			var to = new IntVector2 (dir.x <= 0 ? 0 : width-1, dir.y <= 0 ? 0 : height-1);
 
-                    if (x == 0)
-                    {
-                        // border case
-                        if (dirt)
-                            value = 127;
-                        else
-                        {
-                            value = -128;
-                        }
-                    }
-                    else
-                    {
-                        var valueOnTheLeft = sdfPixels[y*terrainSize.Width + x - 1].R - 128;
-                        value = dirt 
-                            ? Math.Max(0, Math.Min(valueOnTheLeft + 1, 127)) 
-                            : Math.Min(-1, Math.Max(valueOnTheLeft - 1, -128));
-                    }
-
-                    value += 128;
-                    sdfPixels[y*terrainSize.Width + x] = new Color(value, value, value);
-                }
-            }
-
-            // Right-to-left
-            for (var y = 0; y < terrainSize.Height; ++y)
-            {
-                for (var x = terrainSize.Width - 1; x >= 0; --x)
-                {
-                    var curPixel = pixels[y*terrainSize.Width + x];
-                    var dirt = curPixel.R == curPixel.G && curPixel.G == curPixel.B && curPixel.R == 255;
-                    int value;
-
-                    if (x == terrainSize.Width - 1)
-                    {
-                        // border case
-                        if (dirt)
-                            value = 127;
-                        else
-                        {
-                            value = -128;
-                        }
-                    }
-                    else
-                    {
-                        var valueOnTheRight = sdfPixels[y*terrainSize.Width + x + 1].R - 128;
-                        value = dirt 
-                            ? Math.Max(0, Math.Min(valueOnTheRight + 1, 127)) 
-                            : Math.Min(-1, Math.Max(valueOnTheRight - 1, -128));
-                    }
-
-                    value += 128;
-                    int lastValue = sdfPixels[y*terrainSize.Width + x].R;
-                    var newValue = dirt ? Math.Min(lastValue, value) : Math.Max(lastValue, value);
-                    sdfPixels[y*terrainSize.Width + x] = new Color(newValue, newValue, newValue);
-                }
-            }
+			var offset = new IntVector2 (0, 0);
+			var size = new IntVector2 (0, 0);
+			if (from.x < to.x) {
+				size.x = to.x + 1;
+				offset.x = 1;
+			} else {
+				size.x = from.x + 1;
+				offset.x = -1;
+			}
+			if (from.y < to.y) {
+				size.y = to.y + 1;
+				offset.y = 1;
+			} else {
+				size.y = from.y + 1;
+				offset.y = -1;
+			}
 
 
-            // Top-to-bottom
-            for (var y = 0; y < terrainSize.Height; ++y)
-            {
-                for (var x = 0; x < terrainSize.Width; ++x)
-                {
-                    var curPixel = pixels[y*terrainSize.Width + x];
-                    var dirt = curPixel.R == curPixel.G && curPixel.G == curPixel.B && curPixel.R == 255;
-                    int value;
+			int borderX = dir.x == 0 ? -1 : dir.x > 0 ? Math.Min(from.x, to.x) : Math.Max(from.x, to.x);
+			int borderY = dir.y == 0 ? -1 : dir.y > 0 ? Math.Min(from.y, to.y) : Math.Max(from.y, to.y);
+			for (int y = from.y; offset.y > 0 ? y <= to.y : y >= to.y; y += offset.y) {
+				for (int x = from.x; offset.x > 0 ? x <= to.x : x >= to.x; x += offset.x) {
 
-                    if (y == 0)
-                    {
-                        // border case
-                        if (dirt)
-                            value = 127;
-                        else
-                        {
-                            value = -128;
-                        }
-                    }
-                    else
-                    {
-                        var valueOnTop = sdfPixels[(y - 1) * terrainSize.Width + x].R - 128;
-                        value = dirt 
-                            ? Math.Max(0, Math.Min(valueOnTop + 1, 127)) 
-                            : Math.Min(-1, Math.Max(valueOnTop - 1, -128));
-                    }
+					int curIndex = y * size.x + x;
+					bool dirt = dirtPixels [curIndex];
+					float value = 0;
 
-                    value += 128;
-                    int lastValue = sdfPixels[y*terrainSize.Width + x].R;
-                    var newValue = dirt ? Math.Min(lastValue, value) : Math.Max(lastValue, value);
-                    sdfPixels[y*terrainSize.Width + x] = new Color(newValue, newValue, newValue);
-                }
-            }
+					float increment = Math.Abs (dir.x) + Math.Abs (dir.y) > 1 ? (float)Math.Sqrt(2.0) : 1.0f;
+
+					if (x == borderX || y == borderY) { // border case
+						if (dirt)
+							value = 127;
+						else
+							value = -128;
+					} else {
+						float valueOnTheLeft = sdfPixels [(y - dir.y) * size.x + x - dir.x];
+						if (dirt)
+							value = Math.Max(0.0f, Math.Min (valueOnTheLeft + increment, 127.0f));
+						else
+							value = Math.Min(-1.0f, Math.Max (valueOnTheLeft - increment, -128.0f));
+					}
+
+					float lastValue = sdfPixels [curIndex];
+					float newValue = dirt ? Math.Min (lastValue, value) : Math.Max (lastValue, value);
+					sdfPixels [curIndex] = newValue;
+				}
+			}
+
+		}
 
 
-            // Bottom-to-top
-            for (var y = terrainSize.Height - 1; y >= 0; --y)
-            {
-                for (var x = 0; x < terrainSize.Width; ++x)
-                {
-                    var curPixel = pixels[y*terrainSize.Width + x];
-                    var dirt = curPixel.R == curPixel.G && curPixel.G == curPixel.B && curPixel.R == 255;
-                    int value;
-
-                    if (y == terrainSize.Height - 1)
-                    {
-                        // border case
-                        if (dirt)
-                            value = 127;
-                        else
-                        {
-                            value = -128;
-                        }
-                    }
-                    else
-                    {
-                        var valueOnBottom = sdfPixels[(y + 1) * terrainSize.Width + x].R - 128;
-                        value = dirt 
-                            ? Math.Max(0, Math.Min(valueOnBottom + 1, 127)) 
-                            : Math.Min(-1, Math.Max(valueOnBottom - 1, -128));
-                    }
-
-                    value += 128;
-                    int lastValue = sdfPixels[y*terrainSize.Width + x].R;
-                    var newValue = dirt ? Math.Min(lastValue, value) : Math.Max(lastValue, value);
-                    sdfPixels[y*terrainSize.Width + x] = new Color(newValue, newValue, newValue);
-                }
-            }
 
 
-            // Redraw contour
-            for (var y = 0; y < terrainSize.Height; ++y)
-            {
-                for (var x = 0; x < terrainSize.Width; ++x)
-                {
-                    var curPixel = sdfPixels[y*terrainSize.Width + x];
-                    if (curPixel.R == 128)
-                        sdfPixels[y*terrainSize.Width + x] = new Color(255, 0, 0);
-                }
-            }
 
-            var sdf = new Texture2D(
-                Ballz.The().Graphics.GraphicsDevice,
-                terrainSize.Width,
-                terrainSize.Height);
-            sdf.SetData(sdfPixels);
+		public Texture2D ExtractSignedDistanceField(Texture2D terrainTex)
+		{
+			
+			Rectangle terrainSize = terrainTex.Bounds;
+			Color[] pixels = new Color[terrainSize.Width * terrainSize.Height];
+			terrainTex.GetData<Color> (pixels);
 
 
-            return sdf;
-        }
+			bool[] dirtPixels = new bool[terrainSize.Width * terrainSize.Height];
+			float[] sdfPixels = new float[terrainSize.Width * terrainSize.Height];
+
+			// Initialize with "dirt"
+			for (int y = 0; y < terrainSize.Height; ++y) {
+				for (int x = 0; x < terrainSize.Width; ++x) {
+
+					Color curPixel = pixels [y * terrainSize.Width + x];
+					bool dirt = curPixel.R == curPixel.G && curPixel.G == curPixel.B && curPixel.R == 255;
+					dirtPixels [y * terrainSize.Width + x] = dirt;
+
+					sdfPixels [y * terrainSize.Width + x] = dirt ? 127 : -128;
+				}
+			}
+				
+			for (int i = -1; i <= 1; ++i)
+				for (int j = -1; j <= 1; ++j) {
+
+					// omit no-op
+					if (i == 0 && j == 0)
+						continue;
+
+					sdfOneIter (dirtPixels, sdfPixels, terrainSize.Width, terrainSize.Height, new IntVector2 (i, j));
+				}
+					
+
+
+
+
+			Texture2D sdf = new Texture2D (Ballz.The().Graphics.GraphicsDevice, terrainSize.Width, terrainSize.Height);
+
+			Color[] sdfColorPixels = new Color[terrainSize.Width * terrainSize.Height];
+			for (int y = 0; y < terrainSize.Height; ++y) {
+				for (int x = 0; x < terrainSize.Width; ++x) {
+					int colVal = (int)(sdfPixels [y * terrainSize.Width + x] + 128.0f);
+					sdfColorPixels [y * terrainSize.Width + x] = new Color (colVal, colVal, colVal);
+
+					if(colVal == 128)
+						sdfColorPixels [y * terrainSize.Width + x] = new Color (255, 0, 0);
+				}
+			}
+			sdf.SetData (sdfColorPixels);
+			/*
+			var width = terrainSize.Width;
+			var height = terrainSize.Height;
+			float scale = 2f;
+			RenderTarget2D partyspass = new RenderTarget2D (Ballz.The().Graphics.GraphicsDevice, (int)(scale * width), (int)(scale * height));
+
+			Ballz.The().Graphics.GraphicsDevice.SetRenderTarget (partyspass);
+			SpriteBatch spriteBatch = new SpriteBatch (Ballz.The().Graphics.GraphicsDevice);
+
+			spriteBatch.Begin (0, null, SamplerState.LinearClamp);
+			spriteBatch.Draw (sdf, new Vector2(0f, 0f), null, null, null, 0, new Vector2 (scale, scale));
+			spriteBatch.End ();
+
+			Ballz.The().Graphics.GraphicsDevice.SetRenderTarget (null);
+
+			Texture2D sdf2 = new Texture2D (Ballz.The().Graphics.GraphicsDevice, 
+				(int)(scale * width), (int)(scale * height));
+
+			Color[] wurst = new Color[(int)(scale * width) * (int)(scale * height)];
+			//partyspass.GetData<Color> (wurst);
+
+
+			System.Drawing.Bitmap wursti = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+			for (int y = 0; y < terrainSize.Height; ++y) {
+				for (int x = 0; x < terrainSize.Width; ++x) {
+
+					int col = (int)(sdfPixels [y * terrainSize.Width + x] + 128.0f);
+					wursti.SetPixel (x, y, System.Drawing.Color.FromArgb(col, col, col));
+
+				}
+			}
+
+			System.Drawing.Bitmap newimg = new System.Drawing.Bitmap((int)(wursti.Width * scale), (int)(wursti.Height * scale));
+			using(System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newimg))
+			{
+				// Here you set your interpolation mode
+				g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
+				// Scale the image, by drawing it on the larger bitmap
+				g.DrawImage(wursti, new System.Drawing.Rectangle(System.Drawing.Point.Empty, newimg.Size));
+			}
+
+
+			for (int y = 0; y <  (int)(scale * height); ++y) {
+				for (int x = 0; x <  (int)(scale * width); ++x) {
+
+					//Color curPixel = sdfPixels [y * (int)(scale * width) + x];
+					//wursti.SetPixel (x, y, System.Drawing.Color.FromArgb(curPixel.R, curPixel.G, curPixel.B));
+
+					System.Drawing.Color curPixel = newimg.GetPixel(x, y);
+
+					const int thresh = 130;
+					wurst [y * (int)(scale * width) + x] = new Color (curPixel.R > thresh ? curPixel.R / 2 : 0 * curPixel.R, curPixel.R > thresh ? 70 : 0 * curPixel.G, curPixel.R > thresh ? 0 : 0 * curPixel.B);
+
+				}
+			}
+
+			sdf2.SetData<Color> (wurst);
+			*/
+
+			return sdf;
+		}
     }
 }
