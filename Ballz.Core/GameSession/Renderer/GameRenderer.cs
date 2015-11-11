@@ -35,8 +35,8 @@ namespace Ballz.GameSession.Renderer
                 );
 
             Matrix view = Matrix.CreateLookAt(
-                    new Vector3(0, 3, 3),
-                    Vector3.Zero,
+                    new Vector3(0, 0, 10),
+                    new Vector3(5, 5, 0),
                     Vector3.UnitY
                 );
             
@@ -48,7 +48,7 @@ namespace Ballz.GameSession.Renderer
             BallEffect.DiffuseColor = new Vector3(1, 1, 1);
             foreach (var p in snapshot.StaticGeometry.outline)
             {
-                Matrix world = Matrix.CreateTranslation(new Vector3(p*0.01f, 0));
+                Matrix world = Matrix.CreateScale(0.1f) * Matrix.CreateTranslation(new Vector3(p*0.03f, 0));
                 BallEffect.World = world;
                 BallModel.Draw(world, view, projection);
             }
@@ -58,7 +58,6 @@ namespace Ballz.GameSession.Renderer
             {
                 Matrix world = Matrix.CreateTranslation(new Vector3(entity.Position, 0));
                 BallEffect.World = world;
-                
                 BallModel.Draw(world, view, projection);
             }
         }
@@ -67,7 +66,12 @@ namespace Ballz.GameSession.Renderer
         {
             BallEffect = new BasicEffect(Game.GraphicsDevice);
             BallEffect.EnableDefaultLighting();
+            BallEffect.DiffuseColor = new Vector3(1, 0, 0);
+            BallEffect.DirectionalLight0.Direction = new Vector3(1, -1, 0);
+
             BallModel = Game.Content.Load<Model>("Ball");
+            BallModel.Meshes[0].MeshParts[0].Effect = BallEffect;
+
             base.LoadContent();
         }
 
