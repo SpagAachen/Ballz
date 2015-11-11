@@ -3,6 +3,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
+using System;
 
 namespace Ballz.GameSession.Renderer
 {
@@ -13,6 +14,7 @@ namespace Ballz.GameSession.Renderer
     {
         Model BallModel;
         BasicEffect BallEffect;
+		SpriteBatch spriteBatch;
 
         Ballz Game;
 
@@ -45,13 +47,40 @@ namespace Ballz.GameSession.Renderer
 
             var snapshot = Game.World.GetSnapshot(time);
 
+			/*
             BallEffect.DiffuseColor = new Vector3(1, 1, 1);
             foreach (var p in snapshot.StaticGeometry.outline)
             {
-                Matrix world = Matrix.CreateScale(0.1f) * Matrix.CreateTranslation(new Vector3(p*0.03f, 0));
+                Matrix world = Matrix.CreateScale(0.03f) * Matrix.CreateTranslation(new Vector3(p*0.03f, 0));
                 BallEffect.World = world;
                 BallModel.Draw(world, view, projection);
             }
+			*/
+
+			VertexPositionColor[] vpc = new VertexPositionColor[snapshot.StaticGeometry.outline.Count+1];
+			BallEffect.DiffuseColor = new Vector3(1, 1, 1);
+
+			Vector2 last = snapshot.StaticGeometry.outline [snapshot.StaticGeometry.outline.Count - 1];
+
+			int i = 0;
+			foreach (var p in snapshot.StaticGeometry.outline)
+			{
+
+					vpc[i].Color = Color.PapayaWhip;
+					vpc[i].Position = new Vector3(p.X, p.Y, -1);
+
+					++i;
+			}
+				vpc[i].Color = vpc[0].Color;
+				vpc[i].Position = vpc[0].Position;
+
+			Matrix terrainWorld = Matrix.CreateScale (0.05f);
+			BallEffect.World = terrainWorld;
+			BallEffect.VertexColorEnabled = true;
+			BallEffect.CurrentTechnique.Passes [0].Apply();
+			//BallModel.Draw(world, view, projection);
+			GraphicsDevice.DrawUserPrimitives<VertexPositionColor> (PrimitiveType.LineStrip, vpc, 0, snapshot.StaticGeometry.outline.Count);
+
 
             BallEffect.DiffuseColor = new Vector3(1, 0, 0);
             foreach (var entity in snapshot.Entities)
@@ -71,6 +100,8 @@ namespace Ballz.GameSession.Renderer
 
             BallModel = Game.Content.Load<Model>("Ball");
             BallModel.Meshes[0].MeshParts[0].Effect = BallEffect;
+
+			spriteBatch = new SpriteBatch (Game.GraphicsDevice);
 
             base.LoadContent();
         }

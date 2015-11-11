@@ -10,11 +10,54 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class Terrain
     {
-      	public List<Vector2> outline;
+		public List<Vector2> outline = new List<Vector2> ();
 
-		public Terrain ()
+		private Texture2D terrainData = null;
+
+		// We might need that later on...
+		private Texture2D terrainSDF = null;
+
+		public Terrain (Texture2D terrainTexture)
 		{
+			terrainData = terrainTexture;
+			terrainSDF = ExtractSignedDistanceField (terrainData);
 		}
+
+		public void ExtractOutline()
+		{
+			int Width = terrainSDF.Width;
+			int Height = terrainSDF.Height;
+
+			bool[,] values = new bool[Width, Height];
+
+			Color[] sdfpixels = new Color[Width * Height];
+			terrainSDF.GetData<Color> (sdfpixels);
+
+
+			for (int y = 0; y < Height; ++y) {
+				for (int x = 0; x < Width; ++x) {
+
+					Color curPixel = sdfpixels [y * Width + x];
+					bool dirt = 
+						curPixel.R == curPixel.G &&
+						curPixel.G == curPixel.B &&
+						curPixel.R == 128;
+					
+					if (dirt)
+						values [x, Height-y-1] = true;
+				}
+			}
+
+			outline.Clear ();
+
+			Physics2DDotNet.Shapes.ArrayBitmap ab = new Physics2DDotNet.Shapes.ArrayBitmap(values);
+			AdvanceMath.Vector2D[] geometry = Physics2DDotNet.Shapes.VertexHelper.CreateFromBitmap(ab);
+			foreach(AdvanceMath.Vector2D vec in geometry)
+			{
+				outline.Add(new Vector2(vec.X,vec.Y));
+			}
+		}
+
 
 		public struct IntVector2  {
 			public int x, y;
@@ -89,24 +132,25 @@ namespace Ballz.GameSession.World
 
 		public Texture2D ExtractSignedDistanceField(Texture2D terrainTex)
 		{
-			
-			Rectangle terrainSize = terrainTex.Bounds;
-			Color[] pixels = new Color[terrainSize.Width * terrainSize.Height];
+			int Width = terrainTex.Width;
+			int Height = terrainTex.Height;
+
+			Color[] pixels = new Color[Width * Height];
 			terrainTex.GetData<Color> (pixels);
 
 
-			bool[] dirtPixels = new bool[terrainSize.Width * terrainSize.Height];
-			float[] sdfPixels = new float[terrainSize.Width * terrainSize.Height];
+			bool[] dirtPixels = new bool[Width * Height];
+			float[] sdfPixels = new float[Width * Height];
 
 			// Initialize with "dirt"
-			for (int y = 0; y < terrainSize.Height; ++y) {
-				for (int x = 0; x < terrainSize.Width; ++x) {
+			for (int y = 0; y < Height; ++y) {
+				for (int x = 0; x < Width; ++x) {
 
-					Color curPixel = pixels [y * terrainSize.Width + x];
+					Color curPixel = pixels [y * Width + x];
 					bool dirt = curPixel.R == curPixel.G && curPixel.G == curPixel.B && curPixel.R == 255;
-					dirtPixels [y * terrainSize.Width + x] = dirt;
+					dirtPixels [y * Width + x] = dirt;
 
-					sdfPixels [y * terrainSize.Width + x] = dirt ? 127 : -128;
+					sdfPixels [y * Width + x] = dirt ? 127 : -128;
 				}
 			}
 				
@@ -117,26 +161,27 @@ namespace Ballz.GameSession.World
 					if (i == 0 && j == 0)
 						continue;
 
-					sdfOneIter (dirtPixels, sdfPixels, terrainSize.Width, terrainSize.Height, new IntVector2 (i, j));
+					sdfOneIter (dirtPixels, sdfPixels, Width, Height, new IntVector2 (i, j));
 				}
 					
 
 
 
 
-			Texture2D sdf = new Texture2D (Ballz.The().Graphics.GraphicsDevice, terrainSize.Width, terrainSize.Height);
+			Texture2D sdf = new Texture2D (Ballz.The().Graphics.GraphicsDevice, Width, Height);
 
-			Color[] sdfColorPixels = new Color[terrainSize.Width * terrainSize.Height];
-			for (int y = 0; y < terrainSize.Height; ++y) {
-				for (int x = 0; x < terrainSize.Width; ++x) {
-					int colVal = (int)(sdfPixels [y * terrainSize.Width + x] + 128.0f);
-					sdfColorPixels [y * terrainSize.Width + x] = new Color (colVal, colVal, colVal);
-
-					if(colVal == 128)
-						sdfColorPixels [y * terrainSize.Width + x] = new Color (255, 0, 0);
+			Color[] sdfColorPixels = new Color[Width * Height];
+			for (int y = 0; y < Height; ++y) {
+				for (int x = 0; x < Width; ++x) {
+					int colVal = (int)(sdfPixels [y * Width + x] + 128.0f);
+					sdfColorPixels [y * Width + x] = new Color (colVal, colVal, colVal);
 				}
 			}
 			sdf.SetData (sdfColorPixels);
+
+			return sdf;
+
+
 			/*
 			var width = terrainSize.Width;
 			var height = terrainSize.Height;
@@ -195,9 +240,10 @@ namespace Ballz.GameSession.World
 			}
 
 			sdf2.SetData<Color> (wurst);
-			*/
 
-			return sdf;
+			return sdf2;
+			*/
 		}
+
     }
 }

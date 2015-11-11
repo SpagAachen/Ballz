@@ -62,57 +62,18 @@ namespace Ballz.GameSession
       {
          ///generate a dummy game world
          /// TODO: find a nice solution to initialize the world especially regarding networking. maybe use an event for this
-         theTerrain = new Terrain();
-         theTerrain.outline = new List<Vector2>();
+		 theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld"));
+		 theTerrain.ExtractOutline ();
          //try to load the testworld
 
          Entities.Add(new Player());
-         int x=0;
-         int y=0;
-         int width = 0;
 
-            //System.Console.WriteLine("");
-            Texture2D testWorld = Game.Content.Load<Texture2D>("Worlds/TestWorld");
-            Boolean[,] values = new Boolean[testWorld.Width,testWorld.Height];
-            width = testWorld.Width;
-            //int x = 0;
-            //int y = 0;
-            Color[] theColors = new Color[testWorld.Width * testWorld.Height];
-            testWorld.GetData<Color>(theColors);
+         //System.Console.WriteLine("");
+        
+         WorldSnapshot snpsht = new WorldSnapshot(Entities, theTerrain);
 
-            foreach(Color aColor in theColors)
-            {
-               
-               if(aColor.ToVector3().LengthSquared() > 0)
-               {
-                  values[x,y] = true;
-                  //System.Console.Out.Write("#");
-               }
-               else
-               {
-                  //System.Console.Out.Write("0");
-               }
-               if(++x >= width)
-               {
-                  //System.Console.WriteLine("");
-                  x = 0;
-                  ++y;
-               }
-
-            }
-            Physics2DDotNet.Shapes.ArrayBitmap ab = new Physics2DDotNet.Shapes.ArrayBitmap(values);
-            AdvanceMath.Vector2D[] geometry = Physics2DDotNet.Shapes.VertexHelper.CreateFromBitmap(ab);
-            foreach(AdvanceMath.Vector2D vec in geometry)
-            {
-               theTerrain.outline.Add(new Vector2(vec.X,vec.Y));
-            }
-            WorldSnapshot snpsht = new WorldSnapshot(Entities,theTerrain);
-
-            theGame.World = new World.World();
-            theGame.World.AddDiscreteSnapshot(snpsht);
-         
-            //use Physics2d to get terrain stuff from the bitmap
-         //TODO: use kerstens code as soon as possible
+         theGame.World = new World.World();
+         theGame.World.AddDiscreteSnapshot(snpsht);
 
       }
          
