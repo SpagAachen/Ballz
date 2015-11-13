@@ -123,8 +123,8 @@ namespace Ballz.Logic
                             // todo: implement LogicMessage class and use it here
                             return;
                         }
-                        PrepareMenu(activatedMenu.Value);
                         activeMenu.Push(activatedMenu.Value);
+                        PrepareMenu(activatedMenu.Value);
                         RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
                     }
                     break;
