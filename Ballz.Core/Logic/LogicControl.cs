@@ -50,7 +50,9 @@ namespace Ballz.Logic
             }
             //set the found MenuItem as selectedItem
             var currentMenu = activeMenu.Pop();
-            currentMenu.SelectedItem = menuItem;
+            //only select the menu item if it is selectable
+            if(menuItem.Value.Selectable)
+                currentMenu.SelectedItem = menuItem;
             activeMenu.Push(currentMenu);
         }
 
