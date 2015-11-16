@@ -13,9 +13,12 @@
             RawInput
         }
 
-        public InputMessage(MessageType type) : base(Message.MessageType.InputMessage)
+        public char? Key{ get; private set;}
+
+        public InputMessage(MessageType type, char? value) : base(Message.MessageType.InputMessage)
         {
             Kind = type;
+            Key = value;
         }
 
         public new MessageType Kind { get; private set; }
