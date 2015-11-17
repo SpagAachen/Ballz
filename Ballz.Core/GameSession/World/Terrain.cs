@@ -204,7 +204,62 @@ namespace Ballz.GameSession.World
                         case 0:
                             // No triangles at all
                             break;
-                            // TODO(ks): other cases
+                        case 1:
+                            triangles.Add(new Triangle(v0, 0.5f * (v0 + v1), 0.5f * (v0 + v3)));
+                            break;
+                        case 2:
+                            triangles.Add(new Triangle(v1, 0.5f * (v1 + v2), 0.5f * (v0 + v1)));
+                            break;
+                        case 3:
+                            triangles.Add(new Triangle(v0, v1, 0.5f * (v1 + v2)));
+                            triangles.Add(new Triangle(0.5f * (v1 + v2), 0.5f * (v0 + v3), v0));
+                            break;
+                        case 4:
+                            triangles.Add(new Triangle(v2, 0.5f * (v2 + v3), 0.5f * (v1 + v2)));
+                            break;
+                        case 5:
+                            triangles.Add(new Triangle(v0, 0.5f * (v0 + v1), 0.5f * (v0 + v3)));
+                            triangles.Add(new Triangle(v2, 0.5f * (v2 + v3), 0.5f * (v1 + v2)));
+                            break;
+                        case 6:
+                            triangles.Add(new Triangle(v2, 0.5f * (v0 + v1), v1));
+                            triangles.Add(new Triangle(v2, 0.5f * (v2 + v3), 0.5f * (v0 + v1)));
+                            break;
+                        case 7:
+                            triangles.Add(new Triangle(v1, 0.5f * (v0 + v3), v0));
+                            triangles.Add(new Triangle(v1, 0.5f * (v2 + v3), 0.5f * (v0 + v3)));
+                            triangles.Add(new Triangle(v1, v2, 0.5f * (v2 + v3)));
+                            break;
+                        case 8:
+                            triangles.Add(new Triangle(v3, 0.5f * (v0 + v3), 0.5f * (v2 + v3)));
+                            break;
+                        case 9:
+                            triangles.Add(new Triangle(v0, 0.5f * (v2 + v3), v3));
+                            triangles.Add(new Triangle(v0, 0.5f * (v0 + v1), 0.5f * (v2 + v3)));
+                            break;
+                        case 10: 
+                            triangles.Add(new Triangle(v1, 0.5f * (v1 + v2), 0.5f * (v0 + v1)));
+                            triangles.Add(new Triangle(v3, 0.5f * (v0 + v3), 0.5f * (v2 + v3)));
+                            break;
+                        case 11: 
+                            triangles.Add(new Triangle(v0, v1, 0.5f * (v1 + v2)));
+                            triangles.Add(new Triangle(v0, 0.5f * (v1 + v2), 0.5f * (v2 + v3)));
+                            triangles.Add(new Triangle(v0, 0.5f * (v2 + v3), v3));
+                            break;
+                        case 12: 
+                            triangles.Add(new Triangle(v3, 0.5f * (v0 + v3), 0.5f * (v1 + v2)));
+                            triangles.Add(new Triangle(v3, 0.5f * (v1 + v2), v2));
+                            break;
+                        case 13: 
+                            triangles.Add(new Triangle(v3, v0, 0.5f * (v0 + v1)));
+                            triangles.Add(new Triangle(v3, 0.5f * (v0 + v1), 0.5f * (v1 + v2)));
+                            triangles.Add(new Triangle(v3, 0.5f * (v1 + v2), v2));
+                            break;
+                        case 14: 
+                            triangles.Add(new Triangle(v2, 0.5f * (v0 + v1), v1));
+                            triangles.Add(new Triangle(v2, 0.5f * (v0 + v3), 0.5f * (v0 + v1)));
+                            triangles.Add(new Triangle(v2, v3, 0.5f * (v0 + v3)));
+                            break;
                         case 15:
                             // Fill the whole quad
                             triangles.Add(new Triangle(v0, v1, v3));
