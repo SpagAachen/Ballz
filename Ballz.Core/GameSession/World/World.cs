@@ -13,9 +13,13 @@ namespace Ballz.GameSession.World
     public class World
     {
         readonly List<WorldSnapshot> snapshots = new List<WorldSnapshot>();
-        TimeSpan headTime = new TimeSpan(0,0,0);
-        private const double IntervalMs = 16;
-        private const int SnapshotCount = 6;
+        public TimeSpan HeadTime
+        {
+            get; protected set;
+        } = new TimeSpan(0,0,0);
+
+        public const double IntervalMs = 16;
+        public const int SnapshotCount = 6;
 
         public World()
         {
@@ -30,11 +34,14 @@ namespace Ballz.GameSession.World
         {
             if (snapshots.Count > 1)
             {
-                var msSinceTime = headTime.Subtract(time.ElapsedGameTime).TotalMilliseconds;
-                if (msSinceTime <= 0)
-                    return snapshots[0];
-                var timeInShots = snapshots.Count - 1 - msSinceTime/IntervalMs;
+                //TODO: Fix snapshot interpolation
+                var msSinceHeadTime = (HeadTime - time.TotalGameTime).TotalMilliseconds;
+                if (msSinceHeadTime <= 0)
+                    return snapshots[snapshots.Count - 1];
+                var timeInShots = snapshots.Count - 1 - msSinceHeadTime/IntervalMs;
                 var preIndex = (int) Math.Floor(timeInShots);
+                if (preIndex < 0)
+                    preIndex = 0;
                 var postIndex = preIndex + 1;
                 var alpha = (float) (timeInShots - preIndex);
                 var preSnapshot = snapshots[preIndex];
@@ -61,9 +68,14 @@ namespace Ballz.GameSession.World
                 return snapshots[0];
         }
 
+        public WorldSnapshot GetHeadSnapshot()
+        {
+            return snapshots[snapshots.Count - 1];
+        }
+
         public WorldSnapshot GetDiscreteSnapshot(GameTime time)
         {
-            var msSinceTime = headTime.Subtract(time.ElapsedGameTime).TotalMilliseconds;
+            var msSinceTime = HeadTime.Subtract(time.ElapsedGameTime).TotalMilliseconds;
             var timeInShots = snapshots.Count - 1 - msSinceTime / IntervalMs;
             var preIndex = (int)Math.Floor(timeInShots);
             return snapshots[preIndex];
@@ -75,7 +87,7 @@ namespace Ballz.GameSession.World
             if (snapshots.Count > SnapshotCount)
                 snapshots.RemoveAt(0);
             //the simulation time is for now 16 ms;
-            headTime = headTime.Add(new TimeSpan(0,0,0,0,16));
+            HeadTime = HeadTime.Add(new TimeSpan(0,0,0,0,16));
         }
     }
 }

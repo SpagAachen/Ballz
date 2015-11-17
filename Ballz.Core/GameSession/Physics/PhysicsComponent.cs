@@ -1,5 +1,7 @@
-﻿using Ballz.Messages;
+﻿using Ballz.GameSession.World;
+using Ballz.Messages;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace Ballz.GameSession.Physics
 {
@@ -16,17 +18,27 @@ namespace Ballz.GameSession.Physics
 
         public override void Update(GameTime time)
         {
-            var snapshot = Game.World.GetSnapshot(time);
+            float intervalSeconds = (float)World.World.IntervalMs / 1000.0f;
 
-            var elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
+            var headSnapshot = Game.World.GetHeadSnapshot();
+            var headTime = Game.World.HeadTime;
 
-            foreach(var e in snapshot.Entities)
+            for (var remainingSeconds = time.TotalGameTime.TotalSeconds - headTime.TotalSeconds;
+                remainingSeconds > 0;
+                remainingSeconds -= intervalSeconds)
             {
-                e.Position = e.Position + e.Velocity * elapsedSeconds;
-                if(e.Position.Y > 5)
-                    e.Velocity += new Vector2(0, -10) * elapsedSeconds;
-                else
-                    e.Velocity += new Vector2(0, 10) * elapsedSeconds;
+                headSnapshot = (WorldSnapshot)headSnapshot.Clone();
+
+                foreach (var e in headSnapshot.Entities)
+                {
+                    e.Position = e.Position + e.Velocity * intervalSeconds;
+                    if (e.Position.Y > 5)
+                        e.Velocity += new Vector2(0, -10) * intervalSeconds;
+                    else
+                        e.Velocity += new Vector2(0, 10) * intervalSeconds;
+                }
+
+                Game.World.AddDiscreteSnapshot(headSnapshot);
             }
         }
 

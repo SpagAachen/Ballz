@@ -6,7 +6,7 @@ namespace Ballz.GameSession.World
     /// <summary>
     ///     Entity is the Base class for all types of Entities in our Game.
     /// </summary>
-    public class Entity
+    public class Entity: ICloneable
     {
         private static int InstanceCounter = 0;
 
@@ -55,6 +55,21 @@ namespace Ballz.GameSession.World
         {
             Kind = kind;
             ID = InstanceCounter++;
+        }
+
+        protected Entity() { }
+
+        public object Clone()
+        {
+            return new Entity
+            {
+                ID = ID,
+                Kind = Kind,
+                Material = Material,
+                Position = Position,
+                Rotation = Rotation,
+                Velocity = Velocity
+            };
         }
     }
 }
