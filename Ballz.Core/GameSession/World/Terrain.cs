@@ -13,49 +13,45 @@ namespace Ballz.GameSession.World
 		public List<Vector2> outline = new List<Vector2> ();
 
 		private Texture2D terrainData = null;
+		private bool[,] terrainBitmap = null;
 
 		// We might need that later on...
-		private Texture2D terrainSDF = null;
+		//private Texture2D terrainSDF = null;
 
 		public Terrain (Texture2D terrainTexture)
 		{
 			terrainData = terrainTexture;
-			terrainSDF = ExtractSignedDistanceField (terrainData);
-		}
+			//terrainSDF = ExtractSignedDistanceField (terrainData);
 
-		public void ExtractOutline()
-		{
-			int Width = terrainSDF.Width;
-			int Height = terrainSDF.Height;
+			int Width = terrainData.Width;
+			int Height = terrainData.Height;
 
-			bool[,] values = new bool[Width, Height];
+			terrainBitmap = new bool[Width, Height];
 
-			Color[] sdfpixels = new Color[Width * Height];
-			terrainSDF.GetData<Color> (sdfpixels);
+			Color[] pixels = new Color[Width * Height];
+			terrainData.GetData<Color> (pixels);
 
 
 			for (int y = 0; y < Height; ++y) {
 				for (int x = 0; x < Width; ++x) {
 
-					Color curPixel = sdfpixels [y * Width + x];
-					bool dirt = 
-						curPixel.R == curPixel.G &&
-						curPixel.G == curPixel.B &&
-						curPixel.R == 128;
-					
-					if (dirt)
-						values [x, Height-y-1] = true;
+					Color curPixel = pixels [y * Width + x];
+					if(curPixel == Color.White)
+						terrainBitmap [x, Height-y-1] = true;
 				}
 			}
 
+			ExtractOutline ();
+		}
+
+		public void ExtractOutline()
+		{
 			outline.Clear ();
 
-			Physics2DDotNet.Shapes.ArrayBitmap ab = new Physics2DDotNet.Shapes.ArrayBitmap(values);
+			Physics2DDotNet.Shapes.ArrayBitmap ab = new Physics2DDotNet.Shapes.ArrayBitmap(terrainBitmap);
 			AdvanceMath.Vector2D[] geometry = Physics2DDotNet.Shapes.VertexHelper.CreateFromBitmap(ab);
 			foreach(AdvanceMath.Vector2D vec in geometry)
-			{
 				outline.Add(new Vector2(vec.X,vec.Y));
-			}
 		}
 
 
