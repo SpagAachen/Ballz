@@ -23,8 +23,8 @@
         /// <param name="id">Id for this connection</param>
         public Connection(string host, int port, int id)
         {
-            this.tcpClient = new TcpClient(host, port);
-            this.Id = id;
+            tcpClient = new TcpClient(host, port);
+            Id = id;
         }
 
         /// <summary>
@@ -34,8 +34,8 @@
         /// <param name="id">Id for this connection</param>
         public Connection(TcpClient connection, int id)
         {
-            this.tcpClient = connection;
-            this.Id = id;
+            tcpClient = connection;
+            Id = id;
         }
 
         /// <summary>
@@ -44,18 +44,18 @@
         /// <param name="data"></param>
         public void Send(string data)
         {
-            var s = this.tcpClient.GetStream();
-            using (this.writer = new StreamWriter(this.tcpClient.GetStream()))
+            var s = tcpClient.GetStream();
+            using (writer = new StreamWriter(tcpClient.GetStream()))
             {
                 if (s.CanWrite)
                 {
-                    this.writer.WriteLine(data);
-                    this.writer.Flush();
+                    writer.WriteLine(data);
+                    writer.Flush();
                 }
                 else
                 {
                     s.Close();
-                    this.tcpClient.Close();
+                    tcpClient.Close();
                     throw new InvalidOperationException("Unable to write data to stream");
                 }
             }
@@ -67,15 +67,15 @@
         /// <returns></returns>
         public List<string> Receive()
         {
-            var s = this.tcpClient.GetStream();
+            var s = tcpClient.GetStream();
             var res = new List<string>();
             // new lines available?
             if (!s.DataAvailable)
                 return res;
-            using (this.reader = new StreamReader(this.tcpClient.GetStream()))
+            using (reader = new StreamReader(tcpClient.GetStream()))
             {
-                while (this.reader.Peek() >= 0)
-                    res.Add(this.reader.ReadLine());
+                while (reader.Peek() >= 0)
+                    res.Add(reader.ReadLine());
             }
             return res;
         }
@@ -86,7 +86,7 @@
         /// <returns></returns>
         public bool DataAvailable()
         {
-            return this.tcpClient.GetStream().DataAvailable;
+            return tcpClient.GetStream().DataAvailable;
         }
     }
 }

@@ -16,7 +16,7 @@
 
         public Message(MessageType type)
         {
-            this.Kind = type;
+            Kind = type;
         }
 
 
