@@ -57,13 +57,12 @@ namespace Ballz.GameSession
                 input.Input -= renderer.HandleMessage;
             }
         }
-
+            
         protected override void LoadContent()
         {
             ///generate a dummy game world
             /// TODO: find a nice solution to initialize the world especially regarding networking. maybe use an event for this
             theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld"));
-            theTerrain.ExtractOutline();
             //try to load the testworld
 
             Entities.Add(new Player

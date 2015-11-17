@@ -10,11 +10,12 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class Terrain
     {
-		public List<Vector2> outline = new List<Vector2> ();
+		private List<Vector2> outline = new List<Vector2> ();
 
 		private Texture2D terrainData = null;
 		private bool[,] terrainBitmap = null;
 
+		private bool up2date = false;
 		// We might need that later on...
 		//private Texture2D terrainSDF = null;
 
@@ -36,22 +37,89 @@ namespace Ballz.GameSession.World
 				for (int x = 0; x < Width; ++x) {
 
 					Color curPixel = pixels [y * Width + x];
+
+					// Note that we flip the y coord here
 					if(curPixel == Color.White)
 						terrainBitmap [x, Height-y-1] = true;
 				}
 			}
 
-			ExtractOutline ();
+			extractOutline ();
+			up2date = true;
 		}
 
-		public void ExtractOutline()
+		/*
+		// Debug
+		public void storeCurrentBitmapToFile(string filename)
 		{
+			System.Drawing.Bitmap wusa = new System.Drawing.Bitmap(terrainBitmap.GetLength(0), terrainBitmap.GetLength(1), System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+			for (int y = 0; y < terrainBitmap.GetLength(1); ++y)
+				for (int x = 0; x < terrainBitmap.GetLength(0); ++x)
+				{
+					wusa.SetPixel(x, y, terrainBitmap[x, y] ? System.Drawing.Color.White : System.Drawing.Color.Black);
+				}
+
+			wusa.Save(filename);
+		}
+		*/
+
+		private void extractOutline()
+		{
+			// Do not extract outline if outline is correct already
+			if (up2date)
+				return;
+			
 			outline.Clear ();
 
 			Physics2DDotNet.Shapes.ArrayBitmap ab = new Physics2DDotNet.Shapes.ArrayBitmap(terrainBitmap);
 			AdvanceMath.Vector2D[] geometry = Physics2DDotNet.Shapes.VertexHelper.CreateFromBitmap(ab);
 			foreach(AdvanceMath.Vector2D vec in geometry)
 				outline.Add(new Vector2(vec.X,vec.Y));
+
+			up2date = true;
+		}
+
+		private float distance(float x1, float y1, float x2, float y2)
+		{
+			return (float)Math.Sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+		}
+
+		public void subtractCircle(float x, float y, float radius)
+		{
+			// Compute bounding box
+			int tlx = (int)Math.Floor(x - radius);
+			int tly = (int)Math.Floor(y - radius);
+			int brx = (int)Math.Ceiling(x + radius);
+			int bry = (int)Math.Ceiling(y + radius);
+
+			// Terrain width/height
+			int Width = terrainBitmap.GetLength(0);
+			int Height = terrainBitmap.GetLength(1);
+
+			// Iterate over bounding box part of bitmap
+			for (int j = Math.Max(0, tly); j < Math.Min(Height, bry); ++j) {
+				for (int i = Math.Max(0, tlx); i < Math.Min(Width, brx); ++i) {
+
+					if (distance(i, j, x, y) > radius)
+						continue;
+
+					// Subtract dirt (if any)
+					terrainBitmap [i, j] = false;
+
+				}
+			}
+
+			up2date = false;
+			
+		}
+
+		public List<Vector2> getOutline()
+		{
+			// This is a no-op if outline is up to date
+			extractOutline();
+
+			return outline;
 		}
 
 

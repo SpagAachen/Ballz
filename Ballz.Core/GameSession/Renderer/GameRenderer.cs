@@ -40,13 +40,18 @@ namespace Ballz.GameSession.Renderer
 
             var snapshot = Game.World.GetSnapshot(time);
 
-            VertexPositionColor[] vpc = new VertexPositionColor[snapshot.StaticGeometry.outline.Count + 1];
+            // Debug
+            //snapshot.StaticGeometry.subtractCircle(1.0f * ((int)time.TotalGameTime.TotalMilliseconds * 1321 % 640), 1.0f * ((int)time.TotalGameTime.TotalMilliseconds * 1701 % 480), (float)(new Random()).NextDouble() * 10.0f);
+
+
+            var outline = snapshot.StaticGeometry.getOutline();
+            VertexPositionColor[] vpc = new VertexPositionColor[outline.Count + 1];
             BallEffect.DiffuseColor = new Vector3(1, 1, 1);
 
-            Vector2 last = snapshot.StaticGeometry.outline[snapshot.StaticGeometry.outline.Count - 1];
+            Vector2 last = outline[outline.Count - 1];
 
             int i = 0;
-            foreach (var p in snapshot.StaticGeometry.outline)
+            foreach (var p in outline)
             {
                 vpc[i].Color = Color.PapayaWhip;
                 vpc[i].Position = new Vector3(p.X, p.Y, -1);
@@ -59,7 +64,8 @@ namespace Ballz.GameSession.Renderer
             LineEffect.World = terrainWorld;
             LineEffect.CurrentTechnique.Passes[0].Apply();
 
-            GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, vpc, 0, snapshot.StaticGeometry.outline.Count);
+            GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, vpc, 0, outline.Count);
+
 
 
             BallEffect.DiffuseColor = new Vector3(1, 0, 0);
