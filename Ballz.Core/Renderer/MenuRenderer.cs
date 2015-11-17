@@ -8,6 +8,7 @@ namespace Ballz.Renderer
     public class MenuRenderer : DrawableGameComponent
     {
         private GameMenu menu;
+        private GameMenu parentMenu;
         private SpriteFont menuFont;
         private SpriteBatch spriteBatch;
         private Texture2D textureSplashScreen;
@@ -40,6 +41,7 @@ namespace Ballz.Renderer
             if (message.Kind == Message.MessageType.MenuMessage)
             {
                 var msg = (MenuMessage)message;
+                parentMenu = menu;
                 menu = msg.Value;
             }
             if (message.Kind == Message.MessageType.LogicMessage)
@@ -59,30 +61,48 @@ namespace Ballz.Renderer
             // Draw a background screen.
             spriteBatch.Draw(textureSplashScreen, Game.Window.ClientBounds, Color.White);
 
+            if (menu.Items.Count > 0)
+            {
+                renderMenu(menu,false);
+            }
+            else
+            {
+                renderMenu(parentMenu,true);
+            }
+
+
+            spriteBatch.End();
+            base.Draw(gameTime);
+        }
+
+        private void renderMenu(GameMenu menu, bool showUnderscore)
+        {
             // Draw the MenuTitle.
             spriteBatch.DrawString(
                 menuFont,
-                menu.Name,
-                new Vector2(Game.Window.ClientBounds.Width/2f - menuFont.MeasureString(menu.Name).X/2, 0),
+                menu.DisplayName,
+                new Vector2(Game.Window.ClientBounds.Width / 2f - menuFont.MeasureString(menu.DisplayName).X / 2, 0),
                 Color.Black);
 
-            // Draw other Menu Items.
-            var itemOffset = menuFont.MeasureString(menu.Name).Y + 30;
+            // Draw subMenu Items.
+            var itemOffset = menuFont.MeasureString(menu.DisplayName).Y + 30;
+            string renderString;
             foreach (var item in menu.Items)
             {
+                if (showUnderscore && item == menu.SelectedItem.Value && item.SelectionType == GameMenu.ItemType.INPUTFIELD)
+                    renderString = item.DisplayName + "_";
+                else
+                    renderString = item.DisplayName;
                 spriteBatch.DrawString(
                     menuFont,
-                    item.Name,
+                    renderString,
                     new Vector2(
                         Game.Window.ClientBounds.Width/8f,
                         itemOffset),
                     (menu.SelectedItem != null && menu.SelectedItem.Value == item) ? Color.Red : Color.Black);
 
-                itemOffset += menuFont.MeasureString(item.Name).Y + 30;
+                itemOffset += menuFont.MeasureString(renderString).Y + 30;
             }
-
-            spriteBatch.End();
-            base.Draw(gameTime);
         }
     }
 }

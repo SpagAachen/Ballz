@@ -11,21 +11,8 @@ namespace Ballz.Logic
     /// </summary>
     public class LogicControl
     {
-        //private GameMenu ActiveMenu;
         private readonly Stack<GameMenu> activeMenu = new Stack<GameMenu>();
         private GameState state;
-        /*foreach(var subMenu in menuToPrepare.Items)
-         {
-            ++index;
-            if (subMenu.Selectable) //use the first selectable menuToPrepare as active one ... 
-            {
-               ActiveMenu.Push(subMenu);
-               ActiveMenu.Peek().Current.Selected = true;
-               SelectionIndex.Push(index);
-               SelectionLimits.Push (Menu.Items.FindLastIndex(delegate(GameMenu gm) {return gm.Selectable;}));
-               break;
-            }
-         }*/
 
         public LogicControl()
         {
@@ -79,6 +66,7 @@ namespace Ballz.Logic
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+            checkInputMode((Input.InputTranslator)sender);
         }
 
         private void GameLogic(InputMessage msg)
@@ -160,10 +148,22 @@ namespace Ballz.Logic
                 case InputMessage.MessageType.ControlsRight:
                     break;
                 case InputMessage.MessageType.RawInput:
+                    GameMenu selected = activeMenu.Peek();
+                    selected.Value += msg.Key;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        /// <summary>
+        /// Checks the input mode.
+        /// TODO: refactor the Menu logic to a menuLogic class or use a partial class definition as this file seems to become messy
+        /// </summary>
+        void checkInputMode(Input.InputTranslator translator)
+        {
+            if (activeMenu.Peek().SelectionType == GameMenu.ItemType.INPUTFIELD)
+                translator.Mode = Input.InputTranslator.InputMode.RAW;
         }
 
         private enum GameState

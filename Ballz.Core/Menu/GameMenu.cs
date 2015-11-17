@@ -4,11 +4,18 @@ namespace Ballz.Menu
 {
     public class GameMenu : LinkedList<GameMenu>
     {
-        public GameMenu(string name, bool selectable = false)
+        public enum ItemType
+        {
+            LABEL,
+            INPUTFIELD
+        }
+
+        public GameMenu(string name, bool selectable = false, ItemType menuType = ItemType.LABEL)
         {
             Name = name;
             Selectable = selectable;
             Items = new LinkedList<GameMenu>();
+            SelectionType = menuType;
         }
 
         public static GameMenu Default
@@ -23,7 +30,7 @@ namespace Ballz.Menu
                 var networkMenu = new GameMenu("Multiplayer", true);
                 // - connect to server
                 var networkConnectToMenu = new GameMenu("Connect to", true);
-                networkConnectToMenu.Items.AddLast(new GameMenu("Not Implemented", false));
+                networkConnectToMenu.Items.AddLast(new GameMenu("Host Name: ", true, ItemType.INPUTFIELD));
                 // - start server
                 var networkServerMenu = new GameMenu("Start server", true);
                 networkServerMenu.Items.AddLast(new GameMenu("Not Implemented", false));
@@ -52,5 +59,14 @@ namespace Ballz.Menu
         public LinkedListNode<GameMenu> SelectedItem { get; set; }
 
         public bool Selectable { get; private set; }
+
+        public ItemType SelectionType {get; private set;}
+
+        public string Value{ get; set;} = "";
+
+        public string DisplayName 
+        {
+            get{ return Name + Value; }
+        }
     }
 }
