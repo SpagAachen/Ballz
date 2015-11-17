@@ -10,13 +10,16 @@ namespace Ballz.GameSession.Renderer
     /// <summary>
     ///     Render system performs all rendering of the Game and is inteded as a module.
     /// </summary>
-    public class GameRenderer : DrawableGameComponent
+    public partial class GameRenderer : DrawableGameComponent
     {
         Model BallModel;
         BasicEffect BallEffect;
         SpriteBatch spriteBatch;
-
+        
         Ballz Game;
+
+        Matrix ProjectionMatrix;
+        Matrix ViewMatrix;
 
         public GameRenderer(Ballz game) : base(game)
         {
@@ -29,12 +32,11 @@ namespace Ballz.GameSession.Renderer
         /// <param name="time">time since start of game (cf BallzGame draw).</param>
         public override void Draw(GameTime time)
         {
-            var projection = Matrix.Identity;
+            ProjectionMatrix = Matrix.Identity;
+            ViewMatrix = Matrix.CreateOrthographicOffCenter(0, 10 * Game.GraphicsDevice.DisplayMode.AspectRatio, 0, 10, -10, 10);
 
-            var view = Matrix.CreateOrthographicOffCenter(0, 10 * Game.GraphicsDevice.DisplayMode.AspectRatio, 0, 10, -10, 10);
-
-            BallEffect.View = view;
-            BallEffect.Projection = projection;
+            BallEffect.View = ViewMatrix;
+            BallEffect.Projection = ProjectionMatrix;
 
             var snapshot = Game.World.GetSnapshot(time);
 
@@ -54,9 +56,8 @@ namespace Ballz.GameSession.Renderer
             vpc[i].Position = vpc[0].Position;
 
             Matrix terrainWorld = Matrix.CreateScale(0.03f);
-            BallEffect.World = terrainWorld;
-            BallEffect.VertexColorEnabled = true;
-            BallEffect.CurrentTechnique.Passes[0].Apply();
+            LineEffect.World = terrainWorld;
+            LineEffect.CurrentTechnique.Passes[0].Apply();
 
             GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, vpc, 0, snapshot.StaticGeometry.outline.Count);
 
@@ -66,7 +67,8 @@ namespace Ballz.GameSession.Renderer
             {
                 Matrix world = Matrix.CreateTranslation(new Vector3(entity.Position, 0));
                 BallEffect.World = world;
-                BallModel.Draw(world, view, projection);
+                BallModel.Draw(world, ViewMatrix, ProjectionMatrix);
+                DrawSphere(entity.Position, new Vector2(1, 0));
             }
         }
 
@@ -81,6 +83,8 @@ namespace Ballz.GameSession.Renderer
             BallModel.Meshes[0].MeshParts[0].Effect = BallEffect;
 
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
+
+            PrepareDebugRendering();
 
             base.LoadContent();
         }
