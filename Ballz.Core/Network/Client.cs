@@ -11,12 +11,12 @@
 
         public Client(Network net)
         {
-            this.network = net;
+            network = net;
         }
 
         public void ConnectToServer(string host, int port)
         {
-            this.ConnectionToServer = new Connection(host, port, 0);
+            ConnectionToServer = new Connection(host, port, 0);
         }
 
         public void Update(GameTime time)

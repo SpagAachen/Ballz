@@ -13,7 +13,7 @@
 
         public NetworkMessage(MessageType type) : base(Message.MessageType.NetworkMessage)
         {
-            this.Kind = type;
+            Kind = type;
         }
 
         public new MessageType Kind { get; private set; }

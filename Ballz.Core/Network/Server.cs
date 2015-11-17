@@ -17,32 +17,32 @@
 
         public Server(Network net)
         {
-            this.network = net;
+            network = net;
         }
 
         public void Listen(int port)
         {
-            this.listener = new TcpListener(IPAddress.Any, port);
-            this.listener.Start();
+            listener = new TcpListener(IPAddress.Any, port);
+            listener.Start();
         }
 
         public void Update(GameTime time)
         {
             // new clients
-            if (this.listener.Pending())
+            if (listener.Pending())
             {
-                var client = this.listener.AcceptTcpClient();
-                this.connections.Add(new Connection(client, nextId++));
-                this.network.RaiseMessageEvent(NetworkMessage.MessageType.NewClient);
+                var client = listener.AcceptTcpClient();
+                connections.Add(new Connection(client, nextId++));
+                network.RaiseMessageEvent(NetworkMessage.MessageType.NewClient);
             }
             // receive data
-            foreach (var c in this.connections)
+            foreach (var c in connections)
             {
                 if (c.DataAvailable())
                 {
                     var data = c.Receive();
                     foreach (var d in data)
-                        this.onData(d, c.Id);
+                        onData(d, c.Id);
                 }
             }
             //TODO: Implement

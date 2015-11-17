@@ -21,38 +21,38 @@
 
         public void RaiseMessageEvent(NetworkMessage.MessageType msg)
         {
-            this.Message?.Invoke(this, new NetworkMessage(msg));
+            Message?.Invoke(this, new NetworkMessage(msg));
         }
 
         public void StartServer(int port)
         {
-            if (this.State != StateT.None)
-                this.Disconnect();
-            this.State = StateT.Server;
-            this.server = new Server(this);
-            this.server.Listen(port);
-            this.RaiseMessageEvent(NetworkMessage.MessageType.ServerStarted);
+            if (State != StateT.None)
+                Disconnect();
+            State = StateT.Server;
+            server = new Server(this);
+            server.Listen(port);
+            RaiseMessageEvent(NetworkMessage.MessageType.ServerStarted);
             //TODO: Implement
         }
 
         public void ConnectToServer(string hostname, int port)
         {
-            if (this.State != StateT.None)
-                this.Disconnect();
-            this.State = StateT.Client;
-            this.client = new Client(this);
-            this.client.ConnectToServer(hostname, port);
-            this.RaiseMessageEvent(NetworkMessage.MessageType.ConnectingToServer);
+            if (State != StateT.None)
+                Disconnect();
+            State = StateT.Client;
+            client = new Client(this);
+            client.ConnectToServer(hostname, port);
+            RaiseMessageEvent(NetworkMessage.MessageType.ConnectingToServer);
             //TODO: Implement
         }
 
         public void Disconnect()
         {
-            if (this.State == StateT.None) return;
-            this.State = StateT.None;
-            this.client = null;
-            this.server = null;
-            this.RaiseMessageEvent(NetworkMessage.MessageType.Disconnected);
+            if (State == StateT.None) return;
+            State = StateT.None;
+            client = null;
+            server = null;
+            RaiseMessageEvent(NetworkMessage.MessageType.Disconnected);
             //TODO: Implement
         }
 
@@ -62,15 +62,15 @@
 
         public override void Update(GameTime time)
         {
-            switch (this.State)
+            switch (State)
             {
                 case StateT.None:
                     return;
                 case StateT.Client:
-                    this.client.Update(time);
+                    client.Update(time);
                     break;
                case StateT.Server:
-                    this.server.Update(time);
+                    server.Update(time);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -79,16 +79,16 @@
 
         public void HandleMessage(object sender, Message message)
         {
-            switch (this.State)
+            switch (State)
             {
                 case StateT.None:
                     //TODO: Implement
                     break;
                 case StateT.Client:
-                    this.client.HandleMessage(sender, message);
+                    client.HandleMessage(sender, message);
                     break;
                 case StateT.Server:
-                    this.server.HandleMessage(sender, message);
+                    server.HandleMessage(sender, message);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

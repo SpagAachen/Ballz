@@ -115,7 +115,7 @@ namespace Ballz.Logic
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            CheckInputMode((Input.InputTranslator)sender);
+            CheckInputMode((InputTranslator)sender);
         }
 
         private void GameLogic(InputMessage msg)
@@ -207,7 +207,7 @@ namespace Ballz.Logic
         /// Checks the input mode.
         /// TODO: refactor the Menu logic to a menuLogic class or use a partial class definition as this file seems to become messy
         /// </summary>
-        void CheckInputMode(Input.InputTranslator translator)
+        void CheckInputMode(InputTranslator translator)
         {
             if (rawInput)
                 translator.Mode = InputTranslator.InputMode.RAW;
