@@ -93,7 +93,8 @@ namespace Ballz.Renderer
                     renderString = item.DisplayName + "_";
                 else
                     renderString = item.DisplayName;
-                spriteBatch.DrawString(
+                renderString = checkLetters(renderString);
+                    spriteBatch.DrawString(
                     menuFont,
                     renderString,
                     new Vector2(
@@ -103,6 +104,18 @@ namespace Ballz.Renderer
 
                 itemOffset += menuFont.MeasureString(renderString).Y + 30;
             }
+        }
+
+        private string checkLetters(string toCheck)
+        {
+            char[] letters = toCheck.ToCharArray();
+            string checkedString = toCheck;
+            foreach (char letter in letters)
+            {
+                if (!menuFont.Characters.Contains(letter))
+                    checkedString = checkedString.Replace(letter,'?');
+            }
+            return checkedString;
         }
     }
 }

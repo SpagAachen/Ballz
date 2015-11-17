@@ -10,6 +10,7 @@
             ControlsRight,
             ControlsAction,
             ControlsBack,
+            RawBack,
             RawInput
         }
 

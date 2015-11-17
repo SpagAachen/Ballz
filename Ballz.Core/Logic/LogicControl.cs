@@ -151,6 +151,11 @@ namespace Ballz.Logic
                     GameMenu selected = activeMenu.Peek();
                     selected.Value += msg.Key;
                     break;
+                case InputMessage.MessageType.RawBack:
+                    GameMenu selected2 = activeMenu.Peek();
+                    if(selected2.Value.Length > 0)
+                        selected2.Value = selected2.Value.Remove(selected2.Value.Length-1);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

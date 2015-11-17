@@ -98,6 +98,11 @@ namespace Ballz.Input
                 down = true;
                 OnInput(InputMessage.MessageType.ControlsBack);
             }
+            if (Keyboard.GetState().IsKeyDown(Keys.Back) && !down)
+            {
+                down = true;
+                OnInput(InputMessage.MessageType.RawBack);
+            }
         }
 
         private void processInput()
