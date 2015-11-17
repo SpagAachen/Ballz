@@ -8,12 +8,26 @@ namespace Ballz.GameSession.Physics
     /// </summary>
     public class PhysicsControl : GameComponent
     {
-        public PhysicsControl(Game game) : base(game)
+        Ballz Game;
+        public PhysicsControl(Ballz game) : base(game)
         {
+            Game = game;
         }
 
         public override void Update(GameTime time)
         {
+            var snapshot = Game.World.GetSnapshot(time);
+
+            var elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
+
+            foreach(var e in snapshot.Entities)
+            {
+                e.Position = e.Position + e.Velocity * elapsedSeconds;
+                if(e.Position.Y > 5)
+                    e.Velocity += new Vector2(0, -10) * elapsedSeconds;
+                else
+                    e.Velocity += new Vector2(0, 10) * elapsedSeconds;
+            }
         }
 
         public void HandleMessage(object sender, Message message)
