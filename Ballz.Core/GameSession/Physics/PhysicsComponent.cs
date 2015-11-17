@@ -1,7 +1,10 @@
 ﻿using Ballz.GameSession.World;
 using Ballz.Messages;
 using Microsoft.Xna.Framework;
+
 using System;
+using Physics2DDotNet;
+using Physics2DDotNet.Shapes;
 
 namespace Ballz.GameSession.Physics
 {
@@ -22,11 +25,63 @@ namespace Ballz.GameSession.Physics
 
             var headSnapshot = Game.World.GetHeadSnapshot();
             var headTime = Game.World.HeadTime;
+            //var elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
+            //TODO extract into function
 
+            // Create engine
+            var engine = new PhysicsEngine();
+            engine.BroadPhase = new Physics2DDotNet.Detectors.SelectiveSweepDetector();
+            engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
+            
+            // Terrain
+            var terrain = headSnapshot.StaticGeometry.getOutline();
+            AdvanceMath.Vector2D[] terrainVert = new AdvanceMath.Vector2D[terrain.Count];
+            for (int i = 0; i < terrain.Count; i++)
+            {
+                terrainVert[i] = new AdvanceMath.Vector2D(terrain[i].X, terrain[i].Y);
+            }
+            //terrainVert[terrain.Count] = new AdvanceMath.Vector2D(terrain[terrain.Count - 1].X, terrain[terrain.Count - 1].Y - 10);
+
+            var terrainShape = new PolygonShape(VertexHelper.CreateRectangle(10, 20), 3);
+            //var terrainShape = new PolygonShape(terrainVert, 0.1f);
+            /*var terrainCoeff = new Coefficients(1, .5f);
+            var terrainBody = new Body(new PhysicsState(), terrainShape, .0f, terrainCoeff, new Lifespan());
+            engine.AddBody(terrainBody);
+            
+            // Entities
+            var entityPhysMap = new System.Collections.Generic.Dictionary<Entity, Body>();
+            foreach (var e in headSnapshot.Entities)
+            {
+                IShape shape = null;
+                float mass = .0f;
+                switch (e.Material.Shape)
+                {
+                    case PhysicsMaterial.PhysicsShape.Circle:
+                        shape = new CircleShape(e.Material.Radius, 16);
+                        mass = (float) (e.Material.Density * e.Material.Radius * e.Material.Radius * Math.PI);
+                        break;
+                    case PhysicsMaterial.PhysicsShape.Polygon:
+                        //TODO
+                        break;
+                    default:
+                        //TODO
+                        break;                        
+                }
+
+                Coefficients coeff = new Coefficients(e.Material.Restitution, e.Material.Friction);
+                Body body = new Body(new PhysicsState(), shape, mass, coeff, new Lifespan());
+                entityPhysMap.Add(e, body);
+                //IShape shape = new CircleShape(e.r)
+            }
+            */
             for (var remainingSeconds = time.TotalGameTime.TotalSeconds - headTime.TotalSeconds;
                 remainingSeconds > 0;
                 remainingSeconds -= intervalSeconds)
             {
+                //TODO: Check timer
+                //engine.Update(intervalSeconds, intervalSeconds);
+                //PhysicsTimer timer = new PhysicsTimer(engine.Update, intervalSeconds);
+
                 headSnapshot = (WorldSnapshot)headSnapshot.Clone();
 
                 foreach (var e in headSnapshot.Entities)
