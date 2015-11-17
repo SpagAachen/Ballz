@@ -64,16 +64,20 @@ namespace Ballz.Renderer
             // Draw a background screen.
             spriteBatch.Draw(textureSplashScreen, Game.Window.ClientBounds, Color.White);
 
-            if (menu.Items.Count > 0)
+            if (menu != null)
             {
-                renderMenu(menu,false);
-            }
-            else
-            {
-                renderMenu(parentMenu,true);
-            }
+
+                if (menu.Items.Count > 0)
+                {
+                    renderMenu(menu, false);
+                }
+                else
+                {
+                    renderMenu(parentMenu, true);
+                }
 
 
+            }
             spriteBatch.End();
             base.Draw(gameTime);
         }

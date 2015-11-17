@@ -14,6 +14,27 @@ namespace Ballz.Menu
         //The name
         public string Name { get; }
 
+        //TODO: this is not very nice :(
+        public static Item Default
+        {
+            get
+            {
+                // main menu
+                var mainMenu = new Composite("Main Menu");
+
+                var play = new Label("Play",true);
+
+                mainMenu.AddItem(play);
+                mainMenu.AddItem(new Label("Options",true));
+                mainMenu.AddItem(new Label("Multiplayer",true));
+
+                var quit = new Label("Quit", true);               
+                mainMenu.AddItem(quit);
+
+                return mainMenu;
+            }
+        }
+
         public abstract IReadOnlyList<Item> Items { get; }
 
         public IEnumerable<Item> Descendants
