@@ -40,6 +40,8 @@ namespace Ballz
         {
             Enabled = false;
             Visible = false;
+            //draw the overlay last, assuming we have game and menu for the very first draw calls
+            DrawOrder = 3;
         }
 
         public override void Initialize()
