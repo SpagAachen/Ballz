@@ -14,7 +14,7 @@ namespace Ballz.GameSession.Renderer
     {
         Model BallModel;
         BasicEffect BallEffect;
-		SpriteBatch spriteBatch;
+        SpriteBatch spriteBatch;
 
         Ballz Game;
 
@@ -29,57 +29,36 @@ namespace Ballz.GameSession.Renderer
         /// <param name="time">time since start of game (cf BallzGame draw).</param>
         public override void Draw(GameTime time)
         {
-            Matrix projection = Matrix.CreatePerspectiveFieldOfView(
-                    1.0472f,
-                    Game.GraphicsDevice.DisplayMode.AspectRatio,
-                    0.1f,
-                    1000.0f
-                );
+            var projection = Matrix.Identity;
 
-            Matrix view = Matrix.CreateLookAt(
-                    new Vector3(0, 0, 10),
-                    new Vector3(5, 5, 0),
-                    Vector3.UnitY
-                );
-            
+            var view = Matrix.CreateOrthographicOffCenter(0, 10 * Game.GraphicsDevice.DisplayMode.AspectRatio, 0, 10, -10, 10);
+
             BallEffect.View = view;
             BallEffect.Projection = projection;
 
             var snapshot = Game.World.GetSnapshot(time);
 
-			/*
+            VertexPositionColor[] vpc = new VertexPositionColor[snapshot.StaticGeometry.outline.Count + 1];
             BallEffect.DiffuseColor = new Vector3(1, 1, 1);
+
+            Vector2 last = snapshot.StaticGeometry.outline[snapshot.StaticGeometry.outline.Count - 1];
+
+            int i = 0;
             foreach (var p in snapshot.StaticGeometry.outline)
             {
-                Matrix world = Matrix.CreateScale(0.03f) * Matrix.CreateTranslation(new Vector3(p*0.03f, 0));
-                BallEffect.World = world;
-                BallModel.Draw(world, view, projection);
+                vpc[i].Color = Color.PapayaWhip;
+                vpc[i].Position = new Vector3(p.X, p.Y, -1);
+                ++i;
             }
-			*/
+            vpc[i].Color = vpc[0].Color;
+            vpc[i].Position = vpc[0].Position;
 
-			VertexPositionColor[] vpc = new VertexPositionColor[snapshot.StaticGeometry.outline.Count+1];
-			BallEffect.DiffuseColor = new Vector3(1, 1, 1);
+            Matrix terrainWorld = Matrix.CreateScale(0.03f);
+            BallEffect.World = terrainWorld;
+            BallEffect.VertexColorEnabled = true;
+            BallEffect.CurrentTechnique.Passes[0].Apply();
 
-			Vector2 last = snapshot.StaticGeometry.outline [snapshot.StaticGeometry.outline.Count - 1];
-
-			int i = 0;
-			foreach (var p in snapshot.StaticGeometry.outline)
-			{
-
-					vpc[i].Color = Color.PapayaWhip;
-					vpc[i].Position = new Vector3(p.X, p.Y, -1);
-
-					++i;
-			}
-				vpc[i].Color = vpc[0].Color;
-				vpc[i].Position = vpc[0].Position;
-
-			Matrix terrainWorld = Matrix.CreateScale (0.05f);
-			BallEffect.World = terrainWorld;
-			BallEffect.VertexColorEnabled = true;
-			BallEffect.CurrentTechnique.Passes [0].Apply();
-			//BallModel.Draw(world, view, projection);
-			GraphicsDevice.DrawUserPrimitives<VertexPositionColor> (PrimitiveType.LineStrip, vpc, 0, snapshot.StaticGeometry.outline.Count);
+            GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.LineStrip, vpc, 0, snapshot.StaticGeometry.outline.Count);
 
 
             BallEffect.DiffuseColor = new Vector3(1, 0, 0);
@@ -101,7 +80,7 @@ namespace Ballz.GameSession.Renderer
             BallModel = Game.Content.Load<Model>("Ball");
             BallModel.Meshes[0].MeshParts[0].Effect = BallEffect;
 
-			spriteBatch = new SpriteBatch (Game.GraphicsDevice);
+            spriteBatch = new SpriteBatch(Game.GraphicsDevice);
 
             base.LoadContent();
         }

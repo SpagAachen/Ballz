@@ -12,13 +12,13 @@ namespace Ballz.GameSession
 {
     public class Session : DrawableGameComponent
     {
-      private List<Entity> Entities = new List<Entity>();
+        private List<Entity> Entities = new List<Entity>();
         private Terrain theTerrain;
         private Physics.PhysicsControl physics;
         private Renderer.GameRenderer renderer;
         private Logic.LogicControl logic;
         private Input.InputTranslator input;
-      private Ballz theGame;
+        private Ballz theGame;
 
         public Session(Ballz _game) : base(_game)
         {
@@ -40,12 +40,12 @@ namespace Ballz.GameSession
 
             _game.Components.ComponentRemoved += cleanup;
             //Initialize();
-         theGame = _game;
+            theGame = _game;
         }
 
         public void cleanup(object sender, GameComponentCollectionEventArgs args)
         {
-            if(args.GameComponent == this)  //we got removed so we get rid of all the other components
+            if (args.GameComponent == this)  //we got removed so we get rid of all the other components
             {
                 logic.Message -= physics.HandleMessage;
                 logic.Message -= renderer.HandleMessage;
@@ -58,28 +58,31 @@ namespace Ballz.GameSession
             }
         }
 
-      protected override void LoadContent()
-      {
-         ///generate a dummy game world
-         /// TODO: find a nice solution to initialize the world especially regarding networking. maybe use an event for this
-		 theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld"));
-		 theTerrain.ExtractOutline ();
-         //try to load the testworld
+        protected override void LoadContent()
+        {
+            ///generate a dummy game world
+            /// TODO: find a nice solution to initialize the world especially regarding networking. maybe use an event for this
+            theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld"));
+            theTerrain.ExtractOutline();
+            //try to load the testworld
 
-         Entities.Add(new Player());
+            Entities.Add(new Player
+            {
+                Position = new Vector2(5, 5)
+            });
 
-         //System.Console.WriteLine("");
-        
-         WorldSnapshot snpsht = new WorldSnapshot(Entities, theTerrain);
+            //System.Console.WriteLine("");
 
-         theGame.World = new World.World();
-         theGame.World.AddDiscreteSnapshot(snpsht);
+            WorldSnapshot snpsht = new WorldSnapshot(Entities, theTerrain);
 
-      }
-         
-      public override void Initialize()
-      {
-         base.Initialize();
-      }
+            theGame.World = new World.World();
+            theGame.World.AddDiscreteSnapshot(snpsht);
+
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+        }
     }
 }
