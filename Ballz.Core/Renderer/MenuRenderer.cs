@@ -7,15 +7,15 @@ namespace Ballz.Renderer
 {
     public class MenuRenderer : DrawableGameComponent
     {
-        private GameMenu menu;
-        private GameMenu parentMenu;
+        private Item menu;
+        private Item parentMenu;
         private SpriteFont menuFont;
         private SpriteBatch spriteBatch;
         private Texture2D textureSplashScreen;
 
         public MenuRenderer(Game game) : base(game)
         {
-            menu = GameMenu.Default;
+            menu = Item.Default;
         }
 
         protected override void LoadContent()
@@ -78,7 +78,7 @@ namespace Ballz.Renderer
             base.Draw(gameTime);
         }
 
-        private void renderMenu(GameMenu menu, bool showUnderscore)
+        private void renderMenu(Item menu, bool showUnderscore)
         {
             // Draw the MenuTitle.
             spriteBatch.DrawString(
@@ -92,7 +92,7 @@ namespace Ballz.Renderer
             string renderString;
             foreach (var item in menu.Items)
             {
-                if (showUnderscore && item == menu.SelectedItem.Value && item.SelectionType == GameMenu.ItemType.INPUTFIELD)
+                if (showUnderscore && item == menu.SelectedItem && item is InputBox)
                     renderString = item.DisplayName + "_";
                 else
                     renderString = item.DisplayName;
@@ -103,7 +103,7 @@ namespace Ballz.Renderer
                     new Vector2(
                         Game.Window.ClientBounds.Width/8f,
                         itemOffset),
-                    (menu.SelectedItem != null && menu.SelectedItem.Value == item) ? Color.Red : Color.Black);
+                    (menu.SelectedItem != null && menu.SelectedItem == item) ? Color.Red : Color.Black);
 
                 itemOffset += menuFont.MeasureString(renderString).Y + 30;
             }

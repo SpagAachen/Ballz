@@ -42,6 +42,11 @@
     <Compile Include="GameSession\Network\NetworkComponent.cs" />
     <Compile Include="GameSession\Physics\PhysicsComponent.cs" />
     <Compile Include="GameSession\World\Entity.cs" />
+    <Compile Include="Menu\Back.cs" />
+    <Compile Include="Menu\InputBox.cs" />
+    <Compile Include="Menu\Leaf.cs" />
+    <Compile Include="Menu\Label.cs" />
+    <Compile Include="Menu\Composite.cs" />
     <Compile Include="Messages\NetworkMessage.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="GameSession\World\Player.cs" />
@@ -65,7 +70,7 @@
     <None Include="Content\Textures\Balls.jpg" />
     <Compile Include="Messages\MenuMessage.cs" />
     <Compile Include="Messages\InputMessage.cs" />
-    <Compile Include="Menu\GameMenu.cs" />
+    <Compile Include="Menu\Item.cs" />
     <Compile Include="Renderer\PerformanceRenderer.cs" />
     <Compile Include="Messages\LogicMessage.cs" />
   </ItemGroup>

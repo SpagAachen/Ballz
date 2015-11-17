@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Ballz.Input;
 using Ballz.Menu;
 using Ballz.Messages;
 
@@ -11,36 +13,80 @@ namespace Ballz.Logic
     /// </summary>
     public class LogicControl
     {
-        private readonly Stack<GameMenu> activeMenu = new Stack<GameMenu>();
+        private readonly Stack<Composite> activeMenu = new Stack<Composite>();
         private GameState state;
+        private bool rawInput;
 
         public LogicControl()
         {
-            var menu = GameMenu.Default;
+            var menu = DefaultMenu();
             //push the root menuToPrepare
-            activeMenu.Push(menu);
-            PrepareMenu(menu);
+            activeMenu.Push(menu); //TODO: uncast
+            RegisterMenuEvents(menu);
+
             state = GameState.MenuState;
         }
 
-        private void PrepareMenu(GameMenu menuToPrepare)
+        private Composite DefaultMenu()
         {
-            //if we have MenuItems select the first one
-            if (menuToPrepare.Items.Count <= 0)
-                return;
+            // options menu
+            var optionsMenu = new Composite("Options", true);
+            optionsMenu.AddItem(new Label("Not Implemented", false));
 
-            //find the first selectable Menu item
-            var menuItem = menuToPrepare.Items.First;
-            while (menuItem.Next != null && !menuItem.Value.Selectable)
+            // multiplayer menu
+            var networkMenu = new Composite("Multiplayer", true);
+            // - connect to server
+            var networkConnectToMenu = new Composite("Connect to", true);
+            networkConnectToMenu.AddItem(new InputBox("Host Name: ", true));
+            // - start server
+            var networkServerMenu = new Composite("Start server", true);
+            networkServerMenu.AddItem(new Label("Not Implemented", false));
+            // - add items
+            networkMenu.AddItem(networkConnectToMenu);
+            networkMenu.AddItem(networkServerMenu);
+            networkMenu.AddItem(new Back());
+
+            // main menu
+            var mainMenu = new Composite("Main Menu");
+
+            var play = new Label("Play",true);
+            play.OnSelect += () =>
             {
-                menuItem = menuItem.Next;
-            }
-            //set the found MenuItem as selectedItem
-            var currentMenu = activeMenu.Pop();
-            //only select the menu item if it is selectable
-            if(menuItem.Value.Selectable)
-                currentMenu.SelectedItem = menuItem;
-            activeMenu.Push(currentMenu);
+                state = GameState.SimulationState;
+                RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
+            };
+          
+            mainMenu.AddItem(play);
+            mainMenu.AddItem(optionsMenu);
+            mainMenu.AddItem(networkMenu);
+
+            var quit = new Label("Quit", true);
+            quit.OnSelect += () => Ballz.The().Exit();
+            mainMenu.AddItem(quit);
+
+            return mainMenu;
+        }
+
+        private void RegisterMenuEvents(Item menu)
+        {
+            menu.BindCompositeHandler(c =>
+            {
+                activeMenu.Push(c);
+                RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
+            });
+
+            menu.BindBackHandler(b =>
+            {
+                activeMenu.Pop();
+                RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
+            });
+            
+            menu.BindInputBoxHandler(ib =>
+            {
+                rawInput = true;
+                RaiseMessageEvent(new MenuMessage(ib));
+            });
+            
         }
 
         public event EventHandler<Message> Message;
@@ -69,7 +115,7 @@ namespace Ballz.Logic
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            checkInputMode((Input.InputTranslator)sender);
+            CheckInputMode((Input.InputTranslator)sender);
         }
 
         private void GameLogic(InputMessage msg)
@@ -101,39 +147,30 @@ namespace Ballz.Logic
 
         private void MenuLogic(InputMessage msg)
         {
-            GameMenu top;
+            Composite top;
             switch (msg.Kind)
             {
                 case InputMessage.MessageType.ControlsAction:
-                    var activatedMenu = activeMenu.Peek().SelectedItem;
-                    if (activatedMenu != null)
-                    {
-                        if (activatedMenu.Value.Name == "Quit")
-                            Ballz.The().Exit();
-                        if (activatedMenu.Value.Name == "Play")
-                        {
-                            state = GameState.SimulationState;
-                            RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
-                            // todo: implement LogicMessage class and use it here
-                            return;
-                        }
-                        activeMenu.Push(activatedMenu.Value);
-                        PrepareMenu(activatedMenu.Value);
-                        RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
-                    }
+                    var selectedItem = activeMenu.Peek().SelectedItem;
+                    selectedItem?.Activate();
                     break;
                 case InputMessage.MessageType.ControlsBack:
                     if (activeMenu.Count == 1) // exit if we are in main menuToPrepare
                         Ballz.The().Exit();
                     else
-                        activeMenu.Pop();
+                    {
+                        if (rawInput)
+                            rawInput = false;
+                        else
+                            activeMenu.Pop();
+                    }
                     RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
                     break;
                 case InputMessage.MessageType.ControlsUp:
                     top = activeMenu.Pop();
                     if (top.SelectedItem != null)
                     {
-                        top.SelectedItem = top.SelectedItem.Previous ?? top.Items.Last;
+                        top.SelectPrevious();
                         RaiseMessageEvent(new MenuMessage(top));
                     }
                     activeMenu.Push(top);
@@ -142,7 +179,7 @@ namespace Ballz.Logic
                     top = activeMenu.Pop();
                     if (top.SelectedItem != null)
                     {
-                        top.SelectedItem = top.SelectedItem.Next ?? top.Items.First;
+                        top.SelectNext();
                         RaiseMessageEvent(new MenuMessage(top));
                     }
                     activeMenu.Push(top);
@@ -152,13 +189,13 @@ namespace Ballz.Logic
                 case InputMessage.MessageType.ControlsRight:
                     break;
                 case InputMessage.MessageType.RawInput:
-                    GameMenu selected = activeMenu.Peek();
-                    selected.Value += msg.Key;
+                    var selected = activeMenu.Peek().SelectedItem;
+                    if (msg.Key != null)
+                        selected.HandleRawKey(msg.Key.Value);
                     break;                    
                 case InputMessage.MessageType.RawBack:
-                    GameMenu selected2 = activeMenu.Peek();
-                    if(selected2.Value.Length > 0)
-                        selected2.Value = selected2.Value.Remove(selected2.Value.Length-1);
+                    var selected2 = activeMenu.Peek().SelectedItem;
+                    selected2.HandleBackspace();
                     break;
                 default:
                     //throw new ArgumentOutOfRangeException();
@@ -170,10 +207,10 @@ namespace Ballz.Logic
         /// Checks the input mode.
         /// TODO: refactor the Menu logic to a menuLogic class or use a partial class definition as this file seems to become messy
         /// </summary>
-        void checkInputMode(Input.InputTranslator translator)
+        void CheckInputMode(Input.InputTranslator translator)
         {
-            if (activeMenu.Peek().SelectionType == GameMenu.ItemType.INPUTFIELD)
-                translator.Mode = Input.InputTranslator.InputMode.RAW;
+            if (rawInput)
+                translator.Mode = InputTranslator.InputMode.RAW;
         }
 
         private enum GameState
