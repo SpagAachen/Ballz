@@ -34,12 +34,15 @@ namespace Ballz.GameSession.Physics
             engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
             
             // Terrain
-            var terrain = headSnapshot.StaticGeometry.getOutline();
-            AdvanceMath.Vector2D[] terrainVert = new AdvanceMath.Vector2D[terrain.Count];
+            var terrain = headSnapshot.StaticGeometry.getTriangles();
+
+            // TODO: Use triangles now! Outline is deprecated
+            /*AdvanceMath.Vector2D[] terrainVert = new AdvanceMath.Vector2D[terrain.Count];
             for (int i = 0; i < terrain.Count; i++)
             {
                 terrainVert[i] = new AdvanceMath.Vector2D(terrain[i].X, terrain[i].Y);
             }
+            */
             //terrainVert[terrain.Count] = new AdvanceMath.Vector2D(terrain[terrain.Count - 1].X, terrain[terrain.Count - 1].Y - 10);
 
             var terrainShape = new PolygonShape(VertexHelper.CreateRectangle(10, 20), 3);

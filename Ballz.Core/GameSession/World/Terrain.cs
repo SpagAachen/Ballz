@@ -10,7 +10,11 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class Terrain
     {
-		private List<Vector2> outline = new List<Vector2> ();
+
+        private List<Triangle> triangles = new List<Triangle>();
+
+        // Deprecated!!
+		private List<Vector2> outline = new List<Vector2>();
 
 		private Texture2D terrainData = null;
 		private bool[,] terrainBitmap = null;
@@ -44,7 +48,7 @@ namespace Ballz.GameSession.World
 				}
 			}
 
-			extractOutline ();
+			extractTriangles ();
 			up2date = true;
 		}
 
@@ -64,6 +68,8 @@ namespace Ballz.GameSession.World
 		}
 		*/
 
+        /*
+        // Deprecated!
 		private void extractOutline()
 		{
 			// Do not extract outline if outline is correct already
@@ -72,20 +78,22 @@ namespace Ballz.GameSession.World
 			
 			outline.Clear ();
 
+            // TODO: VertexHelper does not support holes in terrain
 			Physics2DDotNet.Shapes.ArrayBitmap ab = new Physics2DDotNet.Shapes.ArrayBitmap(terrainBitmap);
 			AdvanceMath.Vector2D[] geometry = Physics2DDotNet.Shapes.VertexHelper.CreateFromBitmap(ab);
-			foreach(AdvanceMath.Vector2D vec in geometry)
-				outline.Add(new Vector2(vec.X,vec.Y));
+            foreach(AdvanceMath.Vector2D vec in geometry)
+			    outline.Add(new Vector2(vec.X,vec.Y));
 
 			up2date = true;
 		}
+        */
 
 		private float distance(float x1, float y1, float x2, float y2)
 		{
 			return (float)Math.Sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 		}
 
-		public void subtractCircle(float x, float y, float radius)
+		public void SubtractCircle(float x, float y, float radius)
 		{
 			// Compute bounding box
 			int tlx = (int)Math.Floor(x - radius);
@@ -114,6 +122,113 @@ namespace Ballz.GameSession.World
 			
 		}
 
+        public void AddCircle(float x, float y, float radius)
+        {
+            // Compute bounding box
+            int tlx = (int)Math.Floor(x - radius);
+            int tly = (int)Math.Floor(y - radius);
+            int brx = (int)Math.Ceiling(x + radius);
+            int bry = (int)Math.Ceiling(y + radius);
+
+            // Terrain width/height
+            int Width = terrainBitmap.GetLength(0);
+            int Height = terrainBitmap.GetLength(1);
+
+            // Iterate over bounding box part of bitmap
+            for (int j = Math.Max(0, tly); j < Math.Min(Height, bry); ++j) {
+                for (int i = Math.Max(0, tlx); i < Math.Min(Width, brx); ++i) {
+
+                    if (distance(i, j, x, y) > radius)
+                        continue;
+
+                    // Subtract dirt (if any)
+                    terrainBitmap [i, j] = true;
+
+                }
+            }
+
+            up2date = false;
+
+        }
+
+        public struct Triangle
+        {
+            public Vector2 a,b,c;
+            public Triangle(Vector2 a, Vector2 b, Vector2 c)
+            {
+                this.a = a;
+                this.b = b;
+                this.c = c;
+            }
+        }
+        public void extractTriangles()
+        {
+            // Do not extract triangles if they are correct already
+            if (up2date)
+                return;
+
+            triangles.Clear();
+
+            int width = terrainBitmap.GetLength(0);
+            int height = terrainBitmap.GetLength(1);
+
+            // Iterate over all bitmap pixels
+            for (int y = 1; y < height; ++y)
+            {
+                for (int x = 1; x < width; ++x)
+                {
+                    
+                    /*
+                     *      0 -- 3
+                     *      |    |
+                     *      1 -- 2
+                     * 
+                     */
+
+                    // TODO: upper-left row/column
+                    bool _0 = terrainBitmap[x-1, y-1];
+                    bool _1 = terrainBitmap[x-1, y];
+                    bool _2 = terrainBitmap[x, y];
+                    bool _3 = terrainBitmap[x, y-1];
+
+                    Vector2 v0 = new Vector2(x-1, y-1);
+                    Vector2 v1 = new Vector2(x-1, y);
+                    Vector2 v2 = new Vector2(x, y);
+                    Vector2 v3 = new Vector2(x, y-1);
+
+
+                    int mscase = (_0?1:0) + (_1?2:0) + (_2?4:0) + (_3?8:0);
+
+                    switch(mscase)
+                    {
+                        case 0:
+                            // No triangles at all
+                            break;
+                            // TODO(ks): other cases
+                        case 15:
+                            // Fill the whole quad
+                            triangles.Add(new Triangle(v0, v1, v3));
+                            triangles.Add(new Triangle(v3, v1, v2));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            up2date = true;
+        }
+
+        public List<Triangle> getTriangles()
+        {
+            // This is a no-op if triangles are up to date
+            extractTriangles();
+
+            return triangles;
+        }
+
+        /*
+        // Deprecated!
 		public List<Vector2> getOutline()
 		{
 			// This is a no-op if outline is up to date
@@ -121,6 +236,7 @@ namespace Ballz.GameSession.World
 
 			return outline;
 		}
+        */
 
 
 		public struct IntVector2  {
