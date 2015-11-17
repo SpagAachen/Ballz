@@ -4,6 +4,7 @@
     {
         public new enum MessageType
         {
+            ControlsConsole,
             ControlsUp,
             ControlsDown,
             ControlsLeft,

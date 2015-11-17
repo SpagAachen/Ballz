@@ -55,6 +55,9 @@ namespace Ballz.Logic
             if (message.Kind != Messages.Message.MessageType.InputMessage)
                 return;
 
+            if (((InputMessage)message).Kind == InputMessage.MessageType.ControlsConsole)
+                RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.PerformanceMessage));
+
             switch (state)
             {
                 case GameState.MenuState:
@@ -75,7 +78,7 @@ namespace Ballz.Logic
             {
                 case InputMessage.MessageType.ControlsBack:
                     state = GameState.MenuState;
-                    RaiseMessageEvent(new Message(Messages.Message.MessageType.LogicMessage));
+                    RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
                     //todo: implement LogicMessage and use it here
                     break;
                 case InputMessage.MessageType.ControlsUp:
@@ -91,7 +94,8 @@ namespace Ballz.Logic
                 case InputMessage.MessageType.RawInput:
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    //throw new ArgumentOutOfRangeException();
+                    break;
             }
         }
 
@@ -109,7 +113,7 @@ namespace Ballz.Logic
                         if (activatedMenu.Value.Name == "Play")
                         {
                             state = GameState.SimulationState;
-                            RaiseMessageEvent(new Message(Messages.Message.MessageType.LogicMessage));
+                            RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
                             // todo: implement LogicMessage class and use it here
                             return;
                         }
@@ -150,14 +154,15 @@ namespace Ballz.Logic
                 case InputMessage.MessageType.RawInput:
                     GameMenu selected = activeMenu.Peek();
                     selected.Value += msg.Key;
-                    break;
+                    break;                    
                 case InputMessage.MessageType.RawBack:
                     GameMenu selected2 = activeMenu.Peek();
                     if(selected2.Value.Length > 0)
                         selected2.Value = selected2.Value.Remove(selected2.Value.Length-1);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    //throw new ArgumentOutOfRangeException();
+                    break;
             }
         }
 

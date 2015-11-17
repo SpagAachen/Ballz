@@ -48,7 +48,7 @@ namespace Ballz
             //Components.Add(physics);
             Components.Add(network);
             Components.Add(menuRendering);
-            //Components.Add(gameRendering);
+            Components.Add(new PerformanceRenderer(this));
 
 
             Logic = new LogicControl();

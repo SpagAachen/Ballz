@@ -111,10 +111,14 @@ namespace Ballz.GameSession.Renderer
             //throw new NotImplementedException ();
             if (message.Kind != Message.MessageType.LogicMessage)
                 return;
+            LogicMessage msg = (LogicMessage)message;
 
-            //todo check content of logicmessage as soon as it is implemented
-            Enabled = !Enabled;
-            Visible = !Visible;
+            //see if the message was meant for us
+            if (msg.Kind == LogicMessage.MessageType.GameMessage)
+            {
+                Enabled = !Enabled;
+                Visible = !Visible;
+            }
         }
     }
 }

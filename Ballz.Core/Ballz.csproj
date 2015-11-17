@@ -66,6 +66,8 @@
     <Compile Include="Messages\MenuMessage.cs" />
     <Compile Include="Messages\InputMessage.cs" />
     <Compile Include="Menu\GameMenu.cs" />
+    <Compile Include="Renderer\PerformanceRenderer.cs" />
+    <Compile Include="Messages\LogicMessage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />

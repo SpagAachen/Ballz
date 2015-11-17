@@ -46,9 +46,12 @@ namespace Ballz.Renderer
             }
             if (message.Kind == Message.MessageType.LogicMessage)
             {
-                //TODO: Check content of logicmessage as soon as it is implemented.
-                Enabled = !Enabled;
-                Visible = !Visible;
+				LogicMessage msg = (LogicMessage)message;
+				if (msg.Kind == LogicMessage.MessageType.GameMessage)
+				{
+					Enabled = !Enabled;
+					Visible = !Visible;
+				}
             }
 
             //TODO: handle Messages
