@@ -23,6 +23,7 @@ namespace Ballz.GameSession
         public Session(Ballz _game) : base(_game)
         {
             physics = new Physics.PhysicsControl(_game);
+            physics.Enabled = false;
             _game.Components.Add(physics);
 
             renderer = new Renderer.GameRenderer(_game);

@@ -13,10 +13,19 @@ namespace Ballz.GameSession.Physics
     /// </summary>
     public class PhysicsControl : GameComponent
     {
-        Ballz Game;
+        new Ballz Game;
+        PhysicsEngine engine;
         public PhysicsControl(Ballz game) : base(game)
         {
             Game = game;
+        }
+
+        public override void Initialize()
+        {
+            // Create engine
+            engine = new PhysicsEngine();
+            engine.BroadPhase = new Physics2DDotNet.Detectors.SelectiveSweepDetector();
+            engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
         }
 
         public override void Update(GameTime time)
@@ -28,11 +37,6 @@ namespace Ballz.GameSession.Physics
             //var elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
             //TODO extract into function
 
-            // Create engine
-            var engine = new PhysicsEngine();
-            engine.BroadPhase = new Physics2DDotNet.Detectors.SelectiveSweepDetector();
-            engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
-            
             // Terrain
             var terrain = headSnapshot.StaticGeometry.getTriangles();
 
@@ -115,7 +119,16 @@ namespace Ballz.GameSession.Physics
 
         public void HandleMessage(object sender, Message message)
         {
-            //TODO: handle Messages
+            //throw new NotImplementedException ();
+            if (message.Kind != Message.MessageType.LogicMessage)
+                return;
+            LogicMessage msg = (LogicMessage)message;
+
+            //see if the message was meant for us
+            if (msg.Kind == LogicMessage.MessageType.GameMessage)
+            {
+                Enabled = !Enabled;
+            }
         }
     }
 }
