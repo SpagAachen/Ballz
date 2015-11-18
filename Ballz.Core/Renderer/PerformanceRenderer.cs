@@ -19,6 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
+using System.Diagnostics;
 using Ballz.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -31,10 +32,13 @@ namespace Ballz
         private SpriteBatch renderer;
         private int fpsCounter = 0;
         private int fps = 0;
-        private int seconds = 0;
+        private double seconds = 0;
+
+        private float allocatedMemory;
 
         private Vector2 fpsPosition = new Vector2(20,20);
         private Vector2 frametimePosition = new Vector2(20,40);
+        private Vector2 memoryPosition = new Vector2(20,60);
 
         public PerformanceRenderer(Ballz game) : base(game)
         {
@@ -60,11 +64,12 @@ namespace Ballz
 
         public override void Draw(GameTime gameTime)
         {
-            if (gameTime.TotalGameTime.Seconds > seconds)
+            if (gameTime.TotalGameTime.TotalSeconds > (seconds+1.0))
             {
                 fps = fpsCounter;
                 fpsCounter = 0;
-                seconds = gameTime.TotalGameTime.Seconds;
+                seconds = gameTime.TotalGameTime.TotalSeconds;
+                allocatedMemory = Process.GetCurrentProcess().PrivateMemorySize64 / 1024f / 1024f;
             }
             else
                 ++fpsCounter;
@@ -73,8 +78,12 @@ namespace Ballz
             renderer.DrawString(font, "fps: " + fps, fpsPosition, Color.DarkSlateGray, 0, -2*Vector2.One,0.4f,SpriteEffects.None,0);
             renderer.DrawString(font, "fps: " + fps, fpsPosition, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);
 
-            renderer.DrawString(font, "frametime: " + gameTime.ElapsedGameTime.Milliseconds, frametimePosition, Color.DarkSlateGray, 0, -2*Vector2.One,0.4f,SpriteEffects.None,0);
-            renderer.DrawString(font, "frametime: " + gameTime.ElapsedGameTime.Milliseconds, frametimePosition, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);
+            renderer.DrawString(font, "frametime: " + gameTime.ElapsedGameTime.TotalMilliseconds + " ms", frametimePosition, Color.DarkSlateGray, 0, -2*Vector2.One,0.4f,SpriteEffects.None,0);
+            renderer.DrawString(font, "frametime: " + gameTime.ElapsedGameTime.TotalMilliseconds + " ms", frametimePosition, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);
+
+            renderer.DrawString(font, "Memory: " + allocatedMemory + " MB", memoryPosition, Color.DarkSlateGray, 0, -2*Vector2.One,0.4f,SpriteEffects.None,0);
+            renderer.DrawString(font, "Memory: " + allocatedMemory + " MB", memoryPosition, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);
+
             renderer.End();
 
             base.Draw(gameTime);
