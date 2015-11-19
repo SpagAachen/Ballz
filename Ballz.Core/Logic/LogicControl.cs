@@ -147,16 +147,15 @@ namespace Ballz.Logic
 
         private void MenuLogic(InputMessage msg)
         {
-            Composite top;
+            Composite top = activeMenu.Peek();
             switch (msg.Kind)
             {
                 case InputMessage.MessageType.ControlsAction:
-                    var selectedItem = activeMenu.Peek().SelectedItem;
-                    selectedItem?.Activate();
+                    top.SelectedItem?.Activate();
                     break;
                 case InputMessage.MessageType.ControlsBack:
                     if (activeMenu.Count == 1) // exit if we are in main menuToPrepare
-                        Ballz.The().Exit();
+                        Ballz.The().Exit();     //TODO: this is rather ugly find a nice way to terminate the programm like sending a termination message
                     else
                     {
                         if (rawInput)
@@ -167,35 +166,29 @@ namespace Ballz.Logic
                     RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
                     break;
                 case InputMessage.MessageType.ControlsUp:
-                    top = activeMenu.Pop();
                     if (top.SelectedItem != null)
                     {
                         top.SelectPrevious();
                         RaiseMessageEvent(new MenuMessage(top));
                     }
-                    activeMenu.Push(top);
                     break;
                 case InputMessage.MessageType.ControlsDown:
-                    top = activeMenu.Pop();
                     if (top.SelectedItem != null)
                     {
                         top.SelectNext();
                         RaiseMessageEvent(new MenuMessage(top));
                     }
-                    activeMenu.Push(top);
                     break;
                 case InputMessage.MessageType.ControlsLeft:
                     break;
                 case InputMessage.MessageType.ControlsRight:
                     break;
                 case InputMessage.MessageType.RawInput:
-                    var selected = activeMenu.Peek().SelectedItem;
                     if (msg.Key != null)
-                        selected.HandleRawKey(msg.Key.Value);
+                        top.SelectedItem.HandleRawKey(msg.Key.Value);
                     break;                    
                 case InputMessage.MessageType.RawBack:
-                    var selected2 = activeMenu.Peek().SelectedItem;
-                    selected2.HandleBackspace();
+                    top.SelectedItem.HandleBackspace();
                     break;
                 default:
                     //throw new ArgumentOutOfRangeException();
