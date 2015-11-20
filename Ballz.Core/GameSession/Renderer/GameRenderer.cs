@@ -14,9 +14,11 @@ namespace Ballz.GameSession.Renderer
     {
         Model BallModel;
         Texture2D GermoneyTexture;
+        Texture2D TerrainTexture;
         BasicEffect BallEffect;
+        BasicEffect TerrainEffect;
         SpriteBatch spriteBatch;
-        
+
         Ballz Game;
 
         Matrix ProjectionMatrix;
@@ -46,27 +48,38 @@ namespace Ballz.GameSession.Renderer
             snapshot.StaticGeometry.AddCircle((float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1711) % 640), (float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 14307) % 480), (float)(new Random()).NextDouble() * 15.0f);
 
             var tris = snapshot.StaticGeometry.getTriangles();
-            VertexPositionColor[] vpc = new VertexPositionColor[tris.Count * 3];
-           
+            VertexPositionColorTexture[] vpc = new VertexPositionColorTexture[tris.Count * 3];
+            
             int i = 0;
+
+            float TerrainTextureScale = 0.01f;
+
             foreach (var t in tris)
             {
-                vpc[i+0].Color = Color.Maroon;
-                vpc[i+0].Position = new Vector3(t.a.X, t.a.Y, -1);
-                vpc[i+1].Color = Color.Maroon;
-                vpc[i+1].Position = new Vector3(t.b.X, t.b.Y, -1);
-                vpc[i+2].Color = Color.Maroon;
-                vpc[i+2].Position = new Vector3(t.c.X, t.c.Y, -1);
-                i+=3;
+                vpc[i + 0].Color = Color.Maroon;
+                vpc[i + 0].Position = new Vector3(t.a.X, t.a.Y, -1);
+                vpc[i + 0].TextureCoordinate = new Vector2(t.a.X, t.a.Y) * TerrainTextureScale;
+                vpc[i + 1].Color = Color.Maroon;
+                vpc[i + 1].Position = new Vector3(t.b.X, t.b.Y, -1);
+                vpc[i + 1].TextureCoordinate = new Vector2(t.b.X, t.b.Y) * TerrainTextureScale;
+                vpc[i + 2].Color = Color.Maroon;
+                vpc[i + 2].Position = new Vector3(t.c.X, t.c.Y, -1);
+                vpc[i + 2].TextureCoordinate = new Vector2(t.c.X, t.c.Y) * TerrainTextureScale;
+                i += 3;
             }
 
             Matrix terrainWorld = Matrix.CreateScale(0.03f);
-            LineEffect.World = terrainWorld;
-            LineEffect.View = ViewMatrix;
-            LineEffect.Projection = ProjectionMatrix;
-            LineEffect.CurrentTechnique.Passes[0].Apply();
+            TerrainEffect.World = terrainWorld;
+            TerrainEffect.View = ViewMatrix;
+            TerrainEffect.Projection = ProjectionMatrix;
+            TerrainEffect.CurrentTechnique.Passes[0].Apply();
+            GraphicsDevice.SamplerStates[0] = new SamplerState
+            {
+                AddressU = TextureAddressMode.Wrap,
+                AddressV = TextureAddressMode.Wrap
+            };
 
-            GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, vpc, 0, tris.Count);
+            GraphicsDevice.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vpc, 0, tris.Count);
 
             foreach (var entity in snapshot.Entities)
             {
@@ -92,6 +105,13 @@ namespace Ballz.GameSession.Renderer
 
             BallModel = Game.Content.Load<Model>("Ball");
             BallModel.Meshes[0].MeshParts[0].Effect = BallEffect;
+
+            TerrainTexture = Game.Content.Load<Texture2D>("Textures/Dirt");
+
+            TerrainEffect = new BasicEffect(Game.GraphicsDevice);
+            TerrainEffect.LightingEnabled = false;
+            TerrainEffect.Texture = TerrainTexture;
+            TerrainEffect.TextureEnabled = true;
 
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
 
