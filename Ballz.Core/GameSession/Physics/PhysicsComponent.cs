@@ -38,7 +38,7 @@ namespace Ballz.GameSession.Physics
             //TODO extract into function
 
             // Terrain
-            var terrain = headSnapshot.StaticGeometry.getTriangles();
+            var terrain = headSnapshot.StaticGeometry.getOutlineTriangles();
 
             // TODO: Use triangles now! Outline is deprecated
             /*AdvanceMath.Vector2D[] terrainVert = new AdvanceMath.Vector2D[terrain.Count];
