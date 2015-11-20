@@ -13,6 +13,7 @@ namespace Ballz.GameSession.Renderer
     public partial class GameRenderer : DrawableGameComponent
     {
         Model BallModel;
+        Texture2D GermoneyTexture;
         BasicEffect BallEffect;
         SpriteBatch spriteBatch;
         
@@ -46,7 +47,6 @@ namespace Ballz.GameSession.Renderer
 
             var tris = snapshot.StaticGeometry.getTriangles();
             VertexPositionColor[] vpc = new VertexPositionColor[tris.Count * 3];
-            BallEffect.DiffuseColor = new Vector3(1, 1, 1);
            
             int i = 0;
             foreach (var t in tris)
@@ -62,29 +62,33 @@ namespace Ballz.GameSession.Renderer
 
             Matrix terrainWorld = Matrix.CreateScale(0.03f);
             LineEffect.World = terrainWorld;
+            LineEffect.View = ViewMatrix;
+            LineEffect.Projection = ProjectionMatrix;
             LineEffect.CurrentTechnique.Passes[0].Apply();
 
             GraphicsDevice.DrawUserPrimitives<VertexPositionColor>(PrimitiveType.TriangleList, vpc, 0, tris.Count);
 
-
-
-
-            BallEffect.DiffuseColor = new Vector3(1, 0, 0);
             foreach (var entity in snapshot.Entities)
             {
-                Matrix world = Matrix.CreateTranslation(new Vector3(entity.Position, 0));
+                Vector2 nV = Vector2.Normalize(entity.Velocity);
+                Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * 50 * nV.X / 360.0)) * Matrix.CreateTranslation(new Vector3(entity.Position, 0));
                 BallEffect.World = world;
                 BallModel.Draw(world, ViewMatrix, ProjectionMatrix);
-                DrawSphere(entity.Position, new Vector2(1, 0));
+                //DrawSphere(entity.Position, new Vector2(1, 0));
             }
         }
 
         protected override void LoadContent()
         {
+            GermoneyTexture = Game.Content.Load<Texture2D>("Textures/Germoney");
+
             BallEffect = new BasicEffect(Game.GraphicsDevice);
             BallEffect.EnableDefaultLighting();
-            BallEffect.DiffuseColor = new Vector3(1, 0, 0);
-            BallEffect.DirectionalLight0.Direction = new Vector3(1, -1, 0);
+            BallEffect.Texture = GermoneyTexture;
+            BallEffect.TextureEnabled = true;
+            BallEffect.DirectionalLight0.Direction = new Vector3(1, -1, -1);
+            BallEffect.AmbientLightColor = new Vector3(0.3f, 0.3f, 0.3f);
+            BallEffect.PreferPerPixelLighting = true;
 
             BallModel = Game.Content.Load<Model>("Ball");
             BallModel.Meshes[0].MeshParts[0].Effect = BallEffect;
