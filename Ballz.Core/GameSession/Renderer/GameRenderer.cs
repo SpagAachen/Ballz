@@ -42,8 +42,8 @@ namespace Ballz.GameSession.Renderer
             var snapshot = Game.World.GetSnapshot(time);
 
             // Debug
-            snapshot.StaticGeometry.SubtractCircle((float)(new Random()).NextDouble() * ((int)time.TotalGameTime.TotalMilliseconds * 1321 % 640), (float)(new Random()).NextDouble() * ((int)time.TotalGameTime.TotalMilliseconds * 1701 % 480), (float)(new Random()).NextDouble() * 25.0f);
-            snapshot.StaticGeometry.AddCircle((float)(new Random()).NextDouble() * ((int)time.TotalGameTime.TotalMilliseconds * 1711 % 640), (float)(new Random()).NextDouble() * ((int)time.TotalGameTime.TotalMilliseconds * 14307 % 480), (float)(new Random()).NextDouble() * 15.0f);
+            snapshot.StaticGeometry.SubtractCircle((float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1321) % 640), (float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1701) % 480), (float)(new Random()).NextDouble() * 25.0f);
+            snapshot.StaticGeometry.AddCircle((float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1711) % 640), (float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 14307) % 480), (float)(new Random()).NextDouble() * 15.0f);
 
             var tris = snapshot.StaticGeometry.getTriangles();
             VertexPositionColor[] vpc = new VertexPositionColor[tris.Count * 3];

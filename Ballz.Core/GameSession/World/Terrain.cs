@@ -14,7 +14,8 @@ namespace Ballz.GameSession.World
         private List<Triangle> triangles = new List<Triangle>();
 
         // Deprecated!!
-		private List<Vector2> outline = new List<Vector2>();
+		//private List<Vector2> outline = new List<Vector2>();
+        private List<Triangle> physicsTris = new List<Triangle>();
 
 		private Texture2D terrainData = null;
 		private bool[,] terrainBitmap = null;
@@ -48,8 +49,7 @@ namespace Ballz.GameSession.World
 				}
 			}
 
-			extractTriangles ();
-			up2date = true;
+            update();
 		}
 
 		/*
@@ -161,20 +161,26 @@ namespace Ballz.GameSession.World
                 this.c = c;
             }
         }
-        public void extractTriangles()
+        private void extractTrianglesAndOutline()
         {
             // Do not extract triangles if they are correct already
             if (up2date)
                 return;
 
             triangles.Clear();
+            physicsTris.Clear();
 
             int width = terrainBitmap.GetLength(0);
             int height = terrainBitmap.GetLength(1);
 
+
+            // reserve max. memory
+            List<List<IntVector2>> fullCells = new List<List<IntVector2>>(height);
+
             // Iterate over all bitmap pixels
             for (int y = 1; y < height; ++y)
             {
+                fullCells.Add(new List<IntVector2>(width));
                 for (int x = 1; x < width; ++x)
                 {
                     
@@ -261,9 +267,10 @@ namespace Ballz.GameSession.World
                             triangles.Add(new Triangle(v2, v3, 0.5f * (v0 + v3)));
                             break;
                         case 15:
+                            fullCells[fullCells.Count - 1].Add(new IntVector2(x, y));
                             // Fill the whole quad
-                            triangles.Add(new Triangle(v0, v1, v3));
-                            triangles.Add(new Triangle(v3, v1, v2));
+                            //triangles.Add(new Triangle(v0, v1, v3));
+                            //triangles.Add(new Triangle(v3, v1, v2));
                             break;
                         default:
                             break;
@@ -271,27 +278,80 @@ namespace Ballz.GameSession.World
                 }
             }
 
+            foreach (var tri in triangles)
+            {
+                physicsTris.Add(tri);
+            }
+
+
+            foreach (var line in fullCells)
+            {
+                int triStartX = -1;
+                int triEndX   = -1;
+
+                bool startNew = true;
+
+                for (int i = 0; i < line.Count; ++i)
+                {
+                    var cell = line[i];
+
+
+                    if(startNew)
+                    {
+                        triStartX = cell.x - 1;
+                        triEndX = cell.x;
+                    }
+
+                    bool createTriangle = (cell.x - 1 != triEndX) || i == line.Count-1;
+
+                    // Shift current end pointer?
+                    if (!createTriangle || i == line.Count - 1)
+                    {
+                        triEndX = cell.x;
+                        startNew = false;
+                    }
+
+                    if(createTriangle)
+                    {
+                        triangles.Add(new Triangle(new Vector2(triStartX, cell.y-1), new Vector2(triStartX, cell.y), new Vector2(triEndX, cell.y-1)));
+                        triangles.Add(new Triangle(new Vector2(triStartX, cell.y), new Vector2(triEndX, cell.y), new Vector2(triEndX, cell.y-1)));
+
+                        startNew = true;
+                    } 
+                }
+            }
+
+
+
             up2date = true;
+        }
+
+
+        public void update()
+        {
+            if (up2date)
+                return;
+
+            extractTrianglesAndOutline();
         }
 
         public List<Triangle> getTriangles()
         {
             // This is a no-op if triangles are up to date
-            extractTriangles();
+            update();
 
             return triangles;
         }
-
-        /*
+            
         // Deprecated!
-		public List<Vector2> getOutline()
+        public List<Triangle> getOutlineTriangles()
 		{
 			// This is a no-op if outline is up to date
-			extractOutline();
+            update();
 
-			return outline;
+            return physicsTris;
 		}
-        */
+
 
 
 		public struct IntVector2  {
