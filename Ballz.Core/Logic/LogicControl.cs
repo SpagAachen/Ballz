@@ -16,10 +16,13 @@ namespace Ballz.Logic
         private readonly Stack<Composite> activeMenu = new Stack<Composite>();
         private GameState state;
         private bool rawInput;
+        private Ballz Game;
 
-        public LogicControl()
+        public LogicControl(Ballz game)
         {
-            var menu = DefaultMenu();
+            Game = game;
+
+            Composite menu = Game.MainMenu;// = DefaultMenu();
             //push the root menuToPrepare
             activeMenu.Push(menu); //TODO: uncast
             RegisterMenuEvents(menu);
@@ -27,44 +30,10 @@ namespace Ballz.Logic
             state = GameState.MenuState;
         }
 
-        private Composite DefaultMenu()
+        public void startGame()
         {
-            // options menu
-            var optionsMenu = new Composite("Options", true);
-            optionsMenu.AddItem(new Label("Not Implemented", false));
-
-            // multiplayer menu
-            var networkMenu = new Composite("Multiplayer", true);
-            // - connect to server
-            var networkConnectToMenu = new Composite("Connect to", true);
-            networkConnectToMenu.AddItem(new InputBox("Host Name: ", true));
-            // - start server
-            var networkServerMenu = new Composite("Start server", true);
-            networkServerMenu.AddItem(new Label("Not Implemented", false));
-            // - add items
-            networkMenu.AddItem(networkConnectToMenu);
-            networkMenu.AddItem(networkServerMenu);
-            networkMenu.AddItem(new Back());
-
-            // main menu
-            var mainMenu = new Composite("Main Menu");
-
-            var play = new Label("Play",true);
-            play.OnSelect += () =>
-            {
-                state = GameState.SimulationState;
-                RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
-            };
-          
-            mainMenu.AddItem(play);
-            mainMenu.AddItem(optionsMenu);
-            mainMenu.AddItem(networkMenu);
-
-            var quit = new Label("Quit", true);
-            quit.OnSelect += () => Ballz.The().Exit();
-            mainMenu.AddItem(quit);
-
-            return mainMenu;
+            state = GameState.SimulationState;
+            RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }
 
         private void RegisterMenuEvents(Item menu)

@@ -74,6 +74,9 @@
     <Compile Include="Menu\Item.cs" />
     <Compile Include="Renderer\PerformanceRenderer.cs" />
     <Compile Include="Messages\LogicMessage.cs" />
+    <Compile Include="Menu\CheckBox.cs" />
+    <Compile Include="Settings\Programmsettings.cs" />
+    <Compile Include="Settings\IBooleanSetting.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
@@ -101,6 +104,7 @@
   <ItemGroup>
     <Folder Include="GameSession\Logic\" />
     <Folder Include="GameSession\Sound\" />
+    <Folder Include="Settings\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Physics2DDotNet\Physics2DDotNet.csproj">
