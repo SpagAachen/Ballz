@@ -43,17 +43,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
-      <HintPath>..\packages\MonoGame.Framework.WindowsGL.3.4.0.459\lib\net40\MonoGame.Framework.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenTK">
-      <HintPath>..\packages\MonoGame.Framework.WindowsGL.3.4.0.459\lib\net40\OpenTK.dll</HintPath>
+      <HintPath>..\packages\MonoGame.Framework.WindowsDX.3.4.0.459\lib\net40\MonoGame.Framework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
-    <Reference Include="Tao.Sdl">
-      <HintPath>..\packages\MonoGame.Framework.Linux.3.4.0.459\lib\net40\Tao.Sdl.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
