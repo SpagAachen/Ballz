@@ -48,6 +48,7 @@
     <Compile Include="Menu\Leaf.cs" />
     <Compile Include="Menu\Label.cs" />
     <Compile Include="Menu\Composite.cs" />
+    <Compile Include="Menu\IRawInputConsumer.cs" />
     <Compile Include="Messages\NetworkMessage.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="GameSession\World\Player.cs" />
@@ -103,7 +104,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Settings\" />
     <Folder Include="GameSession\Logic\" />
     <Folder Include="GameSession\Sound\" />
   </ItemGroup>
