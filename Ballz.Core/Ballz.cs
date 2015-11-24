@@ -1,16 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Xml.Serialization;
-
-using Ballz.GameSession.Physics;
-using Ballz.GameSession.Renderer;
 using Ballz.GameSession.World;
 using Ballz.Input;
 using Ballz.Logic;
-using Ballz.Messages;
 using Ballz.Renderer;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Ballz.Menu;
 
 namespace Ballz
@@ -65,8 +60,8 @@ namespace Ballz
             MainMenu = DefaultMenu();
             Logic = new LogicControl(this);
 
-            Services.AddService<LogicControl>(Logic);
-            Services.AddService<InputTranslator>(input);
+            Services.AddService(Logic);
+            Services.AddService(input);
 
             Match = new GameSession.Session(this);
             Components.Add(Match);
@@ -169,7 +164,7 @@ namespace Ballz
             mainMenu.AddItem(networkMenu);
 
             var quit = new Label("Quit", true);
-            quit.OnSelect += () => Exit();
+            quit.OnSelect += Exit;
             mainMenu.AddItem(quit);
 
             return mainMenu;
