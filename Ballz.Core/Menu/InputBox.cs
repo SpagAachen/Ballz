@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Ballz.Menu
 {
-    public class InputBox : Leaf
+    public class InputBox : Leaf, IRawInputConsumer
     {
         private string code;
 

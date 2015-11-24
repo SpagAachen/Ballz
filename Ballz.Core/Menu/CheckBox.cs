@@ -32,14 +32,6 @@ namespace Ballz.Menu
                 OnSelect += () => this.value.Value = !this.value.Value;
         }
 
-        public override void HandleBackspace()
-        {            
-        }
-
-        public override void HandleRawKey(char key)
-        {          
-        }
-
         public override string DisplayName => Name + (value?.Value.ToString() ?? "");
     }
 }

@@ -55,10 +55,6 @@ namespace Ballz.Menu
 
         public virtual string DisplayName => Name;
 
-        public abstract void HandleRawKey(char key);
-
-        public abstract void HandleBackspace();
-
         public delegate void SelectHandler();
 
         public event SelectHandler OnSelect;

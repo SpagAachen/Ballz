@@ -154,10 +154,10 @@ namespace Ballz.Logic
                     break;
                 case InputMessage.MessageType.RawInput:
                     if (msg.Key != null)
-                        top.SelectedItem.HandleRawKey(msg.Key.Value);
+                        (top.SelectedItem as IRawInputConsumer)?.HandleRawKey(msg.Key.Value);
                     break;                    
                 case InputMessage.MessageType.RawBack:
-                    top.SelectedItem.HandleBackspace();
+                    (top.SelectedItem as IRawInputConsumer)?.HandleBackspace();
                     break;
                 default:
                     //throw new ArgumentOutOfRangeException();
