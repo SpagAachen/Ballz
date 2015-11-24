@@ -46,10 +46,11 @@ namespace Ballz
             Graphics = new GraphicsDeviceManager(this);
             initSettings();
             Content.RootDirectory = "Content";
-            Graphics.IsFullScreen = Settings.Fullscreen;
-            Graphics.PreferredBackBufferHeight = Settings.ScreenHeight;
-            Graphics.PreferredBackBufferWidth = Settings.ScreenWidth;
+            Graphics.IsFullScreen = Settings.Fullscreen.Value;
 
+            Graphics.PreferredBackBufferHeight = Settings.ScreenHeight.Value;
+            Graphics.PreferredBackBufferWidth = Settings.ScreenWidth.Value;
+            Graphics.ApplyChanges();
 
             // create the Game Components
             var menuRendering = new MenuRenderer(this);
@@ -131,14 +132,14 @@ namespace Ballz
             // options menu
             var optionsMenu = new Composite("Options", true);
             //optionsMenu.AddItem(new Label("Not Implemented", false));
-            optionsMenu.AddItem(new CheckBox("FullScreen: ", Settings));
+            optionsMenu.AddItem(new CheckBox("FullScreen: ", Settings.Fullscreen));
             Label apply = new Label("Apply", true);
             apply.OnSelect += () => 
                 {
                     System.IO.FileStream stream = new System.IO.FileStream("Settings.xml", FileMode.OpenOrCreate);
                     storeSettings(stream);
                     stream.Close();
-                    Graphics.IsFullScreen = Settings.Fullscreen;
+                    Graphics.IsFullScreen = Settings.Fullscreen.Value;
                     Graphics.ApplyChanges();
                 };
             optionsMenu.AddItem(apply);
@@ -185,6 +186,7 @@ namespace Ballz
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+           
 
             base.Initialize();
         }

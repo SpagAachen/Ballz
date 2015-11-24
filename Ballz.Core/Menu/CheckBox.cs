@@ -24,8 +24,8 @@ namespace Ballz.Menu
 {
     public class CheckBox : Leaf
     {
-        Settings.IBooleanSetting Value;
-        public CheckBox(string name, Settings.IBooleanSetting value, bool selectable = true ) : base(name, selectable)
+        Settings.BooleanSetting Value;
+        public CheckBox(string name, Settings.BooleanSetting value, bool selectable = true ) : base(name, selectable)
         {
             Value = value;
             OnSelect += () => Value.Value = !Value.Value;

@@ -22,9 +22,26 @@ using System;
 
 namespace Ballz.Settings
 {
-    public interface IBooleanSetting
+    public class BooleanSetting
     {
-        bool Value{ get; set;}
+        public bool Value{ get; set;}
     }
+
+    public class IntegerSetting
+    {
+        public int Value{ get; set;}
+    }
+
+    public class DoubleSetting
+    {
+        public double Value{ get; set;}
+    }
+
+    public class FloatSetting
+    {
+        public float Value{ get; set;}
+    }
+
+
 }
 
