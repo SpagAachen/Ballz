@@ -24,11 +24,12 @@ namespace Ballz.Menu
 {
     public class CheckBox : Leaf
     {
-        Settings.Setting<bool> Value;
-        public CheckBox(string name, Settings.Setting<bool> value, bool selectable = true ) : base(name, selectable)
+        readonly Settings.Setting<bool> value;
+        public CheckBox(string name, Settings.Setting<bool> value = null, bool selectable = true ) : base(name, selectable)
         {
-            Value = value;
-            OnSelect += () => Value.Value = !Value.Value;
+            this.value = value;
+            if (this.value != null)
+                OnSelect += () => this.value.Value = !this.value.Value;
         }
 
         public override void HandleBackspace()
@@ -39,7 +40,7 @@ namespace Ballz.Menu
         {          
         }
 
-        public override string DisplayName => Name + Value.Value;
+        public override string DisplayName => Name + (value?.Value.ToString() ?? "");
     }
 }
 
