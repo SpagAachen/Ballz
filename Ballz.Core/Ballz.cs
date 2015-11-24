@@ -39,7 +39,7 @@ namespace Ballz
 
         public Settings.ProgrammSettings Settings;
 
-        public Menu.Composite MainMenu;
+        public Composite MainMenu;
 
         private Ballz()
         {
@@ -51,7 +51,7 @@ namespace Ballz
             Graphics.PreferredBackBufferWidth = Settings.ScreenWidth.Value;
 
             // create the Game Components
-            var menuRendering = new MenuRenderer(this);
+            var menuRendering = new MenuRenderer(this, DefaultMenu());
             //var physics = new PhysicsControl(this);
             var input = new InputTranslator(this);
             var network = new Network.Network(this);
@@ -98,7 +98,7 @@ namespace Ballz
         {
             try
             {
-                System.IO.FileStream stream = new System.IO.FileStream("Settings.xml", FileMode.Open);
+                FileStream stream = new FileStream("Settings.xml", FileMode.Open);
                 //found an existing Settings file try to deserialize it
                 loadSettings(stream);
                 stream.Close();
@@ -106,7 +106,7 @@ namespace Ballz
             catch (Exception)
             {
                 //no settings file was found, create one.
-                System.IO.FileStream stream = new System.IO.FileStream("Settings.xml", FileMode.OpenOrCreate);
+                FileStream stream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
                 Settings = new Settings.ProgrammSettings();
                 storeSettings(stream);
                 stream.Close();
@@ -134,7 +134,7 @@ namespace Ballz
             Label apply = new Label("Apply", true);
             apply.OnSelect += () => 
                 {
-                    System.IO.FileStream stream = new System.IO.FileStream("Settings.xml", FileMode.OpenOrCreate);
+                    FileStream stream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
                     storeSettings(stream);
                     stream.Close();
                     Graphics.IsFullScreen = Settings.Fullscreen.Value;
