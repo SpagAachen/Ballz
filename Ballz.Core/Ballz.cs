@@ -1,16 +1,11 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Xml.Serialization;
-
-using Ballz.GameSession.Physics;
-using Ballz.GameSession.Renderer;
 using Ballz.GameSession.World;
 using Ballz.Input;
 using Ballz.Logic;
-using Ballz.Messages;
 using Ballz.Renderer;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Ballz.Menu;
 
 namespace Ballz
@@ -39,20 +34,19 @@ namespace Ballz
 
         public Settings.ProgrammSettings Settings;
 
-        public Menu.Composite MainMenu;
+        public Composite MainMenu;
 
         private Ballz()
         {
             Graphics = new GraphicsDeviceManager(this);
             initSettings();
             Content.RootDirectory = "Content";
-            Graphics.IsFullScreen = Settings.Fullscreen;
-            Graphics.PreferredBackBufferHeight = Settings.ScreenHeight;
-            Graphics.PreferredBackBufferWidth = Settings.ScreenWidth;
-
+            Graphics.IsFullScreen = Settings.Fullscreen.Value;
+            Graphics.PreferredBackBufferHeight = Settings.ScreenHeight.Value;
+            Graphics.PreferredBackBufferWidth = Settings.ScreenWidth.Value;
 
             // create the Game Components
-            var menuRendering = new MenuRenderer(this);
+            var menuRendering = new MenuRenderer(this, DefaultMenu());
             //var physics = new PhysicsControl(this);
             var input = new InputTranslator(this);
             var network = new Network.Network(this);
@@ -66,8 +60,8 @@ namespace Ballz
             MainMenu = DefaultMenu();
             Logic = new LogicControl(this);
 
-            Services.AddService<LogicControl>(Logic);
-            Services.AddService<InputTranslator>(input);
+            Services.AddService(Logic);
+            Services.AddService(input);
 
             Match = new GameSession.Session(this);
             Components.Add(Match);
@@ -99,19 +93,29 @@ namespace Ballz
         {
             try
             {
-                System.IO.FileStream stream = new System.IO.FileStream("Settings.xml", FileMode.Open);
+                FileStream stream = new FileStream("Settings.xml", FileMode.Open);
                 //found an existing Settings file try to deserialize it
-                loadSettings(stream);
+                try
+                {
+                    loadSettings(stream);
+                }
+                catch(Exception e)    //loading failed so throw away the old xml
+                {
+                    stream.Close();
+                    File.Delete("Settings.xml");
+                    FileStream theStream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
+                    Settings = new Settings.ProgrammSettings();
+                    storeSettings(theStream);
+                }
                 stream.Close();
             }
-            catch (Exception)
+            catch(Exception e)
             {
                 //no settings file was found, create one.
-                System.IO.FileStream stream = new System.IO.FileStream("Settings.xml", FileMode.OpenOrCreate);
+                FileStream theStream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
                 Settings = new Settings.ProgrammSettings();
-                storeSettings(stream);
-                stream.Close();
-            }           
+                storeSettings(theStream);
+            }
         }
 
         private void loadSettings(FileStream stream)
@@ -131,14 +135,14 @@ namespace Ballz
             // options menu
             var optionsMenu = new Composite("Options", true);
             //optionsMenu.AddItem(new Label("Not Implemented", false));
-            optionsMenu.AddItem(new CheckBox("FullScreen: ", Settings));
+            optionsMenu.AddItem(new CheckBox("FullScreen: ", Settings.Fullscreen));
             Label apply = new Label("Apply", true);
             apply.OnSelect += () => 
                 {
-                    System.IO.FileStream stream = new System.IO.FileStream("Settings.xml", FileMode.OpenOrCreate);
+                    FileStream stream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
                     storeSettings(stream);
                     stream.Close();
-                    Graphics.IsFullScreen = Settings.Fullscreen;
+                    Graphics.IsFullScreen = Settings.Fullscreen.Value;
                     Graphics.ApplyChanges();
                 };
             optionsMenu.AddItem(apply);
@@ -170,7 +174,7 @@ namespace Ballz
             mainMenu.AddItem(networkMenu);
 
             var quit = new Label("Quit", true);
-            quit.OnSelect += () => Exit();
+            quit.OnSelect += Exit;
             mainMenu.AddItem(quit);
 
             return mainMenu;

@@ -36,7 +36,8 @@ namespace Ballz.GameSession.Renderer
         public override void Draw(GameTime time)
         {
             ProjectionMatrix = Matrix.Identity;
-            ViewMatrix = Matrix.CreateOrthographicOffCenter(0, 10 * Game.GraphicsDevice.DisplayMode.AspectRatio, 0, 10, -10, 10);
+
+            ViewMatrix = Matrix.CreateOrthographicOffCenter(0, 10 * Game.GraphicsDevice.Viewport.AspectRatio, 0, 10, -10, 10);
 
             BallEffect.View = ViewMatrix;
             BallEffect.Projection = ProjectionMatrix;

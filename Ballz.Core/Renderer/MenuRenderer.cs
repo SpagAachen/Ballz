@@ -13,9 +13,9 @@ namespace Ballz.Renderer
         private SpriteBatch spriteBatch;
         private Texture2D textureSplashScreen;
 
-        public MenuRenderer(Game game) : base(game)
+        public MenuRenderer(Game game, Item defaultMenu) : base(game)
         {
-            menu = Item.Default;
+            menu = defaultMenu;
         }
 
         protected override void LoadContent()

@@ -24,23 +24,17 @@ using System.Runtime.Serialization;
 namespace Ballz.Settings
 {
     [Serializable()]
-    public class ProgrammSettings : IBooleanSetting
+    public class ProgrammSettings
     {
-        public bool Fullscreen;
-        public int ScreenWidth;
-        public int ScreenHeight;
-
-        public bool Value
-        {
-            get{ return Fullscreen;}
-            set{ Fullscreen = value;}
-        }
+        public Setting<bool> Fullscreen = new Setting<bool>();
+        public Setting<int> ScreenWidth = new Setting<int>();
+        public Setting<int> ScreenHeight = new Setting<int>();
 
         public ProgrammSettings()
         {
-            Fullscreen = false;
-            ScreenWidth = 800;
-            ScreenHeight = 600;
+            Fullscreen.Value = false;
+            ScreenWidth.Value = 800;
+            ScreenHeight.Value = 600;
         }
     }
 }

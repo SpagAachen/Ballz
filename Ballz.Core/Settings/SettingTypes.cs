@@ -21,10 +21,12 @@
 using System;
 
 namespace Ballz.Settings
-{
-    public interface IBooleanSetting
+{   
+
+    public class Setting<T> 
     {
-        bool Value{ get; set;}
+        public T Value{ get; set;}
     }
+
 }
 
