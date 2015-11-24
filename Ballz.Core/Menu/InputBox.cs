@@ -14,12 +14,12 @@ namespace Ballz.Menu
         {
         }
         
-        public override void HandleRawKey(char key)
+        public void HandleRawKey(char key)
         {
             code += key;
         }
 
-        public override void HandleBackspace()
+        public void HandleBackspace()
         {
             if (code.Length > 0)
                 code = code.Substring(0, code.Length - 1);
