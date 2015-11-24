@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace Ballz.Menu
 {
-    public class Label : Leaf
+    interface IRawInputConsumer
     {
-        public Label(string name, bool selectable = false) : base(name, selectable)
-        {
-        }
+        void HandleRawKey(char key);
+        void HandleBackspace();
     }
 }

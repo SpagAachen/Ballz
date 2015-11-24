@@ -27,14 +27,6 @@ namespace Ballz.Menu
         public Choice(string name, bool selectable = false) : base(name, selectable)
         {
         }
-
-        public override void HandleBackspace()
-        {            
-        }
-
-        public override void HandleRawKey(char key)
-        {            
-        }
     }
 }
 

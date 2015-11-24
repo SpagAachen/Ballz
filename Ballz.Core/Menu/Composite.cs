@@ -23,14 +23,6 @@ namespace Ballz.Menu
         public override IReadOnlyList<Item> Items => members;
         public override Item SelectedItem => members[index].Selectable ? members[index] : null;
 
-        public override void HandleRawKey(char key)
-        {
-        }
-
-        public override void HandleBackspace()
-        {
-        }
-
         public void SelectNext()
         {
             if (members.All(m => !m.Selectable))
