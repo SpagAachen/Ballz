@@ -19,7 +19,7 @@ namespace Ballz.GameSession.World
                 mat.Radius = 0.5f;
                 mat.Density = 2f;
                 mat.Restitution = .0f;
-                mat.Friction = 10f;
+                mat.Friction = 30f;
                 mat.Dampening = 10f;
                 return mat;
             }

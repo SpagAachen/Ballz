@@ -38,7 +38,7 @@ namespace Ballz.GameSession.Physics
             engine = new PhysicsEngine();
             engine.BroadPhase = new Physics2DDotNet.Detectors.SelectiveSweepDetector();
             engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
-            PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -1f), new Lifespan());
+            PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -0.1f), new Lifespan());
             engine.AddLogic(logGravity);
             
             float intervalSeconds = (float)World.World.IntervalMs / 1000.0f;
@@ -54,7 +54,7 @@ namespace Ballz.GameSession.Physics
             var terrain = newSnapshot.StaticGeometry.getOutlineTriangles();
 
             //TODO: Testshape
-            IShape shapeTest = new PolygonShape(VertexHelper.CreateRectangle(200, 4), 0.3f);
+            IShape shapeTest = new PolygonShape(VertexHelper.CreateRectangle(200, 1), 0.3f);
             var coeffTest = new Coefficients(.0f, 10f);
             var stateTest = new PhysicsState();
             stateTest.Position = new ALVector2D(.0f, 10, 0);
@@ -114,11 +114,11 @@ namespace Ballz.GameSession.Physics
                         switch (controlInput)
                         {
                             case InputMessage.MessageType.ControlsLeft:
-                                state.Velocity = new ALVector2D(.0f, -5f, e.Velocity.Y);
+                                state.Velocity = new ALVector2D(.0f, -2f, e.Velocity.Y);
                                 controlInput = null;
                                 break;
                             case InputMessage.MessageType.ControlsRight:
-                                state.Velocity = new ALVector2D(.0f, 5f, e.Velocity.Y);
+                                state.Velocity = new ALVector2D(.0f, 2f, e.Velocity.Y);
                                 controlInput = null;
                                 break;
                             default:
@@ -134,7 +134,7 @@ namespace Ballz.GameSession.Physics
                 //IShape shape = new CircleShape(e.r)
             }
             
-            for (var remainingSeconds = time.TotalGameTime.TotalSeconds - headTime.TotalSeconds;
+            for (var remainingSeconds = time.ElapsedGameTime.TotalSeconds;
                 remainingSeconds > 0;
                 remainingSeconds -= intervalSeconds)
             {
@@ -152,26 +152,6 @@ namespace Ballz.GameSession.Physics
                     
                     e.Position = new Vector2(state.Position.X, state.Position.Y);
                     e.Velocity = new Vector2(state.Velocity.X, state.Velocity.Y);
-                    
-                    /*
-                    e.Position = e.Position + e.Velocity * intervalSeconds;
-                    e.Velocity += new Vector2(0, -10) * intervalSeconds;
-
-                    if (e.Position.Y < 0.5)
-                    {
-                        e.Velocity *= new Vector2(1, -0.95f);
-                        e.Position = new Vector2(e.Position.X, 0.5f);
-                    }
-                    if (e.Position.X < 0.5)
-                    {
-                        e.Velocity *= new Vector2(-0.95f, 1);
-                        e.Position = new Vector2(0.5f, e.Position.Y);
-                    }
-                    if (e.Position.X > 9.5)
-                    {
-                        e.Velocity *= new Vector2(-0.95f, 1);
-                        e.Position = new Vector2(9.5f, e.Position.Y);
-                    } */
                 }
 
                 Game.World.AddDiscreteSnapshot(newSnapshot);
