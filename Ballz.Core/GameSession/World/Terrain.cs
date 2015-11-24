@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,7 +15,7 @@ namespace Ballz.GameSession.World
         private List<Triangle> triangles = new List<Triangle>();
 
         // Deprecated!!
-		//private List<Vector2> outline = new List<Vector2>();
+        private List<List<Vector2>> outlines = new List<List<Vector2>>();
         private List<Triangle> physicsTris = new List<Triangle>();
 
 		private Texture2D terrainData = null;
@@ -151,14 +152,147 @@ namespace Ballz.GameSession.World
 
         }
 
+
+        public class GridEdge
+        {
+            public IntVector2 a, b;
+            public GridEdge(IntVector2 a, IntVector2 b)
+            {
+                this.a = a; this.b = b;
+            }
+
+            public override bool Equals(object obj)
+            {
+                var g = obj as GridEdge;
+                if (g == null)
+                    return false;
+                else
+                    return a.x == g.a.x
+                        && a.y == g.a.y
+                        && b.x == g.b.x
+                        && b.y == g.b.y;
+            }
+        }
+
+        public class Edge
+        {
+            public GridEdge a, b;
+            public Edge(GridEdge a, GridEdge b, int x, int y)
+            {
+                if(a == null)
+                    throw new InvalidOperationException("Fuck");
+                this.a = a; this.b = b;
+                this.x = x; this.y = y;
+            }
+
+            public bool outlineHandled = false;
+
+            public int x, y;
+
+            public Vector2[] ExtractLine()
+            {
+                Vector2[] ret = new Vector2[2];
+                ret[0] = 0.5f * (new Vector2(a.a.x, a.a.y) + new Vector2(a.b.x, a.b.y));
+                ret[1] = 0.5f * (new Vector2(b.a.x, b.a.y) + new Vector2(b.b.x, b.b.y));
+
+                return ret;
+            }
+
+            public Edge[] getNeighbors(Edge[,,] outlineEdgeStuff)
+            {
+                var neighborCellEdges = new List<Edge>(8);
+
+                if(x > 0)
+                {
+                    neighborCellEdges.Add(outlineEdgeStuff[x - 1, y, 0]);
+                    neighborCellEdges.Add(outlineEdgeStuff[x - 1, y, 1]);
+                }
+
+                if(x < outlineEdgeStuff.GetLength(0) - 1)
+                {
+                    neighborCellEdges.Add(outlineEdgeStuff[x + 1, y, 0]);
+                    neighborCellEdges.Add(outlineEdgeStuff[x + 1, y, 1]);
+                }
+
+                if(y > 0)
+                {
+                    neighborCellEdges.Add(outlineEdgeStuff[x, y - 1, 0]);
+                    neighborCellEdges.Add(outlineEdgeStuff[x, y - 1, 1]);
+                }
+
+                if(y < outlineEdgeStuff.GetLength(1) - 1)
+                {
+                    neighborCellEdges.Add(outlineEdgeStuff[x, y + 1, 0]);
+                    neighborCellEdges.Add(outlineEdgeStuff[x, y + 1, 1]);
+                }
+
+                return (from e in neighborCellEdges
+                         where e != null && (e.a.Equals(a) || e.b.Equals(a)
+                                          || e.a.Equals(b) || e.b.Equals(b))
+                         select e)
+                        .ToArray();
+            }
+        }
+
+        public void AddEdges(Edge[,,] outlineEdgeStuff, int x, int y, GridEdge a, GridEdge b)
+        {
+            if(outlineEdgeStuff[x, y, 0] == null)
+            {
+                outlineEdgeStuff[x, y, 0] = new Edge(a, b, x, y);
+            }
+            else
+            {
+                outlineEdgeStuff[x, y, 1] = new Edge(a, b, x, y);
+            }
+        }
+
+        public List<Vector2> FollowOutline(Edge[,,] outlineEdgeStuff, Edge edge)
+        {
+            List<Vector2> result = new List<Vector2>(100);
+            Edge lastEdge = null;
+            while(!edge.outlineHandled)
+            {
+                edge.outlineHandled = true;
+
+                var neighbors = edge.getNeighbors(outlineEdgeStuff);
+                var nextEdge = (from e in neighbors
+                    where e != lastEdge
+                    select e)
+                    .FirstOrDefault();
+
+                if (nextEdge == null)
+                {
+                    //TODO(ks) better solution than that
+                    //return new List<Vector2>();
+                    
+                    return result;
+                }
+                
+                if(nextEdge.outlineHandled)
+                {
+                    if(result.Count > 0)
+                        result.Add(result[0]);
+                    return result;
+                }
+
+                if (edge.a.Equals(nextEdge.a) || edge.a.Equals(nextEdge.b))
+                    result.Add(edge.ExtractLine()[0]);
+                else
+                    result.Add(edge.ExtractLine()[1]);
+
+                lastEdge = edge;
+                edge = nextEdge;
+            }
+
+            return result;
+        }
+
         public struct Triangle
         {
             public Vector2 a,b,c;
             public Triangle(Vector2 a, Vector2 b, Vector2 c)
             {
-                this.a = a;
-                this.b = b;
-                this.c = c;
+                this.a = a; this.b = b; this.c = c;
             }
         }
         private void extractTrianglesAndOutline()
@@ -169,6 +303,7 @@ namespace Ballz.GameSession.World
 
             triangles.Clear();
             physicsTris.Clear();
+            outlines.Clear();
 
             int width = terrainBitmap.GetLength(0);
             int height = terrainBitmap.GetLength(1);
@@ -176,6 +311,10 @@ namespace Ballz.GameSession.World
 
             // reserve max. memory
             List<List<IntVector2>> fullCells = new List<List<IntVector2>>(height);
+            /*Dictionary<GridEdge, List<Edge>> outlineEdgeStuff = new Dictionary<GridEdge, List<Edge>>();*/
+
+            Edge[,,] outlineEdgeStuff = new Edge[width, height, 2];
+
 
             // Iterate over all bitmap pixels
             for (int y = 1; y < height; ++y)
@@ -203,7 +342,21 @@ namespace Ballz.GameSession.World
                     Vector2 v3 = new Vector2(x, y-1);
 
 
+                    GridEdge e01 = null;
+                    GridEdge e12 = null;
+                    GridEdge e32 = null;
+                    GridEdge e03 = null;
+
+
                     int mscase = (_0?1:0) + (_1?2:0) + (_2?4:0) + (_3?8:0);
+
+                    if(mscase != 0 && mscase != 15)
+                    {
+                        e01 = new GridEdge(new IntVector2(x - 1, y - 1), new IntVector2(x - 1, y));
+                        e12 = new GridEdge(new IntVector2(x - 1, y), new IntVector2(x, y));
+                        e32 = new GridEdge(new IntVector2(x, y-1), new IntVector2(x, y));
+                        e03 = new GridEdge(new IntVector2(x - 1, y - 1), new IntVector2(x, y-1));
+                    }
 
                     switch(mscase)
                     {
@@ -212,59 +365,76 @@ namespace Ballz.GameSession.World
                             break;
                         case 1:
                             triangles.Add(new Triangle(v0, 0.5f * (v0 + v1), 0.5f * (v0 + v3)));
+                            AddEdges(outlineEdgeStuff, x, y, e01, e03);
                             break;
                         case 2:
                             triangles.Add(new Triangle(v1, 0.5f * (v1 + v2), 0.5f * (v0 + v1)));
+                            AddEdges(outlineEdgeStuff, x, y, e12, e01);
                             break;
                         case 3:
                             triangles.Add(new Triangle(v0, v1, 0.5f * (v1 + v2)));
                             triangles.Add(new Triangle(0.5f * (v1 + v2), 0.5f * (v0 + v3), v0));
+                            AddEdges(outlineEdgeStuff, x, y, e03, e12);
                             break;
                         case 4:
                             triangles.Add(new Triangle(v2, 0.5f * (v2 + v3), 0.5f * (v1 + v2)));
+                            AddEdges(outlineEdgeStuff, x, y, e32, e12);
                             break;
                         case 5:
                             triangles.Add(new Triangle(v0, 0.5f * (v0 + v1), 0.5f * (v0 + v3)));
                             triangles.Add(new Triangle(v2, 0.5f * (v2 + v3), 0.5f * (v1 + v2)));
+                            AddEdges(outlineEdgeStuff, x, y, e01, e03);
+                            AddEdges(outlineEdgeStuff, x, y, e32, e12);
                             break;
                         case 6:
                             triangles.Add(new Triangle(v2, 0.5f * (v0 + v1), v1));
                             triangles.Add(new Triangle(v2, 0.5f * (v2 + v3), 0.5f * (v0 + v1)));
+                            AddEdges(outlineEdgeStuff, x, y, e01, e32);
                             break;
                         case 7:
                             triangles.Add(new Triangle(v1, 0.5f * (v0 + v3), v0));
                             triangles.Add(new Triangle(v1, 0.5f * (v2 + v3), 0.5f * (v0 + v3)));
                             triangles.Add(new Triangle(v1, v2, 0.5f * (v2 + v3)));
+                            AddEdges(outlineEdgeStuff, x, y, e03, e32);
                             break;
                         case 8:
                             triangles.Add(new Triangle(v3, 0.5f * (v0 + v3), 0.5f * (v2 + v3)));
+                            AddEdges(outlineEdgeStuff, x, y, e03, e32);
                             break;
                         case 9:
                             triangles.Add(new Triangle(v0, 0.5f * (v2 + v3), v3));
                             triangles.Add(new Triangle(v0, 0.5f * (v0 + v1), 0.5f * (v2 + v3)));
+                            AddEdges(outlineEdgeStuff, x, y, e32, e01);
                             break;
                         case 10: 
                             triangles.Add(new Triangle(v1, 0.5f * (v1 + v2), 0.5f * (v0 + v1)));
                             triangles.Add(new Triangle(v3, 0.5f * (v0 + v3), 0.5f * (v2 + v3)));
+                            AddEdges(outlineEdgeStuff, x, y, e12, e01);
+                            AddEdges(outlineEdgeStuff, x, y, e03, e32);
                             break;
                         case 11: 
                             triangles.Add(new Triangle(v0, v1, 0.5f * (v1 + v2)));
                             triangles.Add(new Triangle(v0, 0.5f * (v1 + v2), 0.5f * (v2 + v3)));
                             triangles.Add(new Triangle(v0, 0.5f * (v2 + v3), v3));
+                            AddEdges(outlineEdgeStuff, x, y, e12, e32);
                             break;
                         case 12: 
                             triangles.Add(new Triangle(v3, 0.5f * (v0 + v3), 0.5f * (v1 + v2)));
                             triangles.Add(new Triangle(v3, 0.5f * (v1 + v2), v2));
+                            AddEdges(outlineEdgeStuff, x, y, e03, e12);
                             break;
                         case 13: 
                             triangles.Add(new Triangle(v3, v0, 0.5f * (v0 + v1)));
                             triangles.Add(new Triangle(v3, 0.5f * (v0 + v1), 0.5f * (v1 + v2)));
                             triangles.Add(new Triangle(v3, 0.5f * (v1 + v2), v2));
+
+                            AddEdges(outlineEdgeStuff, x, y, e01, e12);
                             break;
                         case 14: 
                             triangles.Add(new Triangle(v2, 0.5f * (v0 + v1), v1));
                             triangles.Add(new Triangle(v2, 0.5f * (v0 + v3), 0.5f * (v0 + v1)));
                             triangles.Add(new Triangle(v2, v3, 0.5f * (v0 + v3)));
+                            AddEdges(outlineEdgeStuff, x, y, e01, e03);
                             break;
                         case 15:
                             fullCells[fullCells.Count - 1].Add(new IntVector2(x, y));
@@ -277,6 +447,24 @@ namespace Ballz.GameSession.World
                     }
                 }
             }
+                
+            for (int y = 1; y < height; ++y)
+            {
+                for (int x = 1; x < width; ++x)
+                {
+                    if (outlineEdgeStuff[x, y, 0] != null && outlineEdgeStuff[x, y, 0].outlineHandled == false)
+                    {
+                        var outline = FollowOutline(outlineEdgeStuff, outlineEdgeStuff[x, y, 0]);
+                        outlines.Add(outline);
+                    }
+                    if (outlineEdgeStuff[x, y, 1] != null && outlineEdgeStuff[x, y, 1].outlineHandled == false)
+                    {
+                        var outline = FollowOutline(outlineEdgeStuff, outlineEdgeStuff[x, y, 1]);
+                        outlines.Add(outline);
+                    }
+                }
+            }
+
 
             foreach (var tri in triangles)
             {
@@ -343,14 +531,21 @@ namespace Ballz.GameSession.World
             return triangles;
         }
             
-        // Deprecated!
         public List<Triangle> getOutlineTriangles()
-		{
-			// This is a no-op if outline is up to date
+        {
+            // This is a no-op if outline is up to date
             update();
 
             return physicsTris;
-		}
+        }
+
+        public List<List<Vector2>> getOutline()
+        {
+            // This is a no-op if outline is up to date
+            update();
+
+            return outlines;
+        }
 
 
 
