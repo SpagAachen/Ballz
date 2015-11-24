@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Xml.Serialization;
 using Ballz.GameSession.World;
@@ -95,17 +95,27 @@ namespace Ballz
             {
                 FileStream stream = new FileStream("Settings.xml", FileMode.Open);
                 //found an existing Settings file try to deserialize it
-                loadSettings(stream);
+                try
+                {
+                    loadSettings(stream);
+                }
+                catch(Exception e)    //loading failed so throw away the old xml
+                {
+                    stream.Close();
+                    File.Delete("Settings.xml");
+                    FileStream theStream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
+                    Settings = new Settings.ProgrammSettings();
+                    storeSettings(theStream);
+                }
                 stream.Close();
             }
-            catch (Exception)
+            catch(Exception e)
             {
                 //no settings file was found, create one.
-                FileStream stream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
+                FileStream theStream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
                 Settings = new Settings.ProgrammSettings();
-                storeSettings(stream);
-                stream.Close();
-            }           
+                storeSettings(theStream);
+            }
         }
 
         private void loadSettings(FileStream stream)

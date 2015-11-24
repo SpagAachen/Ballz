@@ -29,13 +29,11 @@ namespace Ballz.Menu
         }
 
         public override void HandleBackspace()
-        {
-            throw new NotImplementedException();
+        {            
         }
 
         public override void HandleRawKey(char key)
-        {
-            throw new NotImplementedException();
+        {            
         }
     }
 }
