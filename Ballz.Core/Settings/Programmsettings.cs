@@ -26,9 +26,9 @@ namespace Ballz.Settings
     [Serializable()]
     public class ProgrammSettings
     {
-        public BooleanSetting Fullscreen = new BooleanSetting();
-        public IntegerSetting ScreenWidth = new IntegerSetting();
-        public IntegerSetting ScreenHeight = new IntegerSetting();
+        public Setting<bool> Fullscreen = new Setting<bool>();
+        public Setting<int> ScreenWidth = new Setting<int>();
+        public Setting<int> ScreenHeight = new Setting<int>();
 
         public ProgrammSettings()
         {

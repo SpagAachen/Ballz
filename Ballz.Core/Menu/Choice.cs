@@ -1,5 +1,5 @@
 ﻿//
-//  CheckBox.cs
+//  Choice.cs
 //
 //  Author:
 //       Martin <Martin.Schultz@RWTH-Aachen.de>
@@ -22,24 +22,21 @@ using System;
 
 namespace Ballz.Menu
 {
-    public class CheckBox : Leaf
+    public class Choice : Leaf
     {
-        Settings.Setting<bool> Value;
-        public CheckBox(string name, Settings.Setting<bool> value, bool selectable = true ) : base(name, selectable)
+        public Choice(string name, bool selectable = false) : base(name, selectable)
         {
-            Value = value;
-            OnSelect += () => Value.Value = !Value.Value;
         }
 
         public override void HandleBackspace()
-        {            
+        {
+            throw new NotImplementedException();
         }
 
         public override void HandleRawKey(char key)
-        {          
+        {
+            throw new NotImplementedException();
         }
-
-        public override string DisplayName => Name + Value.Value;
     }
 }
 

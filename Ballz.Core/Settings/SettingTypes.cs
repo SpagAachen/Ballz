@@ -21,27 +21,12 @@
 using System;
 
 namespace Ballz.Settings
-{
-    public class BooleanSetting
-    {
-        public bool Value{ get; set;}
-    }
+{   
 
-    public class IntegerSetting
+    public class Setting<T> 
     {
-        public int Value{ get; set;}
+        public T Value{ get; set;}
     }
-
-    public class DoubleSetting
-    {
-        public double Value{ get; set;}
-    }
-
-    public class FloatSetting
-    {
-        public float Value{ get; set;}
-    }
-
 
 }
 

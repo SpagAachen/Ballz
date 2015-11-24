@@ -47,10 +47,8 @@ namespace Ballz
             initSettings();
             Content.RootDirectory = "Content";
             Graphics.IsFullScreen = Settings.Fullscreen.Value;
-
             Graphics.PreferredBackBufferHeight = Settings.ScreenHeight.Value;
             Graphics.PreferredBackBufferWidth = Settings.ScreenWidth.Value;
-            Graphics.ApplyChanges();
 
             // create the Game Components
             var menuRendering = new MenuRenderer(this);
@@ -186,7 +184,6 @@ namespace Ballz
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-           
 
             base.Initialize();
         }
