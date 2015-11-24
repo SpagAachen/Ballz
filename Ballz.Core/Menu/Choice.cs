@@ -1,5 +1,5 @@
 ﻿//
-//  Programmsettings.cs
+//  Choice.cs
 //
 //  Author:
 //       Martin <Martin.Schultz@RWTH-Aachen.de>
@@ -19,22 +19,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
-using System.Runtime.Serialization;
 
-namespace Ballz.Settings
+namespace Ballz.Menu
 {
-    [Serializable()]
-    public class ProgrammSettings
+    public class Choice : Leaf
     {
-        public Setting<bool> Fullscreen = new Setting<bool>();
-        public Setting<int> ScreenWidth = new Setting<int>();
-        public Setting<int> ScreenHeight = new Setting<int>();
-
-        public ProgrammSettings()
+        public Choice(string name, bool selectable = false) : base(name, selectable)
         {
-            Fullscreen.Value = false;
-            ScreenWidth.Value = 800;
-            ScreenHeight.Value = 600;
         }
     }
 }

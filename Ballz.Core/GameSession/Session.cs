@@ -68,8 +68,8 @@ namespace Ballz.GameSession
 
             Entities.Add(new Player
             {
-                Position = new Vector2(5, 5),
-                Velocity = new Vector2(5, 0)
+                Position = new Vector2(5, 10),
+                Velocity = new Vector2(2, 0)
             });
 
             //System.Console.WriteLine("");

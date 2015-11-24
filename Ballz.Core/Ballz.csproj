@@ -48,6 +48,7 @@
     <Compile Include="Menu\Leaf.cs" />
     <Compile Include="Menu\Label.cs" />
     <Compile Include="Menu\Composite.cs" />
+    <Compile Include="Menu\IRawInputConsumer.cs" />
     <Compile Include="Messages\NetworkMessage.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="GameSession\World\Player.cs" />
@@ -76,7 +77,8 @@
     <Compile Include="Messages\LogicMessage.cs" />
     <Compile Include="Menu\CheckBox.cs" />
     <Compile Include="Settings\Programmsettings.cs" />
-    <Compile Include="Settings\IBooleanSetting.cs" />
+    <Compile Include="Settings\SettingTypes.cs" />
+    <Compile Include="Menu\Choice.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
@@ -104,7 +106,6 @@
   <ItemGroup>
     <Folder Include="GameSession\Logic\" />
     <Folder Include="GameSession\Sound\" />
-    <Folder Include="Settings\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Physics2DDotNet\Physics2DDotNet.csproj">

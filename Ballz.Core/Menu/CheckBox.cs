@@ -24,22 +24,15 @@ namespace Ballz.Menu
 {
     public class CheckBox : Leaf
     {
-        Settings.IBooleanSetting Value;
-        public CheckBox(string name, Settings.IBooleanSetting value, bool selectable = true ) : base(name, selectable)
+        readonly Settings.Setting<bool> value;
+        public CheckBox(string name, Settings.Setting<bool> value = null, bool selectable = true ) : base(name, selectable)
         {
-            Value = value;
-            OnSelect += () => Value.Value = !Value.Value;
+            this.value = value;
+            if (this.value != null)
+                OnSelect += () => this.value.Value = !this.value.Value;
         }
 
-        public override void HandleBackspace()
-        {            
-        }
-
-        public override void HandleRawKey(char key)
-        {          
-        }
-
-        public override string DisplayName => Name + Value.Value;
+        public override string DisplayName => Name + (value?.Value.ToString() ?? "");
     }
 }
 

@@ -70,7 +70,7 @@ namespace Ballz.Logic
             if (message.Kind != Messages.Message.MessageType.InputMessage)
                 return;
 
-            if (((InputMessage)message).Kind == InputMessage.MessageType.ControlsConsole)
+            if (((InputMessage)message).Kind == InputMessage.MessageType.ControlsConsole && ((InputMessage)message).Pressed.Value)
                 RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.PerformanceMessage));
 
             switch (state)
@@ -89,34 +89,39 @@ namespace Ballz.Logic
 
         private void GameLogic(InputMessage msg)
         {
-            switch (msg.Kind)
+            if (msg.Pressed.Value)
             {
-                case InputMessage.MessageType.ControlsBack:
-                    state = GameState.MenuState;
-                    RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
+                switch (msg.Kind)
+                {
+                    case InputMessage.MessageType.ControlsBack:
+                        state = GameState.MenuState;
+                        RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
                     //todo: implement LogicMessage and use it here
-                    break;
-                case InputMessage.MessageType.ControlsUp:
-                    break;
-                case InputMessage.MessageType.ControlsDown:
-                    break;
-                case InputMessage.MessageType.ControlsLeft:
-                    break;
-                case InputMessage.MessageType.ControlsRight:
-                    break;
-                case InputMessage.MessageType.ControlsAction:
-                    break;
-                case InputMessage.MessageType.RawInput:
-                    break;
-                default:
+                        break;
+                    case InputMessage.MessageType.ControlsUp:
+                        break;
+                    case InputMessage.MessageType.ControlsDown:
+                        break;
+                    case InputMessage.MessageType.ControlsLeft:
+                        break;
+                    case InputMessage.MessageType.ControlsRight:
+                        break;
+                    case InputMessage.MessageType.ControlsAction:
+                        break;
+                    case InputMessage.MessageType.RawInput:
+                        break;
+                    default:
                     //throw new ArgumentOutOfRangeException();
-                    break;
+                        break;
+                }
             }
         }
 
         private void MenuLogic(InputMessage msg)
         {
             Composite top = activeMenu.Peek();
+            if(msg.Kind == InputMessage.MessageType.RawInput ||  msg.Kind == InputMessage.MessageType.RawBack || msg.Pressed.Value)
+            {
             switch (msg.Kind)
             {
                 case InputMessage.MessageType.ControlsAction:
@@ -154,14 +159,15 @@ namespace Ballz.Logic
                     break;
                 case InputMessage.MessageType.RawInput:
                     if (msg.Key != null)
-                        top.SelectedItem.HandleRawKey(msg.Key.Value);
+                        (top.SelectedItem as IRawInputConsumer)?.HandleRawKey(msg.Key.Value);
                     break;                    
                 case InputMessage.MessageType.RawBack:
-                    top.SelectedItem.HandleBackspace();
+                    (top.SelectedItem as IRawInputConsumer)?.HandleBackspace();
                     break;
                 default:
                     //throw new ArgumentOutOfRangeException();
                     break;
+            }
             }
         }
 

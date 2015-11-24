@@ -17,10 +17,13 @@
 
         public char? Key{ get; private set;}
 
-        public InputMessage(MessageType type, char? value) : base(Message.MessageType.InputMessage)
+        public bool? Pressed{ get; private set;}
+
+        public InputMessage(MessageType type, bool? pressed, char? value) : base(Message.MessageType.InputMessage)
         {
             Kind = type;
             Key = value;
+            Pressed = pressed;
         }
 
         public new MessageType Kind { get; private set; }
