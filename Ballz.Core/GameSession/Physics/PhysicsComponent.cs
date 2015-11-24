@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using System;
 using Physics2DDotNet;
 using Physics2DDotNet.Shapes;
+using Physics2DDotNet.PhysicsLogics;
 
 namespace Ballz.GameSession.Physics
 {
@@ -15,6 +16,7 @@ namespace Ballz.GameSession.Physics
     {
         new Ballz Game;
         PhysicsEngine engine;
+        InputMessage.MessageType? controlInput = null;
         public PhysicsControl(Ballz game) : base(game)
         {
             Game = game;
@@ -23,41 +25,64 @@ namespace Ballz.GameSession.Physics
         public override void Initialize()
         {
             // Create engine
+
             engine = new PhysicsEngine();
             engine.BroadPhase = new Physics2DDotNet.Detectors.SelectiveSweepDetector();
             engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
         }
 
+
         public override void Update(GameTime time)
         {
+            //TODO remove later
+            engine = new PhysicsEngine();
+            engine.BroadPhase = new Physics2DDotNet.Detectors.SelectiveSweepDetector();
+            engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
+            PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -1f), new Lifespan());
+            engine.AddLogic(logGravity);
+            
             float intervalSeconds = (float)World.World.IntervalMs / 1000.0f;
 
             var headSnapshot = Game.World.GetHeadSnapshot();
+            var newSnapshot = (WorldSnapshot)headSnapshot.Clone();
+
             var headTime = Game.World.HeadTime;
             //var elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
             //TODO extract into function
 
             // Terrain
-            var terrain = headSnapshot.StaticGeometry.getOutlineTriangles();
+            var terrain = newSnapshot.StaticGeometry.getOutlineTriangles();
+
+            //TODO: Testshape
+            IShape shapeTest = new PolygonShape(VertexHelper.CreateRectangle(200, 4), 0.3f);
+            var coeffTest = new Coefficients(.0f, 10f);
+            var stateTest = new PhysicsState();
+            stateTest.Position = new ALVector2D(.0f, 10, 0);
+            var bodyTest = new Body(stateTest, shapeTest, float.PositiveInfinity, coeffTest, new Lifespan());
+            bodyTest.IgnoresGravity = true;
+            
+            engine.AddBody(bodyTest);
 
             // TODO: Use triangles now! Outline is deprecated
-            /*AdvanceMath.Vector2D[] terrainVert = new AdvanceMath.Vector2D[terrain.Count];
-            for (int i = 0; i < terrain.Count; i++)
-            {
-                terrainVert[i] = new AdvanceMath.Vector2D(terrain[i].X, terrain[i].Y);
-            }
-            */
-            //terrainVert[terrain.Count] = new AdvanceMath.Vector2D(terrain[terrain.Count - 1].X, terrain[terrain.Count - 1].Y - 10);
 
-            var terrainShape = new PolygonShape(VertexHelper.CreateRectangle(10, 20), 3);
-            //var terrainShape = new PolygonShape(terrainVert, 0.1f);
-            /*var terrainCoeff = new Coefficients(1, .5f);
-            var terrainBody = new Body(new PhysicsState(), terrainShape, .0f, terrainCoeff, new Lifespan());
-            engine.AddBody(terrainBody);
+            for (int i = 0; i < terrain.Count && i < 0; i++)
+            {
+                //terrainVert[i] = new AdvanceMath.Vector2D(terrain[i].X, terrain[i].Y);
+                var tri = terrain[i];
+                AdvanceMath.Vector2D[] terrainPhys = new AdvanceMath.Vector2D[3];
+                terrainPhys[0] = new AdvanceMath.Vector2D(tri.a.X, tri.a.Y);
+                terrainPhys[1] = new AdvanceMath.Vector2D(tri.b.X, tri.b.Y);
+                terrainPhys[2] = new AdvanceMath.Vector2D(tri.c.X, tri.c.Y);
+
+                var terrainShape = new PolygonShape(terrainPhys, 0.3f);
+                var terrainCoeff = new Coefficients(1, .5f);
+                var terrainBody = new Body(new PhysicsState(), terrainShape, .0f, terrainCoeff, new Lifespan());
+                engine.AddBody(terrainBody);
+            } 
             
             // Entities
             var entityPhysMap = new System.Collections.Generic.Dictionary<Entity, Body>();
-            foreach (var e in headSnapshot.Entities)
+            foreach (var e in newSnapshot.Entities)
             {
                 IShape shape = null;
                 float mass = .0f;
@@ -69,30 +94,66 @@ namespace Ballz.GameSession.Physics
                         break;
                     case PhysicsMaterial.PhysicsShape.Polygon:
                         //TODO
-                        break;
+                        continue;
+                        //break;
                     default:
                         //TODO
-                        break;                        
+                        continue;
+                        //break;                        
                 }
 
-                Coefficients coeff = new Coefficients(e.Material.Restitution, e.Material.Friction);
-                Body body = new Body(new PhysicsState(), shape, mass, coeff, new Lifespan());
+                var coeff = new Coefficients(e.Material.Restitution, e.Material.Friction);
+                var state = new PhysicsState();
+                state.Position = new ALVector2D(.0f, e.Position.X, e.Position.Y);
+                state.Velocity = new ALVector2D(.0f, e.Velocity.X, e.Velocity.Y);
+
+                if (e.Kind == Entity.EntityType.Player)
+                {
+                    if (controlInput != null)
+                    {
+                        switch (controlInput)
+                        {
+                            case InputMessage.MessageType.ControlsLeft:
+                                state.Velocity = new ALVector2D(.0f, -5f, e.Velocity.Y);
+                                controlInput = null;
+                                break;
+                            case InputMessage.MessageType.ControlsRight:
+                                state.Velocity = new ALVector2D(.0f, 5f, e.Velocity.Y);
+                                controlInput = null;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                }
+
+                Body body = new Body(state, shape, mass, coeff, new Lifespan());
+                engine.AddBody(body);
                 entityPhysMap.Add(e, body);
                 //IShape shape = new CircleShape(e.r)
             }
-            */
+            
             for (var remainingSeconds = time.TotalGameTime.TotalSeconds - headTime.TotalSeconds;
                 remainingSeconds > 0;
                 remainingSeconds -= intervalSeconds)
             {
-                //TODO: Check timer
-                //engine.Update(intervalSeconds, intervalSeconds);
-                //PhysicsTimer timer = new PhysicsTimer(engine.Update, intervalSeconds);
 
-                headSnapshot = (WorldSnapshot)headSnapshot.Clone();
+                engine.Update(intervalSeconds, intervalSeconds);
 
-                foreach (var e in headSnapshot.Entities)
+                foreach (var e in newSnapshot.Entities)
                 {
+                    if (!entityPhysMap.ContainsKey(e))
+                    {
+                        continue;
+                    }
+                    var physE = entityPhysMap[e];
+                    var state = physE.State;
+                    
+                    e.Position = new Vector2(state.Position.X, state.Position.Y);
+                    e.Velocity = new Vector2(state.Velocity.X, state.Velocity.Y);
+                    
+                    /*
                     e.Position = e.Position + e.Velocity * intervalSeconds;
                     e.Velocity += new Vector2(0, -10) * intervalSeconds;
 
@@ -110,25 +171,37 @@ namespace Ballz.GameSession.Physics
                     {
                         e.Velocity *= new Vector2(-0.95f, 1);
                         e.Position = new Vector2(9.5f, e.Position.Y);
-                    }
+                    } */
                 }
 
-                Game.World.AddDiscreteSnapshot(headSnapshot);
+                Game.World.AddDiscreteSnapshot(newSnapshot);
             }
+        }
+
+        private void processInput(InputMessage message)
+        {
+            controlInput = message.Kind;
         }
 
         public void HandleMessage(object sender, Message message)
         {
-            //throw new NotImplementedException ();
-            if (message.Kind != Message.MessageType.LogicMessage)
-                return;
-            LogicMessage msg = (LogicMessage)message;
-
-            //see if the message was meant for us
-            if (msg.Kind == LogicMessage.MessageType.GameMessage)
+            if (message.Kind == Message.MessageType.InputMessage)
             {
-                Enabled = !Enabled;
+                InputMessage msg = (InputMessage)message;
+
+                processInput(msg);
             }
+
+            if (message.Kind == Message.MessageType.LogicMessage)
+            {
+                LogicMessage msg = (LogicMessage)message;
+
+                if (msg.Kind == LogicMessage.MessageType.GameMessage)
+                {
+                    Enabled = !Enabled;
+                }
+            }
+
         }
     }
 }

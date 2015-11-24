@@ -136,7 +136,17 @@ namespace Ballz.Input
                 down = true;
                 OnInput(InputMessage.MessageType.ControlsDown);
             }
-            #endif
+            if (Keyboard.GetState().IsKeyDown(Keys.Left) && !down)
+            {
+                down = true;
+                OnInput(InputMessage.MessageType.ControlsLeft);
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Right) && !down)
+            {
+                down = true;
+                OnInput(InputMessage.MessageType.ControlsRight);
+            }
+#endif
         }
     }
 }

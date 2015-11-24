@@ -14,7 +14,13 @@ namespace Ballz.GameSession.World
             get
             {
                 PhysicsMaterial mat = new PhysicsMaterial();
+                mat.Shape = PhysicsShape.Circle;
                 //TODO: add reasonable Values here
+                mat.Radius = 0.5f;
+                mat.Density = 2f;
+                mat.Restitution = .0f;
+                mat.Friction = 10f;
+                mat.Dampening = 10f;
                 return mat;
             }
         }
