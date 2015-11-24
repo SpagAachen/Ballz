@@ -38,7 +38,7 @@ namespace Ballz.GameSession.Physics
             engine = new PhysicsEngine();
             engine.BroadPhase = new Physics2DDotNet.Detectors.SelectiveSweepDetector();
             engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
-            PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -0.1f), new Lifespan());
+            PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -1f), new Lifespan());
             engine.AddLogic(logGravity);
             
             float intervalSeconds = (float)World.World.IntervalMs / 1000.0f;
