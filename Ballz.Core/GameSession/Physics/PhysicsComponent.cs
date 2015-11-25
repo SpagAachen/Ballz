@@ -115,11 +115,9 @@ namespace Ballz.GameSession.Physics
                         {
                             case InputMessage.MessageType.ControlsLeft:
                                 state.Velocity = new ALVector2D(.0f, -2f, e.Velocity.Y);
-                                controlInput = null;
                                 break;
                             case InputMessage.MessageType.ControlsRight:
                                 state.Velocity = new ALVector2D(.0f, 2f, e.Velocity.Y);
-                                controlInput = null;
                                 break;
                             default:
                                 break;
@@ -160,7 +158,10 @@ namespace Ballz.GameSession.Physics
 
         private void processInput(InputMessage message)
         {
-            controlInput = message.Kind;
+            if (message.Pressed.Value)
+                controlInput = message.Kind;
+            else
+                controlInput = null;
         }
 
         public void HandleMessage(object sender, Message message)
