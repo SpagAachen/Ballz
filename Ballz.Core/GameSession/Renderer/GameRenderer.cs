@@ -23,6 +23,7 @@ namespace Ballz.GameSession.Renderer
 
         Matrix ProjectionMatrix;
         Matrix ViewMatrix;
+        TimeSpan lastModification;
 
         public GameRenderer(Ballz game) : base(game)
         {
@@ -35,6 +36,8 @@ namespace Ballz.GameSession.Renderer
         /// <param name="time">time since start of game (cf BallzGame draw).</param>
         public override void Draw(GameTime time)
         {
+            if (lastModification == null)
+                lastModification = time.TotalGameTime;
             ProjectionMatrix = Matrix.Identity;
 
             ViewMatrix = Matrix.CreateOrthographicOffCenter(0, 10 * Game.GraphicsDevice.Viewport.AspectRatio, 0, 10, -10, 10);
@@ -45,8 +48,12 @@ namespace Ballz.GameSession.Renderer
             var snapshot = Game.World.GetSnapshot(time);
 
             // Debug
-            snapshot.StaticGeometry.SubtractCircle((float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1321) % 640), (float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1701) % 480), (float)(new Random()).NextDouble() * 25.0f);
-            snapshot.StaticGeometry.AddCircle((float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1711) % 640), (float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 14307) % 480), (float)(new Random()).NextDouble() * 15.0f);
+            if((time.TotalGameTime.TotalSeconds - lastModification.TotalSeconds) >= 1.0d)
+            {
+                snapshot.StaticGeometry.SubtractCircle((float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1321) % 640), (float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1701) % 480), (float)(new Random()).NextDouble() * 25.0f);
+                snapshot.StaticGeometry.AddCircle((float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1711) % 640), (float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 14307) % 480), (float)(new Random()).NextDouble() * 15.0f);
+                lastModification = time.TotalGameTime;
+            }
 
             var tris = snapshot.StaticGeometry.getTriangles();
             VertexPositionColorTexture[] vpc = new VertexPositionColorTexture[tris.Count * 3];
