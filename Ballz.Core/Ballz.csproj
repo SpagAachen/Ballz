@@ -79,6 +79,7 @@
     <Compile Include="Settings\Programmsettings.cs" />
     <Compile Include="Settings\SettingTypes.cs" />
     <Compile Include="Menu\Choice.cs" />
+    <Compile Include="Menu\IChooseable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />

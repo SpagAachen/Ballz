@@ -1,5 +1,5 @@
 ﻿//
-//  Programmsettings.cs
+//  IChangeable.cs
 //
 //  Author:
 //       Martin <Martin.Schultz@RWTH-Aachen.de>
@@ -19,23 +19,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
-using System.Runtime.Serialization;
-using Microsoft.Xna.Framework.Graphics;
 
-namespace Ballz.Settings
+namespace Ballz
 {
-    [Serializable()]
-    public class ProgrammSettings
+    public interface IChooseable
     {
-        public Setting<bool> Fullscreen = new Setting<bool>();
-        public Setting<Resolution> ScreenResolution = new Setting<Resolution>();
-
-        public ProgrammSettings()
-        {
-            Fullscreen.Value = false;
-            ScreenResolution.Value = new Resolution(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
-                GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
-        }
+        void selectNext();
+        void selectPrevious();
     }
 }
 

@@ -34,7 +34,7 @@ namespace Ballz
 
         public GameSession.Session Match;
 
-        public Settings.ProgrammSettings Settings;
+        public Settings.ProgrammSettings GameSettings;
 
         public Composite MainMenu;
 
@@ -43,9 +43,9 @@ namespace Ballz
             Graphics = new GraphicsDeviceManager(this);
             initSettings();
             Content.RootDirectory = "Content";
-            Graphics.IsFullScreen = Settings.Fullscreen.Value;
-            Graphics.PreferredBackBufferHeight = Settings.ScreenHeight.Value;
-            Graphics.PreferredBackBufferWidth = Settings.ScreenWidth.Value;
+            Graphics.IsFullScreen = GameSettings.Fullscreen.Value;
+            Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Value.Height;
+            Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
 
             // create the Game Components
             var menuRendering = new MenuRenderer(this, DefaultMenu());
@@ -102,38 +102,38 @@ namespace Ballz
                     loadSettings(stream);
                     sanitizeSettings();
                 }
-                catch(Exception e)    //loading failed so throw away the old xml
+                catch(Exception )    //loading failed so throw away the old xml
                 {
                     stream.Close();
                     File.Delete("Settings.xml");
                     FileStream theStream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
-                    Settings = new Settings.ProgrammSettings();
+                    GameSettings = new Settings.ProgrammSettings();
                     storeSettings(theStream);
                 }
                 stream.Close();
             }
-            catch(Exception e)
+            catch(Exception )
             {
                 //no settings file was found, create one.
                 FileStream theStream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
-                Settings = new Settings.ProgrammSettings();
+                GameSettings = new Settings.ProgrammSettings();
                 storeSettings(theStream);
             }
         }
 
         private void sanitizeSettings()
         {
-            if (!getResolutions().Contains(new Tuple<int,int>(Settings.ScreenWidth.Value, Settings.ScreenHeight.Value)))
+            if (!getResolutions().Contains(GameSettings.ScreenResolution.Value))
                 throw new Exception("Settings.xml holds bogus values");
         }
 
-        private List<Tuple<int,int>> getResolutions()
+        private List<Settings.Resolution> getResolutions()
         {
-            List<Tuple<int,int>> result = new List<Tuple<int,int>>();
+            List<Settings.Resolution> result = new List<Settings.Resolution>();
             DisplayModeCollection dmc = GraphicsAdapter.DefaultAdapter.SupportedDisplayModes;
             foreach (DisplayMode dm in dmc)
             {
-                Tuple<int,int> resolution = new Tuple<int,int>(dm.Width, dm.Height);
+                Settings.Resolution resolution = new Settings.Resolution(dm.Width, dm.Height);
                 if (!result.Contains(resolution))
                     result.Add(resolution);
             }
@@ -143,13 +143,13 @@ namespace Ballz
         private void loadSettings(FileStream stream)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Settings.ProgrammSettings));
-            Settings = (Settings.ProgrammSettings)serializer.Deserialize(stream);
+            GameSettings = (Settings.ProgrammSettings)serializer.Deserialize(stream);
         }
 
         private void storeSettings(FileStream stream)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Settings.ProgrammSettings));
-            serializer.Serialize(stream, Settings);
+            serializer.Serialize(stream, GameSettings);
         }
 
         private Composite DefaultMenu()
@@ -157,7 +157,8 @@ namespace Ballz
             // options menu
             var optionsMenu = new Composite("Options", true);
             //optionsMenu.AddItem(new Label("Not Implemented", false));
-            optionsMenu.AddItem(new CheckBox("FullScreen: ", Settings.Fullscreen));
+            optionsMenu.AddItem(new CheckBox("FullScreen: ", GameSettings.Fullscreen));
+            optionsMenu.AddItem(new Choice<Settings.Resolution>("Resolution: ",GameSettings.ScreenResolution,getResolutions()));
             Label apply = new Label("Apply", true);
             apply.OnSelect += () => 
                 {
@@ -165,7 +166,9 @@ namespace Ballz
                     FileStream stream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
                     storeSettings(stream);
                     stream.Close();
-                    Graphics.IsFullScreen = Settings.Fullscreen.Value;
+                    Graphics.IsFullScreen = GameSettings.Fullscreen.Value;
+                    Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
+                    Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Value.Height;
                     Graphics.ApplyChanges();
                 };
             optionsMenu.AddItem(apply);
