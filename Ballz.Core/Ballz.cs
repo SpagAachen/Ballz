@@ -7,6 +7,8 @@ using Ballz.Logic;
 using Ballz.Renderer;
 using Microsoft.Xna.Framework;
 using Ballz.Menu;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Ballz
 {
@@ -98,6 +100,7 @@ namespace Ballz
                 try
                 {
                     loadSettings(stream);
+                    sanitizeSettings();
                 }
                 catch(Exception e)    //loading failed so throw away the old xml
                 {
@@ -116,6 +119,25 @@ namespace Ballz
                 Settings = new Settings.ProgrammSettings();
                 storeSettings(theStream);
             }
+        }
+
+        private void sanitizeSettings()
+        {
+            if (!getResolutions().Contains(new Tuple<int,int>(Settings.ScreenWidth.Value, Settings.ScreenHeight.Value)))
+                throw new Exception("Settings.xml holds bogus values");
+        }
+
+        private List<Tuple<int,int>> getResolutions()
+        {
+            List<Tuple<int,int>> result = new List<Tuple<int,int>>();
+            DisplayModeCollection dmc = GraphicsAdapter.DefaultAdapter.SupportedDisplayModes;
+            foreach (DisplayMode dm in dmc)
+            {
+                Tuple<int,int> resolution = new Tuple<int,int>(dm.Width, dm.Height);
+                if (!result.Contains(resolution))
+                    result.Add(resolution);
+            }
+            return result;
         }
 
         private void loadSettings(FileStream stream)
@@ -139,6 +161,7 @@ namespace Ballz
             Label apply = new Label("Apply", true);
             apply.OnSelect += () => 
                 {
+                    File.Delete("Settings.xml");
                     FileStream stream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
                     storeSettings(stream);
                     stream.Close();

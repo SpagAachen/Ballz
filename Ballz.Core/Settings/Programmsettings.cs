@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using System.Runtime.Serialization;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Ballz.Settings
 {
@@ -33,8 +34,8 @@ namespace Ballz.Settings
         public ProgrammSettings()
         {
             Fullscreen.Value = false;
-            ScreenWidth.Value = 800;
-            ScreenHeight.Value = 600;
+            ScreenWidth.Value = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
+            ScreenHeight.Value = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
         }
     }
 }
