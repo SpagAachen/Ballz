@@ -19,14 +19,57 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Ballz.Settings
 {   
-
+    [Serializable]
     public class Setting<T> 
     {
         public T Value{ get; set;}
     }
 
+    [Serializable]
+    public class Resolution : IComparable
+    {
+        public int Width{ get; set;}
+        public int Height{ get; set;}
+        public Resolution()
+        {
+        }
+
+        public Resolution(int width, int height)
+        {
+            Width = width;
+            Height = height;
+        }
+            
+        public override string ToString()
+        {
+            return string.Format("{0}x{1}",Width,Height);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (obj as Resolution)?.Width == Width && (obj as Resolution)?.Height == Height;
+        }
+
+        public int CompareTo(object obj)
+        {
+            int? result;
+            if((obj as Resolution)?.Width.CompareTo(Width) == 0)
+            {
+                result = (obj as Resolution)?.Height.CompareTo(Height);
+            }
+            else
+            {
+                result = (obj as Resolution)?.Width.CompareTo(Width);
+            }
+            if (result.HasValue)
+                return result.Value;
+            else
+                return 0;
+        }
+    }
 }
 

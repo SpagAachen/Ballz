@@ -158,10 +158,13 @@ namespace Ballz.GameSession.Physics
 
         private void processInput(InputMessage message)
         {
-            if (message.Pressed.Value)
-                controlInput = message.Kind;
-            else
-                controlInput = null;
+            if (message.Pressed.HasValue)
+            {
+                if (message.Pressed.Value)
+                    controlInput = message.Kind;
+                else
+                    controlInput = null;
+            }
         }
 
         public void HandleMessage(object sender, Message message)

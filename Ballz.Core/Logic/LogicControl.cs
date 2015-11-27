@@ -153,9 +153,11 @@ namespace Ballz.Logic
                         RaiseMessageEvent(new MenuMessage(top));
                     }
                     break;
-                case InputMessage.MessageType.ControlsLeft:
+                    case InputMessage.MessageType.ControlsLeft:
+                        (top.SelectedItem as IChooseable)?.selectPrevious();
                     break;
                 case InputMessage.MessageType.ControlsRight:
+                        (top.SelectedItem as IChooseable)?.selectNext();
                     break;
                 case InputMessage.MessageType.RawInput:
                     if (msg.Key != null)

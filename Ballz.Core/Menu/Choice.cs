@@ -19,13 +19,56 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
+using System.Collections.Generic;
 
 namespace Ballz.Menu
 {
-    public class Choice : Leaf
+    public class Choice<T> : Leaf, IChooseable 
     {
-        public Choice(string name, bool selectable = false) : base(name, selectable)
+        private Settings.Setting<T> SelectedChoice;
+        private List<T> Choices;
+        private bool Active;
+        private string previousDecorator = "", nextDecorator = "";
+
+        public Choice(string name, Settings.Setting<T> selectedValue, List<T> chooseableValues, bool selectable = true) : base(name, selectable)
         {
+            SelectedChoice = selectedValue;
+            Choices = chooseableValues;
+            OnSelect += () =>
+            {
+                Active = !Active;
+                    if(Active)
+                    {
+                        previousDecorator = "<< ";
+                        nextDecorator = " >>";
+                    }
+                    else
+                    {
+                        previousDecorator = "";
+                        nextDecorator = "";
+                    }
+            };
+        }
+
+        public override string DisplayName => (Name + previousDecorator+SelectedChoice.Value.ToString()+nextDecorator);
+
+        public void selectNext()
+        {
+            if(Active)
+            {
+                int index = Choices.BinarySearch(SelectedChoice.Value);
+                SelectedChoice.Value = Choices[(index+1)%Choices.Count];
+            }
+        }
+
+        public void selectPrevious()
+        {
+            if (Active)
+            {
+                int index = Choices.BinarySearch(SelectedChoice.Value);
+                index = ((index - 1) + Choices.Count) % Choices.Count;
+                SelectedChoice.Value = Choices[index];
+            }
         }
     }
 }
