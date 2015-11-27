@@ -57,16 +57,22 @@ namespace Ballz.Settings
         public int CompareTo(object obj)
         {
             int? result;
-            if((obj as Resolution)?.Width.CompareTo(Width) == 0)
+            Resolution toCompare = obj as Resolution;
+            if (toCompare != null)
             {
-                result = (obj as Resolution)?.Height.CompareTo(Height);
+                if (Width.CompareTo(toCompare.Width) == 0)
+                {
+                    result = Height.CompareTo(toCompare.Height);
+                }
+                else
+                {
+                    result = Width.CompareTo(toCompare.Width);
+                }
+                if (result.HasValue)
+                    return result.Value;
+                else
+                    return 0;
             }
-            else
-            {
-                result = (obj as Resolution)?.Width.CompareTo(Width);
-            }
-            if (result.HasValue)
-                return result.Value;
             else
                 return 0;
         }
