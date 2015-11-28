@@ -19,7 +19,7 @@ namespace Ballz.GameSession.Renderer
         BasicEffect TerrainEffect;
         SpriteBatch spriteBatch;
 
-        Ballz Game;
+        new Ballz Game;
 
         Matrix ProjectionMatrix;
         Matrix ViewMatrix;

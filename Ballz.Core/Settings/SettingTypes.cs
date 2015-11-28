@@ -54,6 +54,11 @@ namespace Ballz.Settings
             return (obj as Resolution)?.Width == Width && (obj as Resolution)?.Height == Height;
         }
 
+        public override int GetHashCode()
+        {
+            return Width ^ Height;
+        }
+
         public int CompareTo(object obj)
         {
             int? result;
