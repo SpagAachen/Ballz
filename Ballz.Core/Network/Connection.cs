@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Net.Sockets;
+	using System.Runtime.Serialization;
+	using System.Runtime.Serialization.Formatters.Binary;
 
     /// <summary>
     /// Provides an abstraction of the protocol layer. Use it to establish a network connection with another game instance.
@@ -12,8 +14,7 @@
     {
         public readonly int Id;
         private readonly TcpClient tcpClient;
-        private StreamReader reader = null;
-        private StreamWriter writer = null;
+		BinaryFormatter formatter = new BinaryFormatter();
 
         /// <summary>
         /// Initializes a new instance of the Connection class and connects to the specified port on the specified host.
@@ -38,11 +39,40 @@
             Id = id;
         }
 
+		/// <summary>
+		/// Serializes on object and send it to another game instance.
+		/// </summary>
+		/// <param name="obj">The object to send</param>
+		public void Send(object obj)
+		{
+			formatter.Serialize(tcpClient.GetStream(), obj);
+		}
+
+		/// <summary>
+		/// Receive objects if any is available
+		/// </summary>
+		/// <returns>A list of objects received</returns>
+		public List<object> Receive()
+		{
+			var s = tcpClient.GetStream();
+			var res = new List<object>();
+			// new data available?
+			if (!s.DataAvailable)
+				return res;
+			while (s.Position != s.Length) {
+				var obj = (object)formatter.Deserialize (s); 
+				res.Add (obj);
+			}
+			return res;
+		}
+
+
+		/*
         /// <summary>
         /// Send data
         /// </summary>
         /// <param name="data"></param>
-        public void Send(string data)
+        private void SendRaw(string data)
         {
             var s = tcpClient.GetStream();
             using (writer = new StreamWriter(tcpClient.GetStream()))
@@ -60,25 +90,7 @@
                 }
             }
         }
-
-        /// <summary>
-        /// Receive data if any is available
-        /// </summary>
-        /// <returns></returns>
-        public List<string> Receive()
-        {
-            var s = tcpClient.GetStream();
-            var res = new List<string>();
-            // new lines available?
-            if (!s.DataAvailable)
-                return res;
-            using (reader = new StreamReader(tcpClient.GetStream()))
-            {
-                while (reader.Peek() >= 0)
-                    res.Add(reader.ReadLine());
-            }
-            return res;
-        }
+		*/
 
         /// <summary>
         /// Returns true iff data is ready to read.

@@ -8,7 +8,7 @@
     using Microsoft.Xna.Framework;
     using System.Net.Sockets;
 
-    class Server
+	class Server
     {
         private static int nextId = 1;
         TcpListener listener = null;
@@ -48,9 +48,9 @@
             //TODO: Implement
         }
 
-        private void onData(string data, int sender)
+        private void onData(object data, int sender)
         {
-            Console.WriteLine("Received data from " + sender + ": " + data);
+			Console.WriteLine("Received data from " + sender + ": " + data.ToString());
         }
 
         public void Broadcast(string data)
