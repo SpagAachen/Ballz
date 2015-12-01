@@ -6,6 +6,7 @@ using System;
 using Physics2DDotNet;
 using Physics2DDotNet.Shapes;
 using Physics2DDotNet.PhysicsLogics;
+using System.Collections.Generic;
 
 namespace Ballz.GameSession.Physics
 {
@@ -31,8 +32,7 @@ namespace Ballz.GameSession.Physics
             engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
         }
 
-
-        public override void Update(GameTime time)
+        public Dictionary<Entity, Body> PreparePhysicsEngine(WorldSnapshot newSnapshot)
         {
             //TODO remove later
             engine = new PhysicsEngine();
@@ -41,11 +41,6 @@ namespace Ballz.GameSession.Physics
             PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -1f), new Lifespan());
             engine.AddLogic(logGravity);
             
-            float intervalSeconds = (float)World.World.IntervalMs / 1000.0f;
-
-            var headSnapshot = Game.World.GetHeadSnapshot();
-            var newSnapshot = (WorldSnapshot)headSnapshot.Clone();
-
             var headTime = Game.World.HeadTime;
             //var elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
             //TODO extract into function
@@ -60,7 +55,7 @@ namespace Ballz.GameSession.Physics
             stateTest.Position = new ALVector2D(.0f, 10, 0);
             var bodyTest = new Body(stateTest, shapeTest, float.PositiveInfinity, coeffTest, new Lifespan());
             bodyTest.IgnoresGravity = true;
-            
+
             engine.AddBody(bodyTest);
 
             // TODO: Use triangles now! Outline is deprecated
@@ -78,8 +73,8 @@ namespace Ballz.GameSession.Physics
                 var terrainCoeff = new Coefficients(1, .5f);
                 var terrainBody = new Body(new PhysicsState(), terrainShape, .0f, terrainCoeff, new Lifespan());
                 engine.AddBody(terrainBody);
-            } 
-            
+            }
+
             // Entities
             var entityPhysMap = new System.Collections.Generic.Dictionary<Entity, Body>();
             foreach (var e in newSnapshot.Entities)
@@ -90,12 +85,12 @@ namespace Ballz.GameSession.Physics
                 {
                     case PhysicsMaterial.PhysicsShape.Circle:
                         shape = new CircleShape(e.Material.Radius, 16);
-                        mass = (float) (e.Material.Density * e.Material.Radius * e.Material.Radius * Math.PI);
+                        mass = (float)(e.Material.Density * e.Material.Radius * e.Material.Radius * Math.PI);
                         break;
                     case PhysicsMaterial.PhysicsShape.Polygon:
                         //TODO
                         continue;
-                        //break;
+                    //break;
                     default:
                         //TODO
                         continue;
@@ -131,7 +126,19 @@ namespace Ballz.GameSession.Physics
                 entityPhysMap.Add(e, body);
                 //IShape shape = new CircleShape(e.r)
             }
-            
+
+            return entityPhysMap;
+        }
+
+        public override void Update(GameTime time)
+        {
+            var headSnapshot = Game.World.GetHeadSnapshot();
+            var newSnapshot = (WorldSnapshot)headSnapshot.Clone();
+
+            var entityPhysMap = PreparePhysicsEngine(newSnapshot);
+
+            float intervalSeconds = (float)World.World.IntervalMs / 1000.0f;
+
             for (var remainingSeconds = time.ElapsedGameTime.TotalSeconds;
                 remainingSeconds > 0;
                 remainingSeconds -= intervalSeconds)

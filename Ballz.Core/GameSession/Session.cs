@@ -20,6 +20,12 @@ namespace Ballz.GameSession
         private Input.InputTranslator input;
         private Ballz theGame;
 
+        /// <summary>
+        /// The ball character that is currently controlled by the local player
+        /// </summary>
+        /// TODO: Add support for multiple local players
+        public Ball PlayerBall { get; set; }
+
         public Session(Ballz _game) : base(_game)
         {
             physics = new Physics.PhysicsControl(_game);
@@ -66,7 +72,7 @@ namespace Ballz.GameSession
             theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld"));
             //try to load the testworld
 
-            Entities.Add(new Player
+            Entities.Add(new Ball
             {
                 Position = new Vector2(5, 10),
                 Velocity = new Vector2(2, 0)

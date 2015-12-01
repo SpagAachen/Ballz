@@ -59,7 +59,7 @@ namespace Ballz.GameSession.World
 
         protected Entity() { }
 
-        public object Clone()
+        public virtual object Clone()
         {
             return new Entity
             {

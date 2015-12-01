@@ -14,27 +14,42 @@ namespace Ballz.GameSession.World
             get;
             private set;
         }
+
         public Terrain StaticGeometry
         {
             get;
             set;
         }
-        public WorldSnapshot(List<Entity> newEntitites, Terrain newTerrain)
+
+        public List<Shot> Shots
+        {
+            get;
+            private set;
+        }
+
+        public WorldSnapshot(List<Entity> newEntitites, Terrain newTerrain, List<Shot> shots = new List<Shot>())
         {
             Entities = newEntitites;
             StaticGeometry = newTerrain;
+            Shots = shots;
         }
 
         public object Clone()
         {
             var newEntities = new List<Entity>();
-            foreach(var oldEntity in Entities)
+            foreach (var oldEntity in Entities)
             {
                 newEntities.Add((Entity)oldEntity.Clone());
             }
 
+            var shots = new List<Shot>();
+            foreach (var oldShot in Shots)
+            {
+                shots.Add((Shot)oldShot.Clone());
+            }
+
             //TODO: Clone Terrain
-            return new WorldSnapshot(newEntities, StaticGeometry);
+            return new WorldSnapshot(newEntities, StaticGeometry, shots);
         }
         
     }
