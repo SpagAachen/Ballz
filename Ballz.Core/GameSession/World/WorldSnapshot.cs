@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Ballz.GameSession.World
@@ -25,6 +26,13 @@ namespace Ballz.GameSession.World
         {
             get;
             private set;
+        }
+
+        public Entity EntityById(int id)
+        {
+            return (from e in Entities
+                    where e.ID == id
+                    select e).FirstOrDefault();
         }
 
         public WorldSnapshot(List<Entity> newEntitites, Terrain newTerrain, List<Shot> shots = null)

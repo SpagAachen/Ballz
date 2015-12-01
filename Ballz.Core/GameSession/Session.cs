@@ -21,10 +21,10 @@ namespace Ballz.GameSession
         private Ballz theGame;
 
         /// <summary>
-        /// The ball character that is currently controlled by the local player
+        /// The entity id of the character that is currently controlled by the local player
         /// </summary>
         /// TODO: Add support for multiple local players
-        public Ball PlayerBall { get; set; }
+        public int PlayerBallId { get; set; }
 
         public Session(Ballz _game) : base(_game)
         {
@@ -70,13 +70,14 @@ namespace Ballz.GameSession
             ///generate a dummy game world
             /// TODO: find a nice solution to initialize the world especially regarding networking. maybe use an event for this
             theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld"));
-            //try to load the testworld
 
-            Entities.Add(new Ball
+            var player = new Ball
             {
                 Position = new Vector2(5, 10),
                 Velocity = new Vector2(2, 0)
-            });
+            };
+            PlayerBallId = player.ID;
+            Entities.Add(player);
 
             //System.Console.WriteLine("");
 

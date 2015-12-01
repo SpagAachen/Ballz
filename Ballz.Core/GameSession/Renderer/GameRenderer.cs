@@ -47,14 +47,6 @@ namespace Ballz.GameSession.Renderer
 
             var snapshot = Game.World.GetSnapshot(time);
 
-            // Debug
-            if((time.TotalGameTime.TotalSeconds - lastModification.TotalSeconds) >= 1.0d)
-            {
-                snapshot.StaticGeometry.SubtractCircle((float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1321) % 640), (float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1701) % 480), (float)(new Random()).NextDouble() * 25.0f);
-                snapshot.StaticGeometry.AddCircle((float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 1711) % 640), (float)(new Random()).NextDouble() * (((int)time.TotalGameTime.TotalMilliseconds * 14307) % 480), (float)(new Random()).NextDouble() * 15.0f);
-                lastModification = time.TotalGameTime;
-            }
-
             var tris = snapshot.StaticGeometry.getTriangles();
             VertexPositionColorTexture[] vpc = new VertexPositionColorTexture[tris.Count * 3];
             

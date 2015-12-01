@@ -23,6 +23,8 @@ namespace Ballz.GameSession.Physics
             Game = game;
         }
 
+        Dictionary<InputMessage.MessageType, bool> KeyPressed = new Dictionary<InputMessage.MessageType, bool>();
+
         public override void Initialize()
         {
             // Create engine
@@ -30,6 +32,12 @@ namespace Ballz.GameSession.Physics
             engine = new PhysicsEngine();
             engine.BroadPhase = new Physics2DDotNet.Detectors.SelectiveSweepDetector();
             engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
+
+            KeyPressed[InputMessage.MessageType.ControlsAction] = false;
+            KeyPressed[InputMessage.MessageType.ControlsUp] = false;
+            KeyPressed[InputMessage.MessageType.ControlsDown] = false;
+            KeyPressed[InputMessage.MessageType.ControlsLeft] = false;
+            KeyPressed[InputMessage.MessageType.ControlsRight] = false;
         }
 
         public Dictionary<Entity, Body> PreparePhysicsEngine(WorldSnapshot newSnapshot)
@@ -102,24 +110,6 @@ namespace Ballz.GameSession.Physics
                 state.Position = new ALVector2D(.0f, e.Position.X, e.Position.Y);
                 state.Velocity = new ALVector2D(.0f, e.Velocity.X, e.Velocity.Y);
 
-                if (e.Kind == Entity.EntityType.Player)
-                {
-                    if (controlInput != null)
-                    {
-                        switch (controlInput)
-                        {
-                            case InputMessage.MessageType.ControlsLeft:
-                                state.Velocity = new ALVector2D(.0f, -2f, e.Velocity.Y);
-                                break;
-                            case InputMessage.MessageType.ControlsRight:
-                                state.Velocity = new ALVector2D(.0f, 2f, e.Velocity.Y);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-
                 Body body = new Body(state, shape, mass, coeff, new Lifespan());
                 engine.AddBody(body);
                 entityPhysMap.Add(e, body);
@@ -133,6 +123,37 @@ namespace Ballz.GameSession.Physics
         {
             var headSnapshot = Game.World.GetHeadSnapshot();
             var newSnapshot = (WorldSnapshot)headSnapshot.Clone();
+
+            var player = newSnapshot.EntityById(Game.Match.PlayerBallId);
+            // Apply input messages
+            if(player != null)
+            {
+                if(KeyPressed[InputMessage.MessageType.ControlsLeft])
+                        player.Velocity = new Vector2(-2f, player.Velocity.Y);
+                if (KeyPressed[InputMessage.MessageType.ControlsRight])
+                    player.Velocity = new Vector2(2f, player.Velocity.Y);
+
+                switch (controlInput)
+                {
+                    case InputMessage.MessageType.ControlsUp:
+                        player.Velocity = new Vector2(player.Velocity.X, 2f);
+                        break;
+                    case InputMessage.MessageType.ControlsAction:
+                        newSnapshot.Shots.Add(new Shot
+                        {
+                            ExplosionRadius = 0.5f,
+                            HealthImpactAtDirectHit = 25,
+                            IsInstantShot = true,
+                            ShotStart = player.Position,
+                            ShotVelocity = player.Direction
+                        });
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            controlInput = null;
 
             var entityPhysMap = PreparePhysicsEngine(newSnapshot);
 
@@ -157,6 +178,12 @@ namespace Ballz.GameSession.Physics
                     
                     e.Position = new Vector2(state.Position.X, state.Position.Y);
                     e.Velocity = new Vector2(state.Velocity.X, state.Velocity.Y);
+
+                    const float dg90 = 2 * (float)Math.PI * 90f / 360f;
+                    if (e.Velocity.LengthSquared() > 0.0001f)
+                        e.Rotation = dg90 * (e.Velocity.X > 0 ? 1 : -1);
+                    else
+                        e.Rotation = dg90;
                 }
 
                 Game.World.AddDiscreteSnapshot(newSnapshot);
@@ -165,18 +192,22 @@ namespace Ballz.GameSession.Physics
             // Update shots
             foreach(var shot in newSnapshot.Shots)
             {
-
+                //TODO: Compute actual shot target position
+                Vector2 targetPos = shot.ShotStart + 3 * shot.ShotVelocity;
+                newSnapshot.StaticGeometry.SubtractCircle(targetPos.X / 0.03f, targetPos.Y / 0.03f, shot.ExplosionRadius / 0.03f);
             }
+            // Remove all shots
+            newSnapshot.Shots.Clear();
         }
 
         private void processInput(InputMessage message)
         {
             if (message.Pressed.HasValue)
             {
+                KeyPressed[message.Kind] = message.Pressed.Value;
+
                 if (message.Pressed.Value)
                     controlInput = message.Kind;
-                else
-                    controlInput = null;
             }
         }
 
