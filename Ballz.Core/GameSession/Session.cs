@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Ballz.GameSession.World;
-
+using Ballz.Logic;
 
 namespace Ballz.GameSession
 {
@@ -16,7 +16,7 @@ namespace Ballz.GameSession
         private Terrain theTerrain;
         private Physics.PhysicsControl physics;
         private Renderer.GameRenderer renderer;
-        private Logic.LogicControl logic;
+        private LogicControl logic;
         private Input.InputTranslator input;
         private Ballz theGame;
 
@@ -37,7 +37,7 @@ namespace Ballz.GameSession
             renderer.Visible = false;
             _game.Components.Add(renderer);
 
-            logic = _game.Services.GetService<Logic.LogicControl>();
+            logic = _game.Services.GetService<LogicControl>();
             logic.Message += physics.HandleMessage;
             logic.Message += renderer.HandleMessage;
 

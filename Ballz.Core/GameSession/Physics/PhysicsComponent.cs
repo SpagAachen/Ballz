@@ -118,7 +118,6 @@ namespace Ballz.GameSession.Physics
                                 break;
                         }
                     }
-
                 }
 
                 Body body = new Body(state, shape, mass, coeff, new Lifespan());
@@ -139,6 +138,7 @@ namespace Ballz.GameSession.Physics
 
             float intervalSeconds = (float)World.World.IntervalMs / 1000.0f;
 
+            // Update Entity positions
             for (var remainingSeconds = time.ElapsedGameTime.TotalSeconds;
                 remainingSeconds > 0;
                 remainingSeconds -= intervalSeconds)
@@ -160,6 +160,12 @@ namespace Ballz.GameSession.Physics
                 }
 
                 Game.World.AddDiscreteSnapshot(newSnapshot);
+            }
+
+            // Update shots
+            foreach(var shot in newSnapshot.Shots)
+            {
+
             }
         }
 

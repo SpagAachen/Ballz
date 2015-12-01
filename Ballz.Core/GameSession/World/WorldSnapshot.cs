@@ -27,8 +27,11 @@ namespace Ballz.GameSession.World
             private set;
         }
 
-        public WorldSnapshot(List<Entity> newEntitites, Terrain newTerrain, List<Shot> shots = new List<Shot>())
+        public WorldSnapshot(List<Entity> newEntitites, Terrain newTerrain, List<Shot> shots = null)
         {
+            Shots = shots;
+            if (shots == null)
+                shots = new List<Shot>();
             Entities = newEntitites;
             StaticGeometry = newTerrain;
             Shots = shots;
