@@ -42,7 +42,7 @@ namespace Ballz.GameSession.Physics
             KeyPressed[InputMessage.MessageType.ControlsRight] = false;
         }
 
-        public Dictionary<Entity, Body> PreparePhysicsEngine(WorldSnapshot newSnapshot)
+        public Dictionary<Entity, Body> PreparePhysicsEngine(World.World worldState)
         {
             //TODO remove later
             engine = new PhysicsEngine();
@@ -50,13 +50,11 @@ namespace Ballz.GameSession.Physics
             engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
             PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -1f), new Lifespan());
             engine.AddLogic(logGravity);
-            
-            var headTime = Game.World.HeadTime;
-            //var elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
+
             //TODO extract into function
 
             // Terrain
-            var terrain = newSnapshot.StaticGeometry.getOutlineTriangles();
+            var terrain = worldState.StaticGeometry.getOutlineTriangles();
 
             //TODO: Testshape
             IShape shapeTest = new PolygonShape(VertexHelper.CreateRectangle(200, 1), 0.3f);
@@ -87,7 +85,7 @@ namespace Ballz.GameSession.Physics
 
             // Entities
             var entityPhysMap = new System.Collections.Generic.Dictionary<Entity, Body>();
-            foreach (var e in newSnapshot.Entities)
+            foreach (var e in worldState.Entities)
             {
                 IShape shape = null;
                 float mass = .0f;
@@ -123,15 +121,14 @@ namespace Ballz.GameSession.Physics
 
         public override void Update(GameTime time)
         {
-            var headSnapshot = Game.World.GetHeadSnapshot();
-            var newSnapshot = (WorldSnapshot)headSnapshot.Clone();
+            var worldState = Game.World;
 
-            var player = newSnapshot.EntityById(Game.Match.PlayerBallId);
+            var player = worldState.EntityById(Game.Match.PlayerBallId);
             // Apply input messages
-            if(player != null)
+            if (player != null)
             {
-                if(KeyPressed[InputMessage.MessageType.ControlsLeft])
-                        player.Velocity = new Vector2(-2f, player.Velocity.Y);
+                if (KeyPressed[InputMessage.MessageType.ControlsLeft])
+                    player.Velocity = new Vector2(-2f, player.Velocity.Y);
                 if (KeyPressed[InputMessage.MessageType.ControlsRight])
                     player.Velocity = new Vector2(2f, player.Velocity.Y);
 
@@ -141,7 +138,7 @@ namespace Ballz.GameSession.Physics
                         player.Velocity = new Vector2(player.Velocity.X, 2f);
                         break;
                     case InputMessage.MessageType.ControlsAction:
-                        newSnapshot.Shots.Add(new Shot
+                        worldState.Shots.Add(new Shot
                         {
                             ExplosionRadius = 0.5f,
                             HealthImpactAtDirectHit = 25,
@@ -157,49 +154,41 @@ namespace Ballz.GameSession.Physics
 
             controlInput = null;
 
-            var entityPhysMap = PreparePhysicsEngine(newSnapshot);
+            var entityPhysMap = PreparePhysicsEngine(worldState);
 
-            float intervalSeconds = (float)World.World.IntervalMs / 1000.0f;
+            float intervalSeconds = (float)time.ElapsedGameTime.TotalSeconds;
 
-            // Update Entity positions
-            for (var remainingSeconds = time.ElapsedGameTime.TotalSeconds;
-                remainingSeconds > 0;
-                remainingSeconds -= intervalSeconds)
+
+            engine.Update(intervalSeconds, intervalSeconds);
+
+            foreach (var e in worldState.Entities)
             {
-
-                engine.Update(intervalSeconds, intervalSeconds);
-
-                foreach (var e in newSnapshot.Entities)
+                if (!entityPhysMap.ContainsKey(e))
                 {
-                    if (!entityPhysMap.ContainsKey(e))
-                    {
-                        continue;
-                    }
-                    var physE = entityPhysMap[e];
-                    var state = physE.State;
-
-                    e.Position = state.Position.ToXna();
-                    e.Velocity = state.Velocity.ToXna();
-
-                    const float dg90 = 2 * (float)Math.PI * 90f / 360f;
-                    if (e.Velocity.LengthSquared() > 0.0001f)
-                        e.Rotation = dg90 * (e.Velocity.X > 0 ? 1 : -1);
-                    else
-                        e.Rotation = dg90;
+                    continue;
                 }
+                var physE = entityPhysMap[e];
+                var state = physE.State;
 
-                Game.World.AddDiscreteSnapshot(newSnapshot);
+                e.Position = state.Position.ToXna();
+                e.Velocity = state.Velocity.ToXna();
+
+                const float dg90 = 2 * (float)Math.PI * 90f / 360f;
+                if (e.Velocity.LengthSquared() > 0.0001f)
+                    e.Rotation = dg90 * (e.Velocity.X > 0 ? 1 : -1);
+                else
+                    e.Rotation = dg90;
             }
 
             // Update shots
-            foreach(var shot in newSnapshot.Shots)
+            foreach (var shot in worldState.Shots)
             {
                 //TODO: Compute actual shot target position
                 Vector2 targetPos = shot.ShotStart + 3 * shot.ShotVelocity;
-                newSnapshot.StaticGeometry.SubtractCircle(targetPos.X / 0.03f, targetPos.Y / 0.03f, shot.ExplosionRadius / 0.03f);
+                worldState.StaticGeometry.SubtractCircle(targetPos.X / 0.03f, targetPos.Y / 0.03f, shot.ExplosionRadius / 0.03f);
             }
             // Remove all shots
-            newSnapshot.Shots.Clear();
+            worldState.Shots.Clear();
         }
 
         private void processInput(InputMessage message)

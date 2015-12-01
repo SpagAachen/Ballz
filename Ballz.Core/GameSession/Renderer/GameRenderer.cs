@@ -45,9 +45,9 @@ namespace Ballz.GameSession.Renderer
             BallEffect.View = ViewMatrix;
             BallEffect.Projection = ProjectionMatrix;
 
-            var snapshot = Game.World.GetSnapshot(time);
+            var worldState = Game.World;
 
-            var tris = snapshot.StaticGeometry.getTriangles();
+            var tris = worldState.StaticGeometry.getTriangles();
             VertexPositionColorTexture[] vpc = new VertexPositionColorTexture[tris.Count * 3];
             
             int i = 0;
@@ -81,7 +81,7 @@ namespace Ballz.GameSession.Renderer
 
             GraphicsDevice.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vpc, 0, tris.Count);
 
-            foreach (var entity in snapshot.Entities)
+            foreach (var entity in worldState.Entities)
             {
                 Vector2 nV = Vector2.Normalize(entity.Velocity);
                 Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * 50 * nV.X / 360.0)) * Matrix.CreateTranslation(new Vector3(entity.Position, 0));

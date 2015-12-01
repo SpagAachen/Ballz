@@ -56,7 +56,6 @@
     <Compile Include="GameSession\World\Ball.cs" />
     <Compile Include="GameSession\World\Terrain.cs" />
     <Compile Include="GameSession\World\World.cs" />
-    <Compile Include="GameSession\World\WorldSnapshot.cs" />
     <Compile Include="GameSession\Renderer\GameRenderer.cs" />
     <Compile Include="Network\Client.cs" />
     <Compile Include="Network\Connection.cs" />

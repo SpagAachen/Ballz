@@ -88,10 +88,9 @@ namespace Ballz.GameSession
 
             //System.Console.WriteLine("");
 
-            WorldSnapshot snpsht = new WorldSnapshot(Entities, theTerrain);
+            World.World snpsht = new World.World(Entities, theTerrain);
 
-            theGame.World = new World.World();
-            theGame.World.AddDiscreteSnapshot(snpsht);
+            theGame.World = snpsht;
 
         }
 
