@@ -56,7 +56,7 @@ namespace Ballz.Menu
         {
             if(Active)
             {
-                int index = Choices.BinarySearch(SelectedChoice.Value);
+                int index = Choices.IndexOf(SelectedChoice.Value);
                 SelectedChoice.Value = Choices[(index+1)%Choices.Count];
             }
         }
@@ -65,7 +65,7 @@ namespace Ballz.Menu
         {
             if (Active)
             {
-                int index = Choices.BinarySearch(SelectedChoice.Value);
+                int index = Choices.IndexOf(SelectedChoice.Value);
                 index = ((index - 1) + Choices.Count) % Choices.Count;
                 SelectedChoice.Value = Choices[index];
             }
