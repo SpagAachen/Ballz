@@ -8,7 +8,7 @@ namespace Ballz.Menu
 {
     public class InputBox : Leaf, IRawInputConsumer
     {
-        private string code;
+        public string Value;
 
         public InputBox(string name, bool selectable = false) : base(name, selectable)
         {
@@ -16,15 +16,15 @@ namespace Ballz.Menu
         
         public void HandleRawKey(char key)
         {
-            code += key;
+            Value += key;
         }
 
         public void HandleBackspace()
         {
-            if (code.Length > 0)
-                code = code.Substring(0, code.Length - 1);
+            if (Value.Length > 0)
+                Value = Value.Substring(0, Value.Length - 1);
         }
 
-        public override string DisplayName => Name + code;
+        public override string DisplayName => Name + Value;
     }
 }

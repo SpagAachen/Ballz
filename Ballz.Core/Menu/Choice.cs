@@ -27,27 +27,48 @@ namespace Ballz.Menu
     {
         private Settings.Setting<T> SelectedChoice;
         private List<T> Choices;
-        private bool Active;
         private string previousDecorator = "", nextDecorator = "";
 
         public Choice(string name, Settings.Setting<T> selectedValue, List<T> chooseableValues, bool selectable = true) : base(name, selectable)
         {
             SelectedChoice = selectedValue;
             Choices = chooseableValues;
-            OnSelect += () =>
-            {
-                Active = !Active;
-                    if(Active)
-                    {
-                        previousDecorator = "<< ";
-                        nextDecorator = " >>";
-                    }
-                    else
-                    {
-                        previousDecorator = "";
-                        nextDecorator = "";
-                    }
+
+            OnSelect += () => {
+                if(!Active)
+                {
+                    ActiveChanged = true;
+                    Active = true;
+                }
+                else
+                    ActiveChanged = false;
             };
+            OnUnSelect += () => {
+                if(Active)
+                {
+                    ActiveChanged = true;
+                    Active = false;
+                }
+                else
+                    ActiveChanged = false;
+            };
+
+            OnSelect += selectionChanged;
+            OnUnSelect += selectionChanged;
+        }
+
+        private void selectionChanged()
+        {
+            if(Active)
+            {
+                previousDecorator = "<< ";
+                nextDecorator = " >>";
+            }
+            else
+            {
+                previousDecorator = "";
+                nextDecorator = "";
+            }
         }
 
         public override string DisplayName => (Name + previousDecorator+SelectedChoice.Value.ToString()+nextDecorator);

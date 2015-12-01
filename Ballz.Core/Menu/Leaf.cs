@@ -10,6 +10,8 @@ namespace Ballz.Menu
     {
         protected Leaf(string name, bool selectable = false) : base(name, selectable)
         {
+            
+
         }
 
         public override IReadOnlyList<Item> Items => new List<Item>();

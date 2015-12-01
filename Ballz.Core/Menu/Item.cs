@@ -5,10 +5,14 @@ namespace Ballz.Menu
 {
     public abstract class Item
     {
+        public bool Active{ get; protected set;}
+        //TODO: if necessary use an event for this.
+        public bool ActiveChanged{ get; protected set;}
         protected Item(string name, bool selectable = false)
         {
             Name = name;
             Selectable = selectable;
+            Active = false;
         }
 
         //The name
@@ -33,20 +37,16 @@ namespace Ballz.Menu
         public delegate void ItemHandler<in T>(T item) 
             where T : Item;
 
-        public void BindCompositeHandler(ItemHandler<Composite> handler)
+        public void BindSelectHandler<T>(ItemHandler<T> handler) where T : Item
         {
-            foreach (var c in Descendants.OfType<Composite>())
+            foreach (var c in Descendants.OfType<T>())
                 c.OnSelect += () => handler.Invoke(c);
         }
-        public void BindBackHandler(ItemHandler<Back> handler)
+
+        public void BindUnSelectHandler<T>(ItemHandler<T> handler) where T : Item
         {
-            foreach (var c in Descendants.OfType<Back>())
-                c.OnSelect += () => handler.Invoke(c);
-        }
-        public void BindInputBoxHandler(ItemHandler<InputBox> handler)
-        {
-            foreach (var c in Descendants.OfType<InputBox>())
-                c.OnSelect += () => handler.Invoke(c);
+            foreach (var c in Descendants.OfType<T>())
+                c.OnUnSelect += () => handler.Invoke(c);
         }
 
         public abstract Item SelectedItem { get; }
@@ -57,11 +57,20 @@ namespace Ballz.Menu
 
         public delegate void SelectHandler();
 
+        public delegate void UnSelectHandler();
+
         public event SelectHandler OnSelect;
+
+        public event UnSelectHandler OnUnSelect;
 
         public void Activate()
         {
             OnSelect?.Invoke();
+        }
+
+        public void DeActivate()
+        {
+            OnUnSelect?.Invoke();
         }
     }
 }
