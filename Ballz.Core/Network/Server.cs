@@ -8,7 +8,7 @@
     using Microsoft.Xna.Framework;
     using System.Net.Sockets;
 
-    class Server
+	class Server
     {
         private static int nextId = 1;
         TcpListener listener = null;

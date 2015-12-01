@@ -178,9 +178,10 @@ namespace Ballz
 			var networkMenu = new Composite ("Multiplayer", true);
 			// - connect to server
 			var networkConnectToMenu = new Composite ("Connect to", true);
-			networkConnectToMenu.AddItem (new InputBox ("Host Name: ", true)); //TODO: process input
+			var networkHostInput = new InputBox ("Host Name: ", true);
+			networkConnectToMenu.AddItem (networkHostInput);
 			var networkConnectToLabel = new Label ("Connect", true);
-			networkConnectToLabel.OnSelect += () => Network.ConnectToServer ("localhost", 13337); //TODO: use input
+			networkConnectToLabel.OnSelect += () => Network.ConnectToServer (networkHostInput.Value, 13337);
 			networkConnectToMenu.AddItem (networkConnectToLabel);
             // - start server
             var networkServerMenu = new Label("Start server", true);
