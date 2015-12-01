@@ -2,12 +2,13 @@
 {
     using Microsoft.Xna.Framework;
     using Messages;
+	using System;
 
     class Client
     {
         private Network network = null;
 
-        private Connection ConnectionToServer = null;
+        private Connection connectionToServer = null;
 
         public Client(Network net)
         {
@@ -16,13 +17,25 @@
 
         public void ConnectToServer(string host, int port)
         {
-            ConnectionToServer = new Connection(host, port, 0);
+            connectionToServer = new Connection(host, port, 0);
         }
 
         public void Update(GameTime time)
         {
+			if (connectionToServer.DataAvailable())
+			{
+				var data = connectionToServer.Receive();
+				foreach (var d in data)
+					onData(d);
+			}
+
             //TODO: Implement
         }
+
+		private void onData(string data)
+		{
+			Console.WriteLine("Received data from SERVER: " + data);
+		}
 
         public void HandleMessage(object sender, Message message)
         {
