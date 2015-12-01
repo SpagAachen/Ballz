@@ -578,44 +578,44 @@ namespace Ballz.GameSession.World
                 extractOutline(b?.e1);
             }
 
-
             physicsTris.AddRange(triangles);
 
-
+            int triStartX = -1;
+            bool startNew = true;
             foreach (var line in fullCells)
             {
-                int triStartX = -1;
-                int triEndX   = -1;
-
-                bool startNew = true;
-
                 for (int i = 0; i < line.Count; ++i)
                 {
                     var cell = line[i];
 
-
-                    if(startNew)
+                    bool createTriangle = false;
+                    if (i == 0 || startNew)
                     {
+                        // new start
                         triStartX = cell.x - 1;
-                        triEndX = cell.x;
+                        startNew = false;
                     }
 
-                    bool createTriangle = (cell.x - 1 != triEndX) || i == line.Count-1;
-
-                    // Shift current end pointer?
-                    if (!createTriangle || i == line.Count - 1)
+                    if (i == line.Count - 1)
                     {
-                        triEndX = cell.x;
-                        startNew = false;
+                        // need to close segment here
+                        createTriangle = true;
+                    }
+                    else
+                    {
+                        if(cell.x+1 < line[i+1].x)
+                        {
+                            // gap
+                            createTriangle = true;
+                            startNew = true;
+                        }
                     }
 
                     if(createTriangle)
                     {
-                        triangles.Add(new Triangle(new Vector2(triStartX, cell.y-1), new Vector2(triStartX, cell.y), new Vector2(triEndX, cell.y-1)));
-                        triangles.Add(new Triangle(new Vector2(triStartX, cell.y), new Vector2(triEndX, cell.y), new Vector2(triEndX, cell.y-1)));
-
-                        startNew = true;
-                    } 
+                        triangles.Add(new Triangle(new Vector2(triStartX, cell.y-1), new Vector2(triStartX, cell.y), new Vector2(cell.x, cell.y-1)));
+                        triangles.Add(new Triangle(new Vector2(triStartX, cell.y), new Vector2(cell.x, cell.y), new Vector2(cell.x, cell.y-1)));
+                    }
                 }
             }
 
