@@ -79,6 +79,8 @@ namespace Ballz
 			Logic.Message += Network.HandleMessage;
             //Logic.Message += gameRendering.HandleMessage;
             Logic.Message += menuRendering.HandleMessage;
+
+			Network.Message += Logic.HandleNetworkMessage;
         }
 
         public static Ballz The()

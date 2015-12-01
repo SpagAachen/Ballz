@@ -41,8 +41,9 @@
                 Disconnect();
             State = StateT.Client;
             client = new Client(this);
-            client.ConnectToServer(hostname, port);
-            RaiseMessageEvent(NetworkMessage.MessageType.ConnectingToServer);
+			RaiseMessageEvent(NetworkMessage.MessageType.ConnectingToServer);
+            client.ConnectToServer(hostname, port); // blocking atm
+			RaiseMessageEvent(NetworkMessage.MessageType.ConnectedToServer);
             //TODO: Implement
         }
 

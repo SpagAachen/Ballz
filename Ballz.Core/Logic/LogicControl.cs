@@ -74,8 +74,23 @@ namespace Ballz.Logic
             Message?.Invoke(this, msg);
         }
 
+		public void HandleNetworkMessage(object sender, Message message)
+		{
+			if (message.Kind != Messages.Message.MessageType.NetworkMessage)
+				return;
+			var msg = (NetworkMessage)message;
+			switch (msg.Kind)
+			{
+			case NetworkMessage.MessageType.ConnectedToServer:
+				startGame ();
+				break;
+			}
+		}
+
         public void HandleInputMessage(object sender, Message message)
         {
+
+
             if (message.Kind != Messages.Message.MessageType.InputMessage)
                 return;
 

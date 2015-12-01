@@ -32,9 +32,9 @@
             //TODO: Implement
         }
 
-		private void onData(string data)
+		private void onData(object data)
 		{
-			Console.WriteLine("Received data from SERVER: " + data);
+			Console.WriteLine("Received data from SERVER: " + data.ToString());
 		}
 
         public void HandleMessage(object sender, Message message)
