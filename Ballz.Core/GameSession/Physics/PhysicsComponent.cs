@@ -47,6 +47,72 @@ namespace Ballz.GameSession.Physics
             KeyPressed[InputMessage.MessageType.ControlsRight] = false;
         }
 
+        private float distance(Vector2 v0, Vector2 v1, Vector2 p)
+        {
+            float dy = v1.Y - v0.Y;
+            float dx = v1.X - v0.X;
+
+            double denominator = Math.Sqrt(dy * dy + dx * dx);
+            double dist = Math.Abs(dy * p.X - dx * p.Y + v1.X * v0.Y - v1.Y * v0.Y) / denominator;
+            return (float) dist;
+        }
+
+        /*private List<Vector2> smoothenContour(List<Vector2> outline)
+        {
+            var contour = new List<Vector2>();
+            float epsilon = 0.1f;
+            int granularity = 16; // has to equal 2^i - 1
+            int errorLength = 0;
+
+            var currentVec = outline[0];
+            contour.Add(currentVec);
+
+            for (int i = 1; i < outline.Count - 1; i++)
+            {
+                float deltaDegree = 360 / granularity;
+                float deltaRad = (float) ((Math.PI / 180) * deltaDegree);
+                var dir = outline[i + 1] - outline[i];
+                dir.Normalize();
+
+                int bestMatch = 0;
+                Vector2 bestDir = new Vector2(0, 0);
+                for (int j = 1; j < granularity; j++)
+                {
+                    dir.X = (float) (dir.X * Math.Cos(deltaRad) - dir.Y * Math.Sin(deltaRad));
+                    dir.Y = (float) (dir.Y * Math.Cos(deltaRad) + dir.X * Math.Sin(deltaRad));
+
+                    for (int l = 1; l < outline.Count - i; l++)
+                    {
+                        var nextVec = outline[i + l];
+                        var dist = distance(currentVec, currentVec + dir, nextVec);
+                        int error = 0;
+
+                        if (l > bestMatch)
+                        {
+                            bestMatch = l;
+                            bestDir = new Vector2(dir.X, dir.Y);
+                            error = 0;
+                        }
+                        else
+                        {
+                            error++;
+                        }
+
+                        if (dist > epsilon && error > errorLength)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+
+
+            }
+
+
+            return outline;
+        }*/
+
         public void UpdateTerrain(List<List<Vector2>> outline)
         {
             /*terrainShapes.Clear();
@@ -64,7 +130,7 @@ namespace Ballz.GameSession.Physics
             terrainShapes.Clear();
             for (int i = 0; i < outline.Count; i++)
             {
-                var terrain = outline[i];
+                var terrain = outline[i];// smoothenContour(outline[i]);
                 var terrainPhys = new AdvanceMath.Vector2D[terrain.Count];
                 for (int j = 0; j < terrain.Count; j++)
                 {
@@ -86,7 +152,7 @@ namespace Ballz.GameSession.Physics
             engine.AddLogic(logGravity);
 
             //Terrain
-            if (!shapesInitialized)
+            if (!shapesInitialized/*Game.World.StaticGeometry.up2date*/)
             {
                 UpdateTerrain(worldState.StaticGeometry.getOutline());
                 shapesInitialized = true;

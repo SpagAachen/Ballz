@@ -49,7 +49,7 @@ namespace Physics2DDotNet.Detectors
             {
                 if (left.value < right.value) { return -1; }
                 if (left.value > right.value) { return 1; }
-                return ((left == right) ? (0) : ((left.begin) ? (-1) : (1)));
+                return ((left.value == right.value) ? (0) : ((left.begin) ? (-1) : (1)));
             }
         }
         [Serializable]
