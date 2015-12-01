@@ -79,6 +79,13 @@ namespace Ballz.GameSession
             PlayerBallId = player.ID;
             Entities.Add(player);
 
+            var npc = new Ball
+            {
+                Position = new Vector2(5, 5),
+                Velocity = new Vector2(0, 0)
+            };
+            Entities.Add(npc);
+
             //System.Console.WriteLine("");
 
             WorldSnapshot snpsht = new WorldSnapshot(Entities, theTerrain);

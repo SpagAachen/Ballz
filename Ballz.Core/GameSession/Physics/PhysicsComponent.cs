@@ -1,8 +1,10 @@
 ﻿using Ballz.GameSession.World;
 using Ballz.Messages;
+using Ballz.Utils;
 using Microsoft.Xna.Framework;
 
 using System;
+using System.Linq;
 using Physics2DDotNet;
 using Physics2DDotNet.Shapes;
 using Physics2DDotNet.PhysicsLogics;
@@ -175,9 +177,9 @@ namespace Ballz.GameSession.Physics
                     }
                     var physE = entityPhysMap[e];
                     var state = physE.State;
-                    
-                    e.Position = new Vector2(state.Position.X, state.Position.Y);
-                    e.Velocity = new Vector2(state.Velocity.X, state.Velocity.Y);
+
+                    e.Position = state.Position.ToXna();
+                    e.Velocity = state.Velocity.ToXna();
 
                     const float dg90 = 2 * (float)Math.PI * 90f / 360f;
                     if (e.Velocity.LengthSquared() > 0.0001f)
