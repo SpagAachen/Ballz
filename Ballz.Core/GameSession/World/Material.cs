@@ -16,11 +16,11 @@ namespace Ballz.GameSession.World
                 PhysicsMaterial mat = new PhysicsMaterial();
                 mat.Shape = PhysicsShape.Circle;
                 //TODO: add reasonable Values here
-                mat.Radius = 0.5f;
-                mat.Density = 2f;
-                mat.Restitution = .0f;
-                mat.Friction = 10f;
-                mat.Dampening = 10f;
+                mat.Radius = 1.0f;
+                mat.Density = 20f;
+                mat.Restitution = .5f;
+                mat.Friction = .5f;
+                mat.Dampening = .5f;
                 return mat;
             }
         }

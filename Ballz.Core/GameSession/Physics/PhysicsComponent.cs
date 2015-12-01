@@ -48,7 +48,7 @@ namespace Ballz.GameSession.Physics
             engine = new PhysicsEngine();
             engine.BroadPhase = new Physics2DDotNet.Detectors.SelectiveSweepDetector();
             engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
-            PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -1f), new Lifespan());
+            PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -9.81f), new Lifespan());
             engine.AddLogic(logGravity);
 
             //TODO extract into function
@@ -123,7 +123,7 @@ namespace Ballz.GameSession.Physics
                 switch (controlInput)
                 {
                     case InputMessage.MessageType.ControlsUp:
-                        player.Velocity = new Vector2(player.Velocity.X, 2f);
+                        player.Velocity = new Vector2(player.Velocity.X, 5f);
                         break;
                     case InputMessage.MessageType.ControlsAction:
                         worldState.Shots.Add(new Shot
