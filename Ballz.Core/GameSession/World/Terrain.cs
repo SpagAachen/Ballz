@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Diagnostics;
 
 namespace Ballz.GameSession.World
 {
@@ -20,6 +23,7 @@ namespace Ballz.GameSession.World
 
 		private Texture2D terrainData = null;
 		private bool[,] terrainBitmap = null;
+        private float[,] terrainSmoothmap = null;
 
 		private bool up2date = false;
 		// We might need that later on...
@@ -34,6 +38,7 @@ namespace Ballz.GameSession.World
 			int Height = terrainData.Height;
 
 			terrainBitmap = new bool[Width, Height];
+            terrainSmoothmap = new float[Width, Height];
 
 			Color[] pixels = new Color[Width * Height];
 			terrainData.GetData<Color> (pixels);
@@ -45,8 +50,11 @@ namespace Ballz.GameSession.World
 					Color curPixel = pixels [y * Width + x];
 
 					// Note that we flip the y coord here
-					if(curPixel == Color.White)
-						terrainBitmap [x, Height-y-1] = true;
+                    if (curPixel == Color.White)
+                    {
+                        terrainBitmap[x, Height - y - 1] = true;
+                        terrainSmoothmap[x, Height - y - 1] = 1.0f;
+                    }
 				}
 			}
 
@@ -152,27 +160,8 @@ namespace Ballz.GameSession.World
 
         }
 
+       
 
-        public class GridEdge
-        {
-            public IntVector2 a, b;
-            public GridEdge(IntVector2 a, IntVector2 b)
-            {
-                this.a = a; this.b = b;
-            }
-
-            public override bool Equals(object obj)
-            {
-                var g = obj as GridEdge;
-                if (g == null)
-                    return false;
-                else
-                    return a.x == g.a.x
-                        && a.y == g.a.y
-                        && b.x == g.b.x
-                        && b.y == g.b.y;
-            }
-        }
 
         public class Border
         {
@@ -308,6 +297,13 @@ namespace Ballz.GameSession.World
             return result;
         }
 
+        public Vector2 Mix(Vector2 a, Vector2 b, float wa, float wb)
+        {
+            float weight = (0.5f - wa) / (wb - wa);
+
+            return a + weight * (b - a);
+        }
+
         public struct Triangle
         {
             public Vector2 a,b,c;
@@ -318,6 +314,7 @@ namespace Ballz.GameSession.World
         }
         private void extractTrianglesAndOutline()
         {
+
             // Do not extract triangles if they are correct already
             if (up2date)
                 return;
@@ -336,6 +333,59 @@ namespace Ballz.GameSession.World
 
             List<Edge> allEdges = new List<Edge>(1000);
 
+            // Use this one if performance is an issue
+            //float[] gauss = new float[]{1,1,1};
+            float[] gauss = new float[]{1,1,1,1,1};
+            //float[] gauss = new float[]{0.0702f,    0.1311f,    0.1907f,    0.2161f,    0.1907f,    0.1311f,    0.0702f};
+            int halfGauss = gauss.GetLength(0) / 2;
+
+            // Iterate over all bitmap pixels
+            for (int y = 0; y < height; ++y)
+            {
+                for (int x = 0; x < width; ++x)
+                {
+                    float sum = 0.0f;
+                    float weight = 0.0f;
+                    for(int i = -halfGauss; i <= halfGauss; ++i)
+                    {
+                        int index = x + i;
+                        if(index >= 0 && index < width)
+                        {
+                            float val = gauss[i + halfGauss];
+
+                            sum    += (terrainBitmap[index, y] ? 1.0f : 0.0f) * val;
+                            weight += val;
+                        }
+                    }
+
+                    terrainSmoothmap[x, y] = sum / weight;
+                }
+            }
+
+            var terrainSmoothmapCopy = terrainSmoothmap;
+
+            for (int y = 0; y < height; ++y)
+            {
+                for (int x = 0; x < width; ++x)
+                {
+                    float sum = 0.0f;
+                    float weight = 0.0f;
+                    for(int i = -halfGauss; i <= halfGauss; ++i)
+                    {
+                        int index = y + i;
+                        if(index >= 0 && index < height)
+                        {
+                            float val = gauss[i + halfGauss];
+
+                            sum    += terrainSmoothmapCopy[x, index] * val;
+                            weight += val;
+                        }
+                    }
+
+                    terrainSmoothmap[x, y] = sum / weight;
+                }
+            }
+
             // Iterate over all bitmap pixels
             for (int y = 1; y < height; ++y)
             {
@@ -351,10 +401,16 @@ namespace Ballz.GameSession.World
                      */
 
                     // TODO: upper-left row/column
-                    bool _0 = terrainBitmap[x-1, y-1];
-                    bool _1 = terrainBitmap[x-1, y];
-                    bool _2 = terrainBitmap[x, y];
-                    bool _3 = terrainBitmap[x, y-1];
+
+                    float w0 = terrainSmoothmap[x - 1, y - 1];
+                    float w1 = terrainSmoothmap[x-1, y];
+                    float w2 = terrainSmoothmap[x, y];
+                    float w3 = terrainSmoothmap[x, y-1];
+
+                    bool _0 = w0 > 0.5f;
+                    bool _1 = w1 > 0.5f;
+                    bool _2 = w2 > 0.5f;
+                    bool _3 = w3 > 0.5f;
 
                     Vector2 v0 = new Vector2(x-1, y-1);
                     Vector2 v1 = new Vector2(x-1, y);
@@ -362,7 +418,7 @@ namespace Ballz.GameSession.World
                     Vector2 v3 = new Vector2(x, y-1);
 
                     int mscase = (_0?1:0) + (_1?2:0) + (_2?4:0) + (_3?8:0);
-                   
+
 
                     IntVector2 top = new IntVector2(2*x-1, 2*(y-1));
                     IntVector2 left = new IntVector2(2*(x-1), 2*y-1);
@@ -376,98 +432,85 @@ namespace Ballz.GameSession.World
                             // No triangles at all
                             break;
                         case 1:
-                            triangles.Add(new Triangle(v0, 0.5f * (v0 + v1), 0.5f * (v0 + v3)));
-
+                            triangles.Add(new Triangle(v0, Mix(v0, v1, w0, w1), Mix(v0, v3, w0, w3)));
                             allEdges.Add(new Edge(top, left));
                             break;
                         case 2:
-                            triangles.Add(new Triangle(v1, 0.5f * (v1 + v2), 0.5f * (v0 + v1)));
+                            triangles.Add(new Triangle(v1, Mix(v1, v2, w1, w2), Mix(v0, v1, w0, w1)));
                             allEdges.Add(new Edge(left, bottom));
                             break;
                         case 3:
-                            triangles.Add(new Triangle(v0, v1, 0.5f * (v1 + v2)));
-                            triangles.Add(new Triangle(0.5f * (v1 + v2), 0.5f * (v0 + v3), v0));
+                            triangles.Add(new Triangle(v0, v1, Mix(v1, v2, w1, w2)));
+                            triangles.Add(new Triangle(Mix(v1, v2, w1, w2), Mix(v0, v3, w0, w3), v0));
                             allEdges.Add(new Edge(top, bottom));
                             break;
                         case 4:
-                            triangles.Add(new Triangle(v2, 0.5f * (v2 + v3), 0.5f * (v1 + v2)));
+                            triangles.Add(new Triangle(v2, Mix(v2, v3, w2, w3), Mix(v1, v2, w1, w2)));
                             allEdges.Add(new Edge(bottom, right));
                             break;
                         case 5:
-                            triangles.Add(new Triangle(v0, 0.5f * (v0 + v1), 0.5f * (v0 + v3)));
-                            triangles.Add(new Triangle(v2, 0.5f * (v2 + v3), 0.5f * (v1 + v2)));
+                            triangles.Add(new Triangle(v0, Mix(v0, v1, w0, w1), Mix(v0, v3, w0, w3)));
+                            triangles.Add(new Triangle(v2, Mix(v2, v3, w2, w3), Mix(v1, v2, w1, w2)));
                             allEdges.Add(new Edge(top, left));
                             allEdges.Add(new Edge(bottom, right));
                             break;
-
-                            /*
-                     *      0 -- 3
-                     *      |    |
-                     *      1 -- 2
-                     * 
-                     */
                         case 6:
-                            triangles.Add(new Triangle(v2, 0.5f * (v0 + v1), v1));
-                            triangles.Add(new Triangle(v2, 0.5f * (v2 + v3), 0.5f * (v0 + v1)));
+                            triangles.Add(new Triangle(v2, Mix(v0, v1, w0, w1), v1));
+                            triangles.Add(new Triangle(v2, Mix(v2, v3, w2, w3), Mix(v0, v1, w0, w1)));
                             allEdges.Add(new Edge(left, right));
                             break;
                         case 7:
-                            triangles.Add(new Triangle(v1, 0.5f * (v0 + v3), v0));
-                            triangles.Add(new Triangle(v1, 0.5f * (v2 + v3), 0.5f * (v0 + v3)));
-                            triangles.Add(new Triangle(v1, v2, 0.5f * (v2 + v3)));
+                            triangles.Add(new Triangle(v1, Mix(v0, v3, w0, w3), v0));
+                            triangles.Add(new Triangle(v1, Mix(v2, v3, w2, w3), Mix(v0, v3, w0, w3)));
+                            triangles.Add(new Triangle(v1, v2, Mix(v2, v3, w2, w3)));
                             allEdges.Add(new Edge(top, right));
                             break;
                         case 8:
-                            triangles.Add(new Triangle(v3, 0.5f * (v0 + v3), 0.5f * (v2 + v3)));
+                            triangles.Add(new Triangle(v3, Mix(v0, v3, w0, w3), Mix(v2, v3, w2, w3)));
                             allEdges.Add(new Edge(top, right));
                             break;
                         case 9:
-                            triangles.Add(new Triangle(v0, 0.5f * (v2 + v3), v3));
-                            triangles.Add(new Triangle(v0, 0.5f * (v0 + v1), 0.5f * (v2 + v3)));
+                            triangles.Add(new Triangle(v0, Mix(v2, v3, w2, w3), v3));
+                            triangles.Add(new Triangle(v0, Mix(v0, v1, w0, w1), Mix(v2, v3, w2, w3)));
                             allEdges.Add(new Edge(left, right));
                             break;
                         case 10: 
-                            triangles.Add(new Triangle(v1, 0.5f * (v1 + v2), 0.5f * (v0 + v1)));
-                            triangles.Add(new Triangle(v3, 0.5f * (v0 + v3), 0.5f * (v2 + v3)));
+                            triangles.Add(new Triangle(v1, Mix(v1, v2, w1, w2), Mix(v0, v1, w0, w1)));
+                            triangles.Add(new Triangle(v3, Mix(v0, v3, w0, w3), Mix(v2, v3, w2, w3)));
                             allEdges.Add(new Edge(left, bottom));
                             allEdges.Add(new Edge(top, right));
                             break;
                         case 11: 
-                            triangles.Add(new Triangle(v0, v1, 0.5f * (v1 + v2)));
-                            triangles.Add(new Triangle(v0, 0.5f * (v1 + v2), 0.5f * (v2 + v3)));
-                            triangles.Add(new Triangle(v0, 0.5f * (v2 + v3), v3));
+                            triangles.Add(new Triangle(v0, v1, Mix(v1, v2, w1, w2)));
+                            triangles.Add(new Triangle(v0, Mix(v1, v2, w1, w2), Mix(v2, v3, w2, w3)));
+                            triangles.Add(new Triangle(v0, Mix(v2, v3, w2, w3), v3));
                             allEdges.Add(new Edge(bottom, right));
                             break;
                         case 12: 
-                            triangles.Add(new Triangle(v3, 0.5f * (v0 + v3), 0.5f * (v1 + v2)));
-                            triangles.Add(new Triangle(v3, 0.5f * (v1 + v2), v2));
+                            triangles.Add(new Triangle(v3, Mix(v0, v3, w0, w3), Mix(v1, v2, w1, w2)));
+                            triangles.Add(new Triangle(v3, Mix(v1, v2, w1, w2), v2));
                             allEdges.Add(new Edge(top, bottom));
                             break;
                         case 13: 
-                            triangles.Add(new Triangle(v3, v0, 0.5f * (v0 + v1)));
-                            triangles.Add(new Triangle(v3, 0.5f * (v0 + v1), 0.5f * (v1 + v2)));
-                            triangles.Add(new Triangle(v3, 0.5f * (v1 + v2), v2));
-
+                            triangles.Add(new Triangle(v3, v0, Mix(v0, v1, w0, w1)));
+                            triangles.Add(new Triangle(v3, Mix(v0, v1, w0, w1), Mix(v1, v2, w1, w2)));
+                            triangles.Add(new Triangle(v3, Mix(v1, v2, w1, w2), v2));
                             allEdges.Add(new Edge(left, bottom));
                             break;
                         case 14: 
-                            triangles.Add(new Triangle(v2, 0.5f * (v0 + v1), v1));
-                            triangles.Add(new Triangle(v2, 0.5f * (v0 + v3), 0.5f * (v0 + v1)));
-                            triangles.Add(new Triangle(v2, v3, 0.5f * (v0 + v3)));
+                            triangles.Add(new Triangle(v2, Mix(v0, v1, w0, w1), v1));
+                            triangles.Add(new Triangle(v2, Mix(v0, v3, w0, w3), Mix(v0, v1, w0, w1)));
+                            triangles.Add(new Triangle(v2, v3, Mix(v0, v3, w0, w3)));
                             allEdges.Add(new Edge(top, left));
                             break;
                         case 15:
                             fullCells[fullCells.Count - 1].Add(new IntVector2(x, y));
-                            // Fill the whole quad
-                            //triangles.Add(new Triangle(v0, v1, v3));
-                            //triangles.Add(new Triangle(v3, v1, v2));
                             break;
                         default:
                             break;
                     }
                 }
             }
-                
 
             Border[,] bordersH = new Border[width, height];
             Border[,] bordersV = new Border[width, height];
@@ -539,7 +582,6 @@ namespace Ballz.GameSession.World
             physicsTris.AddRange(triangles);
 
 
-
             foreach (var line in fullCells)
             {
                 int triStartX = -1;
@@ -576,8 +618,6 @@ namespace Ballz.GameSession.World
                     } 
                 }
             }
-
-
 
             up2date = true;
         }

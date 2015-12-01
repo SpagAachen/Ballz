@@ -54,32 +54,20 @@ namespace Ballz.GameSession.Physics
             //TODO extract into function
 
             // Terrain
-            var terrain = worldState.StaticGeometry.getOutlineTriangles();
-
-            //TODO: Testshape
-            IShape shapeTest = new PolygonShape(VertexHelper.CreateRectangle(200, 1), 0.3f);
-            var coeffTest = new Coefficients(.0f, 10f);
-            var stateTest = new PhysicsState();
-            stateTest.Position = new ALVector2D(.0f, 10, 0);
-            var bodyTest = new Body(stateTest, shapeTest, float.PositiveInfinity, coeffTest, new Lifespan());
-            bodyTest.IgnoresGravity = true;
-
-            engine.AddBody(bodyTest);
-
-            // TODO: Use triangles now! Outline is deprecated
-
-            for (int i = 0; i < terrain.Count && i < 0; i++)
+            var terrains = worldState.StaticGeometry.getOutline();
+            
+           for (int i = 0; i < terrains.Count; i++)
             {
-                //terrainVert[i] = new AdvanceMath.Vector2D(terrain[i].X, terrain[i].Y);
-                var tri = terrain[i];
-                AdvanceMath.Vector2D[] terrainPhys = new AdvanceMath.Vector2D[3];
-                terrainPhys[0] = new AdvanceMath.Vector2D(tri.a.X, tri.a.Y);
-                terrainPhys[1] = new AdvanceMath.Vector2D(tri.b.X, tri.b.Y);
-                terrainPhys[2] = new AdvanceMath.Vector2D(tri.c.X, tri.c.Y);
-
-                var terrainShape = new PolygonShape(terrainPhys, 0.3f);
+                var terrain = terrains[i];
+                var terrainPhys = new AdvanceMath.Vector2D[terrain.Count];
+                for (int j = 0; j < terrain.Count; j++)
+                {
+                    var v = terrain[j];
+                    terrainPhys[j] = new AdvanceMath.Vector2D(v.X * 0.03f, v.Y * 0.03f);
+                }
+                var terrainShape = new PolygonShape(terrainPhys, 3f);
                 var terrainCoeff = new Coefficients(1, .5f);
-                var terrainBody = new Body(new PhysicsState(), terrainShape, .0f, terrainCoeff, new Lifespan());
+                var terrainBody = new Body(new PhysicsState(), terrainShape, float.PositiveInfinity, terrainCoeff, new Lifespan());
                 engine.AddBody(terrainBody);
             }
 
