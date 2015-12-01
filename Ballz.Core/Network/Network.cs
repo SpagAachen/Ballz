@@ -7,9 +7,9 @@
     /// <summary>
     /// Network takes care of all network related stuff independent of an existing game session.
     /// </summary>
-    class Network : GameComponent
+    public class Network : GameComponent
     {
-        internal enum StateT { None, Client, Server };
+        public enum StateT { None, Client, Server };
         private Server server;
         private Client client;
         public event EventHandler<Message> Message;
