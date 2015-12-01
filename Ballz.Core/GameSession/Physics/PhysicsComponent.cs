@@ -19,7 +19,9 @@ namespace Ballz.GameSession.Physics
     {
         new Ballz Game;
         PhysicsEngine engine;
+        List<PolygonShape> terrainShapes = new List<PolygonShape>();
         InputMessage.MessageType? controlInput = null;
+        bool shapesInitialized = false;
         public PhysicsControl(Ballz game) : base(game)
         {
             Game = game;
@@ -35,11 +37,43 @@ namespace Ballz.GameSession.Physics
             engine.BroadPhase = new Physics2DDotNet.Detectors.SelectiveSweepDetector();
             engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
 
+            PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -1f), new Lifespan());
+            engine.AddLogic(logGravity);
+
             KeyPressed[InputMessage.MessageType.ControlsAction] = false;
             KeyPressed[InputMessage.MessageType.ControlsUp] = false;
             KeyPressed[InputMessage.MessageType.ControlsDown] = false;
             KeyPressed[InputMessage.MessageType.ControlsLeft] = false;
             KeyPressed[InputMessage.MessageType.ControlsRight] = false;
+        }
+
+        public void UpdateTerrain(List<List<Vector2>> outline)
+        {
+            /*terrainShapes.Clear();
+            var triangles = Game.World.StaticGeometry.getOutlineTriangles();
+            for (int i = 0; i < triangles.Count; i++)
+            {
+                var terrainPhys = new AdvanceMath.Vector2D[3];
+                var t = triangles[i];
+                terrainPhys[0] = new AdvanceMath.Vector2D(t.a.X * 0.03f, t.a.Y * 0.03f);
+                terrainPhys[1] = new AdvanceMath.Vector2D(t.b.X * 0.03f, t.b.Y * 0.03f);
+                terrainPhys[2] = new AdvanceMath.Vector2D(t.c.X * 0.03f, t.c.Y * 0.03f);
+                var terrainShape = new PolygonShape(terrainPhys, 0.03f);
+                terrainShapes.Add(terrainShape);
+            }*/
+            terrainShapes.Clear();
+            for (int i = 0; i < outline.Count; i++)
+            {
+                var terrain = outline[i];
+                var terrainPhys = new AdvanceMath.Vector2D[terrain.Count];
+                for (int j = 0; j < terrain.Count; j++)
+                {
+                    var v = terrain[j];
+                    terrainPhys[j] = new AdvanceMath.Vector2D(v.X * 0.03f, v.Y * 0.03f);
+                }
+                var terrainShape = new PolygonShape(terrainPhys, 0.1f);
+                terrainShapes.Add(terrainShape);
+            }
         }
 
         public Dictionary<Entity, Body> PreparePhysicsEngine(World.World worldState)
@@ -51,21 +85,16 @@ namespace Ballz.GameSession.Physics
             PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -9.81f), new Lifespan());
             engine.AddLogic(logGravity);
 
-            //TODO extract into function
-
-            // Terrain
-            var terrains = worldState.StaticGeometry.getOutline();
-            
-           for (int i = 0; i < terrains.Count; i++)
+            //Terrain
+            if (!shapesInitialized)
             {
-                var terrain = terrains[i];
-                var terrainPhys = new AdvanceMath.Vector2D[terrain.Count];
-                for (int j = 0; j < terrain.Count; j++)
-                {
-                    var v = terrain[j];
-                    terrainPhys[j] = new AdvanceMath.Vector2D(v.X * 0.03f, v.Y * 0.03f);
-                }
-                var terrainShape = new PolygonShape(terrainPhys, 3f);
+                UpdateTerrain(worldState.StaticGeometry.getOutline());
+                shapesInitialized = true;
+            }
+
+            for (int i = 0; i < terrainShapes.Count; i++)
+            {
+                var terrainShape = terrainShapes[i];
                 var terrainCoeff = new Coefficients(1, .5f);
                 var terrainBody = new Body(new PhysicsState(), terrainShape, float.PositiveInfinity, terrainCoeff, new Lifespan());
                 engine.AddBody(terrainBody);
