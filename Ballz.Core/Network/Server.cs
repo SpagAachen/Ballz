@@ -3,13 +3,14 @@
     using System;
     using System.Collections.Generic;
     using System.Net;
-
     using Messages;
     using Microsoft.Xna.Framework;
     using System.Net.Sockets;
 
 	class Server
     {
+		private int test = 0;
+
         private static int nextId = 1;
         TcpListener listener = null;
         private readonly Network network = null;
@@ -45,6 +46,19 @@
                         onData(d, c.Id);
                 }
             }
+
+			// TEST
+			{
+				test++;
+				if (test % 100 == 0) {
+					var entities = Ballz.The ().World.Entities;
+					var sentities = new List<SEntity>();
+					foreach (var e in entities) {
+						sentities.Add (new SEntity (e));
+					}
+					Broadcast(sentities);
+				}
+			}
             //TODO: Implement
         }
 
@@ -53,7 +67,7 @@
 			Console.WriteLine("Received data from " + sender + ": " + data.ToString());
         }
 
-        public void Broadcast(string data)
+        public void Broadcast(object data)
         {
             foreach (var c in connections)
             {

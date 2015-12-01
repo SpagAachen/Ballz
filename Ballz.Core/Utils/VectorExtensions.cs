@@ -9,8 +9,30 @@ using Physics2DDotNet;
 
 namespace Ballz.Utils
 {
+	[Serializable]
+	public class BalllzVec2
+	{
+		public BalllzVec2(float x, float y)
+		{
+			X = x;
+			Y = y;
+		}
+		public float X = 0;
+		public float Y = 0;
+	}
+
     public static class VectorExtensions
     {
+		public static BalllzVec2 ToBallz(Vector2 v)
+		{
+			return new BalllzVec2(v.X, v.Y);
+		}
+
+		public static Vector2 ToXna(this BalllzVec2 v)
+		{
+			return new Vector2(v.X, v.Y);
+		}
+
         public static Vector2 ToXna(this AdvanceMath.Vector2D v)
         {
             return new Vector2(v.X, v.Y);

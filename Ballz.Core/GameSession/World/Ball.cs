@@ -9,6 +9,7 @@ namespace Ballz.GameSession.World
     /// We do not distinguish between player-controlled and other balls in the world state.
     /// Use <see cref="Session.PlayerBallId"/> to get the ball that is currently controlled by the local player.
     /// </remarks>
+	[Serializable]
     public class Ball : Entity
     {
         public Ball() : base(EntityType.Player)

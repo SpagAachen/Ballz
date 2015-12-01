@@ -10,7 +10,7 @@ namespace Ballz.GameSession.World
     {
         private static int InstanceCounter = 0;
 
-        public int ID
+		public int ID
         {
             get;
             set;
@@ -45,14 +45,14 @@ namespace Ballz.GameSession.World
             set;
         }
 
-        public Vector2 Direction
+		public Vector2 Direction
         {
             get
             {
                 return new Vector2((float)Math.Sin(Rotation), (float)Math.Cos(Rotation));
             }
         }
-
+			
         public PhysicsMaterial Material
         {
             get;
