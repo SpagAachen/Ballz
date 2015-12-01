@@ -32,6 +32,8 @@ namespace Ballz
 
         public World World { get; set; }
 
+		public Network.Network Network { get; set; }
+
         public GameSession.Session Match;
 
         public Settings.ProgrammSettings GameSettings;
@@ -51,11 +53,11 @@ namespace Ballz
             var menuRendering = new MenuRenderer(this, DefaultMenu());
             //var physics = new PhysicsControl(this);
             var input = new InputTranslator(this);
-            var network = new Network.Network(this);
+            Network = new Network.Network(this);
 
             Components.Add(input);
             //Components.Add(physics);
-            Components.Add(network);
+			Components.Add(Network);
             Components.Add(menuRendering);
             Components.Add(new PerformanceRenderer(this));
 
@@ -71,10 +73,10 @@ namespace Ballz
             //add eventhandlers to events
             input.Input += Logic.HandleInputMessage;
             //input.Input += physics.HandleMessage;
-            input.Input += network.HandleMessage;
+			input.Input += Network.HandleMessage;
 
             //Logic.Message += physics.HandleMessage;
-            Logic.Message += network.HandleMessage;
+			Logic.Message += Network.HandleMessage;
             //Logic.Message += gameRendering.HandleMessage;
             Logic.Message += menuRendering.HandleMessage;
         }
@@ -153,34 +155,40 @@ namespace Ballz
         }
 
         private Composite DefaultMenu()
-        {
-            // options menu
-            var optionsMenu = new Composite("Options", true);
-            //optionsMenu.AddItem(new Label("Not Implemented", false));
-            optionsMenu.AddItem(new CheckBox("FullScreen: ", GameSettings.Fullscreen));
-            optionsMenu.AddItem(new Choice<Settings.Resolution>("Resolution: ",GameSettings.ScreenResolution,getResolutions()));
-            Label apply = new Label("Apply", true);
-            apply.OnSelect += () => 
-                {
-                    File.Delete("Settings.xml");
-                    FileStream stream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
-                    storeSettings(stream);
-                    stream.Close();
-                    Graphics.IsFullScreen = GameSettings.Fullscreen.Value;
-                    Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
-                    Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Value.Height;
-                    Graphics.ApplyChanges();
-                };
-            optionsMenu.AddItem(apply);
+		{
+			// options menu
+			var optionsMenu = new Composite ("Options", true);
+			//optionsMenu.AddItem(new Label("Not Implemented", false));
+			optionsMenu.AddItem (new CheckBox ("FullScreen: ", GameSettings.Fullscreen));
+			optionsMenu.AddItem (new Choice<Settings.Resolution> ("Resolution: ", GameSettings.ScreenResolution, getResolutions ()));
+			Label apply = new Label ("Apply", true);
+			apply.OnSelect += () => {
+				File.Delete ("Settings.xml");
+				FileStream stream = new FileStream ("Settings.xml", FileMode.OpenOrCreate);
+				storeSettings (stream);
+				stream.Close ();
+				Graphics.IsFullScreen = GameSettings.Fullscreen.Value;
+				Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
+				Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Value.Height;
+				Graphics.ApplyChanges ();
+			};
+			optionsMenu.AddItem (apply);
 
-            // multiplayer menu
-            var networkMenu = new Composite("Multiplayer", true);
-            // - connect to server
-            var networkConnectToMenu = new Composite("Connect to", true);
-            networkConnectToMenu.AddItem(new InputBox("Host Name: ", true));
+			// multiplayer menu
+			var networkMenu = new Composite ("Multiplayer", true);
+			// - connect to server
+			var networkConnectToMenu = new Composite ("Connect to", true);
+			networkConnectToMenu.AddItem (new InputBox ("Host Name: ", true)); //TODO: process input
+			var networkConnectToLabel = new Label ("Connect", true);
+			networkConnectToLabel.OnSelect += () => Network.ConnectToServer ("localhost", 13337); //TODO: use input
+			networkConnectToMenu.AddItem (networkConnectToLabel);
             // - start server
-            var networkServerMenu = new Composite("Start server", true);
-            networkServerMenu.AddItem(new Label("Not Implemented", false));
+            var networkServerMenu = new Label("Start server", true);
+			networkServerMenu.OnSelect += () => 
+			{
+				Network.StartServer (13337); //TODO: port input
+				Logic.startGame ();
+			};
             // - add items
             networkMenu.AddItem(networkConnectToMenu);
             networkMenu.AddItem(networkServerMenu);

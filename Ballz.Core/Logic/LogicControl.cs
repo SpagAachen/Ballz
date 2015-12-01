@@ -38,23 +38,32 @@ namespace Ballz.Logic
 
         private void RegisterMenuEvents(Item menu)
         {
-            menu.BindCompositeHandler(c =>
+            menu.BindSelectHandler<Composite>(c =>
             {
                 activeMenu.Push(c);
                 RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
             });
 
-            menu.BindBackHandler(b =>
+            menu.BindSelectHandler<Back>(b =>
             {
                 activeMenu.Pop();
                 RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
             });
             
-            menu.BindInputBoxHandler(ib =>
+            menu.BindSelectHandler<InputBox>(ib =>
             {
                 rawInput = true;
                 RaiseMessageEvent(new MenuMessage(ib));
             });
+            
+            menu.BindUnSelectHandler<Item>(i =>
+                {
+                    if(!i.Selectable || !i.Active && !i.ActiveChanged)
+                    {
+                        activeMenu.Pop();
+                        RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
+                    }
+                });
             
         }
 
@@ -132,10 +141,15 @@ namespace Ballz.Logic
                         Ballz.The().Exit();     //TODO: this is rather ugly find a nice way to terminate the programm like sending a termination message
                     else
                     {
-                        if (rawInput)
-                            rawInput = false;
-                        else
-                            activeMenu.Pop();
+                            if (rawInput)
+                                rawInput = false;
+                            else
+                            {
+                                if (top.SelectedItem != null)
+                                    top.SelectedItem.DeActivate();
+                                else
+                                    top.DeActivate();
+                            }
                     }
                     RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
                     break;

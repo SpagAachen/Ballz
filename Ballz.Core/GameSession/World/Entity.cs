@@ -15,6 +15,7 @@ namespace Ballz.GameSession.World
             get;
             set;
         }
+
         public enum EntityType
         {
             Player
@@ -42,6 +43,14 @@ namespace Ballz.GameSession.World
         {
             get;
             set;
+        }
+
+        public Vector2 Direction
+        {
+            get
+            {
+                return new Vector2((float)Math.Sin(Rotation), (float)Math.Cos(Rotation));
+            }
         }
 
         public PhysicsMaterial Material

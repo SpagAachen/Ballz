@@ -56,7 +56,6 @@
     <Compile Include="GameSession\World\Ball.cs" />
     <Compile Include="GameSession\World\Terrain.cs" />
     <Compile Include="GameSession\World\World.cs" />
-    <Compile Include="GameSession\World\WorldSnapshot.cs" />
     <Compile Include="GameSession\Renderer\GameRenderer.cs" />
     <Compile Include="Network\Client.cs" />
     <Compile Include="Network\Connection.cs" />
@@ -65,6 +64,7 @@
     <Compile Include="Renderer\MenuRenderer.cs" />
     <Compile Include="Ballz.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Utils\VectorExtensions.cs" />
     <None Include="app.config" />
     <None Include="Content.mgcb" />
     <None Include="Content\Ball.xnb">
