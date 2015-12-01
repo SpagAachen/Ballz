@@ -25,7 +25,7 @@ namespace Ballz.GameSession.World
 		private bool[,] terrainBitmap = null;
         private float[,] terrainSmoothmap = null;
 
-		private bool up2date = false;
+		public bool up2date { get; private set; } = false;
 		// We might need that later on...
 		//private Texture2D terrainSDF = null;
 

@@ -89,8 +89,6 @@ namespace Ballz.Logic
 
         public void HandleInputMessage(object sender, Message message)
         {
-
-
             if (message.Kind != Messages.Message.MessageType.InputMessage)
                 return;
 
