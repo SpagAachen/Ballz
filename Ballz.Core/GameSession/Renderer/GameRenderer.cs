@@ -83,7 +83,7 @@ namespace Ballz.GameSession.Renderer
 
             foreach (var entity in worldState.Entities)
             {
-                Vector2 nV = Vector2.Normalize(entity.Velocity);
+                Vector2 nV = entity.Direction;
                 Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * 50 * nV.X / 360.0)) * Matrix.CreateTranslation(new Vector3(entity.Position, 0));
                 BallEffect.World = world;
                 BallModel.Draw(world, ViewMatrix, ProjectionMatrix);
