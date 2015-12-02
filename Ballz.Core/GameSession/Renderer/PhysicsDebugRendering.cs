@@ -8,6 +8,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 
+using static MathFloat.MathF;
+
 namespace Ballz.GameSession.Renderer
 {
     public partial class GameRenderer
@@ -30,7 +32,7 @@ namespace Ballz.GameSession.Renderer
             {
                 float angle = (float)Math.PI * 2.0f * (float)i / 16;
                 sphereVertices[i].Color = Color.GreenYellow;
-                sphereVertices[i].Position = new Vector3((float)Math.Sin(angle), (float)Math.Cos(angle), 0);
+                sphereVertices[i].Position = new Vector3(Sin(angle), Cos(angle), 0);
             }
 
             sphereVertices[17].Color = Color.GreenYellow;

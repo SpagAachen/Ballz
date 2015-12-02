@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
 
+using static MathFloat.MathF;
+
 namespace Ballz.Utils
 {
 	[Serializable]
@@ -34,8 +36,8 @@ namespace Ballz.Utils
 
         public static Vector2 Rotate(this Vector2 v, float radians)
         {
-            var ca = (float)Math.Cos(radians);
-            var sa = (float)Math.Sin(radians);
+            var ca = Cos(radians);
+            var sa = Sin(radians);
             return new Vector2(ca * v.X - sa * v.Y, sa * v.X + ca * v.Y);
         }
     }

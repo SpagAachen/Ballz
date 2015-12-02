@@ -6,6 +6,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using System;
 
+using static MathFloat.MathF;
+
 namespace Ballz.GameSession.Renderer
 {
     /// <summary>
