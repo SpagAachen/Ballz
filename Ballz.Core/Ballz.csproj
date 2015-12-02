@@ -84,6 +84,7 @@
     <Compile Include="Menu\Choice.cs" />
     <Compile Include="Menu\IChooseable.cs" />
     <Compile Include="Network\Serialization.cs" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
