@@ -13,6 +13,7 @@ namespace Ballz.Messages
             ControlsLeft,
             ControlsRight,
             ControlsAction,
+            ControlsJump,
             ControlsBack,
             RawBack,
             RawInput

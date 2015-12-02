@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 
 namespace Ballz.GameSession.World
 {
@@ -20,6 +21,10 @@ namespace Ballz.GameSession.World
         /// <summary>
         /// The health value of the ball. Typical value ranges are 0-100.
         /// </summary>
-        public double Health { get; set; }
+        public double Health { get; set; } = 100;
+
+        public bool IsAiming { get; set; } = false;
+
+        public Vector2 AimDirection { get; set; } = Vector2.UnitX;
     }
 }

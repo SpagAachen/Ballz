@@ -158,19 +158,28 @@ namespace Ballz.Input
                         OnInput(InputMessage.MessageType.ControlsBack, pressed);
                         break;
                     case Keys.Enter:
+                    case Keys.LeftControl:
+                    case Keys.RightControl:
                         OnInput(InputMessage.MessageType.ControlsAction, pressed);
                         break;
                     case Keys.Up:
+                    case Keys.W:
                         OnInput(InputMessage.MessageType.ControlsUp, pressed);
                         break;
                     case Keys.Down:
+                    case Keys.S:
                         OnInput(InputMessage.MessageType.ControlsDown, pressed);
                         break;
                     case Keys.Left:
+                    case Keys.A:
                         OnInput(InputMessage.MessageType.ControlsLeft, pressed);
                         break;
                     case Keys.Right:
+                    case Keys.D:
                         OnInput(InputMessage.MessageType.ControlsRight, pressed);
+                        break;
+                    case Keys.Space:
+                        OnInput(InputMessage.MessageType.ControlsJump, pressed);
                         break;
                 }
             }

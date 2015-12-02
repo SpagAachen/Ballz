@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FarseerPhysics.Collision.Shapes;
 using FarseerPhysics.Common;
+using System.Diagnostics;
 
 namespace Ballz.GameSession.Physics
 {
@@ -22,7 +23,7 @@ namespace Ballz.GameSession.Physics
         new Ballz Game;
         FarseerPhysics.Dynamics.World PhysicsWorld;
         InputMessage.MessageType? controlInput = null;
-        bool shapesInitialized = false;
+
         public PhysicsControl(Ballz game) : base(game)
         {
             Game = game;
@@ -130,29 +131,53 @@ namespace Ballz.GameSession.Physics
         public override void Update(GameTime time)
         {
             var worldState = Game.World;
+            float elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
 
-            var player = worldState.EntityById(Game.Match.PlayerBallId);
+            var player = worldState.EntityById(Game.Match.PlayerBallId) as Ball;
             // Apply input messages
             if (player != null)
             {
                 if (KeyPressed[InputMessage.MessageType.ControlsLeft])
+                {
                     player.Velocity = new Vector2(-2f, player.Velocity.Y);
+                    player.AimDirection = new Vector2(-Math.Abs(player.AimDirection.X), player.AimDirection.Y);
+                }
                 if (KeyPressed[InputMessage.MessageType.ControlsRight])
+                {
                     player.Velocity = new Vector2(2f, player.Velocity.Y);
+                    player.AimDirection = new Vector2(Math.Abs(player.AimDirection.X), player.AimDirection.Y);
+                }
+
+                // Up/Down keys rotate the aim vector
+                if (KeyPressed[InputMessage.MessageType.ControlsUp])
+                {
+                    var v = player.AimDirection;
+                    // Rotate at 60°/s. Use sign of v.x to determine the direction, so that the up key always moves the crosshair upwards.
+                    var radians = (v.X > 0 ? 1 : -1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
+                    player.AimDirection = v.Rotate(radians);
+                }
+                if (KeyPressed[InputMessage.MessageType.ControlsDown])
+                {
+                    var v = player.AimDirection;
+                    // Rotate at 60°/s. Use sign of v.x to determine the direction, so that the up key always moves the crosshair upwards.
+                    var radians = (v.X > 0 ? -1 : 1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
+                    player.AimDirection = v.Rotate(radians);
+                }
+
 
                 switch (controlInput)
                 {
-                    case InputMessage.MessageType.ControlsUp:
+                    case InputMessage.MessageType.ControlsJump:
                         player.Velocity = new Vector2(player.Velocity.X, 5f);
                         break;
                     case InputMessage.MessageType.ControlsAction:
                         worldState.Shots.Add(new Shot
                         {
-                            ExplosionRadius = 0.5f,
+                            ExplosionRadius = 1.0f,
                             HealthImpactAtDirectHit = 25,
                             IsInstantShot = true,
                             ShotStart = player.Position,
-                            ShotVelocity = player.Direction
+                            ShotVelocity = player.AimDirection
                         });
                         break;
                     default:
@@ -163,18 +188,51 @@ namespace Ballz.GameSession.Physics
             controlInput = null;
 
             PreparePhysicsEngine(worldState);
-
-            float intervalSeconds = (float)time.ElapsedGameTime.TotalSeconds;
-
-            PhysicsStep(worldState, intervalSeconds);
+            PhysicsStep(worldState, elapsedSeconds);
 
             // Update shots
             foreach (var shot in worldState.Shots)
             {
-                //TODO: Compute actual shot target position
-                Vector2 targetPos = shot.ShotStart + 3 * shot.ShotVelocity;
-                worldState.StaticGeometry.SubtractCircle(targetPos.X / 0.03f, targetPos.Y / 0.03f, shot.ExplosionRadius / 0.03f);
+                Vector2 targetPos = Vector2.Zero;
+                Fixture targetFixture = null;
+                Func<Fixture, Vector2, Vector2, float, float> raycastCallback =
+                    (Fixture fixture, Vector2 position, Vector2 normal, float fraction) =>
+                    {
+                        targetFixture = fixture;
+                        targetPos = position;
+                        return fraction;
+                    };
+                
+                PhysicsWorld.RayCast(raycastCallback, shot.ShotStart, shot.ShotStart + 100 * shot.ShotVelocity);
+
+                // Did the shot hit anything?
+                if(targetFixture != null)
+                {
+                    // Terrain hit? Then add an explosion there.
+                    if(targetFixture.Body == TerrainBody)
+                    {
+                        worldState.StaticGeometry.SubtractCircle(targetPos.X / 0.03f, targetPos.Y / 0.03f, shot.ExplosionRadius / 0.03f);
+                    }
+                    // Otherwise, find the entity that belongs to the hit body
+                    else
+                    {
+                        int entityId = (from e in PhysicsBodiesByEntityId
+                                        where e.Value == targetFixture.Body
+                                        select e.Key).FirstOrDefault();
+                        
+                        var entity = worldState.EntityById(entityId);
+                        var ball = entity as Ball;
+                        if(ball != null)
+                        {
+                            ball.Health -= shot.HealthImpactAtDirectHit;
+                            if (ball.Health < 0)
+                                ball.Health = 0;
+                        }
+                    }
+                }
+                
             }
+
             // Remove all shots
             worldState.Shots.Clear();
         }

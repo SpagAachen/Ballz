@@ -31,5 +31,12 @@ namespace Ballz.Utils
 		{
 			return new Vector2(v.X, v.Y);
 		}
+
+        public static Vector2 Rotate(this Vector2 v, float radians)
+        {
+            var ca = (float)Math.Cos(radians);
+            var sa = (float)Math.Sin(radians);
+            return new Vector2(ca * v.X - sa * v.Y, sa * v.X + ca * v.Y);
+        }
     }
 }

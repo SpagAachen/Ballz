@@ -1,4 +1,5 @@
 ﻿using Ballz.Messages;
+using Ballz.GameSession.World;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,10 +15,13 @@ namespace Ballz.GameSession.Renderer
     {
         Model BallModel;
         Texture2D GermoneyTexture;
+        Texture2D CrosshairTexture;
         Texture2D TerrainTexture;
         BasicEffect BallEffect;
         BasicEffect TerrainEffect;
         SpriteBatch spriteBatch;
+
+        private SpriteFont font;
 
         new Ballz Game;
 
@@ -28,6 +32,22 @@ namespace Ballz.GameSession.Renderer
         public GameRenderer(Ballz game) : base(game)
         {
             Game = game;
+        }
+
+        public Vector2 WorldToScreen(Vector3 Position)
+        {
+            var screenSpace = Vector4.Transform(Position, (ProjectionMatrix * ViewMatrix));
+            screenSpace /= screenSpace.W;
+            return new Vector2
+            {
+                X = (0.5f + 0.5f * screenSpace.X) * Game.GraphicsDevice.Viewport.Width,
+                Y = (1 - (0.5f + 0.5f * screenSpace.Y)) * Game.GraphicsDevice.Viewport.Height,
+            };
+        }
+
+        public Vector2 WorldToScreen(Vector2 Position)
+        {
+            return WorldToScreen(new Vector3(Position, 0));
         }
 
         /// <summary>
@@ -81,19 +101,38 @@ namespace Ballz.GameSession.Renderer
 
             GraphicsDevice.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vpc, 0, tris.Count);
 
+            spriteBatch.Begin();
             foreach (var entity in worldState.Entities)
             {
                 Vector2 nV = entity.Direction;
                 Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * 50 * nV.X / 360.0)) * Matrix.CreateTranslation(new Vector3(entity.Position, 0));
                 BallEffect.World = world;
                 BallModel.Draw(world, ViewMatrix, ProjectionMatrix);
-                //DrawSphere(entity.Position, new Vector2(1, 0));
+
+                var ball = entity as Ball;
+                if(ball != null)
+                {
+                    if(ball.IsAiming)
+                    {
+                        var aimTarget = ball.Position + ball.AimDirection * 2;
+                        var aimTargetScreen = WorldToScreen(aimTarget);
+                        var crossHairRectangle = new Rectangle(aimTargetScreen.ToPoint() - new Point(16, 16), new Point(32, 32));
+                        spriteBatch.Draw(CrosshairTexture, crossHairRectangle, Color.White);
+                    }
+
+                    var screenPos = WorldToScreen(ball.Position + new Vector2(0.33f, 1.5f));
+                    spriteBatch.DrawString(font, ball.Health.ToString("0"), screenPos, Color.Black, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
+                    screenPos += new Vector2(2, 2);
+                    spriteBatch.DrawString(font, ball.Health.ToString("0"), screenPos, Color.White, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
+                }
             }
+            spriteBatch.End();
         }
 
         protected override void LoadContent()
         {
             GermoneyTexture = Game.Content.Load<Texture2D>("Textures/Germoney");
+            CrosshairTexture = Game.Content.Load<Texture2D>("Textures/Crosshair");
 
             BallEffect = new BasicEffect(Game.GraphicsDevice);
             BallEffect.EnableDefaultLighting();
@@ -114,6 +153,7 @@ namespace Ballz.GameSession.Renderer
             TerrainEffect.TextureEnabled = true;
 
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
+            font = Game.Content.Load<SpriteFont>("Fonts/Menufont");
 
             PrepareDebugRendering();
 

@@ -74,7 +74,8 @@ namespace Ballz.GameSession
             var player = new Ball
             {
                 Position = new Vector2(5, 10),
-                Velocity = new Vector2(2, 0)
+                Velocity = new Vector2(2, 0),
+                IsAiming = true,
             };
             PlayerBallId = player.ID;
             Entities.Add(player);

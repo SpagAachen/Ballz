@@ -8,7 +8,7 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class Entity: ICloneable
     {
-        private static int InstanceCounter = 0;
+        private static int InstanceCounter = 1;
 
 		public int ID
         {
