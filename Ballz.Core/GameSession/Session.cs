@@ -81,7 +81,7 @@ namespace Ballz.GameSession
 
             var npc = new Ball
             {
-                Position = new Vector2(5, 5),
+                Position = new Vector2(8, 10),
                 Velocity = new Vector2(0, 0)
             };
             Entities.Add(npc);

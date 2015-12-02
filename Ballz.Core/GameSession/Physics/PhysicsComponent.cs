@@ -32,6 +32,9 @@ namespace Ballz.GameSession.Physics
         
         Dictionary<int, Body> PhysicsBodiesByEntityId = new Dictionary<int, Body>();
 
+        Body TerrainBody;
+        int TerrainRevision = -1;
+
         public override void Initialize()
         {
             PhysicsWorld = new FarseerPhysics.Dynamics.World(new Vector2(0f, -9.82f));
@@ -48,10 +51,39 @@ namespace Ballz.GameSession.Physics
             KeyPressed[InputMessage.MessageType.ControlsRight] = false;
         }
 
+        public void UpdateTerrainBody(Terrain terrain)
+        {
+            if (TerrainBody != null)
+                PhysicsWorld.RemoveBody(TerrainBody);
+
+            var outlines = terrain.getOutline();
+
+            TerrainBody = new Body(PhysicsWorld);
+            TerrainBody.BodyType = BodyType.Static;
+
+            foreach (var outline in outlines)
+            {
+                var vertices = new Vector2[outline.Count];
+
+                for(int i = 0; i < outline.Count; i++)
+                {
+                    vertices[i] = outline[i] * 0.03f;
+                }
+
+                var shape = new ChainShape(new Vertices(vertices));
+                TerrainBody.CreateFixture(shape);
+            }
+        }
+
         public void PreparePhysicsEngine(World.World worldState)
         {
+            if (worldState.StaticGeometry.Revision != TerrainRevision)
+                UpdateTerrainBody(worldState.StaticGeometry);
+
+            TerrainRevision = worldState.StaticGeometry.Revision;
+
             //TODO: Remove bodies from deleted entities from the PhysicsBodiesByEntityId map
-            
+
             // Add Bodies for new entities
             foreach (var e in worldState.Entities)
             {
@@ -60,7 +92,7 @@ namespace Ballz.GameSession.Physics
                 {
                     body = new Body(PhysicsWorld);
                     body.BodyType = BodyType.Dynamic;
-                    body.CreateFixture(new CircleShape(0.5f, 1.0f));
+                    body.CreateFixture(new CircleShape(1.0f, 1.0f));
                     PhysicsBodiesByEntityId[e.ID] = body;
                 }
                 else

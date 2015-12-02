@@ -26,8 +26,10 @@ namespace Ballz.GameSession.World
         private float[,] terrainSmoothmap = null;
 
 		private bool up2date = false;
-		// We might need that later on...
-		//private Texture2D terrainSDF = null;
+        // We might need that later on...
+        //private Texture2D terrainSDF = null;
+
+        public int Revision { get; private set; } = 0;
 
 		public Terrain (Texture2D terrainTexture)
 		{
@@ -128,8 +130,9 @@ namespace Ballz.GameSession.World
 			}
 
 			up2date = false;
-			
-		}
+            Revision++;
+
+        }
 
         public void AddCircle(float x, float y, float radius)
         {
@@ -157,6 +160,7 @@ namespace Ballz.GameSession.World
             }
 
             up2date = false;
+            Revision++;
 
         }
 
