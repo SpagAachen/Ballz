@@ -2,13 +2,15 @@
 using Ballz.Messages;
 using Ballz.Utils;
 using Microsoft.Xna.Framework;
+using FarseerPhysics;
+using FarseerPhysics.Dynamics;
+
 
 using System;
-using System.Linq;
-using Physics2DDotNet;
-using Physics2DDotNet.Shapes;
-using Physics2DDotNet.PhysicsLogics;
 using System.Collections.Generic;
+using System.Linq;
+using FarseerPhysics.Collision.Shapes;
+using FarseerPhysics.Common;
 
 namespace Ballz.GameSession.Physics
 {
@@ -18,8 +20,7 @@ namespace Ballz.GameSession.Physics
     public class PhysicsControl : GameComponent
     {
         new Ballz Game;
-        PhysicsEngine engine;
-        List<PolygonShape> terrainShapes = new List<PolygonShape>();
+        FarseerPhysics.Dynamics.World PhysicsWorld;
         InputMessage.MessageType? controlInput = null;
         bool shapesInitialized = false;
         public PhysicsControl(Ballz game) : base(game)
@@ -28,17 +29,17 @@ namespace Ballz.GameSession.Physics
         }
 
         Dictionary<InputMessage.MessageType, bool> KeyPressed = new Dictionary<InputMessage.MessageType, bool>();
+        
+        Dictionary<int, Body> PhysicsBodiesByEntityId = new Dictionary<int, Body>();
 
         public override void Initialize()
         {
-            // Create engine
+            PhysicsWorld = new FarseerPhysics.Dynamics.World(new Vector2(0f, -9.82f));
 
-            engine = new PhysicsEngine();
-            engine.BroadPhase = new Physics2DDotNet.Detectors.SelectiveSweepDetector();
-            engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
-
-            PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -1f), new Lifespan());
-            engine.AddLogic(logGravity);
+            // Add a ground plate for physics testing
+            var ground = new Body(PhysicsWorld);
+            ground.BodyType = BodyType.Static;
+            ground.CreateFixture(new EdgeShape(new Vector2(-10, 0), new Vector2(20, 0)));
 
             KeyPressed[InputMessage.MessageType.ControlsAction] = false;
             KeyPressed[InputMessage.MessageType.ControlsUp] = false;
@@ -47,93 +48,51 @@ namespace Ballz.GameSession.Physics
             KeyPressed[InputMessage.MessageType.ControlsRight] = false;
         }
 
-        public void UpdateTerrain(List<List<Vector2>> outline)
+        public void PreparePhysicsEngine(World.World worldState)
         {
-            /*terrainShapes.Clear();
-            var triangles = Game.World.StaticGeometry.getOutlineTriangles();
-            for (int i = 0; i < triangles.Count; i++)
+            //TODO: Remove bodies from deleted entities from the PhysicsBodiesByEntityId map
+            
+            // Add Bodies for new entities
+            foreach (var e in worldState.Entities)
             {
-                var terrainPhys = new AdvanceMath.Vector2D[3];
-                var t = triangles[i];
-                terrainPhys[0] = new AdvanceMath.Vector2D(t.a.X * 0.03f, t.a.Y * 0.03f);
-                terrainPhys[1] = new AdvanceMath.Vector2D(t.b.X * 0.03f, t.b.Y * 0.03f);
-                terrainPhys[2] = new AdvanceMath.Vector2D(t.c.X * 0.03f, t.c.Y * 0.03f);
-                var terrainShape = new PolygonShape(terrainPhys, 0.03f);
-                terrainShapes.Add(terrainShape);
-            }*/
-            terrainShapes.Clear();
-            for (int i = 0; i < outline.Count; i++)
-            {
-                var terrain = outline[i];
-                var terrainPhys = new AdvanceMath.Vector2D[terrain.Count];
-                for (int j = 0; j < terrain.Count; j++)
+                Body body = null;
+                if (!PhysicsBodiesByEntityId.ContainsKey(e.ID))
                 {
-                    var v = terrain[j];
-                    terrainPhys[j] = new AdvanceMath.Vector2D(v.X * 0.03f, v.Y * 0.03f);
+                    body = new Body(PhysicsWorld);
+                    body.BodyType = BodyType.Dynamic;
+                    body.CreateFixture(new CircleShape(0.5f, 1.0f));
+                    PhysicsBodiesByEntityId[e.ID] = body;
                 }
-                var terrainShape = new PolygonShape(terrainPhys, 0.1f);
-                terrainShapes.Add(terrainShape);
+                else
+                    body = PhysicsBodiesByEntityId[e.ID];
+
+                body.SetTransform(e.Position, e.Rotation);
+                body.LinearVelocity = e.Velocity;
+
+                // TODO: Allow rotation of bodies
+                body.AngularVelocity = 0;
             }
         }
 
-        public Dictionary<Entity, Body> PreparePhysicsEngine(World.World worldState)
+        public void PhysicsStep(World.World worldState, float elapsedSeconds)
         {
-            //TODO remove later
-            engine = new PhysicsEngine();
-            engine.BroadPhase = new Physics2DDotNet.Detectors.SelectiveSweepDetector();
-            engine.Solver = new Physics2DDotNet.Solvers.SequentialImpulsesSolver();
-            PhysicsLogic logGravity = (PhysicsLogic)new GravityField(new AdvanceMath.Vector2D(0f, -9.81f), new Lifespan());
-            engine.AddLogic(logGravity);
-
-            //Terrain
-            if (!shapesInitialized)
-            {
-                UpdateTerrain(worldState.StaticGeometry.getOutline());
-                shapesInitialized = true;
-            }
-
-            for (int i = 0; i < terrainShapes.Count; i++)
-            {
-                var terrainShape = terrainShapes[i];
-                var terrainCoeff = new Coefficients(1, .5f);
-                var terrainBody = new Body(new PhysicsState(), terrainShape, float.PositiveInfinity, terrainCoeff, new Lifespan());
-                engine.AddBody(terrainBody);
-            }
-
-            // Entities
-            var entityPhysMap = new System.Collections.Generic.Dictionary<Entity, Body>();
+            // Update the physics world
+            PhysicsWorld.Step(elapsedSeconds);
+            
+            // Sync back the positions and velocities
             foreach (var e in worldState.Entities)
             {
-                IShape shape = null;
-                float mass = .0f;
-                switch (e.Material.Shape)
-                {
-                    case PhysicsMaterial.PhysicsShape.Circle:
-                        shape = new CircleShape(e.Material.Radius, 16);
-                        mass = (float)(e.Material.Density * e.Material.Radius * e.Material.Radius * Math.PI);
-                        break;
-                    case PhysicsMaterial.PhysicsShape.Polygon:
-                        //TODO
-                        continue;
-                    //break;
-                    default:
-                        //TODO
-                        continue;
-                        //break;                        
-                }
+                var body = PhysicsBodiesByEntityId[e.ID];
+                
+                e.Position = body.Position;
+                e.Velocity = body.LinearVelocity;
 
-                var coeff = new Coefficients(e.Material.Restitution, e.Material.Friction);
-                var state = new PhysicsState();
-                state.Position = new ALVector2D(.0f, e.Position.X, e.Position.Y);
-                state.Velocity = new ALVector2D(.0f, e.Velocity.X, e.Velocity.Y);
-
-                Body body = new Body(state, shape, mass, coeff, new Lifespan());
-                engine.AddBody(body);
-                entityPhysMap.Add(e, body);
-                //IShape shape = new CircleShape(e.r)
+                const float dg90 = 2 * (float)Math.PI * 90f / 360f;
+                if (e.Velocity.LengthSquared() > 0.0001f)
+                    e.Rotation = dg90 * (e.Velocity.X > 0 ? 1 : -1);
+                else
+                    e.Rotation = dg90;
             }
-
-            return entityPhysMap;
         }
 
         public override void Update(GameTime time)
@@ -171,31 +130,11 @@ namespace Ballz.GameSession.Physics
 
             controlInput = null;
 
-            var entityPhysMap = PreparePhysicsEngine(worldState);
+            PreparePhysicsEngine(worldState);
 
             float intervalSeconds = (float)time.ElapsedGameTime.TotalSeconds;
 
-
-            engine.Update(intervalSeconds, intervalSeconds);
-
-            foreach (var e in worldState.Entities)
-            {
-                if (!entityPhysMap.ContainsKey(e))
-                {
-                    continue;
-                }
-                var physE = entityPhysMap[e];
-                var state = physE.State;
-
-                e.Position = state.Position.ToXna();
-                e.Velocity = state.Velocity.ToXna();
-
-                const float dg90 = 2 * (float)Math.PI * 90f / 360f;
-                if (e.Velocity.LengthSquared() > 0.0001f)
-                    e.Rotation = dg90 * (e.Velocity.X > 0 ? 1 : -1);
-                else
-                    e.Rotation = dg90;
-            }
+            PhysicsStep(worldState, intervalSeconds);
 
             // Update shots
             foreach (var shot in worldState.Shots)
