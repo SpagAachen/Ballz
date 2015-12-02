@@ -48,6 +48,7 @@ namespace Ballz
             Graphics.IsFullScreen = GameSettings.Fullscreen.Value;
             Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Value.Height;
             Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
+            IsFixedTimeStep = false;
 
             // create the Game Components
             var menuRendering = new MenuRenderer(this, DefaultMenu());

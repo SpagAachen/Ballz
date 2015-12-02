@@ -78,8 +78,8 @@ namespace Ballz
             renderer.DrawString(font, "fps: " + fps, fpsPosition, Color.DarkSlateGray, 0, -2*Vector2.One,0.4f,SpriteEffects.None,0);
             renderer.DrawString(font, "fps: " + fps, fpsPosition, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);
 
-            renderer.DrawString(font, "frametime: " + gameTime.ElapsedGameTime.TotalMilliseconds + " ms", frametimePosition, Color.DarkSlateGray, 0, -2*Vector2.One,0.4f,SpriteEffects.None,0);
-            renderer.DrawString(font, "frametime: " + gameTime.ElapsedGameTime.TotalMilliseconds + " ms", frametimePosition, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);
+            renderer.DrawString(font, "frametime: " + gameTime.ElapsedGameTime.TotalSeconds*1000 + " ms", frametimePosition, Color.DarkSlateGray, 0, -2*Vector2.One,0.4f,SpriteEffects.None,0);
+            renderer.DrawString(font, "frametime: " + gameTime.ElapsedGameTime.TotalSeconds*1000 + " ms", frametimePosition, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);
 
             renderer.DrawString(font, "Memory: " + allocatedMemory + " MB", memoryPosition, Color.DarkSlateGray, 0, -2*Vector2.One,0.4f,SpriteEffects.None,0);
             renderer.DrawString(font, "Memory: " + allocatedMemory + " MB", memoryPosition, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);

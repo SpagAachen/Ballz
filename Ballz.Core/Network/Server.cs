@@ -50,21 +50,24 @@
 			// TEST
 			{
 				test++;
-				if (test % 100 == 0) {
 					var entities = Ballz.The ().World.Entities;
 					var sentities = new List<SEntity>();
 					foreach (var e in entities) {
 						sentities.Add (new SEntity (e));
 					}
 					Broadcast(sentities);
-				}
 			}
             //TODO: Implement
         }
 
         private void onData(object data, int sender)
         {
-			Console.WriteLine("Received data from " + sender + ": " + data.ToString());
+			//Console.WriteLine("Received data from " + sender + ": " + data.ToString()); // Debug
+			// Input Message
+			if (data.GetType() == typeof(InputMessage))
+			{
+				
+			}
         }
 
         public void Broadcast(object data)

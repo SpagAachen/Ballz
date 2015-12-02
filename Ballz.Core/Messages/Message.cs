@@ -1,8 +1,11 @@
-﻿namespace Ballz.Messages
+﻿using System;
+
+namespace Ballz.Messages
 {
     /// <summary>
     ///     The Message class is used for message passing via events by LogicControl, InputTranslator etc.
     /// </summary>
+    [Serializable]
     public class Message
     {
         public enum MessageType

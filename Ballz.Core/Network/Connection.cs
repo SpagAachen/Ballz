@@ -62,8 +62,10 @@
 				netStr.Write(userDataLen, 0, 4);
 				memStr.WriteTo (netStr);
 			}
-			catch(Exception e)
-			{}
+			catch(Exception)
+			{
+				Console.WriteLine("Network: Warning: Failed to send some data");
+			}
 		}
 
 		/// <summary>
@@ -114,32 +116,6 @@
 			}
 			return res;
 		}
-
-
-		/*
-        /// <summary>
-        /// Send data
-        /// </summary>
-        /// <param name="data"></param>
-        private void SendRaw(string data)
-        {
-            var s = tcpClient.GetStream();
-            using (writer = new StreamWriter(tcpClient.GetStream()))
-            {
-                if (s.CanWrite)
-                {
-                    writer.WriteLine(data);
-                    writer.Flush();
-                }
-                else
-                {
-                    s.Close();
-                    tcpClient.Close();
-                    throw new InvalidOperationException("Unable to write data to stream");
-                }
-            }
-        }
-		*/
 
         /// <summary>
         /// Returns true iff data is ready to read.

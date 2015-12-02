@@ -1,5 +1,8 @@
-﻿namespace Ballz.Messages
+﻿using System;
+
+namespace Ballz.Messages
 {
+    [Serializable]
     public class InputMessage : Message
     {
         public new enum MessageType

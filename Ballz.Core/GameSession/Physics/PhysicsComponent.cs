@@ -50,7 +50,7 @@ namespace Ballz.GameSession.Physics
             KeyPressed[InputMessage.MessageType.ControlsLeft] = false;
             KeyPressed[InputMessage.MessageType.ControlsRight] = false;
         }
-
+        
         public void UpdateTerrainBody(Terrain terrain)
         {
             if (TerrainBody != null)
