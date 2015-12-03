@@ -4,9 +4,13 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Net.Sockets;
-	using System.Runtime.Serialization;
-	using System.Runtime.Serialization.Formatters.Binary;
-	using System.Diagnostics;
+    using System.Diagnostics;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Bson;
+    using GameSession.World;
+    using System.Threading.Tasks;
+    using System.Text;
+    using Messages;
 
     /// <summary>
     /// Provides an abstraction of the protocol layer. Use it to establish a network connection with another game instance.
@@ -15,11 +19,25 @@
     {
         public readonly int Id;
         private readonly TcpClient tcpClient;
-		BinaryFormatter formatter = new BinaryFormatter();
-		byte[] readBuffer;
+        NetworkStream connectionStream;
+
+        byte[] readBuffer;
 		int readDataLength = -1;
 		int readDataLengthMissing = -1;
 		bool unfinishedObject = false;
+
+        public List<Type> MessageTypes = new List<Type>();
+
+        public int GetMessageTypeId(Type type)
+        {
+            return MessageTypes.IndexOf(type);
+        }
+        public Type GetTypeByMessageTypeId(int id)
+        {
+            return MessageTypes[id];
+        }
+
+        Task<object> receiveTask;
 
         /// <summary>
         /// Initializes a new instance of the Connection class and connects to the specified port on the specified host.
@@ -27,10 +45,9 @@
         /// <param name="host">The DNS name of the remote host to which you intend to connect. </param>
         /// <param name="port">The port number of the remote host to which you intend to connect. </param>
         /// <param name="id">Id for this connection</param>
-        public Connection(string host, int port, int id)
+        public Connection(string host, int port, int id):
+            this(new TcpClient(host, port), id)
         {
-            tcpClient = new TcpClient(host, port);
-            Id = id;
         }
 
         /// <summary>
@@ -40,8 +57,39 @@
         /// <param name="id">Id for this connection</param>
         public Connection(TcpClient connection, int id)
         {
-            tcpClient = connection;
             Id = id;
+            tcpClient = connection;
+            connectionStream = tcpClient.GetStream();
+
+            MessageTypes.Add(typeof(List<Entity>));
+            MessageTypes.Add(typeof(InputMessage));
+
+            BeginReceive();
+        }
+
+        protected void BeginReceive()
+        {
+            if (receiveTask != null)
+                throw new InvalidOperationException("Already receiving");
+
+            receiveTask = new Task<object>(() =>
+            {
+                byte[] msgLengthBuf = new byte[4];
+                connectionStream.Read(msgLengthBuf, 0, 4);
+                int msgLength = BitConverter.ToInt32(msgLengthBuf, 0);
+
+                byte[] msgTypeBuf = new byte[4];
+                connectionStream.Read(msgTypeBuf, 0, 4);
+                int msgType = BitConverter.ToInt32(msgTypeBuf, 0);
+                
+                byte[] data = new byte[msgLength];
+
+                connectionStream.Read(data, 0, msgLength);
+
+                var json = UTF8Encoding.UTF8.GetString(data);
+                return JsonConvert.DeserializeObject(json, GetTypeByMessageTypeId(msgType));
+            });
+            receiveTask.Start();
         }
 
 		/// <summary>
@@ -53,68 +101,23 @@
 			try
 			{
 				var netStr = tcpClient.GetStream ();
-				// serialize object and get size of it
-				var memStr = new MemoryStream ();
-				formatter.Serialize(memStr, obj);
-				var n = memStr.Length;
+                // serialize object and get size of it
+                var json = JsonConvert.SerializeObject(obj);
+                var data = UTF8Encoding.UTF8.GetBytes(json);
 				// write size of object into tcp stream
-				var userDataLen = BitConverter.GetBytes((Int32)n);
+				var userDataLen = BitConverter.GetBytes(data.Length);
 				netStr.Write(userDataLen, 0, 4);
-				memStr.WriteTo (netStr);
+
+                var typeId = GetMessageTypeId(obj.GetType());
+                netStr.Write(BitConverter.GetBytes(typeId), 0, 4);
+
+                netStr.Write(data, 0, data.Length);
+                Console.WriteLine("Serialized " + data.Length + "bytes");
 			}
-			catch(Exception)
+			catch(Exception e)
 			{
-				Console.WriteLine("Network: Warning: Failed to send some data");
+				Console.WriteLine("Network: Warning: Failed to send some data: " + e.Message);
 			}
-		}
-
-		/// <summary>
-		/// Receive objects if any is available
-		/// </summary>
-		/// <returns>A list of objects received</returns>
-		public List<object> Receive()
-		{
-			var s = tcpClient.GetStream();
-			var res = new List<object>();
-			// new data available?
-			while (s.DataAvailable) {
-				if (unfinishedObject) {
-					// how much data can we receive? max is tcp buffer size.
-					int recLen = readDataLengthMissing;
-					if (readDataLengthMissing > tcpClient.ReceiveBufferSize)
-						recLen = tcpClient.ReceiveBufferSize;
-					// add data to buffer
-					s.Read (readBuffer, readDataLength-readDataLengthMissing, recLen);
-					readDataLengthMissing -= recLen;
-					Debug.Assert (readDataLengthMissing >= 0, "Read more data than available");
-					if (readDataLengthMissing == 0) {
-						// hole object is finished
-						Stream stream = new MemoryStream(readBuffer);
-						var obj = (object)formatter.Deserialize (stream); 
-						res.Add (obj);
-					}
-
-				} else {
-					// determine length of object to receive
-					byte[] readMsgLen = new byte[4];
-					s.Read(readMsgLen, 0, 4);
-					readDataLength = BitConverter.ToInt32(readMsgLen, 0);
-					// is data split in multiple packets?
-					if (readDataLength > tcpClient.ReceiveBufferSize + 4) {
-						// data does not fit in one packet. allocate buffer.
-						unfinishedObject = true;
-						readDataLengthMissing = readDataLength;
-						readBuffer = new byte[readDataLength];
-						// store received part of object in buffer
-						s.Read (readBuffer, 0, tcpClient.ReceiveBufferSize - 4);
-					} else {
-						// not split. read it directly.
-						var obj = (object)formatter.Deserialize (s); 
-						res.Add (obj);
-					}
-				}
-			}
-			return res;
 		}
 
         /// <summary>
@@ -123,7 +126,18 @@
         /// <returns></returns>
         public bool DataAvailable()
         {
-            return tcpClient.GetStream().DataAvailable;
+            return receiveTask.IsCompleted;
+        }
+
+        public object ReceiveData()
+        {
+            if (receiveTask == null)
+                throw new InvalidOperationException("No receiving is in progress");
+            receiveTask.Wait();
+            var result = receiveTask.Result;
+            receiveTask = null;
+            BeginReceive();
+            return result;
         }
     }
 }

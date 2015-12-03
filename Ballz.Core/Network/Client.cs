@@ -2,8 +2,9 @@
 {
     using Microsoft.Xna.Framework;
     using Messages;
-	using System;
-	using System.Collections.Generic;
+    using System;
+    using System.Collections.Generic;
+    using GameSession.World;
 
     class Client
     {
@@ -31,9 +32,8 @@
         {
 			if (connectionToServer.DataAvailable())
 			{
-				var data = connectionToServer.Receive();
-				foreach (var d in data)
-					onData(d);
+				var data = connectionToServer.ReceiveData();
+				onData(data);
 			}
 
             //TODO: Implement
@@ -41,15 +41,15 @@
 
 		private void onData(object data)
 		{
-			// Entities
-			if (data.GetType() == typeof(List<SEntity>))
+            // Entities
+            var entities = data as IEnumerable<Entity>;
+            if (entities != null)
 			{
-				var entities = (List<SEntity>)data;
 				foreach (var e in entities)
 				{
 					var ourE = Ballz.The().World.EntityById(e.ID);
-					ourE.Position = Utils.VectorExtensions.ToXna(e.Position);
-					ourE.Velocity = Utils.VectorExtensions.ToXna(e.Velocity);
+					ourE.Position = e.Position;
+					ourE.Velocity = e.Velocity;
 					ourE.Rotation = e.Rotation;
 				}
 			}

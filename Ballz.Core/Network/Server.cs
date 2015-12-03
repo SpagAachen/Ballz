@@ -41,21 +41,15 @@
             {
                 if (c.DataAvailable())
                 {
-                    var data = c.Receive();
-                    foreach (var d in data)
-                        onData(d, c.Id);
+                    var data = c.ReceiveData();
+                    onData(data, c.Id);
                 }
             }
 
 			// TEST
 			{
 				test++;
-					var entities = Ballz.The ().World.Entities;
-					var sentities = new List<SEntity>();
-					foreach (var e in entities) {
-						sentities.Add (new SEntity (e));
-					}
-					Broadcast(sentities);
+				Broadcast(Ballz.The().World.Entities);
 			}
             //TODO: Implement
         }
