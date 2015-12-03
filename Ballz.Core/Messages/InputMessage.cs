@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ballz.GameSession.Logic;
+using System;
 
 namespace Ballz.Messages
 {
@@ -23,11 +24,14 @@ namespace Ballz.Messages
 
         public bool? Pressed{ get; private set;}
 
-        public InputMessage(MessageType type, bool? pressed, char? value) : base(Message.MessageType.InputMessage)
+        public Player Player { get; private set; }
+
+        public InputMessage(MessageType type, bool? pressed, char? value, Player player) : base(Message.MessageType.InputMessage)
         {
             Kind = type;
             Key = value;
             Pressed = pressed;
+            Player = player;
         }
 
         public new MessageType Kind { get; private set; }

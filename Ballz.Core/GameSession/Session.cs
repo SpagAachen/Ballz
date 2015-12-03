@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Ballz.GameSession.World;
 using Ballz.Logic;
+using Ballz.GameSession.Logic;
 
 namespace Ballz.GameSession
 {
@@ -15,16 +16,14 @@ namespace Ballz.GameSession
         private List<Entity> Entities = new List<Entity>();
         private Terrain theTerrain;
         private Physics.PhysicsControl physics;
+        private Logic.GameLogic sessionLogic;
         private Renderer.GameRenderer renderer;
         private LogicControl logic;
         private Input.InputTranslator input;
         private Ballz theGame;
 
-        /// <summary>
-        /// The entity id of the character that is currently controlled by the local player
-        /// </summary>
-        /// TODO: Add support for multiple local players
-        public int PlayerBallId { get; set; }
+        public List<Player> Players { get; set; } = new List<Player>();
+
 
         public Session(Ballz _game) : base(_game)
         {
@@ -37,13 +36,19 @@ namespace Ballz.GameSession
             renderer.Visible = false;
             _game.Components.Add(renderer);
 
+            sessionLogic = new Logic.GameLogic(_game);
+            sessionLogic.Enabled = false;
+            _game.Components.Add(sessionLogic);
+
             logic = _game.Services.GetService<LogicControl>();
             logic.Message += physics.HandleMessage;
             logic.Message += renderer.HandleMessage;
+            logic.Message += sessionLogic.HandleMessage;
 
             input = _game.Services.GetService<Input.InputTranslator>();
             input.Input += physics.HandleMessage;
             input.Input += renderer.HandleMessage;
+            input.Input += sessionLogic.HandleMessage;
 
             _game.Components.ComponentRemoved += cleanup;
             //Initialize();
@@ -71,14 +76,39 @@ namespace Ballz.GameSession
             /// TODO: find a nice solution to initialize the world especially regarding networking. maybe use an event for this
             theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld"));
 
-            var player = new Ball
+            var player1 = new Player
+            {
+                Name = "Player1"
+            };
+            Players.Add(player1);
+
+            var player1Ball = new Ball
             {
                 Position = new Vector2(5, 10),
                 Velocity = new Vector2(2, 0),
                 IsAiming = true,
+                Player = player1
             };
-            PlayerBallId = player.ID;
-            Entities.Add(player);
+            Entities.Add(player1Ball);
+
+            sessionLogic.AddPlayer(player1, player1Ball);
+
+            var player2 = new Player
+            {
+                Name = "Player2"
+            };
+            Players.Add(player2);
+
+            var player2Ball = new Ball
+            {
+                Position = new Vector2(5, 12),
+                Velocity = new Vector2(2, 0),
+                IsAiming = true,
+                Player = player2
+            };
+            Entities.Add(player2Ball);
+
+            sessionLogic.AddPlayer(player2, player2Ball);
 
             var npc = new Ball
             {
@@ -98,6 +128,13 @@ namespace Ballz.GameSession
         public override void Initialize()
         {
             base.Initialize();
+        }
+
+        public Player PlayerByNumber(int number)
+        {
+            if (Players.Count < number)
+                return null;
+            return Players[number - 1];
         }
     }
 }

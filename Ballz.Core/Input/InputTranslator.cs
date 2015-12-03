@@ -1,3 +1,4 @@
+using Ballz.GameSession.Logic;
 using Ballz.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -63,9 +64,9 @@ namespace Ballz.Input
             OnInput(InputMessage.MessageType.RawInput, null, eventArgs.Character);
         }
 
-        private void OnInput(InputMessage.MessageType inputMessage, bool? pressed = null, char? key = null)
+        private void OnInput(InputMessage.MessageType inputMessage, bool? pressed = null, char? key = null, Player player = null)
         {
-            Input?.Invoke(this, new InputMessage(inputMessage, pressed, key)); //todo: use object pooling and specify message better
+            Input?.Invoke(this, new InputMessage(inputMessage, pressed, key, player)); //todo: use object pooling and specify message better
         }
 
         public override void Update(GameTime gameTime)
@@ -157,30 +158,47 @@ namespace Ballz.Input
                     case Keys.Escape:
                         OnInput(InputMessage.MessageType.ControlsBack, pressed);
                         break;
-                    case Keys.Enter:
                     case Keys.LeftControl:
-                    case Keys.RightControl:
-                        OnInput(InputMessage.MessageType.ControlsAction, pressed);
+                        OnInput(InputMessage.MessageType.ControlsAction, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.Up:
-                    case Keys.W:
-                        OnInput(InputMessage.MessageType.ControlsUp, pressed);
+                        OnInput(InputMessage.MessageType.ControlsUp, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.Down:
-                    case Keys.S:
-                        OnInput(InputMessage.MessageType.ControlsDown, pressed);
+                        OnInput(InputMessage.MessageType.ControlsDown, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.Left:
-                    case Keys.A:
-                        OnInput(InputMessage.MessageType.ControlsLeft, pressed);
+                        OnInput(InputMessage.MessageType.ControlsLeft, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.Right:
-                    case Keys.D:
-                        OnInput(InputMessage.MessageType.ControlsRight, pressed);
+                        OnInput(InputMessage.MessageType.ControlsRight, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
+                        break;
+                    case Keys.Enter:
+                    case Keys.RightControl:
+                        OnInput(InputMessage.MessageType.ControlsAction, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.Space:
-                        OnInput(InputMessage.MessageType.ControlsJump, pressed);
+                        OnInput(InputMessage.MessageType.ControlsJump, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
                         break;
+                    case Keys.W:
+                        OnInput(InputMessage.MessageType.ControlsUp, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
+                        break;
+                    case Keys.S:
+                        OnInput(InputMessage.MessageType.ControlsDown, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
+                        break;
+                    case Keys.A:
+                        OnInput(InputMessage.MessageType.ControlsLeft, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
+                        break;
+                    case Keys.D:
+                        OnInput(InputMessage.MessageType.ControlsRight, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
+                        break;
+                    case Keys.E:
+                        OnInput(InputMessage.MessageType.ControlsAction, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
+                        break;
+                    case Keys.Q:
+                        OnInput(InputMessage.MessageType.ControlsJump, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
+                        break;
+
                 }
             }
         }

@@ -37,6 +37,8 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Compile Include="GameSession\Logic\BallControl.cs" />
+    <Compile Include="GameSession\Logic\GameLogic.cs" />
+    <Compile Include="GameSession\Logic\Player.cs" />
     <Compile Include="GameSession\Renderer\PhysicsDebugRendering.cs" />
     <Compile Include="GameSession\Session.cs" />
     <Compile Include="GameSession\World\Material.cs" />

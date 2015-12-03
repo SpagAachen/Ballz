@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Ballz.GameSession.Logic;
+using Microsoft.Xna.Framework;
 using System;
 
 namespace Ballz.GameSession.World
@@ -6,10 +7,6 @@ namespace Ballz.GameSession.World
     /// <summary>
     /// Represents a Ball character. 
     /// </summary>
-    /// <remarks>
-    /// We do not distinguish between player-controlled and other balls in the world state.
-    /// Use <see cref="Session.PlayerBallId"/> to get the ball that is currently controlled by the local player.
-    /// </remarks>
 	[Serializable]
     public class Ball : Entity
     {
@@ -24,6 +21,8 @@ namespace Ballz.GameSession.World
         public double Health { get; set; } = 100;
 
         public bool IsAiming { get; set; } = false;
+
+        public Player Player { get; set; } = Player.NPC;
 
         public Vector2 AimDirection { get; set; } = Vector2.UnitX;
     }

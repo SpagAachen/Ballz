@@ -22,15 +22,13 @@ namespace Ballz.GameSession.Physics
     {
         new Ballz Game;
         FarseerPhysics.Dynamics.World PhysicsWorld;
-        InputMessage.MessageType? controlInput = null;
 
         public PhysicsControl(Ballz game) : base(game)
         {
             Game = game;
         }
 
-        Dictionary<InputMessage.MessageType, bool> KeyPressed = new Dictionary<InputMessage.MessageType, bool>();
-        
+       
         Dictionary<int, Body> PhysicsBodiesByEntityId = new Dictionary<int, Body>();
 
         Body TerrainBody;
@@ -45,11 +43,7 @@ namespace Ballz.GameSession.Physics
             ground.BodyType = BodyType.Static;
             ground.CreateFixture(new EdgeShape(new Vector2(-10, 0), new Vector2(20, 0)));
 
-            KeyPressed[InputMessage.MessageType.ControlsAction] = false;
-            KeyPressed[InputMessage.MessageType.ControlsUp] = false;
-            KeyPressed[InputMessage.MessageType.ControlsDown] = false;
-            KeyPressed[InputMessage.MessageType.ControlsLeft] = false;
-            KeyPressed[InputMessage.MessageType.ControlsRight] = false;
+
         }
         
         public void UpdateTerrainBody(Terrain terrain)
@@ -132,61 +126,7 @@ namespace Ballz.GameSession.Physics
         {
             var worldState = Game.World;
             float elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
-
-            var player = worldState.EntityById(Game.Match.PlayerBallId) as Ball;
-            // Apply input messages
-            if (player != null)
-            {
-                if (KeyPressed[InputMessage.MessageType.ControlsLeft])
-                {
-                    player.Velocity = new Vector2(-2f, player.Velocity.Y);
-                    player.AimDirection = new Vector2(-Math.Abs(player.AimDirection.X), player.AimDirection.Y);
-                }
-                if (KeyPressed[InputMessage.MessageType.ControlsRight])
-                {
-                    player.Velocity = new Vector2(2f, player.Velocity.Y);
-                    player.AimDirection = new Vector2(Math.Abs(player.AimDirection.X), player.AimDirection.Y);
-                }
-
-                // Up/Down keys rotate the aim vector
-                if (KeyPressed[InputMessage.MessageType.ControlsUp])
-                {
-                    var v = player.AimDirection;
-                    // Rotate at 60°/s. Use sign of v.x to determine the direction, so that the up key always moves the crosshair upwards.
-                    var radians = (v.X > 0 ? 1 : -1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
-                    player.AimDirection = v.Rotate(radians);
-                }
-                if (KeyPressed[InputMessage.MessageType.ControlsDown])
-                {
-                    var v = player.AimDirection;
-                    // Rotate at 60°/s. Use sign of v.x to determine the direction, so that the up key always moves the crosshair upwards.
-                    var radians = (v.X > 0 ? -1 : 1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
-                    player.AimDirection = v.Rotate(radians);
-                }
-
-
-                switch (controlInput)
-                {
-                    case InputMessage.MessageType.ControlsJump:
-                        player.Velocity = new Vector2(player.Velocity.X, 5f);
-                        break;
-                    case InputMessage.MessageType.ControlsAction:
-                        worldState.Shots.Add(new Shot
-                        {
-                            ExplosionRadius = 1.0f,
-                            HealthImpactAtDirectHit = 25,
-                            IsInstantShot = true,
-                            ShotStart = player.Position,
-                            ShotVelocity = player.AimDirection
-                        });
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            controlInput = null;
-
+            
             PreparePhysicsEngine(worldState);
             PhysicsStep(worldState, elapsedSeconds);
 
@@ -237,26 +177,9 @@ namespace Ballz.GameSession.Physics
             worldState.Shots.Clear();
         }
 
-        private void processInput(InputMessage message)
-        {
-            if (message.Pressed.HasValue)
-            {
-                KeyPressed[message.Kind] = message.Pressed.Value;
-
-                if (message.Pressed.Value)
-                    controlInput = message.Kind;
-            }
-        }
 
         public void HandleMessage(object sender, Message message)
         {
-            if (message.Kind == Message.MessageType.InputMessage)
-            {
-                InputMessage msg = (InputMessage)message;
-
-                processInput(msg);
-            }
-
             if (message.Kind == Message.MessageType.LogicMessage)
             {
                 LogicMessage msg = (LogicMessage)message;
@@ -266,7 +189,8 @@ namespace Ballz.GameSession.Physics
                     Enabled = !Enabled;
                 }
             }
-
         }
+
+
     }
 }

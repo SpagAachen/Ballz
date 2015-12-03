@@ -123,9 +123,18 @@ namespace Ballz.GameSession.Renderer
                     }
 
                     var screenPos = WorldToScreen(ball.Position + new Vector2(0.33f, 1.5f));
+                    
+                    spriteBatch.DrawString(font, ball.Player.Name, screenPos, Color.Black, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
+                    screenPos += new Vector2(2, 2);
+                    spriteBatch.DrawString(font, ball.Player.Name, screenPos, Color.MediumSpringGreen, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
+
+                    screenPos = WorldToScreen(ball.Position + new Vector2(0.33f, 1.5f));
+                    screenPos += new Vector2(0, 20);
                     spriteBatch.DrawString(font, ball.Health.ToString("0"), screenPos, Color.Black, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
                     screenPos += new Vector2(2, 2);
                     spriteBatch.DrawString(font, ball.Health.ToString("0"), screenPos, Color.White, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
+
+
                 }
             }
             spriteBatch.End();
