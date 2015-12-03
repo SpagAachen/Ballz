@@ -9,6 +9,14 @@ using System.Threading.Tasks;
 
 namespace Ballz.GameSession.Logic
 {
+    public enum SessionState
+    {
+        Starting,
+        Running,
+        Finished,
+        Paused,
+    }
+
     public class GameLogic: GameComponent
     {
         private Ballz Game;
@@ -32,14 +40,38 @@ namespace Ballz.GameSession.Logic
 
             var worldState = Game.World;
 
-            foreach (var controller in BallControllers.Values)
-                controller.Update(elapsedSeconds, worldState);
+            if (Game.Match.State == SessionState.Running)
+            {
+                // Update all balls
+                foreach (var controller in BallControllers.Values)
+                    controller.Update(elapsedSeconds, worldState);
+                
+                // Check for dead players
+                int alivePlayers = 0;
+                Player winner = null;
+                foreach (var controller in BallControllers.Values)
+                {
+                    if (controller.IsAlive)
+                    {
+                        alivePlayers++;
+                        winner = controller.Ball.Player;
+                    }
+                }
+
+                if (alivePlayers < 2)
+                {
+                    Game.Match.State = SessionState.Finished;
+                    Game.Match.Winner = winner;
+                }
+            }
+
         }
 
         public void HandleMessage(object sender, Message message)
         {
             if (message.Kind == Message.MessageType.InputMessage)
             {
+                // Pass input messages to the respective ball controllers
                 InputMessage msg = (InputMessage)message;
                 if(msg.Player != null && BallControllers.ContainsKey(msg.Player))
                 {

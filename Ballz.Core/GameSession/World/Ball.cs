@@ -23,7 +23,7 @@ namespace Ballz.GameSession.World
         public bool IsAiming { get; set; } = false;
 
         public Player Player { get; set; } = Player.NPC;
-
+        
         public Vector2 AimDirection { get; set; } = Vector2.UnitX;
     }
 }

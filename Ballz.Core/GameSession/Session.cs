@@ -23,7 +23,8 @@ namespace Ballz.GameSession
         private Ballz theGame;
 
         public List<Player> Players { get; set; } = new List<Player>();
-
+        public Player Winner { get; set; } = null;
+        public SessionState State { get; set; } = SessionState.Starting;
 
         public Session(Ballz _game) : base(_game)
         {
@@ -122,6 +123,8 @@ namespace Ballz.GameSession
             World.World snpsht = new World.World(Entities, theTerrain);
 
             theGame.World = snpsht;
+
+            State = SessionState.Running;
 
         }
 

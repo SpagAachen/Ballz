@@ -124,6 +124,9 @@ namespace Ballz.GameSession.Physics
 
         public override void Update(GameTime time)
         {
+            if (Game.Match.State != Logic.SessionState.Running)
+                return;
+
             var worldState = Game.World;
             float elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
             

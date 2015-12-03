@@ -35,54 +35,61 @@ namespace Ballz.GameSession.Logic
         
         public void Update(float elapsedSeconds, World.World worldState)
         {
-            if (KeyPressed[InputMessage.MessageType.ControlsLeft])
+            if (!IsAlive)
             {
-                Ball.Velocity = new Vector2(-2f, Ball.Velocity.Y);
-                Ball.AimDirection = new Vector2(-Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
+                Ball.IsAiming = false;
             }
-            if (KeyPressed[InputMessage.MessageType.ControlsRight])
+            else
             {
-                Ball.Velocity = new Vector2(2f, Ball.Velocity.Y);
-                Ball.AimDirection = new Vector2(Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
-            }
 
-            // Up/Down keys rotate the aim vector
-            if (KeyPressed[InputMessage.MessageType.ControlsUp])
-            {
-                var v = Ball.AimDirection;
-                // Rotate at 60°/s. Use sign of v.x to determine the direction, so that the up key always moves the crosshair upwards.
-                var radians = (v.X > 0 ? 1 : -1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
-                Ball.AimDirection = v.Rotate(radians);
-            }
-            if (KeyPressed[InputMessage.MessageType.ControlsDown])
-            {
-                var v = Ball.AimDirection;
-                // Rotate at 60°/s. Use sign of v.x to determine the direction, so that the up key always moves the crosshair upwards.
-                var radians = (v.X > 0 ? -1 : 1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
-                Ball.AimDirection = v.Rotate(radians);
-            }
+                if (KeyPressed[InputMessage.MessageType.ControlsLeft])
+                {
+                    Ball.Velocity = new Vector2(-2f, Ball.Velocity.Y);
+                    Ball.AimDirection = new Vector2(-Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
+                }
+                if (KeyPressed[InputMessage.MessageType.ControlsRight])
+                {
+                    Ball.Velocity = new Vector2(2f, Ball.Velocity.Y);
+                    Ball.AimDirection = new Vector2(Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
+                }
+
+                // Up/Down keys rotate the aim vector
+                if (KeyPressed[InputMessage.MessageType.ControlsUp])
+                {
+                    var v = Ball.AimDirection;
+                    // Rotate at 60°/s. Use sign of v.x to determine the direction, so that the up key always moves the crosshair upwards.
+                    var radians = (v.X > 0 ? 1 : -1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
+                    Ball.AimDirection = v.Rotate(radians);
+                }
+                if (KeyPressed[InputMessage.MessageType.ControlsDown])
+                {
+                    var v = Ball.AimDirection;
+                    // Rotate at 60°/s. Use sign of v.x to determine the direction, so that the up key always moves the crosshair upwards.
+                    var radians = (v.X > 0 ? -1 : 1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
+                    Ball.AimDirection = v.Rotate(radians);
+                }
 
 
-            // Handle single-shot input events
-            switch (controlInput)
-            {
-                case InputMessage.MessageType.ControlsJump:
-                    Ball.Velocity = new Vector2(Ball.Velocity.X, 5f);
-                    break;
-                case InputMessage.MessageType.ControlsAction:
-                    worldState.Shots.Add(new Shot
-                    {
-                        ExplosionRadius = 1.0f,
-                        HealthImpactAtDirectHit = 25,
-                        IsInstantShot = true,
-                        ShotStart = Ball.Position,
-                        ShotVelocity = Ball.AimDirection
-                    });
-                    break;
-                default:
-                    break;
+                // Handle single-shot input events
+                switch (controlInput)
+                {
+                    case InputMessage.MessageType.ControlsJump:
+                        Ball.Velocity = new Vector2(Ball.Velocity.X, 5f);
+                        break;
+                    case InputMessage.MessageType.ControlsAction:
+                        worldState.Shots.Add(new Shot
+                        {
+                            ExplosionRadius = 1.0f,
+                            HealthImpactAtDirectHit = 25,
+                            IsInstantShot = true,
+                            ShotStart = Ball.Position,
+                            ShotVelocity = Ball.AimDirection
+                        });
+                        break;
+                    default:
+                        break;
+                }
             }
-
             controlInput = null;
 
         }
@@ -108,5 +115,7 @@ namespace Ballz.GameSession.Logic
             }
 
         }
+
+        public bool IsAlive {  get { return Ball.Health > 0;  } }
     }
 }

@@ -62,6 +62,23 @@ namespace Ballz.GameSession.Renderer
                 lastModification = time.TotalGameTime;
             ProjectionMatrix = Matrix.Identity;
 
+            if(Game.Match.State == Logic.SessionState.Finished)
+            {
+                string msg = "";
+
+                if (Game.Match.Winner != null)
+                    msg = Game.Match.Winner.Name + " won the match!";
+                else
+                    msg = "Draw!";
+
+                spriteBatch.Begin();
+                var screenPos = new Vector2(30, Game.GraphicsDevice.Viewport.Height / 2);
+                spriteBatch.DrawString(font, msg, screenPos, Color.Black, 0, Vector2.Zero, 1.0f, SpriteEffects.None, 0);
+                screenPos += new Vector2(2, 2);
+                spriteBatch.DrawString(font, msg, screenPos, Color.Red, 0, Vector2.Zero, 1.0f, SpriteEffects.None, 0);
+                spriteBatch.End();
+            }
+
             ViewMatrix = Matrix.CreateOrthographicOffCenter(0, 10 * Game.GraphicsDevice.Viewport.AspectRatio, 0, 10, -10, 10);
 
             BallEffect.View = ViewMatrix;
