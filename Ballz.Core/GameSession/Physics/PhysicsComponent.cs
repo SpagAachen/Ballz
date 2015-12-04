@@ -42,8 +42,6 @@ namespace Ballz.GameSession.Physics
             var ground = new Body(PhysicsWorld);
             ground.BodyType = BodyType.Static;
             ground.CreateFixture(new EdgeShape(new Vector2(-10, 0), new Vector2(20, 0)));
-
-
         }
         
         public void UpdateTerrainBody(Terrain terrain)
@@ -55,6 +53,7 @@ namespace Ballz.GameSession.Physics
 
             TerrainBody = new Body(PhysicsWorld);
             TerrainBody.BodyType = BodyType.Static;
+            TerrainBody.Friction = 1.0f;
 
             foreach (var outline in outlines)
             {
@@ -89,15 +88,16 @@ namespace Ballz.GameSession.Physics
                     body.BodyType = BodyType.Dynamic;
                     body.CreateFixture(new CircleShape(1.0f, 1.0f));
                     PhysicsBodiesByEntityId[e.ID] = body;
+                    body.Friction = 5.0f;
+                    body.Restitution = 0.1f;
+                    body.Mass = 10f;
+                    body.FixedRotation = true;
                 }
                 else
                     body = PhysicsBodiesByEntityId[e.ID];
 
                 body.SetTransform(e.Position, e.Rotation);
                 body.LinearVelocity = e.Velocity;
-
-                // TODO: Allow rotation of bodies
-                body.AngularVelocity = 0;
             }
         }
 
