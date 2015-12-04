@@ -19,7 +19,7 @@ namespace Ballz.GameSession.Logic
 
     public class GameLogic: GameComponent
     {
-        private Ballz Game;
+        new private Ballz Game;
 
         Dictionary<Player, BallControl> BallControllers = new Dictionary<Player, BallControl>();
 
@@ -86,6 +86,10 @@ namespace Ballz.GameSession.Logic
                 if (msg.Kind == LogicMessage.MessageType.GameMessage)
                 {
                     Enabled = !Enabled;
+                    if (Enabled)
+                        Game.Match.State = SessionState.Running;
+                    else
+                        Game.Match.State = SessionState.Paused;
                 }
             }
         }

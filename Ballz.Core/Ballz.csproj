@@ -87,6 +87,7 @@
     <Compile Include="Menu\IChooseable.cs" />
     <None Include="packages.config" />
     <Compile Include="Renderer\Camera.cs" />
+    <Compile Include="Sound\SoundControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
@@ -116,9 +117,15 @@
     <Content Include="Content\Worlds\TestWorld2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\Sounds\pew.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Sounds\pew.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="GameSession\Sound\" />
+    <Folder Include="Sound\" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FarseerPhysics MonoGame, Version=3.5.0.40766, Culture=neutral, processorArchitecture=MSIL">

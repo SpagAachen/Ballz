@@ -33,6 +33,8 @@ namespace Ballz.Logic
         public void startGame()
         {
             state = GameState.SimulationState;
+
+            Game.Match.start();
             RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }
 

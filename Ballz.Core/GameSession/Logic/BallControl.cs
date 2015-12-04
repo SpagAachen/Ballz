@@ -1,6 +1,7 @@
 ﻿using Ballz.GameSession.World;
 using Ballz.Messages;
 using Ballz.Utils;
+using Ballz.Sound;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -77,6 +78,7 @@ namespace Ballz.GameSession.Logic
                         Ball.Velocity = new Vector2(Ball.Velocity.X, 5f);
                         break;
                     case InputMessage.MessageType.ControlsAction:
+                        Game.Services.GetService<SoundControl>().playSound(SoundControl.shotSound);
                         worldState.Shots.Add(new Shot
                         {
                             ExplosionRadius = 1.0f,

@@ -5,6 +5,7 @@ using Ballz.GameSession.World;
 using Ballz.Input;
 using Ballz.Logic;
 using Ballz.Renderer;
+using Ballz.Sound;
 using Microsoft.Xna.Framework;
 using Ballz.Menu;
 using System.Collections.Generic;
@@ -71,6 +72,8 @@ namespace Ballz
 
             Services.AddService(Logic);
             Services.AddService(input);
+
+            Services.AddService(new SoundControl(this));
 
             Match = new GameSession.Session(this);
             Components.Add(Match);

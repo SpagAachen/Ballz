@@ -3,7 +3,7 @@
 
 /outputDir:.
 /intermediateDir:obj
-/platform:Windows
+/platform:Linux
 /config:
 /profile:Reach
 /compress:False
@@ -59,4 +59,10 @@
 /processorParam:SwapWindingOrder=False
 /processorParam:TextureFormat=DxtCompressed
 /build:Content/Ball.obj
+
+#begin Content/Sounds/pew.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Content/Sounds/pew.wav
 

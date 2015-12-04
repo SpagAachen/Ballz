@@ -53,14 +53,19 @@ namespace Ballz.GameSession
             logic.Message += sessionLogic.HandleMessage;
 
             input = _game.Services.GetService<Input.InputTranslator>();
-            input.Input += physics.HandleMessage;
-            input.Input += gameRenderer.HandleMessage;
-            input.Input += sessionLogic.HandleMessage;
-            input.Input += debugRenderer.HandleMessage;
+           
 
             _game.Components.ComponentRemoved += cleanup;
             //Initialize();
             theGame = _game;
+        }
+
+        public void start()
+        {
+            input.Input += physics.HandleMessage;
+            input.Input += gameRenderer.HandleMessage;
+            input.Input += sessionLogic.HandleMessage;
+            input.Input += debugRenderer.HandleMessage;
         }
 
         public void cleanup(object sender, GameComponentCollectionEventArgs args)
@@ -131,7 +136,8 @@ namespace Ballz.GameSession
 
             theGame.World = snpsht;
 
-            State = SessionState.Running;
+            //maybe use paused
+            State = SessionState.Starting;
 
         }
 
