@@ -113,6 +113,9 @@
     <Content Include="Content\Worlds\TestWorld.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\Worlds\TestWorld2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="GameSession\Sound\" />

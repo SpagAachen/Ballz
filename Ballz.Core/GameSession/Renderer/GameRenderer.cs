@@ -77,7 +77,7 @@ namespace Ballz.GameSession.Renderer
                 spriteBatch.End();
             }
 
-            Game.Camera.setView( Matrix.CreateOrthographicOffCenter(0, 10 * Game.GraphicsDevice.Viewport.AspectRatio, 0, 10, -10, 10));
+            Game.Camera.setView( Matrix.CreateOrthographicOffCenter(0, 20 * Game.GraphicsDevice.Viewport.AspectRatio, 0, 20, -20, 20));
 
             BallEffect.View = Game.Camera.View;
             BallEffect.Projection = Game.Camera.Projection;
@@ -105,7 +105,7 @@ namespace Ballz.GameSession.Renderer
                 i += 3;
             }
 
-            Matrix terrainWorld = Matrix.CreateScale(0.03f);
+            Matrix terrainWorld = Matrix.CreateScale(worldState.StaticGeometry.Scale);
             TerrainEffect.World = terrainWorld;
             TerrainEffect.View = Game.Camera.View;
             TerrainEffect.Projection = Game.Camera.Projection;

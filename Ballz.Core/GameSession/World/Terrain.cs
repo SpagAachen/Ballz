@@ -28,8 +28,10 @@ namespace Ballz.GameSession.World
         public int Revision { get; private set; } = 0;
 
 		public bool up2date { get; private set; } = false;
-		// We might need that later on...
-		//private Texture2D terrainSDF = null;
+        // We might need that later on...
+        //private Texture2D terrainSDF = null;
+
+        public float Scale = 0.08f;
 
 		public Terrain (Texture2D terrainTexture)
 		{
@@ -106,8 +108,12 @@ namespace Ballz.GameSession.World
 
 		public void SubtractCircle(float x, float y, float radius)
 		{
-			// Compute bounding box
-			int tlx = (int)Math.Floor(x - radius);
+            x /= Scale;
+            y /= Scale;
+            radius /= Scale;
+
+            // Compute bounding box
+            int tlx = (int)Math.Floor(x - radius);
 			int tly = (int)Math.Floor(y - radius);
 			int brx = (int)Math.Ceiling(x + radius);
 			int bry = (int)Math.Ceiling(y + radius);
@@ -136,6 +142,10 @@ namespace Ballz.GameSession.World
 
         public void AddCircle(float x, float y, float radius)
         {
+            x /= Scale;
+            y /= Scale;
+            radius /= Scale;
+
             // Compute bounding box
             int tlx = (int)Math.Floor(x - radius);
             int tly = (int)Math.Floor(y - radius);

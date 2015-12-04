@@ -91,7 +91,7 @@ namespace Ballz.GameSession.Renderer
                     for (int i = 0; i < lineStrip.Count; i++)
                     {
                         lineVertices[i].Color = Color.GreenYellow;
-                        lineVertices[i].Position = new Vector3(lineStrip[i],0);
+                        lineVertices[i].Position = new Vector3(lineStrip[i],0) * Game.World.StaticGeometry.Scale;
                     }
                     terrainVertices.Add(lineVertices);
                 }
@@ -142,7 +142,7 @@ namespace Ballz.GameSession.Renderer
         {
             LineEffect.Projection = Game.Camera.Projection;
             LineEffect.View = Game.Camera.View;
-            LineEffect.World = Matrix.CreateScale(0.03f);
+            LineEffect.World = Matrix.Identity;
 
             LineEffect.CurrentTechnique.Passes[0].Apply();
             foreach (VertexPositionColor[] lineVertices in terrainVertices)

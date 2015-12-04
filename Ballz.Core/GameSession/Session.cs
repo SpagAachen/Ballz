@@ -82,7 +82,7 @@ namespace Ballz.GameSession
         {
             ///generate a dummy game world
             /// TODO: find a nice solution to initialize the world especially regarding networking. maybe use an event for this
-            theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld"));
+            theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld2"));
 
             var player1 = new Player
             {
@@ -92,7 +92,7 @@ namespace Ballz.GameSession
 
             var player1Ball = new Ball
             {
-                Position = new Vector2(5, 10),
+                Position = new Vector2(4, 10),
                 Velocity = new Vector2(2, 0),
                 IsAiming = true,
                 Player = player1
@@ -109,7 +109,7 @@ namespace Ballz.GameSession
 
             var player2Ball = new Ball
             {
-                Position = new Vector2(5, 12),
+                Position = new Vector2(27, 7),
                 Velocity = new Vector2(2, 0),
                 IsAiming = true,
                 Player = player2

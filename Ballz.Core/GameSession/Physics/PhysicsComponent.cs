@@ -61,7 +61,7 @@ namespace Ballz.GameSession.Physics
 
                 for(int i = 0; i < outline.Count; i++)
                 {
-                    vertices[i] = outline[i] * 0.03f;
+                    vertices[i] = outline[i] * terrain.Scale;
                 }
 
                 var shape = new ChainShape(new Vertices(vertices));
@@ -154,7 +154,7 @@ namespace Ballz.GameSession.Physics
                     // Terrain hit? Then add an explosion there.
                     if(targetFixture.Body == TerrainBody)
                     {
-                        worldState.StaticGeometry.SubtractCircle(targetPos.X / 0.03f, targetPos.Y / 0.03f, shot.ExplosionRadius / 0.03f);
+                        worldState.StaticGeometry.SubtractCircle(targetPos.X, targetPos.Y, shot.ExplosionRadius);
                     }
                     // Otherwise, find the entity that belongs to the hit body
                     else
