@@ -17,7 +17,8 @@ namespace Ballz.GameSession
         private Terrain theTerrain;
         private Physics.PhysicsControl physics;
         private Logic.GameLogic sessionLogic;
-        private Renderer.GameRenderer renderer;
+        private Renderer.GameRenderer gameRenderer;
+        private Renderer.DebugRenderer debugRenderer;
         private LogicControl logic;
         private Input.InputTranslator input;
         private Ballz theGame;
@@ -32,10 +33,15 @@ namespace Ballz.GameSession
             physics.Enabled = false;
             _game.Components.Add(physics);
 
-            renderer = new Renderer.GameRenderer(_game);
-            renderer.Enabled = false;
-            renderer.Visible = false;
-            _game.Components.Add(renderer);
+            gameRenderer = new Renderer.GameRenderer(_game);
+            gameRenderer.Enabled = false;
+            gameRenderer.Visible = false;
+            _game.Components.Add(gameRenderer);
+
+            debugRenderer = new Renderer.DebugRenderer(_game);
+            debugRenderer.Enabled = false;
+            debugRenderer.Visible = false;
+            _game.Components.Add(debugRenderer);
 
             sessionLogic = new Logic.GameLogic(_game);
             sessionLogic.Enabled = false;
@@ -43,13 +49,14 @@ namespace Ballz.GameSession
 
             logic = _game.Services.GetService<LogicControl>();
             logic.Message += physics.HandleMessage;
-            logic.Message += renderer.HandleMessage;
+            logic.Message += gameRenderer.HandleMessage;
             logic.Message += sessionLogic.HandleMessage;
 
             input = _game.Services.GetService<Input.InputTranslator>();
             input.Input += physics.HandleMessage;
-            input.Input += renderer.HandleMessage;
+            input.Input += gameRenderer.HandleMessage;
             input.Input += sessionLogic.HandleMessage;
+            input.Input += debugRenderer.HandleMessage;
 
             _game.Components.ComponentRemoved += cleanup;
             //Initialize();
@@ -61,13 +68,13 @@ namespace Ballz.GameSession
             if (args.GameComponent == this)  //we got removed so we get rid of all the other components
             {
                 logic.Message -= physics.HandleMessage;
-                logic.Message -= renderer.HandleMessage;
+                logic.Message -= gameRenderer.HandleMessage;
 
                 Game.Components.Remove(physics);
-                Game.Components.Remove(renderer);
+                Game.Components.Remove(gameRenderer);
 
                 input.Input -= physics.HandleMessage;
-                input.Input -= renderer.HandleMessage;
+                input.Input -= gameRenderer.HandleMessage;
             }
         }
             

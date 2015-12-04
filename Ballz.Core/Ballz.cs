@@ -40,6 +40,8 @@ namespace Ballz
 
         public Composite MainMenu;
 
+        public Camera Camera;
+
         private Ballz()
         {
             Graphics = new GraphicsDeviceManager(this);
@@ -50,6 +52,8 @@ namespace Ballz
             Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
             IsFixedTimeStep = false;
 
+
+            Camera = new Camera();
             // create the Game Components
             var menuRendering = new MenuRenderer(this, DefaultMenu());
             //var physics = new PhysicsControl(this);

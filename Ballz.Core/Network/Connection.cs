@@ -1,4 +1,5 @@
-﻿namespace Ballz.Network
+﻿
+namespace Ballz.Network
 {
     using System;
     using System.Collections.Generic;
@@ -132,6 +133,7 @@
         public object ReceiveData()
         {
             if (receiveTask == null)
+
                 throw new InvalidOperationException("No receiving is in progress");
             receiveTask.Wait();
             var result = receiveTask.Result;

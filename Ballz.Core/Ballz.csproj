@@ -86,6 +86,7 @@
     <Compile Include="Menu\Choice.cs" />
     <Compile Include="Menu\IChooseable.cs" />
     <None Include="packages.config" />
+    <Compile Include="Renderer\Camera.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />

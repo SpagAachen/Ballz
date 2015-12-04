@@ -27,8 +27,6 @@ namespace Ballz.GameSession.Renderer
 
         new Ballz Game;
 
-        Matrix ProjectionMatrix;
-        Matrix ViewMatrix;
         TimeSpan lastModification;
 
         public GameRenderer(Ballz game) : base(game)
@@ -38,7 +36,7 @@ namespace Ballz.GameSession.Renderer
 
         public Vector2 WorldToScreen(Vector3 Position)
         {
-            var screenSpace = Vector4.Transform(Position, (ProjectionMatrix * ViewMatrix));
+            var screenSpace = Vector4.Transform(Position, (Game.Camera.Projection * Game.Camera.View));
             screenSpace /= screenSpace.W;
             return new Vector2
             {
@@ -60,7 +58,7 @@ namespace Ballz.GameSession.Renderer
         {
             if (lastModification == null)
                 lastModification = time.TotalGameTime;
-            ProjectionMatrix = Matrix.Identity;
+            Game.Camera.setProjection( Matrix.Identity);
 
             if(Game.Match.State == Logic.SessionState.Finished)
             {
@@ -79,10 +77,10 @@ namespace Ballz.GameSession.Renderer
                 spriteBatch.End();
             }
 
-            ViewMatrix = Matrix.CreateOrthographicOffCenter(0, 10 * Game.GraphicsDevice.Viewport.AspectRatio, 0, 10, -10, 10);
+            Game.Camera.setView( Matrix.CreateOrthographicOffCenter(0, 10 * Game.GraphicsDevice.Viewport.AspectRatio, 0, 10, -10, 10));
 
-            BallEffect.View = ViewMatrix;
-            BallEffect.Projection = ProjectionMatrix;
+            BallEffect.View = Game.Camera.View;
+            BallEffect.Projection = Game.Camera.Projection;
 
             var worldState = Game.World;
 
@@ -109,8 +107,8 @@ namespace Ballz.GameSession.Renderer
 
             Matrix terrainWorld = Matrix.CreateScale(0.03f);
             TerrainEffect.World = terrainWorld;
-            TerrainEffect.View = ViewMatrix;
-            TerrainEffect.Projection = ProjectionMatrix;
+            TerrainEffect.View = Game.Camera.View;
+            TerrainEffect.Projection = Game.Camera.Projection;
             TerrainEffect.CurrentTechnique.Passes[0].Apply();
             GraphicsDevice.SamplerStates[0] = new SamplerState
             {
@@ -126,7 +124,7 @@ namespace Ballz.GameSession.Renderer
                 Vector2 nV = entity.Direction;
                 Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * 50 * nV.X / 360.0)) * Matrix.CreateTranslation(new Vector3(entity.Position, 0));
                 BallEffect.World = world;
-                BallModel.Draw(world, ViewMatrix, ProjectionMatrix);
+                BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
 
                 var ball = entity as Ball;
                 if(ball != null)
@@ -183,7 +181,7 @@ namespace Ballz.GameSession.Renderer
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             font = Game.Content.Load<SpriteFont>("Fonts/Menufont");
 
-            PrepareDebugRendering();
+            //PrepareDebugRendering();
 
             base.LoadContent();
         }
