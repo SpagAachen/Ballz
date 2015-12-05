@@ -15,12 +15,11 @@ namespace Ballz.GameSession.Renderer
     /// </summary>
     public partial class GameRenderer : DrawableGameComponent
     {
-        Model BallModel;
+        Model BallModel, GraveModel;
         Texture2D GermoneyTexture;
         Texture2D CrosshairTexture;
         Texture2D TerrainTexture;
-        BasicEffect BallEffect;
-        BasicEffect TerrainEffect;
+        BasicEffect BallEffect, TerrainEffect, GraveEffect;
         SpriteBatch spriteBatch;
 
         private SpriteFont font;
@@ -124,11 +123,17 @@ namespace Ballz.GameSession.Renderer
                 Vector2 nV = entity.Direction;
                 Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * 50 * nV.X / 360.0)) * Matrix.CreateTranslation(new Vector3(entity.Position, 0));
                 BallEffect.World = world;
-                BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
+                GraveEffect.World = world;
+
 
                 var ball = entity as Ball;
                 if(ball != null)
                 {
+                    if (ball.Health > 0)
+                        BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
+                    else
+                        GraveModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
+
                     if(ball.IsAiming)
                     {
                         var aimTarget = ball.Position + ball.AimDirection * 2;
@@ -168,7 +173,7 @@ namespace Ballz.GameSession.Renderer
             BallEffect.AmbientLightColor = new Vector3(0.3f, 0.3f, 0.3f);
             BallEffect.PreferPerPixelLighting = true;
 
-            BallModel = Game.Content.Load<Model>("Ball");
+            BallModel = Game.Content.Load<Model>("Models/Ball");
             BallModel.Meshes[0].MeshParts[0].Effect = BallEffect;
 
             TerrainTexture = Game.Content.Load<Texture2D>("Textures/Dirt");
@@ -180,6 +185,17 @@ namespace Ballz.GameSession.Renderer
 
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             font = Game.Content.Load<SpriteFont>("Fonts/Menufont");
+
+            GraveEffect = new BasicEffect(Game.GraphicsDevice);
+            GraveEffect.EnableDefaultLighting();
+            GraveEffect.Texture = Game.Content.Load<Texture2D>("Textures/RIP");
+            GraveEffect.TextureEnabled = true;
+            GraveEffect.DirectionalLight0.Direction = new Vector3(1,-1,-1);
+            GraveEffect.AmbientLightColor = new Vector3(0.3f);
+            GraveEffect.PreferPerPixelLighting = true;
+
+            GraveModel = Game.Content.Load<Model>("Models/RIP");
+            GraveModel.Meshes[0].MeshParts[0].Effect = GraveEffect;
 
             //PrepareDebugRendering();
 
