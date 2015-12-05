@@ -123,7 +123,8 @@ namespace Ballz.GameSession.Physics
         }
 
         public override void Update(GameTime time)
-        {
+        {using (new PerformanceReporter(Game))
+            {
             if (Game.Match.State != Logic.SessionState.Running)
                 return;
 
@@ -178,6 +179,7 @@ namespace Ballz.GameSession.Physics
 
             // Remove all shots
             worldState.Shots.Clear();
+        }
         }
 
 

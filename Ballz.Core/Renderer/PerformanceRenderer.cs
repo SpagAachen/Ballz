@@ -23,6 +23,7 @@ using System.Diagnostics;
 using Ballz.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace Ballz
 {
@@ -33,12 +34,15 @@ namespace Ballz
         private int fpsCounter = 0;
         private int fps = 0;
         private double seconds = 0;
+        private Dictionary<string, double> reportedMsecs = new Dictionary<string,double>();
 
         private float allocatedMemory;
 
         private Vector2 fpsPosition = new Vector2(20,20);
         private Vector2 frametimePosition = new Vector2(20,40);
         private Vector2 memoryPosition = new Vector2(20,60);
+        private Vector2 spacing = new Vector2(0,20);
+        private Vector2 positioning;
 
         public PerformanceRenderer(Ballz game) : base(game)
         {
@@ -79,10 +83,21 @@ namespace Ballz
             renderer.DrawString(font, "fps: " + fps, fpsPosition, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);
 
             renderer.DrawString(font, "frametime: " + gameTime.ElapsedGameTime.TotalSeconds*1000 + " ms", frametimePosition, Color.DarkSlateGray, 0, -2*Vector2.One,0.4f,SpriteEffects.None,0);
-            renderer.DrawString(font, "frametime: " + gameTime.ElapsedGameTime.TotalSeconds*1000 + " ms", frametimePosition, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);
+            renderer.DrawString(font, "frametime: " + gameTime.ElapsedGameTime.TotalSeconds * 1000 + " ms", frametimePosition, Color.Wheat, 0, Vector2.Zero, 0.4f, SpriteEffects.None, 0);
 
             renderer.DrawString(font, "Memory: " + allocatedMemory + " MB", memoryPosition, Color.DarkSlateGray, 0, -2*Vector2.One,0.4f,SpriteEffects.None,0);
             renderer.DrawString(font, "Memory: " + allocatedMemory + " MB", memoryPosition, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);
+
+            positioning = memoryPosition + spacing;
+
+            renderer.DrawString(font, "Measures: ", positioning, Color.DarkSlateGray, 0, -2*Vector2.One,0.4f,SpriteEffects.None,0);
+            renderer.DrawString(font, "Measures: ", positioning, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);
+            foreach (var t in reportedMsecs)
+            {
+                positioning += spacing;    
+                renderer.DrawString(font, t.Key+": "+t.Value+" ms", positioning, Color.DarkSlateGray, 0, -2*Vector2.One,0.4f,SpriteEffects.None,0);
+                renderer.DrawString(font, t.Key+": "+t.Value+" ms", positioning, Color.Wheat, 0, Vector2.Zero,0.4f,SpriteEffects.None,0);
+            }
 
             renderer.End();
 
@@ -104,6 +119,11 @@ namespace Ballz
                 }
             }
                 
+        }
+
+        public void reportTime(string name, TimeSpan time)
+        {
+            reportedMsecs[name] = time.TotalMilliseconds;
         }
     }
 }
