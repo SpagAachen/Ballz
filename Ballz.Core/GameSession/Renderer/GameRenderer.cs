@@ -58,6 +58,7 @@ namespace Ballz.GameSession.Renderer
         public override void Draw(GameTime time)
         { using (new PerformanceReporter(Game))
             {
+                GraphicsDevice.Clear(Color.CornflowerBlue);
                 if (lastModification == null)
                     lastModification = time.TotalGameTime;
                 Game.Camera.setProjection(Matrix.Identity);
