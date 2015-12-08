@@ -88,6 +88,16 @@ namespace Ballz.GameSession.Physics
                     continue;
                 }
 
+                if(e.Position.LengthSquared() > 100*100)
+                {
+                    e.Dispose();
+                    EntityIdByPhysicsBody.Remove(e.PhysicsBody);
+                    e.PhysicsBody.Dispose();
+                    e.PhysicsBody = null;
+                    worldState.Entities.Remove(e);
+                    continue;
+                }
+
                 Body body = e.PhysicsBody;
                 if (body == null)
                 {
