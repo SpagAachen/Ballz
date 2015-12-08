@@ -76,14 +76,15 @@ namespace Ballz.GameSession.Physics
             TerrainRevision = worldState.StaticGeometry.Revision;
 
             // Add Bodies for new entities
-            foreach (var e in worldState.Entities)
+            var entities = worldState.Entities.ToArray();
+            foreach (var e in entities)
             {
                 if(e.Disposed && e.PhysicsBody != null)
                 {
                     EntityIdByPhysicsBody.Remove(e.PhysicsBody);
-                    PhysicsWorld.RemoveBody(e.PhysicsBody);
                     e.PhysicsBody.Dispose();
                     e.PhysicsBody = null;
+                    worldState.Entities.Remove(e);
                     continue;
                 }
 
@@ -216,7 +217,7 @@ namespace Ballz.GameSession.Physics
                     worldState.StaticGeometry.SubtractCircle(targetPos.X, targetPos.Y, shot.ExplosionRadius);
                 }
                 // Otherwise, find the entity that belongs to the hit body
-                else
+                else if(EntityIdByPhysicsBody.ContainsKey(targetFixture.Body))
                 {
                     int entityId = EntityIdByPhysicsBody[targetFixture.Body];
 
