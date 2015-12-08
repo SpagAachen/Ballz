@@ -78,7 +78,7 @@ namespace Ballz.GameSession.Renderer
                     spriteBatch.End();
                 }
 
-                Game.Camera.setView(Matrix.CreateOrthographicOffCenter(0, 20 * Game.GraphicsDevice.Viewport.AspectRatio, 0, 20, -20, 20));
+                Game.Camera.setView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
 
                 BallEffect.View = Game.Camera.View;
                 BallEffect.Projection = Game.Camera.Projection;
