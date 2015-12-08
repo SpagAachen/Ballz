@@ -2,6 +2,7 @@
 using Ballz.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace Ballz.Renderer
 {
@@ -59,10 +60,24 @@ namespace Ballz.Renderer
 
         public override void Draw(GameTime gameTime)
         {
-            spriteBatch.Begin();
             
+            
+            spriteBatch.Begin();
+
+            var bounds = Game.Window.ClientBounds;
+
             // Draw a background screen.
-            spriteBatch.Draw(textureSplashScreen, Game.Window.ClientBounds, Color.White);
+            var time = gameTime.TotalGameTime.TotalSeconds;
+            var foo = bounds.Height * 0.1;
+            var s = (int)(foo * Math.Sin(3*time));
+            var c = (int)(foo * Math.Cos(3*time));
+
+            bounds.X -= s;
+            bounds.Width += 2 * s;
+            bounds.Y -= c;
+            bounds.Height += 2 * c;
+
+            spriteBatch.Draw(textureSplashScreen, bounds, Color.White);
 
             if (menu != null)
             {

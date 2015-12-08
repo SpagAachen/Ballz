@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace Ballz.Menu
 {
     public class Back : Label
-    {
+	{
         public Back() : base("Back", true)
-        {
+		{
 
         }
     }
