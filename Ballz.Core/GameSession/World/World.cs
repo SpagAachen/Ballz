@@ -26,13 +26,7 @@ namespace Ballz.GameSession.World
             get;
             set;
         }
-
-        public List<Shot> Shots
-        {
-            get;
-            private set;
-        }
-
+        
         public Entity EntityById(int id)
         {
             return (from e in Entities
@@ -40,14 +34,10 @@ namespace Ballz.GameSession.World
                     select e).FirstOrDefault();
         }
 
-        public World(List<Entity> newEntitites, Terrain newTerrain, List<Shot> shots = null)
+        public World(List<Entity> newEntitites, Terrain newTerrain)
         {
-            Shots = shots;
-            if (shots == null)
-                shots = new List<Shot>();
             Entities = newEntitites;
             StaticGeometry = newTerrain;
-            Shots = shots;
         }
     }
 }
