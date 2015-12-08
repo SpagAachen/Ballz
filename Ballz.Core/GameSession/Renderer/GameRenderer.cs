@@ -122,45 +122,59 @@ namespace Ballz.GameSession.Renderer
                 spriteBatch.Begin();
                 foreach (var entity in worldState.Entities)
                 {
-                    Vector2 nV = entity.Direction;
-                    Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * 50 * nV.X / 360.0)) * Matrix.CreateTranslation(new Vector3(entity.Position, 0));
-                    BallEffect.World = world;
-                    GraveEffect.World = world;
-
+                    if (entity.Disposed)
+                        continue;
 
                     var ball = entity as Ball;
                     if (ball != null)
-                    {
-                        if (ball.Health > 0)
-                            BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
-                        else
-                            GraveModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
-
-                        if (ball.IsAiming)
-                        {
-                            var aimTarget = ball.Position + ball.AimDirection * 2;
-                            var aimTargetScreen = WorldToScreen(aimTarget);
-                            var crossHairRectangle = new Rectangle(aimTargetScreen.ToPoint() - new Point(16, 16), new Point(32, 32));
-                            spriteBatch.Draw(CrosshairTexture, crossHairRectangle, Color.White);
-                        }
-
-                        var screenPos = WorldToScreen(ball.Position + new Vector2(0.33f, 1.5f));
-                    
-                        spriteBatch.DrawString(font, ball.Player.Name, screenPos, Color.Black, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
-                        screenPos += new Vector2(2, 2);
-                        spriteBatch.DrawString(font, ball.Player.Name, screenPos, Color.MediumSpringGreen, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
-
-                        screenPos = WorldToScreen(ball.Position + new Vector2(0.33f, 1.5f));
-                        screenPos += new Vector2(0, 20);
-                        spriteBatch.DrawString(font, ball.Health.ToString("0"), screenPos, Color.Black, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
-                        screenPos += new Vector2(2, 2);
-                        spriteBatch.DrawString(font, ball.Health.ToString("0"), screenPos, Color.White, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
-
-
-                    }
+                        DrawBall(ball);
+                    var shot = entity as Shot;
+                    if (shot != null)
+                        DrawShot(shot);
                 }
                 spriteBatch.End();
             }
+        }
+
+        public void DrawBall(Ball ball)
+        {
+            BallEffect.DiffuseColor = Vector3.One;
+
+            Vector2 nV = ball.Direction;
+            Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * 50 * nV.X / 360.0)) * Matrix.CreateTranslation(new Vector3(ball.Position, 0));
+            BallEffect.World = world;
+            GraveEffect.World = world;
+
+            if (ball.Health > 0)
+                BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
+            else
+                GraveModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
+
+            if (ball.IsAiming)
+            {
+                var aimTarget = ball.Position + ball.AimDirection * 2;
+                var aimTargetScreen = WorldToScreen(aimTarget);
+                var crossHairRectangle = new Rectangle(aimTargetScreen.ToPoint() - new Point(16, 16), new Point(32, 32));
+                spriteBatch.Draw(CrosshairTexture, crossHairRectangle, Color.White);
+            }
+
+            var screenPos = WorldToScreen(ball.Position + new Vector2(0.33f, 1.5f));
+
+            spriteBatch.DrawString(font, ball.Player.Name, screenPos, Color.Black, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
+            screenPos += new Vector2(2, 2);
+            spriteBatch.DrawString(font, ball.Player.Name, screenPos, Color.MediumSpringGreen, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
+
+            screenPos = WorldToScreen(ball.Position + new Vector2(0.33f, 1.5f));
+            screenPos += new Vector2(0, 20);
+            spriteBatch.DrawString(font, ball.Health.ToString("0"), screenPos, Color.Black, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
+            screenPos += new Vector2(2, 2);
+            spriteBatch.DrawString(font, ball.Health.ToString("0"), screenPos, Color.White, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
+        }
+        public void DrawShot(Shot shot)
+        {
+            BallEffect.DiffuseColor = Vector3.Zero;
+            Matrix world = Matrix.CreateScale(0.1f) * Matrix.CreateTranslation(new Vector3(shot.Position, 0));
+            BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
         }
 
         protected override void LoadContent()
