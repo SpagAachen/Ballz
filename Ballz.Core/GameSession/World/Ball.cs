@@ -10,9 +10,10 @@ namespace Ballz.GameSession.World
 	[Serializable]
     public class Ball : Entity
     {
-        public Ball() : base(EntityType.Player)
+        public Ball()
         {
             Material = PhysicsMaterial.Ball;
+            Radius = 0.8f;
         }
 
         /// <summary>

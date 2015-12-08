@@ -32,10 +32,13 @@ namespace Ballz.GameSession.Renderer
         public override void Draw(GameTime gameTime)
         {
             //DrawSphere(Vector2.Zero, new Vector2(0.0f,1.0f));
-
+            debugWorld = Game.World;
             foreach (Entity ball in debugWorld.Entities)
             {
-                DrawSphere(ball.Position, ball.Rotation);
+                if (ball.Disposed)
+                    continue;
+
+                DrawSphere(ball.Position, ball.Rotation, ball.Radius);
             }
             drawTerrain();
 
@@ -126,12 +129,12 @@ namespace Ballz.GameSession.Renderer
             base.OnEnabledChanged(sender, args);
         }
             
-        public void DrawSphere(Vector2 position, float direction)
+        public void DrawSphere(Vector2 position, float direction, float radius)
         {
-            
             LineEffect.Projection = Game.Camera.Projection;
             LineEffect.View = Game.Camera.View;
-            LineEffect.World = Matrix.CreateRotationZ(direction);
+            LineEffect.World = Matrix.CreateScale(radius);
+            LineEffect.World *= Matrix.CreateRotationZ(direction);
             LineEffect.World *= Matrix.CreateTranslation((new Vector3(position, 0)));
 
             LineEffect.CurrentTechnique.Passes[0].Apply();

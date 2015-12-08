@@ -6,7 +6,7 @@ namespace Ballz.GameSession.World
     /// <summary>
     ///     Entity is the Base class for all types of Entities in our Game.
     /// </summary>
-    public class Entity: ICloneable
+    public class Entity: IDisposable
     {
         private static int InstanceCounter = 1;
 
@@ -15,18 +15,7 @@ namespace Ballz.GameSession.World
             get;
             set;
         }
-
-        public enum EntityType
-        {
-            Player
-        }
-
-        public EntityType Kind
-        {
-            get;
-            private set;
-        }
-
+        
         public Vector2 Position
         {
             get;
@@ -59,26 +48,34 @@ namespace Ballz.GameSession.World
             set;
         }
 
+        public float Radius { get; set; } = 0.5f;
 
-        public Entity(EntityType kind)
+        public bool IsStatic { get; set; } = false;
+
+        public FarseerPhysics.Dynamics.Body PhysicsBody { get; set; }
+
+        public Entity()
         {
-            Kind = kind;
             ID = InstanceCounter++;
         }
-
-        protected Entity() { }
 
         public virtual object Clone()
         {
             return new Entity
             {
                 ID = ID,
-                Kind = Kind,
                 Material = Material,
                 Position = Position,
                 Rotation = Rotation,
                 Velocity = Velocity
             };
+        }
+
+        public bool Disposed { get; private set; } = false;
+
+        public void Dispose()
+        {
+            Disposed = true;
         }
     }
 }

@@ -79,13 +79,14 @@ namespace Ballz.GameSession.Logic
                         break;
                     case InputMessage.MessageType.ControlsAction:
                         Game.Services.GetService<SoundControl>().playSound(SoundControl.shotSound);
-                        worldState.Shots.Add(new Shot
+                        worldState.Entities.Add(new Shot
                         {
                             ExplosionRadius = 1.0f,
                             HealthImpactAtDirectHit = 25,
-                            IsInstantShot = true,
-                            ShotStart = Ball.Position,
-                            ShotVelocity = Ball.AimDirection
+                            IsInstantShot = false,
+                            Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.2f),
+                            Velocity = Ball.AimDirection * 10f,
+                            ShooterId = Ball.ID
                         });
                         break;
                     default:
