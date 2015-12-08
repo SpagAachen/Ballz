@@ -68,6 +68,23 @@ namespace Ballz.GameSession.Physics
             }
         }
 
+        public void RemoveEntity(Entity e, World.World worldState)
+        {
+            e.Dispose();
+            worldState.Entities.Remove(e);
+            if(e.PhysicsBody != null)
+            {
+                EntityIdByPhysicsBody.Remove(e.PhysicsBody);
+                var fixtures = e.PhysicsBody.FixtureList.ToArray();
+                foreach (var fixture in fixtures)
+                {
+                    fixture.Dispose();
+                }
+                e.PhysicsBody.Dispose();
+                e.PhysicsBody = null;
+            }
+        }
+
         public void PreparePhysicsEngine(World.World worldState)
         {
             if (worldState.StaticGeometry.Revision != TerrainRevision)
@@ -79,22 +96,9 @@ namespace Ballz.GameSession.Physics
             var entities = worldState.Entities.ToArray();
             foreach (var e in entities)
             {
-                if(e.Disposed && e.PhysicsBody != null)
+                if(e.Disposed || e.Position.LengthSquared() > 100 * 100)
                 {
-                    EntityIdByPhysicsBody.Remove(e.PhysicsBody);
-                    e.PhysicsBody.Dispose();
-                    e.PhysicsBody = null;
-                    worldState.Entities.Remove(e);
-                    continue;
-                }
-
-                if(e.Position.LengthSquared() > 100*100)
-                {
-                    e.Dispose();
-                    EntityIdByPhysicsBody.Remove(e.PhysicsBody);
-                    e.PhysicsBody.Dispose();
-                    e.PhysicsBody = null;
-                    worldState.Entities.Remove(e);
+                    RemoveEntity(e, worldState);
                     continue;
                 }
 
