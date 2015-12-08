@@ -20,6 +20,7 @@ namespace Ballz.GameSession.Renderer
         Texture2D GermoneyTexture;
         Texture2D CrosshairTexture;
         Texture2D TerrainTexture;
+        Texture2D WhiteTexture;
         BasicEffect BallEffect, TerrainEffect, GraveEffect;
         SpriteBatch spriteBatch;
 
@@ -61,29 +62,16 @@ namespace Ballz.GameSession.Renderer
                     lastModification = time.TotalGameTime;
                 Game.Camera.setProjection(Matrix.Identity);
 
-                if (Game.Match.State == Logic.SessionState.Finished)
-                {
-                    string msg = "";
-
-                    if (Game.Match.Winner != null)
-                        msg = Game.Match.Winner.Name + " won the match!";
-                    else
-                        msg = "Draw!";
-
-                    spriteBatch.Begin();
-                    var screenPos = new Vector2(30, Game.GraphicsDevice.Viewport.Height / 2);
-                    spriteBatch.DrawString(font, msg, screenPos, Color.Black, 0, Vector2.Zero, 1.0f, SpriteEffects.None, 0);
-                    screenPos += new Vector2(2, 2);
-                    spriteBatch.DrawString(font, msg, screenPos, Color.Red, 0, Vector2.Zero, 1.0f, SpriteEffects.None, 0);
-                    spriteBatch.End();
-                }
-
                 Game.Camera.setView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
 
                 BallEffect.View = Game.Camera.View;
                 BallEffect.Projection = Game.Camera.Projection;
 
                 var worldState = Game.World;
+
+                spriteBatch.Begin();
+                spriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), Color.CornflowerBlue);
+                spriteBatch.End();
 
                 var tris = worldState.StaticGeometry.getTriangles();
                 VertexPositionColorTexture[] vpc = new VertexPositionColorTexture[tris.Count * 3];
@@ -133,6 +121,8 @@ namespace Ballz.GameSession.Renderer
                         DrawShot(shot);
                 }
                 spriteBatch.End();
+
+                DrawMessageOverlay();
             }
         }
 
@@ -158,23 +148,57 @@ namespace Ballz.GameSession.Renderer
                 spriteBatch.Draw(CrosshairTexture, crossHairRectangle, Color.White);
             }
 
-            var screenPos = WorldToScreen(ball.Position + new Vector2(0.33f, 1.5f));
+            var screenPos = WorldToScreen(ball.Position + new Vector2(0, 2f));
 
-            spriteBatch.DrawString(font, ball.Player.Name, screenPos, Color.Black, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
-            screenPos += new Vector2(2, 2);
-            spriteBatch.DrawString(font, ball.Player.Name, screenPos, Color.MediumSpringGreen, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
-
-            screenPos = WorldToScreen(ball.Position + new Vector2(0.33f, 1.5f));
+            DrawText(ball.Player.Name, screenPos, 0.5f, Color.LawnGreen, 1, true, true);
             screenPos += new Vector2(0, 20);
-            spriteBatch.DrawString(font, ball.Health.ToString("0"), screenPos, Color.Black, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
-            screenPos += new Vector2(2, 2);
-            spriteBatch.DrawString(font, ball.Health.ToString("0"), screenPos, Color.White, 0, Vector2.Zero, 0.5f, SpriteEffects.None, 0);
+            DrawText(ball.Health.ToString("0"), screenPos, 0.5f, Color.White, 1, true, true);
         }
         public void DrawShot(Shot shot)
         {
             BallEffect.DiffuseColor = Vector3.Zero;
             Matrix world = Matrix.CreateScale(0.1f) * Matrix.CreateTranslation(new Vector3(shot.Position, 0));
             BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
+        }
+
+        public void DrawMessageOverlay()
+        {
+            if (Game.Match.State == Logic.SessionState.Finished)
+            {
+                string msg = "";
+
+                if (Game.Match.Winner != null)
+                    msg = Game.Match.Winner.Name + " won the match!";
+                else
+                    msg = "Draw!";
+
+                spriteBatch.Begin();
+                spriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), new Color(Color.Black, 0.5f));
+
+                var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width / 2, Game.GraphicsDevice.Viewport.Height / 2);
+                DrawText(msg, screenPos, 1f, Color.Red, centerHorizontal: true);
+                spriteBatch.End();
+            }
+        }
+
+        public void DrawText(string text, Vector2 position, float size, Color color, int shadowOffset=2, bool centerVertical = false, bool centerHorizontal = false)
+        {
+            if(centerVertical || centerHorizontal)
+            {
+                var dimensions = font.MeasureString(text);
+                if(centerHorizontal)
+                    position.X -= (int)Math.Round(size * (float)dimensions.X / 2f);
+                if (centerVertical)
+                    position.Y -= (int)Math.Round(size * (float)dimensions.Y / 2f);
+            }
+
+            if(shadowOffset > 0)
+            {
+                position += new Vector2(shadowOffset);
+                spriteBatch.DrawString(font, text, position, new Color(Color.Black, 0.5f), 0, Vector2.Zero, size, SpriteEffects.None, 0);
+                position -= new Vector2(shadowOffset);
+            }
+            spriteBatch.DrawString(font, text, position, color, 0, Vector2.Zero, size, SpriteEffects.None, 0);
         }
 
         protected override void LoadContent()
@@ -213,6 +237,13 @@ namespace Ballz.GameSession.Renderer
 
             GraveModel = Game.Content.Load<Model>("Models/RIP");
             GraveModel.Meshes[0].MeshParts[0].Effect = GraveEffect;
+
+            {
+                WhiteTexture = new Texture2D(Game.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+                Color[] color = new Color[1];
+                color[0] = Color.White;
+                WhiteTexture.SetData(color);
+            }
 
             //PrepareDebugRendering();
 
