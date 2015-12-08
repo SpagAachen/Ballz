@@ -49,6 +49,8 @@ namespace Ballz.GameSession.Physics
             if (TerrainBody != null)
                 PhysicsWorld.RemoveBody(TerrainBody);
 
+            // Update the terrain explicitly
+            terrain.update();
             var outlines = terrain.getOutline();
 
             TerrainBody = new Body(PhysicsWorld);

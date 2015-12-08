@@ -15,91 +15,70 @@ namespace Ballz.GameSession.World
     public class Terrain
     {
 
+        public int Revision { get; private set; } = 0;
+        public bool up2date { get; private set; } = false;
+        public float Scale = 0.08f;
+
+
+
+        // Triangles for rendering
         private List<Triangle> triangles = new List<Triangle>();
 
-        // Deprecated!!
+        // Line segments for physics
         private List<List<Vector2>> outlines = new List<List<Vector2>>();
-        private List<Triangle> physicsTris = new List<Triangle>();
 
+        // Internal terrain bitmaps
 		private Texture2D terrainData = null;
 		private bool[,] terrainBitmap = null;
         private float[,] terrainSmoothmap = null;
 
-        public int Revision { get; private set; } = 0;
+        // Terrain size
+        private int width = -1;
+        private int height = -1;
 
-		public bool up2date { get; private set; } = false;
-        // We might need that later on...
-        //private Texture2D terrainSDF = null;
-
-        public float Scale = 0.08f;
+        // Internal members to avoid reallocation
+        private Border[,] bordersH = null;
+        private Border[,] bordersV = null;
+        private List<List<IntVector2>> fullCells = null;
+        private List<Edge> allEdges = null;
 
 		public Terrain (Texture2D terrainTexture)
 		{
 			terrainData = terrainTexture;
-			//terrainSDF = ExtractSignedDistanceField (terrainData);
 
-			int Width = terrainData.Width;
-			int Height = terrainData.Height;
+			width = terrainData.Width;
+			height = terrainData.Height;
 
-			terrainBitmap = new bool[Width, Height];
-            terrainSmoothmap = new float[Width, Height];
+            terrainBitmap = new bool[width, height];
+            terrainSmoothmap = new float[width, height];
 
-			Color[] pixels = new Color[Width * Height];
+            Color[] pixels = new Color[width * height];
 			terrainData.GetData<Color> (pixels);
 
 
-			for (int y = 0; y < Height; ++y) {
-				for (int x = 0; x < Width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                for (int x = 0; x < width; ++x) {
 
-					Color curPixel = pixels [y * Width + x];
+                    Color curPixel = pixels [y * width + x];
 
 					// Note that we flip the y coord here
                     if (curPixel == Color.White)
                     {
-                        terrainBitmap[x, Height - y - 1] = true;
-                        terrainSmoothmap[x, Height - y - 1] = 1.0f;
+                        terrainBitmap[x, height - y - 1] = true;
+                        terrainSmoothmap[x, height - y - 1] = 1.0f;
                     }
 				}
 			}
 
+            // Pre-allocate internal members
+            bordersH = new Border[width, height];
+            bordersV = new Border[width, height];
+            fullCells = new List<List<IntVector2>>(height);
+            allEdges = new List<Edge>();
+
             update();
 		}
-
-		/*
-		// Debug
-		public void storeCurrentBitmapToFile(string filename)
-		{
-			System.Drawing.Bitmap wusa = new System.Drawing.Bitmap(terrainBitmap.GetLength(0), terrainBitmap.GetLength(1), System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-			for (int y = 0; y < terrainBitmap.GetLength(1); ++y)
-				for (int x = 0; x < terrainBitmap.GetLength(0); ++x)
-				{
-					wusa.SetPixel(x, y, terrainBitmap[x, y] ? System.Drawing.Color.White : System.Drawing.Color.Black);
-				}
-
-			wusa.Save(filename);
-		}
-		*/
-
-        /*
-        // Deprecated!
-		private void extractOutline()
-		{
-			// Do not extract outline if outline is correct already
-			if (up2date)
-				return;
-			
-			outline.Clear ();
-
-            // TODO: VertexHelper does not support holes in terrain
-			Physics2DDotNet.Shapes.ArrayBitmap ab = new Physics2DDotNet.Shapes.ArrayBitmap(terrainBitmap);
-			AdvanceMath.Vector2D[] geometry = Physics2DDotNet.Shapes.VertexHelper.CreateFromBitmap(ab);
-            foreach(AdvanceMath.Vector2D vec in geometry)
-			    outline.Add(new Vector2(vec.X,vec.Y));
-
-			up2date = true;
-		}
-        */
+            
 
 		private float distance(float x1, float y1, float x2, float y2)
 		{
@@ -152,18 +131,15 @@ namespace Ballz.GameSession.World
             int brx = (int)Math.Ceiling(x + radius);
             int bry = (int)Math.Ceiling(y + radius);
 
-            // Terrain width/height
-            int Width = terrainBitmap.GetLength(0);
-            int Height = terrainBitmap.GetLength(1);
 
             // Iterate over bounding box part of bitmap
-            for (int j = Math.Max(0, tly); j < Math.Min(Height, bry); ++j) {
-                for (int i = Math.Max(0, tlx); i < Math.Min(Width, brx); ++i) {
+            for (int j = Math.Max(0, tly); j < Math.Min(height, bry); ++j) {
+                for (int i = Math.Max(0, tlx); i < Math.Min(width, brx); ++i) {
 
                     if (distance(i, j, x, y) > radius)
                         continue;
 
-                    // Subtract dirt (if any)
+                    // Add dirt
                     terrainBitmap [i, j] = true;
 
                 }
@@ -326,31 +302,11 @@ namespace Ballz.GameSession.World
                 this.a = a; this.b = b; this.c = c;
             }
         }
-        private void extractTrianglesAndOutline()
+
+
+        private void smoothTerrain(float[] gauss)
         {
-
-            // Do not extract triangles if they are correct already
-            if (up2date)
-                return;
-
-            triangles.Clear();
-            physicsTris.Clear();
-            outlines.Clear();
-
-            int width = terrainBitmap.GetLength(0);
-            int height = terrainBitmap.GetLength(1);
-
-
-            // reserve max. memory
-            List<List<IntVector2>> fullCells = new List<List<IntVector2>>(height);
-            /*Dictionary<GridEdge, List<Edge>> outlineEdgeStuff = new Dictionary<GridEdge, List<Edge>>();*/
-
-            List<Edge> allEdges = new List<Edge>(1000);
-
-            // Use this one if performance is an issue
-            //float[] gauss = new float[]{1,1,1};
-            float[] gauss = new float[]{1,1,1,1,1};
-            //float[] gauss = new float[]{0.0702f,    0.1311f,    0.1907f,    0.2161f,    0.1907f,    0.1311f,    0.0702f};
+            
             int halfGauss = gauss.GetLength(0) / 2;
 
             // Iterate over all bitmap pixels
@@ -399,6 +355,14 @@ namespace Ballz.GameSession.World
                     terrainSmoothmap[x, y] = sum / weight;
                 }
             }
+        }
+
+        private void performMarchingSquares()
+        {
+            // Clear internal members
+            triangles.Clear();
+            allEdges.Clear();
+            fullCells.Clear();
 
             // Iterate over all bitmap pixels
             for (int y = 1; y < height; ++y)
@@ -406,7 +370,7 @@ namespace Ballz.GameSession.World
                 fullCells.Add(new List<IntVector2>(width));
                 for (int x = 1; x < width; ++x)
                 {
-                    
+
                     /*
                      *      0 -- 3
                      *      |    |
@@ -525,9 +489,14 @@ namespace Ballz.GameSession.World
                     }
                 }
             }
+        }
 
-            Border[,] bordersH = new Border[width, height];
-            Border[,] bordersV = new Border[width, height];
+        private void extractOutlineFromEdges()
+        {
+            // Clear old borders and outline
+            Array.Clear(bordersH, 0, width * height);
+            Array.Clear(bordersV, 0, width * height);
+            outlines.Clear();
 
             foreach(var edge in allEdges)
             {
@@ -539,7 +508,7 @@ namespace Ballz.GameSession.World
                         bordersV[edgeCoordsA.x, edgeCoordsA.y] = new Border(edge);
                     else
                         bordersV[edgeCoordsA.x, edgeCoordsA.y].e1 = edge;
-                    
+
                     edge.b0 = bordersV[edgeCoordsA.x, edgeCoordsA.y];
                 }
                 else
@@ -576,7 +545,7 @@ namespace Ballz.GameSession.World
             {
                 if (b == null)
                     continue;
-                
+
                 if(b.e0 != null)
                 {
                     extractOutline(b.e0);
@@ -591,9 +560,10 @@ namespace Ballz.GameSession.World
                 extractOutline(b?.e0);
                 extractOutline(b?.e1);
             }
+        }
 
-            physicsTris.AddRange(triangles);
-
+        private void extractTrianglesFromCells()
+        {
             int triStartX = -1;
             bool startNew = true;
             foreach (var line in fullCells)
@@ -632,7 +602,29 @@ namespace Ballz.GameSession.World
                     }
                 }
             }
+        }
 
+        private void extractTrianglesAndOutline()
+        {
+
+            // Do not extract triangles if they are correct already
+            if (up2date)
+                return;
+
+            // Smooth the terrain bitmap
+            smoothTerrain(new float[]{1,1,1,1,1});
+            //smoothTerrain(new float[]{1,1,1}); // Use this one if performance is an issue
+
+            // Extract dirt cells and outline triangles/edges from the bitmap
+            performMarchingSquares();
+
+            // Extract the outline line segments from the aforementioned edges
+            extractOutlineFromEdges();
+
+            // Combine full dirt cells and create a couple of triangles from them
+            extractTrianglesFromCells();
+
+            // Now we're up to date
             up2date = true;
         }
 
@@ -645,26 +637,25 @@ namespace Ballz.GameSession.World
             extractTrianglesAndOutline();
         }
 
-        public List<Triangle> getTriangles()
+        public List<Triangle> getTriangles(bool enforceUpdate = false)
         {
-            // This is a no-op if triangles are up to date
-            update();
+            if(enforceUpdate)
+            {
+                // This is a no-op if outline is up to date
+                update();
+            }
 
             return triangles;
         }
             
-        public List<Triangle> getOutlineTriangles()
-        {
-            // This is a no-op if outline is up to date
-            update();
 
-            return physicsTris;
-        }
-
-        public List<List<Vector2>> getOutline()
+        public List<List<Vector2>> getOutline(bool enforceUpdate = false)
         {
-            // This is a no-op if outline is up to date
-            update();
+            if(enforceUpdate)
+            {
+                // This is a no-op if outline is up to date
+                update();
+            }
 
             return outlines;
         }
@@ -682,7 +673,7 @@ namespace Ballz.GameSession.World
             public static Vector2 operator*(IntVector2 v, float f) => new Vector2(v.x * f, v.y * f);
 		}
 
-
+        /*
 		private void sdfOneIter(bool[] dirtPixels, float[] sdfPixels, int width, int height, IntVector2 dir)
 		{
 			// TODO(ks): allow other sdf-vectors besides -1/0/1 combinations
@@ -794,70 +785,8 @@ namespace Ballz.GameSession.World
 			sdf.SetData (sdfColorPixels);
 
 			return sdf;
-
-
-			/*
-			var width = terrainSize.Width;
-			var height = terrainSize.Height;
-			float scale = 2f;
-			RenderTarget2D partyspass = new RenderTarget2D (Ballz.The().Graphics.GraphicsDevice, (int)(scale * width), (int)(scale * height));
-
-			Ballz.The().Graphics.GraphicsDevice.SetRenderTarget (partyspass);
-			SpriteBatch spriteBatch = new SpriteBatch (Ballz.The().Graphics.GraphicsDevice);
-
-			spriteBatch.Begin (0, null, SamplerState.LinearClamp);
-			spriteBatch.Draw (sdf, new Vector2(0f, 0f), null, null, null, 0, new Vector2 (scale, scale));
-			spriteBatch.End ();
-
-			Ballz.The().Graphics.GraphicsDevice.SetRenderTarget (null);
-
-			Texture2D sdf2 = new Texture2D (Ballz.The().Graphics.GraphicsDevice, 
-				(int)(scale * width), (int)(scale * height));
-
-			Color[] wurst = new Color[(int)(scale * width) * (int)(scale * height)];
-			//partyspass.GetData<Color> (wurst);
-
-
-			System.Drawing.Bitmap wursti = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-			for (int y = 0; y < terrainSize.Height; ++y) {
-				for (int x = 0; x < terrainSize.Width; ++x) {
-
-					int col = (int)(sdfPixels [y * terrainSize.Width + x] + 128.0f);
-					wursti.SetPixel (x, y, System.Drawing.Color.FromArgb(col, col, col));
-
-				}
-			}
-
-			System.Drawing.Bitmap newimg = new System.Drawing.Bitmap((int)(wursti.Width * scale), (int)(wursti.Height * scale));
-			using(System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newimg))
-			{
-				// Here you set your interpolation mode
-				g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
-				// Scale the image, by drawing it on the larger bitmap
-				g.DrawImage(wursti, new System.Drawing.Rectangle(System.Drawing.Point.Empty, newimg.Size));
-			}
-
-
-			for (int y = 0; y <  (int)(scale * height); ++y) {
-				for (int x = 0; x <  (int)(scale * width); ++x) {
-
-					//Color curPixel = sdfPixels [y * (int)(scale * width) + x];
-					//wursti.SetPixel (x, y, System.Drawing.Color.FromArgb(curPixel.R, curPixel.G, curPixel.B));
-
-					System.Drawing.Color curPixel = newimg.GetPixel(x, y);
-
-					const int thresh = 130;
-					wurst [y * (int)(scale * width) + x] = new Color (curPixel.R > thresh ? curPixel.R / 2 : 0 * curPixel.R, curPixel.R > thresh ? 70 : 0 * curPixel.G, curPixel.R > thresh ? 0 : 0 * curPixel.B);
-
-				}
-			}
-
-			sdf2.SetData<Color> (wurst);
-
-			return sdf2;
-			*/
 		}
+        */
 
     }
 }
