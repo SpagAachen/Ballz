@@ -72,7 +72,7 @@ namespace Ballz.GameSession.Logic
 
                 if(KeyPressed[InputMessage.MessageType.ControlsAction])
                 {
-                    Ball.ShootCharge += elapsedSeconds * 0.33f;
+                    Ball.ShootCharge += elapsedSeconds * 0.7f;
                     if (Ball.ShootCharge > 1f)
                         Ball.ShootCharge = 1f;
                 }
