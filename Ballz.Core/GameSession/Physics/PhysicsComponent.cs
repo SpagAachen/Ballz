@@ -230,7 +230,7 @@ namespace Ballz.GameSession.Physics
                 // Terrain hit? Then add an explosion there.
                 if (targetFixture.Body == TerrainBody)
                 {
-                    worldState.StaticGeometry.SubtractCircle(targetPos.X, targetPos.Y, shot.ExplosionRadius);
+                    worldState.StaticGeometry.SubtractCircle(targetPos.X, targetPos.Y, 0.04f * shot.Velocity.Length() * shot.ExplosionRadius);
                 }
                 // Otherwise, find the entity that belongs to the hit body
                 else if(EntityIdByPhysicsBody.ContainsKey(targetFixture.Body))
@@ -244,6 +244,8 @@ namespace Ballz.GameSession.Physics
                         ball.Health -= shot.HealthImpactAtDirectHit;
                         if (ball.Health < 0)
                             ball.Health = 0;
+
+                        ball.PhysicsBody.ApplyLinearImpulse(10*shot.Velocity);
                     }
                 }
             }
