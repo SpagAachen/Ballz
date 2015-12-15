@@ -180,19 +180,23 @@ namespace Ballz.GameSession.World
             public int ax, ay;
             public int bx, by;
 
+            public Vector2 a;
+            public Vector2 b;
+
             public Edge(int ax, int ay, int bx, int by)
             {
                 this.ax = ax; this.ay = ay;
                 this.bx = bx; this.by = by;
+
+                a = 0.5f * new Vector2(ax, ay);
+                b = 0.5f * new Vector2(bx, by);
             }
 
-            public Vector2[] ExtractLine()
+            public Edge(int ax, int ay, int bx, int by, Vector2 a, Vector2 b)
             {
-                Vector2[] ret = new Vector2[2];
-                ret[0] = 0.5f * new Vector2(ax, ay);
-                ret[1] = 0.5f * new Vector2(bx, by);
-
-                return ret;
+                this.a = a; this.b = b;
+                this.ax = ax; this.ay = ay;
+                this.bx = bx; this.by = by;
             }
         }
             
@@ -233,12 +237,12 @@ namespace Ballz.GameSession.World
                 if (edge.b0 == b)
                 {
                     edge.b0 = null;
-                    result.Add(0.5f * new Vector2(edge.ax, edge.ay));
+                    result.Add(edge.a);
                 }
                 else if (edge.b1 == b)
                 {
                     edge.b1 = null;
-                    result.Add(0.5f * new Vector2(edge.bx, edge.by));
+                    result.Add(edge.b);
                 }
                 else
                     throw new InvalidOperationException("lolnope1");
@@ -265,13 +269,13 @@ namespace Ballz.GameSession.World
                 {
                     edge.b0 = null;
                     if (edge == firstEdge) // closed loop
-                        result.Add(0.5f * new Vector2(edge.bx, edge.by));
+                        result.Add(edge.b);
                 }
                 else if (edge.b1 == b)
                 {
                     edge.b1 = null;
                     if (edge == firstEdge) // closed loop
-                        result.Add(0.5f * new Vector2(edge.ax, edge.ay));
+                        result.Add(edge.a);
                 }
                 else
                     throw new InvalidOperationException("lolnope3");
@@ -423,75 +427,76 @@ namespace Ballz.GameSession.World
                                 break;
                             case 1:
                                 triangles.Add(new Triangle(v0, Mix(v0, v1, w0, w1), Mix(v0, v3, w0, w3)));
-                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*(x-1), 2*y-1));
+                                //allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*(x-1), 2*y-1));
+                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*(x-1), 2*y-1, Mix(v0, v1, w0, w1), Mix(v0, v3, w0, w3)));
                                 break;
                             case 2:
                                 triangles.Add(new Triangle(v1, Mix(v1, v2, w1, w2), Mix(v0, v1, w0, w1)));
-                                allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x-1, 2*y));
+                                allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x-1, 2*y, Mix(v1, v2, w1, w2), Mix(v0, v1, w0, w1)));
                                 break;
                             case 3:
                                 triangles.Add(new Triangle(v0, v1, Mix(v1, v2, w1, w2)));
                                 triangles.Add(new Triangle(Mix(v1, v2, w1, w2), Mix(v0, v3, w0, w3), v0));
-                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x-1, 2*y));
+                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x-1, 2*y, Mix(v1, v2, w1, w2), Mix(v0, v3, w0, w3)));
                                 break;
                             case 4:
                                 triangles.Add(new Triangle(v2, Mix(v2, v3, w2, w3), Mix(v1, v2, w1, w2)));
-                                allEdges.Add(new Edge(2*x-1, 2*y, 2*x, 2*y-1));
+                                allEdges.Add(new Edge(2*x-1, 2*y, 2*x, 2*y-1, Mix(v2, v3, w2, w3), Mix(v1, v2, w1, w2)));
                                 break;
                             case 5:
                                 triangles.Add(new Triangle(v0, Mix(v0, v1, w0, w1), Mix(v0, v3, w0, w3)));
                                 triangles.Add(new Triangle(v2, Mix(v2, v3, w2, w3), Mix(v1, v2, w1, w2)));
-                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*(x-1), 2*y-1));
-                                allEdges.Add(new Edge(2*x-1, 2*y, 2*x, 2*y-1));
+                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*(x-1), 2*y-1, Mix(v0, v1, w0, w1), Mix(v0, v3, w0, w3)));
+                                allEdges.Add(new Edge(2*x-1, 2*y, 2*x, 2*y-1, Mix(v2, v3, w2, w3), Mix(v1, v2, w1, w2)));
                                 break;
                             case 6:
                                 triangles.Add(new Triangle(v2, Mix(v0, v1, w0, w1), v1));
                                 triangles.Add(new Triangle(v2, Mix(v2, v3, w2, w3), Mix(v0, v1, w0, w1)));
-                                allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x, 2*y-1));
+                                allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x, 2*y-1, Mix(v2, v3, w2, w3), Mix(v0, v1, w0, w1)));
                                 break;
                             case 7:
                                 triangles.Add(new Triangle(v1, Mix(v0, v3, w0, w3), v0));
                                 triangles.Add(new Triangle(v1, Mix(v2, v3, w2, w3), Mix(v0, v3, w0, w3)));
                                 triangles.Add(new Triangle(v1, v2, Mix(v2, v3, w2, w3)));
-                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x, 2*y-1));
+                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x, 2*y-1, Mix(v2, v3, w2, w3), Mix(v0, v3, w0, w3)));
                                 break;
                             case 8:
                                 triangles.Add(new Triangle(v3, Mix(v0, v3, w0, w3), Mix(v2, v3, w2, w3)));
-                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x, 2*y-1));
+                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x, 2*y-1, Mix(v0, v3, w0, w3), Mix(v2, v3, w2, w3)));
                                 break;
                             case 9:
                                 triangles.Add(new Triangle(v0, Mix(v2, v3, w2, w3), v3));
                                 triangles.Add(new Triangle(v0, Mix(v0, v1, w0, w1), Mix(v2, v3, w2, w3)));
-                                allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x, 2*y-1));
+                                allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x, 2*y-1, Mix(v0, v1, w0, w1), Mix(v2, v3, w2, w3)));
                                 break;
                             case 10: 
                                 triangles.Add(new Triangle(v1, Mix(v1, v2, w1, w2), Mix(v0, v1, w0, w1)));
                                 triangles.Add(new Triangle(v3, Mix(v0, v3, w0, w3), Mix(v2, v3, w2, w3)));
-                                allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x-1, 2*y));
-                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x, 2*y-1));
+                                allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x-1, 2*y, Mix(v1, v2, w1, w2), Mix(v0, v1, w0, w1)));
+                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x, 2*y-1, Mix(v0, v3, w0, w3), Mix(v2, v3, w2, w3)));
                                 break;
                             case 11: 
                                 triangles.Add(new Triangle(v0, v1, Mix(v1, v2, w1, w2)));
                                 triangles.Add(new Triangle(v0, Mix(v1, v2, w1, w2), Mix(v2, v3, w2, w3)));
                                 triangles.Add(new Triangle(v0, Mix(v2, v3, w2, w3), v3));
-                                allEdges.Add(new Edge(2*x-1, 2*y, 2*x, 2*y-1));
+                                allEdges.Add(new Edge(2*x-1, 2*y, 2*x, 2*y-1, Mix(v1, v2, w1, w2), Mix(v2, v3, w2, w3)));
                                 break;
                             case 12: 
                                 triangles.Add(new Triangle(v3, Mix(v0, v3, w0, w3), Mix(v1, v2, w1, w2)));
                                 triangles.Add(new Triangle(v3, Mix(v1, v2, w1, w2), v2));
-                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x-1, 2*y));
+                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x-1, 2*y, Mix(v0, v3, w0, w3), Mix(v1, v2, w1, w2)));
                                 break;
                             case 13: 
                                 triangles.Add(new Triangle(v3, v0, Mix(v0, v1, w0, w1)));
                                 triangles.Add(new Triangle(v3, Mix(v0, v1, w0, w1), Mix(v1, v2, w1, w2)));
                                 triangles.Add(new Triangle(v3, Mix(v1, v2, w1, w2), v2));
-                                allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x-1, 2*y));
+                                allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x-1, 2*y, Mix(v0, v1, w0, w1), Mix(v1, v2, w1, w2)));
                                 break;
                             case 14: 
                                 triangles.Add(new Triangle(v2, Mix(v0, v1, w0, w1), v1));
                                 triangles.Add(new Triangle(v2, Mix(v0, v3, w0, w3), Mix(v0, v1, w0, w1)));
                                 triangles.Add(new Triangle(v2, v3, Mix(v0, v3, w0, w3)));
-                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*(x-1), 2*y-1));
+                                allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*(x-1), 2*y-1, Mix(v0, v3, w0, w3), Mix(v0, v1, w0, w1)));
                                 break;
                             case 15:
                                 fullCells[fullCells.Count - 1].Add(new IntVector2(x, y));
