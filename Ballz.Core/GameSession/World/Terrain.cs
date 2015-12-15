@@ -15,21 +15,27 @@ namespace Ballz.GameSession.World
     public class Terrain
     {
 
+        public class TerrainShape
+        {
+            // Triangles for rendering
+            public List<Triangle> triangles = new List<Triangle>();
+
+            // Line segments for physics
+            public List<List<Vector2>> outlines = new List<List<Vector2>>();
+
+            public bool[,] terrainBitmap = null;
+        }
+
         public int Revision { get; private set; } = 0;
-        public bool up2date { get; private set; } = false;
+        private int WorkingRevision = 1;
         public float Scale = 0.08f;
 
 
-
-        // Triangles for rendering
-        private List<Triangle> triangles = new List<Triangle>();
-
-        // Line segments for physics
-        private List<List<Vector2>> outlines = new List<List<Vector2>>();
+        public TerrainShape publicShape = new TerrainShape();
+        private TerrainShape workingShape = null;
 
         // Internal terrain bitmaps
 		private Texture2D terrainData = null;
-		private bool[,] terrainBitmap = null;
         private float[,] terrainSmoothmap = null;
         private float[,] terrainSmoothmapCopy = null;
 
@@ -50,7 +56,7 @@ namespace Ballz.GameSession.World
 			width = terrainData.Width;
 			height = terrainData.Height;
 
-            terrainBitmap = new bool[width, height];
+            publicShape.terrainBitmap = new bool[width, height];
             terrainSmoothmap = new float[width, height];
             terrainSmoothmapCopy = new float[width, height];
 
@@ -66,7 +72,7 @@ namespace Ballz.GameSession.World
 					// Note that we flip the y coord here
                     if (curPixel == Color.White)
                     {
-                        terrainBitmap[x, height - y - 1] = true;
+                        publicShape.terrainBitmap[x, height - y - 1] = true;
                         terrainSmoothmap[x, height - y - 1] = 1.0f;
                     }
 				}
@@ -99,25 +105,20 @@ namespace Ballz.GameSession.World
 			int brx = (int)Math.Ceiling(x + radius);
 			int bry = (int)Math.Ceiling(y + radius);
 
-			// Terrain width/height
-			int Width = terrainBitmap.GetLength(0);
-			int Height = terrainBitmap.GetLength(1);
-
 			// Iterate over bounding box part of bitmap
-			for (int j = Math.Max(0, tly); j < Math.Min(Height, bry); ++j) {
-				for (int i = Math.Max(0, tlx); i < Math.Min(Width, brx); ++i) {
+			for (int j = Math.Max(0, tly); j < Math.Min(height, bry); ++j) {
+				for (int i = Math.Max(0, tlx); i < Math.Min(width, brx); ++i) {
 
 					if (distance(i, j, x, y) > radius)
 						continue;
 
 					// Subtract dirt (if any)
-					terrainBitmap [i, j] = false;
+                    publicShape.terrainBitmap [i, j] = false;
 
 				}
 			}
 
-			up2date = false;
-            Revision++;
+            WorkingRevision++;
 
         }
 
@@ -142,13 +143,12 @@ namespace Ballz.GameSession.World
                         continue;
 
                     // Add dirt
-                    terrainBitmap [i, j] = true;
+                    publicShape.terrainBitmap [i, j] = true;
 
                 }
             }
 
-            up2date = false;
-            Revision++;
+            WorkingRevision++;
 
         }
 
@@ -215,7 +215,7 @@ namespace Ballz.GameSession.World
                 o1.AddRange(o2);
             }
 
-            outlines.Add(o1);
+            workingShape.outlines.Add(o1);
         }
         private List<Vector2> extractOutlineInternal(Edge edge)
         {
@@ -332,7 +332,7 @@ namespace Ballz.GameSession.World
                         {
                             float val = gauss[i + halfGauss];
 
-                            sum    += (terrainBitmap[index, y] ? 1.0f : 0.0f) * val;
+                            sum    += (workingShape.terrainBitmap[index, y] ? 1.0f : 0.0f) * val;
                             weight += val;
                         }
                     }
@@ -370,7 +370,7 @@ namespace Ballz.GameSession.World
         private void performMarchingSquares()
         {
             // Clear internal members
-            triangles.Clear();
+            workingShape.triangles.Clear();
             allEdges.Clear();
             fullCells.Clear();
 
@@ -426,76 +426,76 @@ namespace Ballz.GameSession.World
                                 // No triangles at all
                                 break;
                             case 1:
-                                triangles.Add(new Triangle(v0, Mix(v0, v1, w0, w1), Mix(v0, v3, w0, w3)));
+                                workingShape.triangles.Add(new Triangle(v0, Mix(v0, v1, w0, w1), Mix(v0, v3, w0, w3)));
                                 //allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*(x-1), 2*y-1));
                                 allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*(x-1), 2*y-1, Mix(v0, v1, w0, w1), Mix(v0, v3, w0, w3)));
                                 break;
                             case 2:
-                                triangles.Add(new Triangle(v1, Mix(v1, v2, w1, w2), Mix(v0, v1, w0, w1)));
+                                workingShape.triangles.Add(new Triangle(v1, Mix(v1, v2, w1, w2), Mix(v0, v1, w0, w1)));
                                 allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x-1, 2*y, Mix(v1, v2, w1, w2), Mix(v0, v1, w0, w1)));
                                 break;
                             case 3:
-                                triangles.Add(new Triangle(v0, v1, Mix(v1, v2, w1, w2)));
-                                triangles.Add(new Triangle(Mix(v1, v2, w1, w2), Mix(v0, v3, w0, w3), v0));
+                                workingShape.triangles.Add(new Triangle(v0, v1, Mix(v1, v2, w1, w2)));
+                                workingShape.triangles.Add(new Triangle(Mix(v1, v2, w1, w2), Mix(v0, v3, w0, w3), v0));
                                 allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x-1, 2*y, Mix(v1, v2, w1, w2), Mix(v0, v3, w0, w3)));
                                 break;
                             case 4:
-                                triangles.Add(new Triangle(v2, Mix(v2, v3, w2, w3), Mix(v1, v2, w1, w2)));
+                                workingShape.triangles.Add(new Triangle(v2, Mix(v2, v3, w2, w3), Mix(v1, v2, w1, w2)));
                                 allEdges.Add(new Edge(2*x-1, 2*y, 2*x, 2*y-1, Mix(v2, v3, w2, w3), Mix(v1, v2, w1, w2)));
                                 break;
                             case 5:
-                                triangles.Add(new Triangle(v0, Mix(v0, v1, w0, w1), Mix(v0, v3, w0, w3)));
-                                triangles.Add(new Triangle(v2, Mix(v2, v3, w2, w3), Mix(v1, v2, w1, w2)));
+                                workingShape.triangles.Add(new Triangle(v0, Mix(v0, v1, w0, w1), Mix(v0, v3, w0, w3)));
+                                workingShape.triangles.Add(new Triangle(v2, Mix(v2, v3, w2, w3), Mix(v1, v2, w1, w2)));
                                 allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*(x-1), 2*y-1, Mix(v0, v1, w0, w1), Mix(v0, v3, w0, w3)));
                                 allEdges.Add(new Edge(2*x-1, 2*y, 2*x, 2*y-1, Mix(v2, v3, w2, w3), Mix(v1, v2, w1, w2)));
                                 break;
                             case 6:
-                                triangles.Add(new Triangle(v2, Mix(v0, v1, w0, w1), v1));
-                                triangles.Add(new Triangle(v2, Mix(v2, v3, w2, w3), Mix(v0, v1, w0, w1)));
+                                workingShape.triangles.Add(new Triangle(v2, Mix(v0, v1, w0, w1), v1));
+                                workingShape.triangles.Add(new Triangle(v2, Mix(v2, v3, w2, w3), Mix(v0, v1, w0, w1)));
                                 allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x, 2*y-1, Mix(v2, v3, w2, w3), Mix(v0, v1, w0, w1)));
                                 break;
                             case 7:
-                                triangles.Add(new Triangle(v1, Mix(v0, v3, w0, w3), v0));
-                                triangles.Add(new Triangle(v1, Mix(v2, v3, w2, w3), Mix(v0, v3, w0, w3)));
-                                triangles.Add(new Triangle(v1, v2, Mix(v2, v3, w2, w3)));
+                                workingShape.triangles.Add(new Triangle(v1, Mix(v0, v3, w0, w3), v0));
+                                workingShape.triangles.Add(new Triangle(v1, Mix(v2, v3, w2, w3), Mix(v0, v3, w0, w3)));
+                                workingShape.triangles.Add(new Triangle(v1, v2, Mix(v2, v3, w2, w3)));
                                 allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x, 2*y-1, Mix(v2, v3, w2, w3), Mix(v0, v3, w0, w3)));
                                 break;
                             case 8:
-                                triangles.Add(new Triangle(v3, Mix(v0, v3, w0, w3), Mix(v2, v3, w2, w3)));
+                                workingShape.triangles.Add(new Triangle(v3, Mix(v0, v3, w0, w3), Mix(v2, v3, w2, w3)));
                                 allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x, 2*y-1, Mix(v0, v3, w0, w3), Mix(v2, v3, w2, w3)));
                                 break;
                             case 9:
-                                triangles.Add(new Triangle(v0, Mix(v2, v3, w2, w3), v3));
-                                triangles.Add(new Triangle(v0, Mix(v0, v1, w0, w1), Mix(v2, v3, w2, w3)));
+                                workingShape.triangles.Add(new Triangle(v0, Mix(v2, v3, w2, w3), v3));
+                                workingShape.triangles.Add(new Triangle(v0, Mix(v0, v1, w0, w1), Mix(v2, v3, w2, w3)));
                                 allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x, 2*y-1, Mix(v0, v1, w0, w1), Mix(v2, v3, w2, w3)));
                                 break;
                             case 10: 
-                                triangles.Add(new Triangle(v1, Mix(v1, v2, w1, w2), Mix(v0, v1, w0, w1)));
-                                triangles.Add(new Triangle(v3, Mix(v0, v3, w0, w3), Mix(v2, v3, w2, w3)));
+                                workingShape.triangles.Add(new Triangle(v1, Mix(v1, v2, w1, w2), Mix(v0, v1, w0, w1)));
+                                workingShape.triangles.Add(new Triangle(v3, Mix(v0, v3, w0, w3), Mix(v2, v3, w2, w3)));
                                 allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x-1, 2*y, Mix(v1, v2, w1, w2), Mix(v0, v1, w0, w1)));
                                 allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x, 2*y-1, Mix(v0, v3, w0, w3), Mix(v2, v3, w2, w3)));
                                 break;
                             case 11: 
-                                triangles.Add(new Triangle(v0, v1, Mix(v1, v2, w1, w2)));
-                                triangles.Add(new Triangle(v0, Mix(v1, v2, w1, w2), Mix(v2, v3, w2, w3)));
-                                triangles.Add(new Triangle(v0, Mix(v2, v3, w2, w3), v3));
+                                workingShape.triangles.Add(new Triangle(v0, v1, Mix(v1, v2, w1, w2)));
+                                workingShape.triangles.Add(new Triangle(v0, Mix(v1, v2, w1, w2), Mix(v2, v3, w2, w3)));
+                                workingShape.triangles.Add(new Triangle(v0, Mix(v2, v3, w2, w3), v3));
                                 allEdges.Add(new Edge(2*x-1, 2*y, 2*x, 2*y-1, Mix(v1, v2, w1, w2), Mix(v2, v3, w2, w3)));
                                 break;
                             case 12: 
-                                triangles.Add(new Triangle(v3, Mix(v0, v3, w0, w3), Mix(v1, v2, w1, w2)));
-                                triangles.Add(new Triangle(v3, Mix(v1, v2, w1, w2), v2));
+                                workingShape.triangles.Add(new Triangle(v3, Mix(v0, v3, w0, w3), Mix(v1, v2, w1, w2)));
+                                workingShape.triangles.Add(new Triangle(v3, Mix(v1, v2, w1, w2), v2));
                                 allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*x-1, 2*y, Mix(v0, v3, w0, w3), Mix(v1, v2, w1, w2)));
                                 break;
                             case 13: 
-                                triangles.Add(new Triangle(v3, v0, Mix(v0, v1, w0, w1)));
-                                triangles.Add(new Triangle(v3, Mix(v0, v1, w0, w1), Mix(v1, v2, w1, w2)));
-                                triangles.Add(new Triangle(v3, Mix(v1, v2, w1, w2), v2));
+                                workingShape.triangles.Add(new Triangle(v3, v0, Mix(v0, v1, w0, w1)));
+                                workingShape.triangles.Add(new Triangle(v3, Mix(v0, v1, w0, w1), Mix(v1, v2, w1, w2)));
+                                workingShape.triangles.Add(new Triangle(v3, Mix(v1, v2, w1, w2), v2));
                                 allEdges.Add(new Edge(2*(x-1), 2*y-1, 2*x-1, 2*y, Mix(v0, v1, w0, w1), Mix(v1, v2, w1, w2)));
                                 break;
                             case 14: 
-                                triangles.Add(new Triangle(v2, Mix(v0, v1, w0, w1), v1));
-                                triangles.Add(new Triangle(v2, Mix(v0, v3, w0, w3), Mix(v0, v1, w0, w1)));
-                                triangles.Add(new Triangle(v2, v3, Mix(v0, v3, w0, w3)));
+                                workingShape.triangles.Add(new Triangle(v2, Mix(v0, v1, w0, w1), v1));
+                                workingShape.triangles.Add(new Triangle(v2, Mix(v0, v3, w0, w3), Mix(v0, v1, w0, w1)));
+                                workingShape.triangles.Add(new Triangle(v2, v3, Mix(v0, v3, w0, w3)));
                                 allEdges.Add(new Edge(2*x-1, 2*(y-1), 2*(x-1), 2*y-1, Mix(v0, v3, w0, w3), Mix(v0, v1, w0, w1)));
                                 break;
                             case 15:
@@ -516,7 +516,7 @@ namespace Ballz.GameSession.World
             // Clear old borders and outline
             Array.Clear(bordersH, 0, width * height);
             Array.Clear(bordersV, 0, width * height);
-            outlines.Clear();
+            workingShape.outlines.Clear();
 
             foreach(var edge in allEdges)
             {
@@ -617,8 +617,8 @@ namespace Ballz.GameSession.World
 
                     if(createTriangle)
                     {
-                        triangles.Add(new Triangle(new Vector2(triStartX, cell.y-1), new Vector2(triStartX, cell.y), new Vector2(cell.x, cell.y-1)));
-                        triangles.Add(new Triangle(new Vector2(triStartX, cell.y), new Vector2(cell.x, cell.y), new Vector2(cell.x, cell.y-1)));
+                        workingShape.triangles.Add(new Triangle(new Vector2(triStartX, cell.y-1), new Vector2(triStartX, cell.y), new Vector2(cell.x, cell.y-1)));
+                        workingShape.triangles.Add(new Triangle(new Vector2(triStartX, cell.y), new Vector2(cell.x, cell.y), new Vector2(cell.x, cell.y-1)));
                     }
                 }
             }
@@ -626,11 +626,6 @@ namespace Ballz.GameSession.World
 
         private void extractTrianglesAndOutline()
         {
-
-            // Do not extract triangles if they are correct already
-            if (up2date)
-                return;
-
             // Smooth the terrain bitmap
             smoothTerrain(new float[]{1,1,1,1,1});
             //smoothTerrain(new float[]{1,1,1}); // Use this one if performance is an issue
@@ -643,41 +638,60 @@ namespace Ballz.GameSession.World
 
             // Combine full dirt cells and create a couple of triangles from them
             extractTrianglesFromCells();
-
-            // Now we're up to date
-            up2date = true;
         }
 
 
         public void update()
         {
-            if (up2date)
+            if (WorkingRevision == Revision || workingShape != null)
                 return;
+            
+            int currentRevision = WorkingRevision;
+            
+            workingShape = new TerrainShape
+            {
+                terrainBitmap = publicShape.terrainBitmap.Clone() as bool[,]
+            };
+            
+            // Enqueue update-task
+            var Task = new Task(()=>{
+                
+                extractTrianglesAndOutline();
 
-            extractTrianglesAndOutline();
+                lock(publicShape)
+                {
+                    // Copy new triangles/outline to TerrainShape
+                    publicShape = workingShape;
+                    workingShape = null;
+                    Revision = currentRevision;
+                }
+            });
+                
+            Task.Start();
+
+            if (currentRevision == 0)
+                Task.Wait();
         }
 
         public List<Triangle> getTriangles(bool enforceUpdate = false)
         {
-            if(enforceUpdate)
-            {
-                // This is a no-op if outline is up to date
-                update();
-            }
+            update();
 
-            return triangles;
+            lock (publicShape)
+            {
+                return publicShape.triangles;
+            }
         }
             
 
         public List<List<Vector2>> getOutline(bool enforceUpdate = false)
         {
-            if(enforceUpdate)
-            {
-                // This is a no-op if outline is up to date
-                update();
-            }
+            update();
 
-            return outlines;
+            lock (publicShape)
+            {
+                return publicShape.outlines;
+            }
         }
 
 
