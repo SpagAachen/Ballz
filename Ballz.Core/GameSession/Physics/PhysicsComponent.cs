@@ -172,11 +172,10 @@ namespace Ballz.GameSession.Physics
 
                 if (e is Ball)
                 {
-                    const float dg90 = 2 * (float)Math.PI * 90f / 360f;
-                    if (e.Velocity.LengthSquared() > 0.0001f)
-                        e.Rotation = dg90 * (e.Velocity.X > 0 ? 1 : -1);
-                    else
-                        e.Rotation = dg90;
+                    if (e.Velocity.X > 0.01f)
+                        e.Rotation = (float)Math.PI * 0.5f;
+                    else if (e.Velocity.X < -0.01f)
+                        e.Rotation = -(float)Math.PI * 0.5f;
                 }
             }
         }
