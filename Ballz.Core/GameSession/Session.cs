@@ -77,6 +77,7 @@ namespace Ballz.GameSession
 
                 Game.Components.Remove(physics);
                 Game.Components.Remove(gameRenderer);
+                Game.Components.Remove(sessionLogic);
 
                 input.Input -= physics.HandleMessage;
                 input.Input -= gameRenderer.HandleMessage;

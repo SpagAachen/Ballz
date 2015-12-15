@@ -89,7 +89,18 @@ namespace Ballz.GameSession.Logic
                     if (Enabled)
                         Game.Match.State = SessionState.Running;
                     else
-                        Game.Match.State = SessionState.Paused;
+                    {
+                        if (Game.Match.State == SessionState.Finished)
+                        {
+                            Game.Components.Remove(Game.Match);
+                            Game.Match = new GameSession.Session(Game);
+                            Game.Components.Add(Game.Match);
+                        }
+                        else
+                        {
+                            Game.Match.State = SessionState.Paused;
+                        }
+                    }
                 }
             }
         }
