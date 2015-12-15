@@ -134,12 +134,12 @@ namespace Ballz.GameSession.Renderer
             Vector2 nV = ball.Direction;
             Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * 50 * nV.X / 360.0)) * Matrix.CreateTranslation(new Vector3(ball.Position, 0));
             BallEffect.World = world;
-            GraveEffect.World = world;
+            GraveEffect.World = world * Matrix.CreateScale(0.3f);
 
             if (ball.Health > 0)
                 BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
             else
-                GraveModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
+                GraveModel.Draw(Matrix.CreateScale(0.4f) * world * Matrix.CreateTranslation(0, -1.0f, 0), Game.Camera.View, Game.Camera.Projection);
 
             if (ball.IsAiming)
             {
