@@ -209,13 +209,22 @@ namespace Ballz
             // main menu
             var mainMenu = new Composite("Main Menu");
 
-            var play = new Label("Play",true);
+            var play = new Label("DebugWorld",true);
             play.OnSelect += () =>
                 {
                     Logic.startGame();
                 };
 
-            mainMenu.AddItem(play);
+            var playrandom = new Label("Random Mountain",true);
+            playrandom.OnSelect += () =>
+                {
+                    Logic.startGameRandom();
+                };
+            Composite startGame = new Composite("Start Game", true);
+            startGame.AddItem(play);
+            startGame.AddItem(playrandom);
+
+            mainMenu.AddItem(startGame);
             mainMenu.AddItem(optionsMenu);
             mainMenu.AddItem(networkMenu);
 

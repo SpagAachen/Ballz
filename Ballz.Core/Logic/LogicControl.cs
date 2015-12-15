@@ -38,6 +38,14 @@ namespace Ballz.Logic
             RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }
 
+        public void startGameRandom()
+        {
+            state = GameState.SimulationState;
+
+            Game.Match.startRandom();
+            RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
+        }
+
         private void RegisterMenuEvents(Item menu)
         {
             menu.BindSelectHandler<Composite>(c =>

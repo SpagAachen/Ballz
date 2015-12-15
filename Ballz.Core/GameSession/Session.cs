@@ -51,6 +51,7 @@ namespace Ballz.GameSession
             logic.Message += physics.HandleMessage;
             logic.Message += gameRenderer.HandleMessage;
             logic.Message += sessionLogic.HandleMessage;
+            logic.Message += debugRenderer.HandleMessage;
 
             input = _game.Services.GetService<Input.InputTranslator>();
            
@@ -68,12 +69,19 @@ namespace Ballz.GameSession
             input.Input += debugRenderer.HandleMessage;
         }
 
+        public void startRandom()
+        {
+            start();
+            //TODO: theTerrain=randomgenerated;
+        }
+
         public void cleanup(object sender, GameComponentCollectionEventArgs args)
         {
             if (args.GameComponent == this)  //we got removed so we get rid of all the other components
             {
                 logic.Message -= physics.HandleMessage;
                 logic.Message -= gameRenderer.HandleMessage;
+                logic.Message -= debugRenderer.HandleMessage;
 
                 Game.Components.Remove(physics);
                 Game.Components.Remove(gameRenderer);
