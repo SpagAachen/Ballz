@@ -132,12 +132,22 @@ namespace Ballz.Network
 
         public object ReceiveData()
         {
+            object result = null;
             if (receiveTask == null)
 
                 throw new InvalidOperationException("No receiving is in progress");
-            receiveTask.Wait();
-            var result = receiveTask.Result;
-            receiveTask = null;
+            try{
+                receiveTask.Wait();            
+                result = receiveTask.Result;
+            }
+            catch(Exception)
+            {
+                System.Console.Out.WriteLine("Network: Warning: Failed to receive data");
+            }
+            finally
+            {
+                receiveTask = null;
+            }
             BeginReceive();
             return result;
         }
