@@ -88,7 +88,16 @@ namespace Ballz.GameSession
         {
             ///generate a dummy game world
             /// TODO: find a nice solution to initialize the world especially regarding networking. maybe use an event for this
-            theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld2"));
+
+            var rand = new Random();
+            if (rand.Next() % 2 == 0)
+            {
+                theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld2"));
+            }
+            else
+            {
+                theTerrain = Terrain.mountainTerrain(GraphicsDevice);
+            }
 
             var player1 = new Player
             {

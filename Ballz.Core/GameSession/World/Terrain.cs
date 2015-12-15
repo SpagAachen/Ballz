@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
 
+
 namespace Ballz.GameSession.World
 {
     /// <summary>
@@ -14,6 +15,9 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class Terrain
     {
+        static float linmap(float a, float min1, float max1, float min2, float max2) {
+            return ((a-min1)/(max1-min1))*(max2-min2) + min2;
+        }
 
         public class TerrainShape
         {
@@ -48,6 +52,85 @@ namespace Ballz.GameSession.World
         private Border[,] bordersV = null;
         private List<List<IntVector2>> fullCells = null;
         private List<Edge> allEdges = null;
+
+
+        static void foobar(Random rand, float[] data, int left, int right) {
+            if (right - 1 <= left)
+            {
+                return;
+            }
+            
+            var mid = (right + left) / 2;
+            var midHeight = (data[right] + data[left]) * 0.5f;
+
+            var u1 = rand.NextDouble(); //these are uniform(0,1) random doubles
+            var u2 = rand.NextDouble();
+            var randNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
+                Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
+            
+            data[mid] = (float)(midHeight + (right - left) * 0.2 * randNormal);
+
+            foobar(rand, data, left, mid);
+            foobar(rand, data, mid, right);
+        }
+
+        public static Texture2D generateMountain(GraphicsDevice device) {
+            var width = 1920/4;
+            var height = 1080/4;
+
+
+            var rand = new Random();
+
+            var heightmap = new float[width];
+
+            var castleWidth = 200/4;
+            var mountainHeight = 800/4;
+            var leftHeight = 200/4;
+            var rightHeight = 200/4;
+
+
+
+            var i = 0; var start_i = 0; var end_i = 0;
+            for (end_i = castleWidth, start_i = i; i < end_i ; i++)
+            {
+                heightmap[i] = leftHeight;
+            }
+            for (end_i = width / 2, start_i = i; i < end_i; i++)
+            {
+                heightmap[i] = linmap(i, start_i, end_i, leftHeight, mountainHeight);
+            }
+
+            for (end_i = width - castleWidth, start_i = i; i < end_i; i++)
+            {
+                heightmap[i] = linmap(i, start_i, end_i, mountainHeight, rightHeight);
+            }
+            for (end_i = width, start_i = i; i < end_i; i++)
+            {
+                heightmap[i] = rightHeight;
+            }
+
+            foobar(rand, heightmap, castleWidth, width / 2);
+            foobar(rand, heightmap, width/2, width - castleWidth);
+                
+
+            Color[] pixels = new Color[width * height];
+
+            for (int y = 0; y < height; ++y)
+            {
+                for (int x = 0; x < width; ++x)
+                {
+                    pixels[x + (height - y - 1) * width] = heightmap[x] < y ? Color.Black : Color.White;
+                }
+            }
+
+            var texture = new Texture2D(device, width, height, false, SurfaceFormat.Color);
+            texture.SetData<Color>(pixels);
+            return texture;
+        }
+
+        public static Terrain mountainTerrain(GraphicsDevice device) {
+            return new Terrain(generateMountain(device));
+        }
 
 		public Terrain (Texture2D terrainTexture)
 		{
