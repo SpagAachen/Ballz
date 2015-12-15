@@ -145,8 +145,13 @@ namespace Ballz.GameSession.Renderer
             {
                 var aimTarget = ball.Position + ball.AimDirection * 2;
                 var aimTargetScreen = WorldToScreen(aimTarget);
+                var aimRotation = ball.AimDirection.RotationFromDirection();
                 var crossHairRectangle = new Rectangle(aimTargetScreen.ToPoint() - new Point(16, 16), new Point(32, 32));
-                spriteBatch.Draw(CrosshairTexture, crossHairRectangle, Color.White);
+                spriteBatch.Draw(CrosshairTexture, position: aimTargetScreen, color: Color.White, rotation: aimRotation, origin: new Vector2(16, 16));
+
+                var chargeRectangle = new Rectangle(aimTargetScreen.ToPoint() + new Point(16, 16), new Point((int)(ball.ShootCharge * 50), 32));
+                
+                spriteBatch.Draw(WhiteTexture, destinationRectangle: chargeRectangle, color: Color.Red);
             }
 
             var screenPos = WorldToScreen(ball.Position + new Vector2(0, 2f));

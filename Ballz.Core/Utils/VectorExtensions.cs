@@ -20,5 +20,10 @@ namespace Ballz.Utils
             var sa = Sin(radians);
             return new Vector2(ca * v.X - sa * v.Y, sa * v.X + ca * v.Y);
         }
+
+        public static float RotationFromDirection(this Vector2 v)
+        {
+            return (v.X > 0 ? 1 : -1) * Acos(Vector2.Dot(Vector2.Normalize(v), Vector2.UnitY)) + (0.5f * (float)Math.PI);
+        }
     }
 }

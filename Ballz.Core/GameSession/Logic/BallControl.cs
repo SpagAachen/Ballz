@@ -70,24 +70,32 @@ namespace Ballz.GameSession.Logic
                     Ball.AimDirection = v.Rotate(radians);
                 }
 
+                if(KeyPressed[InputMessage.MessageType.ControlsAction])
+                {
+                    Ball.ShootCharge += elapsedSeconds * 0.33f;
+                    if (Ball.ShootCharge > 1f)
+                        Ball.ShootCharge = 1f;
+                }
+                else if(Ball.ShootCharge > 0 )
+                {
+                    Game.Services.GetService<SoundControl>().playSound(SoundControl.shotSound);
+                    worldState.Entities.Add(new Shot
+                    {
+                        ExplosionRadius = 1.0f,
+                        HealthImpactAtDirectHit = 25,
+                        IsInstantShot = false,
+                        Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.2f),
+                        Velocity = Ball.AimDirection * Ball.ShootCharge * 30f,
+                        ShooterId = Ball.ID
+                    });
 
+                    Ball.ShootCharge = 0f;
+                }
                 // Handle single-shot input events
                 switch (controlInput)
                 {
                     case InputMessage.MessageType.ControlsJump:
                         Ball.Velocity = new Vector2(Ball.Velocity.X, 5f);
-                        break;
-                    case InputMessage.MessageType.ControlsAction:
-                        Game.Services.GetService<SoundControl>().playSound(SoundControl.shotSound);
-                        worldState.Entities.Add(new Shot
-                        {
-                            ExplosionRadius = 1.0f,
-                            HealthImpactAtDirectHit = 25,
-                            IsInstantShot = false,
-                            Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.2f),
-                            Velocity = Ball.AimDirection * 10f,
-                            ShooterId = Ball.ID
-                        });
                         break;
                     default:
                         break;

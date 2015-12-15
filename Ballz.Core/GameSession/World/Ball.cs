@@ -23,6 +23,11 @@ namespace Ballz.GameSession.World
 
         public bool IsAiming { get; set; } = false;
 
+        /// <summary>
+        /// Indicates the "charging level" that is used to control the initial velocity of certain projectiles.
+        /// </summary>
+        public float ShootCharge { get; set; } = 0f;
+
         public Player Player { get; set; } = Player.NPC;
         
         public Vector2 AimDirection { get; set; } = Vector2.UnitX;
