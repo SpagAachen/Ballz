@@ -54,7 +54,7 @@ namespace Ballz.GameSession.World
         private List<Edge> allEdges = null;
 
 
-        static void foobar(Random rand, float[] data, int left, int right) {
+        static private void randomize(Random rand, float[] data, int left, int right) {
             if (right - 1 <= left)
             {
                 return;
@@ -70,8 +70,8 @@ namespace Ballz.GameSession.World
             
             data[mid] = (float)(midHeight + (right - left) * 0.2 * randNormal);
 
-            foobar(rand, data, left, mid);
-            foobar(rand, data, mid, right);
+            randomize(rand, data, left, mid);
+            randomize(rand, data, mid, right);
         }
 
         public static Texture2D generateMountain(GraphicsDevice device) {
@@ -109,8 +109,8 @@ namespace Ballz.GameSession.World
                 heightmap[i] = rightHeight;
             }
 
-            foobar(rand, heightmap, castleWidth, width / 2);
-            foobar(rand, heightmap, width/2, width - castleWidth);
+            randomize(rand, heightmap, castleWidth, width / 2);
+            randomize(rand, heightmap, width/2, width - castleWidth);
                 
 
             Color[] pixels = new Color[width * height];
