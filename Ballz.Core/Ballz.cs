@@ -212,13 +212,13 @@ namespace Ballz
             var play = new Label("DebugWorld",true);
             play.OnSelect += () =>
                 {
-                    Logic.startGame();
+                    Logic.startGame(false);
                 };
 
             var playrandom = new Label("Random Mountain",true);
             playrandom.OnSelect += () =>
                 {
-                    Logic.startGameRandom();
+                    Logic.startGame(true);
                 };
             Composite startGame = new Composite("Start Game", true);
             startGame.AddItem(play);

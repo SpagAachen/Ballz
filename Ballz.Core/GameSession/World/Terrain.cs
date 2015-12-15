@@ -752,7 +752,7 @@ namespace Ballz.GameSession.World
                 
             Task.Start();
 
-            if (currentRevision == 0)
+            if (currentRevision == 1)
                 Task.Wait();
         }
 
