@@ -61,18 +61,71 @@ namespace Ballz.GameSession
             theGame = _game;
         }
 
-        public void start()
+        public void start(bool random)
         {
+            generateWorld(random);
             input.Input += physics.HandleMessage;
             input.Input += gameRenderer.HandleMessage;
             input.Input += sessionLogic.HandleMessage;
             input.Input += debugRenderer.HandleMessage;
         }
 
-        public void startRandom()
+        private void generateWorld(bool random)
         {
-            start();
-            //TODO: theTerrain=randomgenerated;
+            if (random)
+            {
+                theTerrain=Terrain.mountainTerrain(GraphicsDevice);
+            }
+            else
+            {
+                theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld2"));
+            }
+
+            var player1 = new Player
+                {
+                    Name = "Player1"
+                };
+            Players.Add(player1);
+
+            var player1Ball = new Ball
+                {
+                    Position = new Vector2(4, 10),
+                    Velocity = new Vector2(2, 0),
+                    IsAiming = true,
+                    Player = player1
+                };
+            Entities.Add(player1Ball);
+
+            sessionLogic.AddPlayer(player1, player1Ball);
+
+            var player2 = new Player
+                {
+                    Name = "Player2"
+                };
+            Players.Add(player2);
+
+            var player2Ball = new Ball
+                {
+                    Position = new Vector2(27, 7),
+                    Velocity = new Vector2(2, 0),
+                    IsAiming = true,
+                    Player = player2
+                };
+            Entities.Add(player2Ball);
+
+            sessionLogic.AddPlayer(player2, player2Ball);
+
+            var npc = new Ball
+                {
+                    Position = new Vector2(8, 10),
+                    Velocity = new Vector2(0, 0)
+                };
+            Entities.Add(npc);
+
+            //System.Console.WriteLine("");
+
+            World.World snpsht = new World.World(Entities, theTerrain);
+            theGame.World = snpsht;
         }
 
         public void cleanup(object sender, GameComponentCollectionEventArgs args)
@@ -93,58 +146,7 @@ namespace Ballz.GameSession
         }
             
         protected override void LoadContent()
-        {
-            ///generate a dummy game world
-            /// TODO: find a nice solution to initialize the world especially regarding networking. maybe use an event for this
-            theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld2"));
-
-            var player1 = new Player
-            {
-                Name = "Player1"
-            };
-            Players.Add(player1);
-
-            var player1Ball = new Ball
-            {
-                Position = new Vector2(4, 10),
-                Velocity = new Vector2(2, 0),
-                IsAiming = true,
-                Player = player1
-            };
-            Entities.Add(player1Ball);
-
-            sessionLogic.AddPlayer(player1, player1Ball);
-
-            var player2 = new Player
-            {
-                Name = "Player2"
-            };
-            Players.Add(player2);
-
-            var player2Ball = new Ball
-            {
-                Position = new Vector2(27, 7),
-                Velocity = new Vector2(2, 0),
-                IsAiming = true,
-                Player = player2
-            };
-            Entities.Add(player2Ball);
-
-            sessionLogic.AddPlayer(player2, player2Ball);
-
-            var npc = new Ball
-            {
-                Position = new Vector2(8, 10),
-                Velocity = new Vector2(0, 0)
-            };
-            Entities.Add(npc);
-
-            //System.Console.WriteLine("");
-
-            World.World snpsht = new World.World(Entities, theTerrain);
-
-            theGame.World = snpsht;
-
+        {         
             //maybe use paused
             State = SessionState.Starting;
 
