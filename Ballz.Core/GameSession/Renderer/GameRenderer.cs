@@ -148,13 +148,13 @@ namespace Ballz.GameSession.Renderer
                 var aimRotation = ball.AimDirection.RotationFromDirection();
                 spriteBatch.Draw(CrosshairTexture, position: aimTargetScreen, color: Color.White, rotation: aimRotation, origin: new Vector2(16, 16));
 
-                int width = (int)(ball.ShootCharge * 50);
-                var aimIndicator = ball.Position + ball.AimDirection * 1;
+                int width = (int)(ball.ShootCharge * 40);
+                var aimIndicator = ball.Position + ball.AimDirection * 1.1f;
                 var aimIndicatorScreen = WorldToScreen(aimIndicator);
 
-                var chargeRectangle = new Rectangle(aimIndicatorScreen.ToPoint(), new Point(width, 5));
+                var chargeRectangle = new Rectangle(aimIndicatorScreen.ToPoint(), new Point(width, 10));
                 var chargeColor = ball.ShootCharge * new Vector4(1.0f, 0.0f, 0.0f, 0.5f) + (1.0f - ball.ShootCharge) * new Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-                spriteBatch.Draw(WhiteTexture, destinationRectangle: chargeRectangle, color: new Color(chargeColor), rotation: aimRotation + (float)Math.PI, origin: new Vector2(0, 0));
+                spriteBatch.Draw(WhiteTexture, destinationRectangle: chargeRectangle, color: new Color(chargeColor), rotation: aimRotation + (float)Math.PI);
             }
 
             var screenPos = WorldToScreen(ball.Position + new Vector2(0, 2f));
