@@ -40,8 +40,8 @@ namespace Ballz.GameSession.World
         private float[,] terrainSmoothmapCopy = null;
 
         // Terrain size
-        private int width = -1;
-        private int height = -1;
+        public int Width { get; }= -1;
+        public int Height { get; } = -1;
 
         // Internal members to avoid reallocation
         private Border[,] bordersH = null;
@@ -53,35 +53,35 @@ namespace Ballz.GameSession.World
 		{
 			terrainData = terrainTexture;
 
-			width = terrainData.Width;
-			height = terrainData.Height;
+			Width = terrainData.Width;
+			Height = terrainData.Height;
 
-            publicShape.terrainBitmap = new bool[width, height];
-            terrainSmoothmap = new float[width, height];
-            terrainSmoothmapCopy = new float[width, height];
+            publicShape.terrainBitmap = new bool[Width, Height];
+            terrainSmoothmap = new float[Width, Height];
+            terrainSmoothmapCopy = new float[Width, Height];
 
-            Color[] pixels = new Color[width * height];
+            Color[] pixels = new Color[Width * Height];
 			terrainData.GetData<Color> (pixels);
 
 
-            for (int y = 0; y < height; ++y) {
-                for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < Height; ++y) {
+                for (int x = 0; x < Width; ++x) {
 
-                    Color curPixel = pixels [y * width + x];
+                    Color curPixel = pixels [y * Width + x];
 
 					// Note that we flip the y coord here
                     if (curPixel == Color.White)
                     {
-                        publicShape.terrainBitmap[x, height - y - 1] = true;
-                        terrainSmoothmap[x, height - y - 1] = 1.0f;
+                        publicShape.terrainBitmap[x, Height - y - 1] = true;
+                        terrainSmoothmap[x, Height - y - 1] = 1.0f;
                     }
 				}
 			}
 
             // Pre-allocate internal members
-            bordersH = new Border[width, height];
-            bordersV = new Border[width, height];
-            fullCells = new List<List<IntVector2>>(height);
+            bordersH = new Border[Width, Height];
+            bordersV = new Border[Width, Height];
+            fullCells = new List<List<IntVector2>>(Height);
             allEdges = new List<Edge>();
 
             update();
@@ -106,8 +106,8 @@ namespace Ballz.GameSession.World
 			int bry = (int)Math.Ceiling(y + radius);
 
 			// Iterate over bounding box part of bitmap
-			for (int j = Math.Max(0, tly); j < Math.Min(height, bry); ++j) {
-				for (int i = Math.Max(0, tlx); i < Math.Min(width, brx); ++i) {
+			for (int j = Math.Max(0, tly); j < Math.Min(Height, bry); ++j) {
+				for (int i = Math.Max(0, tlx); i < Math.Min(Width, brx); ++i) {
 
 					if (distance(i, j, x, y) > radius)
 						continue;
@@ -136,8 +136,8 @@ namespace Ballz.GameSession.World
 
 
             // Iterate over bounding box part of bitmap
-            for (int j = Math.Max(0, tly); j < Math.Min(height, bry); ++j) {
-                for (int i = Math.Max(0, tlx); i < Math.Min(width, brx); ++i) {
+            for (int j = Math.Max(0, tly); j < Math.Min(Height, bry); ++j) {
+                for (int i = Math.Max(0, tlx); i < Math.Min(Width, brx); ++i) {
 
                     if (distance(i, j, x, y) > radius)
                         continue;
@@ -319,16 +319,16 @@ namespace Ballz.GameSession.World
             int halfGauss = gauss.GetLength(0) / 2;
 
             // Iterate over all bitmap pixels
-            for (int y = 0; y < height; ++y)
+            for (int y = 0; y < Height; ++y)
             {
-                for (int x = 0; x < width; ++x)
+                for (int x = 0; x < Width; ++x)
                 {
                     float sum = 0.0f;
                     float weight = 0.0f;
                     for(int i = -halfGauss; i <= halfGauss; ++i)
                     {
                         int index = x + i;
-                        if(index >= 0 && index < width)
+                        if(index >= 0 && index < Width)
                         {
                             float val = gauss[i + halfGauss];
 
@@ -344,16 +344,16 @@ namespace Ballz.GameSession.World
                 }
             }
 
-            for (int y = 0; y < height; ++y)
+            for (int y = 0; y < Height; ++y)
             {
-                for (int x = 0; x < width; ++x)
+                for (int x = 0; x < Width; ++x)
                 {
                     float sum = 0.0f;
                     float weight = 0.0f;
                     for(int i = -halfGauss; i <= halfGauss; ++i)
                     {
                         int index = y + i;
-                        if(index >= 0 && index < height)
+                        if(index >= 0 && index < Height)
                         {
                             float val = gauss[i + halfGauss];
 
@@ -375,10 +375,10 @@ namespace Ballz.GameSession.World
             fullCells.Clear();
 
             // Iterate over all bitmap pixels
-            for (int y = 1; y < height; ++y)
+            for (int y = 1; y < Height; ++y)
             {
-                fullCells.Add(new List<IntVector2>(width));
-                for (int x = 1; x < width; ++x)
+                fullCells.Add(new List<IntVector2>(Width));
+                for (int x = 1; x < Width; ++x)
                 {
 
                     /*
@@ -514,8 +514,8 @@ namespace Ballz.GameSession.World
         private void extractOutlineFromEdges()
         {
             // Clear old borders and outline
-            Array.Clear(bordersH, 0, width * height);
-            Array.Clear(bordersV, 0, width * height);
+            Array.Clear(bordersH, 0, Width * Height);
+            Array.Clear(bordersV, 0, Width * Height);
             workingShape.outlines.Clear();
 
             foreach(var edge in allEdges)
@@ -708,12 +708,12 @@ namespace Ballz.GameSession.World
 		}
 
         /*
-		private void sdfOneIter(bool[] dirtPixels, float[] sdfPixels, int width, int height, IntVector2 dir)
+		private void sdfOneIter(bool[] dirtPixels, float[] sdfPixels, int Width, int Height, IntVector2 dir)
 		{
 			// TODO(ks): allow other sdf-vectors besides -1/0/1 combinations
 
-			var from = new IntVector2 (dir.x > 0 ? 0 : width-1, dir.y > 0 ? 0 : height-1);
-			var to = new IntVector2 (dir.x <= 0 ? 0 : width-1, dir.y <= 0 ? 0 : height-1);
+			var from = new IntVector2 (dir.x > 0 ? 0 : Width-1, dir.y > 0 ? 0 : Height-1);
+			var to = new IntVector2 (dir.x <= 0 ? 0 : Width-1, dir.y <= 0 ? 0 : Height-1);
 
 			var offset = new IntVector2 (0, 0);
 			var size = new IntVector2 (0, 0);

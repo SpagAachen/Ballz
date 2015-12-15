@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using Ballz.GameSession.Physics;
 
 namespace Ballz.GameSession.World
 {
@@ -18,7 +19,6 @@ namespace Ballz.GameSession.World
         public List<Entity> Entities
         {
             get;
-            private set;
         }
 
         public Terrain StaticGeometry
@@ -26,6 +26,8 @@ namespace Ballz.GameSession.World
             get;
             set;
         }
+
+        public Water Water { get; }
         
         public Entity EntityById(int id)
         {
@@ -34,10 +36,11 @@ namespace Ballz.GameSession.World
                     select e).FirstOrDefault();
         }
 
-        public World(List<Entity> newEntitites, Terrain newTerrain)
+        public World(List<Entity> newEntitites, Terrain newTerrain, Water newWater)
         {
             Entities = newEntitites;
             StaticGeometry = newTerrain;
+            Water = newWater;
         }
     }
 }

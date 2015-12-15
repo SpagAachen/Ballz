@@ -133,7 +133,8 @@ namespace Ballz.GameSession
 
             //System.Console.WriteLine("");
 
-            World.World snpsht = new World.World(Entities, theTerrain);
+            var theWater = new Water(theTerrain.Width, theTerrain.Height);
+            World.World snpsht = new World.World(Entities, theTerrain, theWater);
 
             theGame.World = snpsht;
 

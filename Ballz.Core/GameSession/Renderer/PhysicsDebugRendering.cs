@@ -23,6 +23,8 @@ namespace Ballz.GameSession.Renderer
         List<VertexPositionColor[]> terrainVertices = new List<VertexPositionColor[]>();
         private World.World debugWorld;
         private int terrainRevision = -1;
+        private SpriteBatch spriteBatch;
+        private Texture2D whiteTexture;
 
         public DebugRenderer(Ballz _game) : base(_game)
         {
@@ -41,6 +43,7 @@ namespace Ballz.GameSession.Renderer
                 DrawSphere(ball.Position, ball.Rotation, ball.Radius);
             }
             drawTerrain();
+            drawWater();
 
             base.Draw(gameTime);
         }
@@ -74,6 +77,12 @@ namespace Ballz.GameSession.Renderer
 
             Matrix terrainWorld = Matrix.CreateScale(0.03f);
 
+            spriteBatch = new SpriteBatch(Game.GraphicsDevice);
+            whiteTexture = new Texture2D(Game.GraphicsDevice,1,1,false,SurfaceFormat.Color);
+            whiteTexture.SetData(new Color[1]
+            {
+                Color.White
+            });
             base.LoadContent();
         }
 
@@ -152,6 +161,40 @@ namespace Ballz.GameSession.Renderer
             {
                 GraphicsDevice.DrawUserPrimitives(PrimitiveType.LineStrip, lineVertices, 0, lineVertices.Length - 1);
             }
+        }
+        
+        public Vector2 WorldToScreen(Vector3 Position)
+        {
+            var screenSpace = Vector4.Transform(Position, (Game.Camera.Projection * Game.Camera.View));
+            screenSpace /= screenSpace.W;
+            return new Vector2
+            {
+                X = (0.5f + 0.5f * screenSpace.X) * Game.GraphicsDevice.Viewport.Width,
+                Y = (1 - (0.5f + 0.5f * screenSpace.Y)) * Game.GraphicsDevice.Viewport.Height,
+            };
+        }
+
+        public Vector2 WorldToScreen(Vector2 Position)
+        {
+            return WorldToScreen(new Vector3(Position, 0));
+        }
+
+        public void drawWater()
+        {
+            spriteBatch.Begin();
+            Game.GraphicsDevice.BlendState = BlendState.Additive;
+            
+            for (var x = 0; x < debugWorld.Water.Width; ++x)
+                for (var y = 0; y < debugWorld.Water.Height; ++y)
+                {
+                    var color =
+                        new Color(new Vector4(debugWorld.Water[x, y], 0,0, 0.0f));
+                    var pos = new Vector2(x * debugWorld.StaticGeometry.Scale,y * debugWorld.StaticGeometry.Scale);
+                    var sPos = WorldToScreen(pos);
+                    spriteBatch.Draw(whiteTexture,position: sPos, scale: new Vector2(3,3), color : color);
+                }
+
+            spriteBatch.End();
         }
     }
 }

@@ -64,6 +64,7 @@
     <Compile Include="GameSession\Session.cs" />
     <Compile Include="GameSession\World\Material.cs" />
     <Compile Include="GameSession\World\Shot.cs" />
+    <Compile Include="GameSession\World\Water.cs" />
     <Compile Include="Input\InputTranslator.cs" />
     <Compile Include="Logic\LogicControl.cs" />
     <Compile Include="GameSession\Network\NetworkComponent.cs" />

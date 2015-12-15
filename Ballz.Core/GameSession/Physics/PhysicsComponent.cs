@@ -12,6 +12,7 @@ using System.Linq;
 using FarseerPhysics.Collision.Shapes;
 using FarseerPhysics.Common;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Ballz.GameSession.Physics
 {
@@ -193,6 +194,7 @@ namespace Ballz.GameSession.Physics
 
                 PreparePhysicsEngine(worldState);
                 PhysicsStep(worldState, elapsedSeconds);
+                worldState.Water.Step(worldState, elapsedSeconds);
 
                 // Update shots
                 var shots = (from e in worldState.Entities
