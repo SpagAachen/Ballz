@@ -181,17 +181,21 @@ namespace Ballz.GameSession.Renderer
 
         public void drawWater()
         {
-            spriteBatch.Begin();
-            Game.GraphicsDevice.BlendState = BlendState.Additive;
-            
+            var blending = new BlendState();
+            blending.AlphaSourceBlend = Blend.SourceAlpha;
+            blending.AlphaDestinationBlend = Blend.InverseSourceAlpha;
+            blending.ColorSourceBlend = Blend.SourceAlpha;
+            blending.ColorDestinationBlend = Blend.InverseSourceAlpha;
+
+            spriteBatch.Begin(blendState: blending);
             for (var x = 0; x < debugWorld.Water.Width; ++x)
                 for (var y = 0; y < debugWorld.Water.Height; ++y)
                 {
-                    var color =
-                        new Color(new Vector4(debugWorld.Water[x, y], 0,0, 0.0f));
+                    var density = debugWorld.Water[x, y];
+                    var color = new Color(1f, 1f, 1f, density*0.8f);
                     var pos = new Vector2(x * debugWorld.StaticGeometry.Scale,y * debugWorld.StaticGeometry.Scale);
                     var sPos = WorldToScreen(pos);
-                    spriteBatch.Draw(whiteTexture,position: sPos, scale: new Vector2(3,3), color : color);
+                    spriteBatch.Draw(whiteTexture, new Rectangle(sPos.ToPoint(), new Point(3,3)), color);
                 }
 
             spriteBatch.End();
