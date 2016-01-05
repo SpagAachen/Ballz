@@ -18,6 +18,9 @@ namespace Ballz.Input
 
         private KeyboardState previousState;
         private KeyboardState currentState;
+        private GamePadState[] previousGamePadState;
+        private PlayerIndex[] gamePadPlayerIndex;
+
 
         public InputMode Mode
         {
@@ -57,6 +60,14 @@ namespace Ballz.Input
             Mode = InputMode.PROCESSED;
             previousState = Keyboard.GetState();
             currentState = previousState;
+            previousGamePadState = new GamePadState[4];
+
+            gamePadPlayerIndex = new PlayerIndex[4];
+            gamePadPlayerIndex[0] = PlayerIndex.One;
+            gamePadPlayerIndex[1] = PlayerIndex.Two;
+            gamePadPlayerIndex[2] = PlayerIndex.Three;
+            gamePadPlayerIndex[3] = PlayerIndex.Four;
+            //previousGamePadState = GamePad.GetState(
         }
 
         void RawHandler(Object sender, TextInputEventArgs eventArgs)
@@ -69,8 +80,70 @@ namespace Ballz.Input
             Input?.Invoke(this, new InputMessage(inputMessage, pressed, key, player)); //todo: use object pooling and specify message better
         }
 
+        private void processGamePadInput(int p)
+        {                           
+            GamePadState currentState = GamePad.GetState(gamePadPlayerIndex[p-1]);
+
+            if (currentState.IsConnected)
+            {                    
+                if (previousGamePadState[p - 1].IsButtonUp(Buttons.DPadUp) && currentState.IsButtonDown(Buttons.DPadUp))
+                    OnInput(InputMessage.MessageType.ControlsUp, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                if (previousGamePadState[p - 1].IsButtonUp(Buttons.DPadDown) && currentState.IsButtonDown(Buttons.DPadDown))
+                    OnInput(InputMessage.MessageType.ControlsDown, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                if (previousGamePadState[p - 1].IsButtonUp(Buttons.DPadLeft) && currentState.IsButtonDown(Buttons.DPadLeft))
+                    OnInput(InputMessage.MessageType.ControlsLeft, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                if (previousGamePadState[p - 1].IsButtonUp(Buttons.DPadRight) && currentState.IsButtonDown(Buttons.DPadRight))
+                    OnInput(InputMessage.MessageType.ControlsRight, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                if (previousGamePadState[p - 1].IsButtonUp(Buttons.B) && currentState.IsButtonDown(Buttons.B))
+                    OnInput(InputMessage.MessageType.ControlsBack, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                if (previousGamePadState[p - 1].IsButtonUp(Buttons.A) && currentState.IsButtonDown(Buttons.A))
+                    OnInput(InputMessage.MessageType.ControlsAction, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                if (previousGamePadState[p - 1].IsButtonUp(Buttons.X) && currentState.IsButtonDown(Buttons.X))
+                    OnInput(InputMessage.MessageType.ControlsJump, true, null, Ballz.The().Match?.PlayerByNumber(p));
+
+                if(previousGamePadState[p - 1].ThumbSticks.Left.X <= 0.5 && currentState.ThumbSticks.Left.X > 0.5)
+                    OnInput(InputMessage.MessageType.ControlsRight, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                if(previousGamePadState[p - 1].ThumbSticks.Left.X >= -0.5 && currentState.ThumbSticks.Left.X < -0.5)
+                    OnInput(InputMessage.MessageType.ControlsLeft, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                if(previousGamePadState[p - 1].ThumbSticks.Left.Y <= 0.5 && currentState.ThumbSticks.Left.Y > 0.5)
+                    OnInput(InputMessage.MessageType.ControlsDown, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                if(previousGamePadState[p - 1].ThumbSticks.Left.Y >= -0.5 && currentState.ThumbSticks.Left.Y < -0.5)
+                    OnInput(InputMessage.MessageType.ControlsUp, true, null, Ballz.The().Match?.PlayerByNumber(p));
+
+                if(previousGamePadState[p - 1].ThumbSticks.Left.X > 0.5 && currentState.ThumbSticks.Left.X <= 0.5)
+                    OnInput(InputMessage.MessageType.ControlsRight, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                if(previousGamePadState[p - 1].ThumbSticks.Left.X < -0.5 && currentState.ThumbSticks.Left.X >= -0.5)
+                    OnInput(InputMessage.MessageType.ControlsLeft, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                if(previousGamePadState[p - 1].ThumbSticks.Left.Y > 0.5 && currentState.ThumbSticks.Left.Y <= 0.5)
+                    OnInput(InputMessage.MessageType.ControlsDown, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                if(previousGamePadState[p - 1].ThumbSticks.Left.Y < -0.5 && currentState.ThumbSticks.Left.Y >= -0.5)
+                    OnInput(InputMessage.MessageType.ControlsUp, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                
+                if (previousGamePadState[p - 1].IsButtonDown(Buttons.DPadUp) && currentState.IsButtonUp(Buttons.DPadUp))
+                    OnInput(InputMessage.MessageType.ControlsUp, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                if (previousGamePadState[p - 1].IsButtonDown(Buttons.DPadDown) && currentState.IsButtonUp(Buttons.DPadDown))
+                    OnInput(InputMessage.MessageType.ControlsDown, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                if (previousGamePadState[p - 1].IsButtonDown(Buttons.DPadLeft) && currentState.IsButtonUp(Buttons.DPadLeft))
+                    OnInput(InputMessage.MessageType.ControlsLeft, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                if (previousGamePadState[p - 1].IsButtonDown(Buttons.DPadRight) && currentState.IsButtonUp(Buttons.DPadRight))
+                    OnInput(InputMessage.MessageType.ControlsRight, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                if (previousGamePadState[p - 1].IsButtonDown(Buttons.B) && currentState.IsButtonUp(Buttons.B))
+                    OnInput(InputMessage.MessageType.ControlsBack, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                if (previousGamePadState[p - 1].IsButtonDown(Buttons.A) && currentState.IsButtonUp(Buttons.A))
+                    OnInput(InputMessage.MessageType.ControlsAction, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                if (previousGamePadState[p - 1].IsButtonDown(Buttons.X) && currentState.IsButtonUp(Buttons.X))
+                    OnInput(InputMessage.MessageType.ControlsJump, false, null, Ballz.The().Match?.PlayerByNumber(p));
+            }
+            previousGamePadState[p - 1] = currentState;
+        }
+
         public override void Update(GameTime gameTime)
         {
+            for (int i = 1; i < 5; i++)
+            {
+                processGamePadInput(i);
+            }
+
             currentState = Keyboard.GetState();
             if (currentState != previousState)
             {
