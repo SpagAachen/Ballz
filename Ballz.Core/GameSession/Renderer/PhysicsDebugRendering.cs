@@ -40,7 +40,7 @@ namespace Ballz.GameSession.Renderer
                 if (ball.Disposed)
                     continue;
 
-                DrawSphere(ball.Position, ball.Rotation, ball.Radius);
+                DrawSphere(ball.Position, ball.Rotation, ball.Radius, ball.PhysicsBody?.Awake ?? false);
             }
             drawTerrain();
             drawWater();
@@ -138,13 +138,16 @@ namespace Ballz.GameSession.Renderer
             base.OnEnabledChanged(sender, args);
         }
             
-        public void DrawSphere(Vector2 position, float direction, float radius)
+        public void DrawSphere(Vector2 position, float direction, float radius, bool awake)
         {
             LineEffect.Projection = Game.Camera.Projection;
             LineEffect.View = Game.Camera.View;
             LineEffect.World = Matrix.CreateScale(radius);
             LineEffect.World *= Matrix.CreateRotationZ(direction);
             LineEffect.World *= Matrix.CreateTranslation((new Vector3(position, 0)));
+
+            if(awake)
+                LineEffect.DiffuseColor = new Vector3(1, 0, 0);
 
             LineEffect.CurrentTechnique.Passes[0].Apply();
             GraphicsDevice.DrawUserPrimitives(PrimitiveType.LineStrip, sphereVertices, 0, sphereVertices.Length - 1);
@@ -155,6 +158,7 @@ namespace Ballz.GameSession.Renderer
             LineEffect.Projection = Game.Camera.Projection;
             LineEffect.View = Game.Camera.View;
             LineEffect.World = Matrix.Identity;
+            LineEffect.DiffuseColor = Color.GreenYellow.ToVector3();
 
             LineEffect.CurrentTechnique.Passes[0].Apply();
             foreach (VertexPositionColor[] lineVertices in terrainVertices)

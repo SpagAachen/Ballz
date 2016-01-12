@@ -32,7 +32,7 @@ namespace Ballz.GameSession.World
             for (var x = 0; x < Width; ++x)
                 for (var y = 0; y < Height; ++y)
                 {
-                    if (worldState.StaticGeometry.publicShape.terrainBitmap[x, y])
+                    if (worldState.StaticGeometry.PublicShape.TerrainBitmap[x, y])
                         density[x, y] = 0;
                     else
                         density[x, y] = 1;
