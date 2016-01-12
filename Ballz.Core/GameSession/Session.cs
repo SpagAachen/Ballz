@@ -126,6 +126,7 @@ namespace Ballz.GameSession
             
             var theWater = new Water(theTerrain.Width, theTerrain.Height);
             var snpsht = new World.World(Entities, theTerrain, theWater);
+            theWater.Initialize(snpsht);
             theGame.World = snpsht;
         }
 

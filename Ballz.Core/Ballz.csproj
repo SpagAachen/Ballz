@@ -89,6 +89,8 @@
     <Compile Include="Renderer\MenuRenderer.cs" />
     <Compile Include="Ballz.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Utils\BufferedArray.cs" />
+    <Compile Include="Utils\MathExtensions.cs" />
     <Compile Include="Utils\VectorExtensions.cs" />
     <None Include="app.config" />
     <None Include="Content.mgcb" />
