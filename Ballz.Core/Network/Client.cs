@@ -69,7 +69,7 @@
                 }
                 return;
             }
-            if (data)
+            if (data != null)
 			    Console.WriteLine("Unknown object received: " + data.ToString());
             else
                 Console.WriteLine("Empty data");
