@@ -16,7 +16,7 @@ namespace Ballz.Menu
         }
 
         //The name
-        public string Name { get; }
+        public string Name { get; set; }
 
         public abstract IReadOnlyList<Item> Items { get; }
 

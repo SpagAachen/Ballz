@@ -39,6 +39,8 @@ namespace Ballz
 
         public Settings.ProgrammSettings GameSettings;
 
+        public Label NetworkLobbyConnectedClients = new Label ("test", true);
+
         public Composite MainMenu;
 
         public Camera Camera;
@@ -195,12 +197,23 @@ namespace Ballz
 			networkConnectToLabel.OnSelect += () => Network.ConnectToServer (networkHostInput.Value, 13337);
 			networkConnectToMenu.AddItem (networkConnectToLabel);
             // - start server
-            var networkServerMenu = new Label("Start server", true);
+            var networkServerMenu = new Composite("Start Server", true);
+
 			networkServerMenu.OnSelect += () => 
 			{
-				Network.StartServer (13337); //TODO: port input
-				Logic.startGame ();
+				Network.StartServer(13337); //TODO: port input
 			};
+            // network lobby
+            networkServerMenu.AddItem(NetworkLobbyConnectedClients);
+            var networkServerMenuStartGame = new Label ("Start Game", true);
+            networkServerMenuStartGame.OnSelect += () => 
+                {
+                    Logic.startGame();
+                    Network.GameStarted();
+                };
+            networkServerMenu.AddItem(networkServerMenuStartGame);
+            //TODO: abort button - close server etc.
+
             // - add items
             networkMenu.AddItem(networkConnectToMenu);
             networkMenu.AddItem(networkServerMenu);

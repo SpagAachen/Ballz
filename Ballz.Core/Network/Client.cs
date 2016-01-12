@@ -52,9 +52,27 @@
 					ourE.Velocity = e.Velocity;
 					ourE.Rotation = e.Rotation;
 				}
+                return;
 			}
-			else
-				Console.WriteLine("Unknown object received: " + data.ToString());
+            // network message
+            var netMsg = data as NetworkMessage;
+            if (netMsg != null)
+            {
+                switch (netMsg.Kind)
+                {
+                    case NetworkMessage.MessageType.GameStarted:
+                        Ballz.The().Logic.startGame();
+                        break;
+                    default:
+                        Console.WriteLine("Unknown netMsg received: " + netMsg.Kind.ToString());
+                        break;
+                }
+                return;
+            }
+            if (data)
+			    Console.WriteLine("Unknown object received: " + data.ToString());
+            else
+                Console.WriteLine("Empty data");
 		}
 
 		public void HandleInputMessage(InputMessage message)
