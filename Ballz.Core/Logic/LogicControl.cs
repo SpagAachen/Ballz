@@ -30,14 +30,14 @@ namespace Ballz.Logic
             state = GameState.MenuState;
         }
 
-        public void startGame()
+        public void startGame(bool random = false)
         {
             state = GameState.SimulationState;
 
-            Game.Match.start();
+            Game.Match.start(random);
             RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }
-
+     
         private void RegisterMenuEvents(Item menu)
         {
             menu.BindSelectHandler<Composite>(c =>

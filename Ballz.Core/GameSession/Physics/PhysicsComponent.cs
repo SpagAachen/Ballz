@@ -16,11 +16,19 @@ using System.Diagnostics;
 namespace Ballz.GameSession.Physics
 {
     /// <summary>
-    ///     Physics control is called by BallzGame update to simulate discrete GamePhysics.
+    /// Physics control is called by BallzGame update to simulate discrete GamePhysics.
     /// </summary>
+    /// <remarks>
+    /// In each update step, this component syncs the state of all entities into the physics world,
+    /// runs a simulation step, and syncs positions and velocities back to the entities.
+    /// </remarks>
     public class PhysicsControl : GameComponent
     {
         new Ballz Game;
+
+        /// <summary>
+        /// The main acces point to the physics engine.
+        /// </summary>
         FarseerPhysics.Dynamics.World PhysicsWorld;
 
         public PhysicsControl(Ballz game) : base(game)
@@ -30,7 +38,14 @@ namespace Ballz.GameSession.Physics
         
         Dictionary<Body, int> EntityIdByPhysicsBody = new Dictionary<Body, int>();
 
-        Body TerrainBody;
+        /// <summary>
+        /// List of the physics bodies that represent the terrain
+        /// </summary>
+        List<Body> TerrainBodies = new List<Body>();
+
+        /// <summary>
+        /// Terrain revision of the physics terrain shapes in <see cref="TerrainBodies"/>
+        /// </summary>
         int TerrainRevision = -1;
 
         public override void Initialize()
@@ -43,18 +58,28 @@ namespace Ballz.GameSession.Physics
             ground.CreateFixture(new EdgeShape(new Vector2(-10, 0), new Vector2(20, 0)));
         }
 
+        /// <summary>
+        /// Removes the old terrain physics bodies and replaces them with new ones,
+        /// generated from the given terrain.
+        /// </summary>
         public void UpdateTerrainBody(Terrain terrain)
         {
-            if (TerrainBody != null)
-                PhysicsWorld.RemoveBody(TerrainBody);
+            foreach (var body in TerrainBodies)
+            {
+                var fixtures = body.FixtureList.ToArray();
+                foreach (var fixture in fixtures)
+                {
+                    fixture.Dispose();
+                }
+                body.Dispose();
+            }
+
+            TerrainBodies.Clear();
 
             // Update the terrain explicitly
             terrain.update();
             var outlines = terrain.getOutline();
 
-            TerrainBody = new Body(PhysicsWorld);
-            TerrainBody.BodyType = BodyType.Static;
-            TerrainBody.Friction = 1.0f;
 
             foreach (var outline in outlines)
             {
@@ -66,10 +91,19 @@ namespace Ballz.GameSession.Physics
                 }
 
                 var shape = new ChainShape(new Vertices(vertices));
-                TerrainBody.CreateFixture(shape);
+
+                var body = new Body(PhysicsWorld);
+                body.BodyType = BodyType.Static;
+                body.Friction = 1.0f;
+                body.CreateFixture(shape);
+
+                TerrainBodies.Add(body);
             }
         }
 
+        /// <summary>
+        /// Removes the physics body of the given entity from the physics world.
+        /// </summary>
         public void RemoveEntity(Entity e, World.World worldState)
         {
             e.Dispose();
@@ -87,6 +121,10 @@ namespace Ballz.GameSession.Physics
             }
         }
 
+        /// <summary>
+        /// Syncs the given world state into the physics world.
+        /// Creates new physics bodies for entities that don't have one yet.
+        /// </summary>
         public void PreparePhysicsEngine(World.World worldState)
         {
             if (worldState.StaticGeometry.Revision != TerrainRevision)
@@ -109,6 +147,8 @@ namespace Ballz.GameSession.Physics
                 {
                     body = new Body(PhysicsWorld);
                     body.BodyType = e.IsStatic ? BodyType.Static : BodyType.Dynamic;
+                    body.SleepingAllowed = true;
+                    body.Awake = true;
                     body.CreateFixture(new CircleShape(e.Radius, 1.0f));
                     e.PhysicsBody = body;
                     EntityIdByPhysicsBody[body] = e.ID;
@@ -120,7 +160,7 @@ namespace Ballz.GameSession.Physics
                         body.Mass = 10f;
                     }
 
-                    if(e is Shot)
+                    if (e is Shot)
                     {
                         var shot = e as Shot;
                         body.OnCollision += (a, b, contact) =>
@@ -149,11 +189,17 @@ namespace Ballz.GameSession.Physics
                         };
                     }
                 }
-                body.SetTransform(e.Position, e.Rotation);
-                body.LinearVelocity = e.Velocity;
+
+                if(body.Position != e.Position || body.Rotation != e.Rotation)
+                    body.SetTransform(e.Position, e.Rotation);
+                if (body.LinearVelocity != e.Velocity)
+                    body.LinearVelocity = e.Velocity;
             }
         }
 
+        /// <summary>
+        /// Runs a single simulation step in the physics engine and syncs the state of the physics bodies back to the given world.
+        /// </summary>
         public void PhysicsStep(World.World worldState, float elapsedSeconds)
         {
             // Update the physics world
@@ -221,18 +267,21 @@ namespace Ballz.GameSession.Physics
             }
         }
 
+        /// <summary>
+        /// Applies the impact of a shot projectile.
+        /// </summary>
         public void ApplyImpact(Shot shot, Fixture targetFixture, Vector2 targetPos, World.World worldState)
         {
             // Did the shot hit anything?
             if (targetFixture != null)
             {
                 // Terrain hit? Then add an explosion there.
-                if (targetFixture.Body == TerrainBody)
+                if (TerrainBodies.Contains(targetFixture.Body))
                 {
                     worldState.StaticGeometry.SubtractCircle(targetPos.X, targetPos.Y, 0.04f * shot.Velocity.Length() * shot.ExplosionRadius);
                 }
                 // Otherwise, find the entity that belongs to the hit body
-                else if(EntityIdByPhysicsBody.ContainsKey(targetFixture.Body))
+                else if (EntityIdByPhysicsBody.ContainsKey(targetFixture.Body))
                 {
                     int entityId = EntityIdByPhysicsBody[targetFixture.Body];
 
