@@ -102,7 +102,6 @@ namespace Ballz.GameSession.Logic
                 }
             }
             controlInput = null;
-
         }
 
         private void processInput(InputMessage message)

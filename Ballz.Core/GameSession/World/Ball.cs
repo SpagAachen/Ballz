@@ -31,5 +31,8 @@ namespace Ballz.GameSession.World
         public Player Player { get; set; } = Player.NPC;
         
         public Vector2 AimDirection { get; set; } = Vector2.UnitX;
+
+        public string HoldingWeapon;
+
     }
 }
