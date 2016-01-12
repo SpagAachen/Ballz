@@ -134,29 +134,50 @@ namespace Ballz.GameSession.Renderer
             Vector2 nV = ball.Direction;
             Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * 50 * nV.X / 360.0)) * Matrix.CreateTranslation(new Vector3(ball.Position, 0));
             BallEffect.World = world;
-            GraveEffect.World = world;
+            GraveEffect.World = world * Matrix.CreateScale(0.3f);
 
             if (ball.Health > 0)
-                BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
-            else
-                GraveModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
-
-            if (ball.IsAiming)
             {
+                BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
+
                 var aimTarget = ball.Position + ball.AimDirection * 2;
                 var aimTargetScreen = WorldToScreen(aimTarget);
                 var aimRotation = ball.AimDirection.RotationFromDirection();
-                spriteBatch.Draw(CrosshairTexture, position: aimTargetScreen, color: Color.White, rotation: aimRotation, origin: new Vector2(16, 16));
 
-                int width = (int)(ball.ShootCharge * 40);
-                var aimIndicator = ball.Position + ball.AimDirection * 1.1f;
-                var aimIndicatorScreen = WorldToScreen(aimIndicator);
+                var effects =  SpriteEffects.None;
+                
+                if(ball.AimDirection.X < 0)
+                {
+                    effects = SpriteEffects.FlipHorizontally;
+                    aimRotation += (float)Math.PI;
+                }
 
-                var chargeRectangle = new Rectangle(aimIndicatorScreen.ToPoint(), new Point(width, 10));
-                var chargeColor = ball.ShootCharge * new Vector4(1.0f, 0.0f, 0.0f, 0.5f) + (1.0f - ball.ShootCharge) * new Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-                spriteBatch.Draw(WhiteTexture, destinationRectangle: chargeRectangle, color: new Color(chargeColor), rotation: aimRotation + (float)Math.PI);
+
+                if (!String.IsNullOrEmpty(ball.HoldingWeapon))
+                {
+                    var weaponPosScreen = WorldToScreen(ball.Position - new Vector2(0, 0.33f));
+                    var weaponTexture = Game.Content.Load<Texture2D>("Textures/" + ball.HoldingWeapon);
+                    spriteBatch.Draw(weaponTexture, position: weaponPosScreen, color: Color.White, rotation: aimRotation, origin: new Vector2(32, 32), effects: effects);
+                }
+
+                if (ball.IsAiming)
+                {
+                    spriteBatch.Draw(CrosshairTexture, position: aimTargetScreen, color: Color.White, rotation: aimRotation, origin: new Vector2(16, 16));
+
+                    int width = (int)(ball.ShootCharge * 40);
+                    var aimIndicator = ball.Position + ball.AimDirection * 1.1f;
+                    var aimIndicatorScreen = WorldToScreen(aimIndicator);
+
+                    var chargeRectangle = new Rectangle(aimIndicatorScreen.ToPoint(), new Point(width, 10));
+                    var chargeColor = ball.ShootCharge * new Vector4(1.0f, 0.0f, 0.0f, 0.5f) + (1.0f - ball.ShootCharge) * new Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+                    spriteBatch.Draw(WhiteTexture, destinationRectangle: chargeRectangle, color: new Color(chargeColor), rotation: aimRotation);
+                }
             }
-
+            else // Player is dead
+            {
+                GraveModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
+            }
+            
             var screenPos = WorldToScreen(ball.Position + new Vector2(0, 2f));
 
             DrawText(ball.Player.Name, screenPos, 0.5f, Color.LawnGreen, 1, true, true);

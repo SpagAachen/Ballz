@@ -39,10 +39,28 @@ namespace Ballz.GameSession.World
         /// </summary>
         public bool IsInstantShot { get; set; }
 
-        public int ShooterId { get; set; }
 
-        public Vector2 TargetPosition { get; set; }
-        public int TargetId { get; set; } = -1;
+        public bool DisposeOnCollision { get; set; } = true;
+
+        public override void OnEntityCollision(Entity other)
+        {
+            // Die?
+            if(DisposeOnCollision)
+                Dispose();
+        }
+
+        public override void OnTerrainCollision(Terrain terrain, Vector2 position)
+        {
+            float impact = Velocity.Length() * ExplosionRadius;
+            if (impact > 5)
+            {
+                // Destroy terrain and die
+                terrain.SubtractCircle(position.X, position.Y, 0.04f * impact);
+            }
+
+            if(DisposeOnCollision)
+                Dispose();
+        }
 
     }
 }
