@@ -165,26 +165,31 @@ namespace Ballz.GameSession.Physics
                         var shot = e as Shot;
                         body.OnCollision += (a, b, contact) =>
                         {
-                            if (shot.TargetId > 0)
-                                return true;
 
                             Vector2 normal;
                             FixedArray2<Vector2> points;
                             contact.GetWorldManifold(out normal, out points);
-                            shot.TargetPosition = points[0];
 
                             Fixture targetFixture;
                             if (contact.FixtureA.Body == shot.PhysicsBody)
                                 targetFixture = contact.FixtureB;
                             else
                                 targetFixture = contact.FixtureA;
+                                
+                            if (TerrainBodies.Contains(targetFixture.Body))
+                            {
+                                // Shot collides with terrain
+                                shot.OnTerrainCollision(worldState.StaticGeometry, points[0]);
+                            }
+                            else if (EntityIdByPhysicsBody.ContainsKey(targetFixture.Body))
+                            {
+                                int entityId = EntityIdByPhysicsBody[targetFixture.Body];
+                                Entity entity = worldState.EntityById(entityId);
 
-                            if (EntityIdByPhysicsBody.ContainsKey(targetFixture.Body))
-                                shot.TargetId = EntityIdByPhysicsBody[targetFixture.Body];
-
-                            ApplyImpact(shot, targetFixture, shot.TargetPosition, worldState);
-
-                            shot.Dispose();
+                                // Mutual collision
+                                entity.OnEntityCollision(shot);
+                                shot.OnEntityCollision(entity);
+                            }
                             return true;
                         };
                     }
@@ -218,9 +223,10 @@ namespace Ballz.GameSession.Physics
 
                 if (e is Ball)
                 {
-                    if (e.Velocity.X > 0.01f)
+                    float eps = 0.01f;
+                    if (e.Velocity.X > eps)
                         e.Rotation = (float)Math.PI * 0.5f;
-                    else if (e.Velocity.X < -0.01f)
+                    else if (e.Velocity.X < -eps)
                         e.Rotation = -(float)Math.PI * 0.5f;
                 }
             }
@@ -260,45 +266,25 @@ namespace Ballz.GameSession.Physics
                             };
 
                         PhysicsWorld.RayCast(raycastCallback, shot.Position, shot.Position + 100 * shot.Velocity);
-                        ApplyImpact(shot, targetFixture, targetPos, worldState);
+                        if (TerrainBodies.Contains(targetFixture.Body))
+                        {
+                            // Shot collides with terrain
+                            shot.OnTerrainCollision(worldState.StaticGeometry, targetPos);
+                        }
+                        else if (EntityIdByPhysicsBody.ContainsKey(targetFixture.Body))
+                        {
+                            int entityId = EntityIdByPhysicsBody[targetFixture.Body];
+                            Entity entity = worldState.EntityById(entityId);
+
+                            // Mutual collision
+                            entity.OnEntityCollision(shot);
+                            shot.OnEntityCollision(entity);
+                        }
                         worldState.Entities.Remove(shot);
                     }
                 }
             }
         }
-
-        /// <summary>
-        /// Applies the impact of a shot projectile.
-        /// </summary>
-        public void ApplyImpact(Shot shot, Fixture targetFixture, Vector2 targetPos, World.World worldState)
-        {
-            // Did the shot hit anything?
-            if (targetFixture != null)
-            {
-                // Terrain hit? Then add an explosion there.
-                if (TerrainBodies.Contains(targetFixture.Body))
-                {
-                    worldState.StaticGeometry.SubtractCircle(targetPos.X, targetPos.Y, 0.04f * shot.Velocity.Length() * shot.ExplosionRadius);
-                }
-                // Otherwise, find the entity that belongs to the hit body
-                else if (EntityIdByPhysicsBody.ContainsKey(targetFixture.Body))
-                {
-                    int entityId = EntityIdByPhysicsBody[targetFixture.Body];
-
-                    var entity = worldState.EntityById(entityId);
-                    var ball = entity as Ball;
-                    if (ball != null)
-                    {
-                        ball.Health -= shot.HealthImpactAtDirectHit;
-                        if (ball.Health < 0)
-                            ball.Health = 0;
-
-                        ball.PhysicsBody.ApplyLinearImpulse(10*shot.Velocity);
-                    }
-                }
-            }
-        }
-
 
         public void HandleMessage(object sender, Message message)
         {

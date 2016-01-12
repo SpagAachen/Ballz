@@ -92,7 +92,8 @@ namespace Ballz.GameSession
                     Position = new Vector2(4, 10),
                     Velocity = new Vector2(2, 0),
                     IsAiming = true,
-                    Player = player1
+                    Player = player1,
+                    HoldingWeapon = "Bazooka",
                 };
             Entities.Add(player1Ball);
 
@@ -109,8 +110,9 @@ namespace Ballz.GameSession
                     Position = new Vector2(27, 7),
                     Velocity = new Vector2(2, 0),
                     IsAiming = true,
-                    Player = player2
-                };
+                    Player = player2,
+                    HoldingWeapon = "HandGun",
+            };
             Entities.Add(player2Ball);
 
             sessionLogic.AddPlayer(player2, player2Ball);

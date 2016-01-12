@@ -86,7 +86,6 @@ namespace Ballz.GameSession.Logic
                         IsInstantShot = false,
                         Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.2f),
                         Velocity = Ball.AimDirection * Ball.ShootCharge * 30f,
-                        ShooterId = Ball.ID
                     });
 
                     Ball.ShootCharge = 0f;
@@ -102,7 +101,6 @@ namespace Ballz.GameSession.Logic
                 }
             }
             controlInput = null;
-
         }
 
         private void processInput(InputMessage message)
