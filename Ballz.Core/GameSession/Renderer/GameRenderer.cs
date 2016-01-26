@@ -176,13 +176,15 @@ namespace Ballz.GameSession.Renderer
                     var aimIndicator = ball.Position + ball.AimDirection * 2.1f;
                     var aimIndicatorScreen = WorldToScreen(aimIndicator);
                     var aimIndicatorSize = new Vector2(width, 20);
-                    
-                    var chargeColor = GetChargeColor(ball.ShootCharge);
 
-                    // Draw charge indicator
-                    spriteBatch.Draw(WhiteTexture, position: aimIndicatorScreen, scale: aimIndicatorSize + new Vector2(2, 4), color: new Color(Color.Black, 64), rotation: aimRotation, origin: new Vector2(0, 0.5f));
-                    spriteBatch.Draw(WhiteTexture, position: aimIndicatorScreen, scale: aimIndicatorSize, color: new Color(chargeColor), rotation: aimRotation, origin: new Vector2(0, 0.5f));
+                    if (ball.ShootCharge > 0)
+                    {
+                        var chargeColor = GetChargeColor(ball.ShootCharge);
 
+                        // Draw charge indicator
+                        spriteBatch.Draw(WhiteTexture, position: aimIndicatorScreen, scale: new Vector2(100, 20), color: new Color(Color.Black, (int)(64*ball.ShootCharge)), rotation: aimRotation, origin: new Vector2(0, 0.5f));
+                        spriteBatch.Draw(WhiteTexture, position: aimIndicatorScreen, scale: aimIndicatorSize, color: new Color(chargeColor), rotation: aimRotation, origin: new Vector2(0, 0.5f));
+                    }
                     // Draw crosshair
                     spriteBatch.Draw(CrosshairTexture, position: aimTargetScreen, color: Color.White, rotation: aimRotation, origin: new Vector2(16, 16));
                 }
