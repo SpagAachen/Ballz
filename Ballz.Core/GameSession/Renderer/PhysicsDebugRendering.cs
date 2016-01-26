@@ -183,6 +183,8 @@ namespace Ballz.GameSession.Renderer
             return WorldToScreen(new Vector3(Position, 0));
         }
 
+        Texture2D WaterTexture = null;
+
         public void drawWater()
         {
             var blending = new BlendState();
@@ -191,17 +193,30 @@ namespace Ballz.GameSession.Renderer
             blending.ColorSourceBlend = Blend.SourceAlpha;
             blending.ColorDestinationBlend = Blend.InverseSourceAlpha;
 
-            spriteBatch.Begin(blendState: blending);
-            for (var x = 0; x < debugWorld.Water.Width; ++x)
-                for (var y = 0; y < debugWorld.Water.Height; ++y)
-                {
-                    var density = debugWorld.Water[x, y];
-                    var color = new Color(1f, 1f, 1f, density*0.8f);
-                    var pos = new Vector2(x * debugWorld.StaticGeometry.Scale,y * debugWorld.StaticGeometry.Scale);
-                    var sPos = WorldToScreen(pos);
-                    spriteBatch.Draw(whiteTexture, new Rectangle(sPos.ToPoint(), new Point(3,3)), color);
-                }
+            var water = debugWorld.Water;
+            var w = water.Width;
+            var h = water.Height;
 
+            if (WaterTexture == null)
+                WaterTexture = new Texture2D(Game.GraphicsDevice, w, h, false, SurfaceFormat.Color);
+
+            Color[] waterColors = new Color[w*h];
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                    waterColors[y * w + x] = new Color(new Vector4(new Vector3(1, 0, 0), water[x, y]));
+
+            WaterTexture.SetData(waterColors);
+
+            //var pos = new Vector2(x * debugWorld.StaticGeometry.Scale, y * debugWorld.StaticGeometry.Scale);
+            //var sPos = WorldToScreen(pos);
+
+            var topLeft = WorldToScreen(new Vector2(0, h) * debugWorld.StaticGeometry.Scale);
+            var bottomRight = WorldToScreen(new Vector2(w, 0) * debugWorld.StaticGeometry.Scale);
+
+            var destRect = new Rectangle(topLeft.ToPoint(), (bottomRight - topLeft).ToPoint());
+
+            spriteBatch.Begin(blendState: blending);
+            spriteBatch.Draw(WaterTexture, destinationRectangle: destRect, color: Color.White, effects: SpriteEffects.FlipVertically);
             spriteBatch.End();
         }
     }
