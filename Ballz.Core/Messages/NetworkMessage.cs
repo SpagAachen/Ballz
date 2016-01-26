@@ -8,7 +8,8 @@
             ConnectingToServer,
             ConnectedToServer,
             ServerStarted,
-            NewClient
+            NewClient,
+            GameStarted
         }
 
         public NetworkMessage(MessageType type) : base(Message.MessageType.NetworkMessage)

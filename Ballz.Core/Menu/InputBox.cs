@@ -16,7 +16,8 @@ namespace Ballz.Menu
         
         public void HandleRawKey(char key)
         {
-            Value += key;
+            if(!Char.IsControl(key))
+                Value += key;
         }
 
         public void HandleBackspace()

@@ -77,5 +77,13 @@ namespace Ballz.GameSession.World
         {
             Disposed = true;
         }
+
+        public virtual void OnTerrainCollision(Terrain terrain, Vector2 position)
+        {
+        }
+
+        public virtual void OnEntityCollision(Entity other)
+        {
+        }
     }
 }

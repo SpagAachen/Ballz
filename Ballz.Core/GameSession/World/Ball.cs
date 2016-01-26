@@ -31,5 +31,34 @@ namespace Ballz.GameSession.World
         public Player Player { get; set; } = Player.NPC;
         
         public Vector2 AimDirection { get; set; } = Vector2.UnitX;
+
+        public string HoldingWeapon;
+
+        public override void OnEntityCollision(Entity other)
+        {
+            var shot = other as Shot;
+            if (shot != null)
+            {
+                float impact = shot.Velocity.Length() * shot.ExplosionRadius;
+                if (impact < 5)
+                    return;
+
+                //TODO(ks) more elaborate damage model
+                Health -= shot.HealthImpactAtDirectHit * Math.Min(1, impact / 20);
+                if (Health < 0)
+                    Health = 0;
+
+                PhysicsBody.ApplyLinearImpulse(10*shot.Velocity);
+            }
+            else
+            {
+                // Other balls, etc -> no-op
+            }
+        }
+
+        public override void OnTerrainCollision(Terrain terrain, Vector2 position)
+        {
+            base.OnTerrainCollision(terrain, position);
+        }
     }
 }

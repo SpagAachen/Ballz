@@ -10,6 +10,7 @@
     public class Network : GameComponent
     {
         public enum StateT { None, Client, Server };
+        public enum GameStateT { None, InLobby, InGame };
         private Server server;
         private Client client;
         public event EventHandler<Message> Message;
@@ -18,6 +19,7 @@
         /// The state of the game: Unconnected/None, Client or Server
         /// </summary>
         public StateT State { get; private set; } = StateT.None;
+        public GameStateT GameState { get;  set; } = GameStateT.None;
 
         public void RaiseMessageEvent(NetworkMessage.MessageType msg)
         {
@@ -33,6 +35,14 @@
             server.Listen(port);
             RaiseMessageEvent(NetworkMessage.MessageType.ServerStarted);
             //TODO: Implement
+        }
+
+        public void GameStarted()
+        {
+            if (State == StateT.Server)
+            {
+                server.GameStarted();
+            }
         }
 
         public void ConnectToServer(string hostname, int port)

@@ -23,7 +23,7 @@ namespace Ballz.Utils
 
         public static float RotationFromDirection(this Vector2 v)
         {
-            return (v.X > 0 ? 1 : -1) * Acos(Vector2.Dot(Vector2.Normalize(v), Vector2.UnitY)) + (0.5f * (float)Math.PI);
+            return (v.X > 0 ? 1 : -1) * Acos(Vector2.Dot(Vector2.Normalize(v), Vector2.UnitY)) - (0.5f * (float)Math.PI);
         }
     }
 }
