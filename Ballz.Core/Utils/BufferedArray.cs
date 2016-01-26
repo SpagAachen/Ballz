@@ -5,8 +5,8 @@ namespace Ballz.Utils
 {
     public class BufferedArray<T>
     {
-        private readonly T[] data;
-        private readonly T[] buffer;
+        private T[] data;
+        private T[] buffer;
 
         private readonly int[] size;
 
@@ -41,8 +41,9 @@ namespace Ballz.Utils
 
         public void Unbuffer()
         {
-            for (var i = 0; i < data.Length; ++i)
-                data[i] = buffer[i];
+            var tmp = buffer;
+            buffer = data;
+            data = tmp;
         }
     }
 }
