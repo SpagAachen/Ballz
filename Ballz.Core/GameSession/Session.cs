@@ -11,152 +11,60 @@ using Ballz.GameSession.Logic;
 
 namespace Ballz.GameSession
 {
-    public class Session : DrawableGameComponent
+    public class Session: IDisposable
     {
-        private List<Entity> Entities = new List<Entity>();
-        private Terrain theTerrain;
-        private Physics.PhysicsControl physics;
-        private Logic.GameLogic sessionLogic;
-        private Renderer.GameRenderer gameRenderer;
-        private Renderer.DebugRenderer debugRenderer;
-        private LogicControl logic;
-        private Input.InputTranslator input;
-        private Ballz theGame;
+        public List<Entity> Entities = new List<Entity>();
+        public Terrain Terrain;
+        public Physics.PhysicsControl Physics;
+        public Logic.GameLogic SessionLogic;
+        public Renderer.GameRenderer GameRenderer;
+        public Renderer.DebugRenderer DebugRenderer;
+        public LogicControl Logic;
+        public Input.InputTranslator Input;
+        public Ballz Game;
 
         public List<Player> Players { get; set; } = new List<Player>();
         public Player Winner { get; set; } = null;
         public SessionState State { get; set; } = SessionState.Starting;
 
-        public Session(Ballz _game) : base(_game)
+        public Session(Ballz _game)
         {
-            physics = new Physics.PhysicsControl(_game);
-            physics.Enabled = false;
-            _game.Components.Add(physics);
+            Physics = new Physics.PhysicsControl(_game);
+            Physics.Enabled = false;
+            _game.Components.Add(Physics);
 
-            gameRenderer = new Renderer.GameRenderer(_game);
-            gameRenderer.Enabled = false;
-            gameRenderer.Visible = false;
-            _game.Components.Add(gameRenderer);
+            GameRenderer = new Renderer.GameRenderer(_game);
+            GameRenderer.Enabled = false;
+            GameRenderer.Visible = false;
+            _game.Components.Add(GameRenderer);
 
-            debugRenderer = new Renderer.DebugRenderer(_game);
-            debugRenderer.Enabled = false;
-            debugRenderer.Visible = false;
-            _game.Components.Add(debugRenderer);
+            DebugRenderer = new Renderer.DebugRenderer(_game);
+            DebugRenderer.Enabled = false;
+            DebugRenderer.Visible = false;
+            _game.Components.Add(DebugRenderer);
 
-            sessionLogic = new Logic.GameLogic(_game);
-            sessionLogic.Enabled = false;
-            _game.Components.Add(sessionLogic);
+            SessionLogic = new Logic.GameLogic(_game);
+            SessionLogic.Enabled = false;
+            _game.Components.Add(SessionLogic);
 
-            logic = _game.Services.GetService<LogicControl>();
-            logic.Message += physics.HandleMessage;
-            logic.Message += gameRenderer.HandleMessage;
-            logic.Message += sessionLogic.HandleMessage;
-            logic.Message += debugRenderer.HandleMessage;
+            Logic = _game.Services.GetService<LogicControl>();
+            Logic.Message += Physics.HandleMessage;
+            Logic.Message += GameRenderer.HandleMessage;
+            Logic.Message += SessionLogic.HandleMessage;
+            Logic.Message += DebugRenderer.HandleMessage;
 
-            input = _game.Services.GetService<Input.InputTranslator>();
-           
-
-            _game.Components.ComponentRemoved += cleanup;
-            //Initialize();
-            theGame = _game;
-        }
-
-        public void start(bool random)
-        {
-            generateWorld(random);
-            input.Input += physics.HandleMessage;
-            input.Input += gameRenderer.HandleMessage;
-            input.Input += sessionLogic.HandleMessage;
-            input.Input += debugRenderer.HandleMessage;
-        }
-
-        private void generateWorld(bool random)
-        {
-            if (random)
-            {
-                theTerrain=Terrain.mountainTerrain(GraphicsDevice);
-            }
-            else
-            {
-                theTerrain = new Terrain(Game.Content.Load<Texture2D>("Worlds/TestWorld2"));
-            }
-
-            var player1 = new Player
-                {
-                    Name = "Player1"
-                };
-            Players.Add(player1);
-
-            var player1Ball = new Ball
-                {
-                    Position = new Vector2(4, 10),
-                    Velocity = new Vector2(2, 0),
-                    IsAiming = true,
-                    Player = player1,
-                    HoldingWeapon = "Bazooka",
-                };
-            Entities.Add(player1Ball);
-
-            sessionLogic.AddPlayer(player1, player1Ball);
-
-            var player2 = new Player
-                {
-                    Name = "Player2"
-                };
-            Players.Add(player2);
-
-            var player2Ball = new Ball
-                {
-                    Position = new Vector2(27, 7),
-                    Velocity = new Vector2(2, 0),
-                    IsAiming = true,
-                    Player = player2,
-                    HoldingWeapon = "HandGun",
-            };
-            Entities.Add(player2Ball);
-
-            sessionLogic.AddPlayer(player2, player2Ball);
-
-            var npc = new Ball
-                {
-                    Position = new Vector2(8, 10),
-                    Velocity = new Vector2(0, 0)
-                };
-            Entities.Add(npc);
-
-            //System.Console.WriteLine("");
-
-            World.World snpsht = new World.World(Entities, theTerrain);
-            theGame.World = snpsht;
-        }
-
-        public void cleanup(object sender, GameComponentCollectionEventArgs args)
-        {
-            if (args.GameComponent == this)  //we got removed so we get rid of all the other components
-            {
-                logic.Message -= physics.HandleMessage;
-                logic.Message -= gameRenderer.HandleMessage;
-                logic.Message -= debugRenderer.HandleMessage;
-
-                Game.Components.Remove(physics);
-                Game.Components.Remove(gameRenderer);
-                Game.Components.Remove(sessionLogic);
-
-                input.Input -= physics.HandleMessage;
-                input.Input -= gameRenderer.HandleMessage;
-            }
-        }
+            Input = _game.Services.GetService<Input.InputTranslator>();
             
-        protected override void LoadContent()
-        {         
-            //maybe use paused
-            State = SessionState.Starting;
-
+            Game = _game;
         }
 
-        public override void Initialize()
+        public void Start()
         {
-            base.Initialize();
+            Input.Input += Physics.HandleMessage;
+            Input.Input += GameRenderer.HandleMessage;
+            Input.Input += SessionLogic.HandleMessage;
+            Input.Input += DebugRenderer.HandleMessage;
+            State = SessionState.Running;
         }
 
         public Player PlayerByNumber(int number)
@@ -165,5 +73,42 @@ namespace Ballz.GameSession
                 return null;
             return Players[number - 1];
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    Logic.Message -= Physics.HandleMessage;
+                    Logic.Message -= GameRenderer.HandleMessage;
+                    Logic.Message -= DebugRenderer.HandleMessage;
+
+                    Game.Components.Remove(Physics);
+                    Game.Components.Remove(GameRenderer);
+                    Game.Components.Remove(SessionLogic);
+
+                    Input.Input -= Physics.HandleMessage;
+                    Input.Input -= GameRenderer.HandleMessage;
+                }
+                
+                disposedValue = true;
+            }
+        }
+
+        ~Session()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }

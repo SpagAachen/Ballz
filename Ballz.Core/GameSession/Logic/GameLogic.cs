@@ -86,20 +86,11 @@ namespace Ballz.GameSession.Logic
                 if (msg.Kind == LogicMessage.MessageType.GameMessage)
                 {
                     Enabled = !Enabled;
-                    if (Enabled)
+                    if (Enabled && Game.Match.State != SessionState.Finished)
                         Game.Match.State = SessionState.Running;
                     else
                     {
-                        if (Game.Match.State == SessionState.Finished)
-                        {
-                            Game.Components.Remove(Game.Match);
-                            Game.Match = new GameSession.Session(Game);
-                            Game.Components.Add(Game.Match);
-                        }
-                        else
-                        {
-                            Game.Match.State = SessionState.Paused;
-                        }
+                        Game.Match.State = SessionState.Paused;
                     }
                 }
             }
