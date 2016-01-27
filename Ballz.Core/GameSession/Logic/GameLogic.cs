@@ -21,19 +21,14 @@ namespace Ballz.GameSession.Logic
     {
         new private Ballz Game;
 
-        Dictionary<Player, BallControl> BallControllers = new Dictionary<Player, BallControl>();
+        public Dictionary<Player, BallControl> BallControllers = new Dictionary<Player, BallControl>();
 
         public GameLogic(Ballz game):
             base(game)
         {
             Game = game;
         }
-
-        public void AddPlayer(Player player, Ball ball)
-        {
-            BallControllers[player] = new BallControl(Game, Game.Match, ball);
-        }
-
+        
         public override void Update(GameTime time)
         {
             var elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;

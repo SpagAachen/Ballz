@@ -97,7 +97,7 @@ namespace Ballz.GameSession
                 };
             Entities.Add(player1Ball);
 
-            sessionLogic.AddPlayer(player1, player1Ball);
+            sessionLogic.BallControllers[player1] = new UserControl(theGame, this, player1Ball);
 
             var player2 = new Player
                 {
@@ -115,14 +115,22 @@ namespace Ballz.GameSession
             };
             Entities.Add(player2Ball);
 
-            sessionLogic.AddPlayer(player2, player2Ball);
+            sessionLogic.BallControllers[player2] = new UserControl(theGame, this, player2Ball);
 
-            var npc = new Ball
-                {
-                    Position = new Vector2(8, 10),
-                    Velocity = new Vector2(0, 0)
-                };
-            Entities.Add(npc);
+            var playerAi = new Player
+            {
+                Name = "NPC"
+            };
+            Players.Add(playerAi);
+
+            var aiBall = new Ball
+            {
+                Position = new Vector2(8, 10),
+                Velocity = new Vector2(0, 0),
+                Player = playerAi
+            };
+            Entities.Add(aiBall);
+            sessionLogic.BallControllers[playerAi] = new AIControl(theGame, this, aiBall);
 
             //System.Console.WriteLine("");
 
