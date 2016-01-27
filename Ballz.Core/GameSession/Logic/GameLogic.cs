@@ -21,19 +21,14 @@ namespace Ballz.GameSession.Logic
     {
         new private Ballz Game;
 
-        Dictionary<Player, BallControl> BallControllers = new Dictionary<Player, BallControl>();
+        public Dictionary<Player, BallControl> BallControllers = new Dictionary<Player, BallControl>();
 
         public GameLogic(Ballz game):
             base(game)
         {
             Game = game;
         }
-
-        public void AddPlayer(Player player, Ball ball)
-        {
-            BallControllers[player] = new BallControl(Game, Game.Match, ball);
-        }
-
+        
         public override void Update(GameTime time)
         {
             var elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
@@ -43,8 +38,16 @@ namespace Ballz.GameSession.Logic
             if (Game.Match.State == SessionState.Running)
             {
                 // Update all balls
-                foreach (var controller in BallControllers.Values)
-                    controller.Update(elapsedSeconds, worldState);
+                var currentControllers = BallControllers.Values.ToArray();
+                foreach (var controller in currentControllers)
+                {
+                    if (controller.Ball.Disposed)
+                    {
+                        BallControllers.Remove(controller.Ball.Player);
+                    }
+                    else
+                        controller.Update(elapsedSeconds, worldState);
+                }
                 
                 // Check for dead players
                 int alivePlayers = 0;
@@ -86,20 +89,11 @@ namespace Ballz.GameSession.Logic
                 if (msg.Kind == LogicMessage.MessageType.GameMessage)
                 {
                     Enabled = !Enabled;
-                    if (Enabled)
+                    if (Enabled && Game.Match.State != SessionState.Finished)
                         Game.Match.State = SessionState.Running;
                     else
                     {
-                        if (Game.Match.State == SessionState.Finished)
-                        {
-                            Game.Components.Remove(Game.Match);
-                            Game.Match = new GameSession.Session(Game);
-                            Game.Components.Add(Game.Match);
-                        }
-                        else
-                        {
-                            Game.Match.State = SessionState.Paused;
-                        }
+                        Game.Match.State = SessionState.Paused;
                     }
                 }
             }

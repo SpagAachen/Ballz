@@ -61,7 +61,7 @@
                 switch (netMsg.Kind)
                 {
                     case NetworkMessage.MessageType.GameStarted:
-                        Ballz.The().Logic.startGame();
+                        Ballz.The().Logic.StartGame(new SessionFactory.Worms());
                         break;
                     default:
                         Console.WriteLine("Unknown netMsg received: " + netMsg.Kind.ToString());

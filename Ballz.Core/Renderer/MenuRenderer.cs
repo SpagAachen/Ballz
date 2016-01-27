@@ -111,20 +111,23 @@ namespace Ballz.Renderer
             string renderString;
             foreach (var item in menu.Items)
             {
-                if (showUnderscore && item == menu.SelectedItem && item is InputBox)
-                    renderString = item.DisplayName + "_";
-                else
-                    renderString = item.DisplayName;
-                renderString = checkLetters(renderString);
+                if (item.Visible)
+                {
+                    if (showUnderscore && item == menu.SelectedItem && item is InputBox)
+                        renderString = item.DisplayName + "_";
+                    else
+                        renderString = item.DisplayName;
+                    renderString = checkLetters(renderString);
                     spriteBatch.DrawString(
                     menuFont,
                     renderString,
                     new Vector2(
-                        Game.Window.ClientBounds.Width/8f,
+                        Game.Window.ClientBounds.Width / 8f,
                         itemOffset),
                     (menu.SelectedItem != null && menu.SelectedItem == item) ? Color.Red : Color.Black);
 
-                itemOffset += menuFont.MeasureString(renderString).Y + 30;
+                    itemOffset += menuFont.MeasureString(renderString).Y + 30;
+                }
             }
         }
 

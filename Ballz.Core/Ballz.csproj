@@ -57,9 +57,11 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="GameSession\Logic\AIControl.cs" />
     <Compile Include="GameSession\Logic\BallControl.cs" />
     <Compile Include="GameSession\Logic\GameLogic.cs" />
     <Compile Include="GameSession\Logic\Player.cs" />
+    <Compile Include="GameSession\Logic\UserControl.cs" />
     <Compile Include="GameSession\Renderer\PhysicsDebugRendering.cs" />
     <Compile Include="GameSession\Session.cs" />
     <Compile Include="GameSession\World\Material.cs" />
@@ -88,6 +90,9 @@
     <Compile Include="Renderer\MenuRenderer.cs" />
     <Compile Include="Ballz.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="SessionFactory\Ballerburg.cs" />
+    <Compile Include="SessionFactory\SessionFactory.cs" />
+    <Compile Include="SessionFactory\Worms.cs" />
     <Compile Include="Utils\VectorExtensions.cs" />
     <None Include="app.config" />
     <None Include="Content.mgcb" />
