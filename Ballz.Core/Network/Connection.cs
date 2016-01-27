@@ -82,6 +82,8 @@ namespace Ballz.Network
                 byte[] msgTypeBuf = new byte[4];
                 connectionStream.Read(msgTypeBuf, 0, 4);
                 int msgType = BitConverter.ToInt32(msgTypeBuf, 0);
+
+                if (msgType < 0) return null;
                 
                 byte[] data = new byte[msgLength];
 

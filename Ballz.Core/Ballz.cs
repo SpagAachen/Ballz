@@ -192,7 +192,8 @@ namespace Ballz
 			// - connect to server
 			var networkConnectToMenu = new Composite ("Connect to", true);
 			var networkHostInput = new InputBox ("Host Name: ", true);
-			networkConnectToMenu.AddItem (networkHostInput);
+            networkHostInput.Value = "localhost";
+            networkConnectToMenu.AddItem (networkHostInput);
 			var networkConnectToLabel = new Label ("Connect", true);
 			networkConnectToLabel.OnSelect += () => Network.ConnectToServer (networkHostInput.Value, 13337);
 			networkConnectToMenu.AddItem (networkConnectToLabel);
