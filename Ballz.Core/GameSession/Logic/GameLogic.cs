@@ -38,8 +38,16 @@ namespace Ballz.GameSession.Logic
             if (Game.Match.State == SessionState.Running)
             {
                 // Update all balls
-                foreach (var controller in BallControllers.Values)
-                    controller.Update(elapsedSeconds, worldState);
+                var currentControllers = BallControllers.Values.ToArray();
+                foreach (var controller in currentControllers)
+                {
+                    if (controller.Ball.Disposed)
+                    {
+                        BallControllers.Remove(controller.Ball.Player);
+                    }
+                    else
+                        controller.Update(elapsedSeconds, worldState);
+                }
                 
                 // Check for dead players
                 int alivePlayers = 0;
