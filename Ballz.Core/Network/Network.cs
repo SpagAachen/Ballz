@@ -34,6 +34,7 @@
             server = new Server(this);
             server.Listen(port);
             RaiseMessageEvent(NetworkMessage.MessageType.ServerStarted);
+            Console.WriteLine("Started server on port " + port);
             //TODO: Implement
         }
 
@@ -54,6 +55,7 @@
 			RaiseMessageEvent(NetworkMessage.MessageType.ConnectingToServer);
             client.ConnectToServer(hostname, port); // blocking atm
 			RaiseMessageEvent(NetworkMessage.MessageType.ConnectedToServer);
+            Console.WriteLine("Connected to server");
             //TODO: Implement
         }
 

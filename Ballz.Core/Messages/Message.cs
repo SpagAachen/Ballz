@@ -2,6 +2,8 @@
 
 namespace Ballz.Messages
 {
+    using Newtonsoft.Json;
+
     /// <summary>
     ///     The Message class is used for message passing via events by LogicControl, InputTranslator etc.
     /// </summary>
@@ -10,6 +12,7 @@ namespace Ballz.Messages
     {
         public enum MessageType
         {
+            Invalid,
             LogicMessage,
             PhysicsMessage,
             MenuMessage,

@@ -1,9 +1,18 @@
-﻿namespace Ballz.Messages
+﻿
+namespace Ballz.Messages
 {
+    using System;
+
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
+
+    [Serializable]
+    [JsonObject(MemberSerialization.OptIn)]
     public class NetworkMessage : Message
     {
         public new enum MessageType
         {
+            Invalid,
             Disconnected,
             ConnectingToServer,
             ConnectedToServer,
@@ -17,6 +26,7 @@
             Kind = type;
         }
 
+        [JsonProperty("NetworkMessageKind")]
         public new MessageType Kind { get; private set; }
     }
 }

@@ -12,6 +12,9 @@ namespace Ballz.Network
     using System.Threading.Tasks;
     using System.Text;
     using Messages;
+    using System.Diagnostics;
+
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Provides an abstraction of the protocol layer. Use it to establish a network connection with another game instance.
@@ -31,10 +34,13 @@ namespace Ballz.Network
 
         public int GetMessageTypeId(Type type)
         {
-            return MessageTypes.IndexOf(type);
+            var res = MessageTypes.IndexOf(type);
+            Debug.Assert(res >= 0, "Unknown type!");
+            return res;
         }
         public Type GetTypeByMessageTypeId(int id)
         {
+            Debug.Assert(id >= 0, "Invalid id!");
             return MessageTypes[id];
         }
 
@@ -64,6 +70,7 @@ namespace Ballz.Network
 
             MessageTypes.Add(typeof(List<Entity>));
             MessageTypes.Add(typeof(InputMessage));
+            MessageTypes.Add(typeof(NetworkMessage));
 
             BeginReceive();
         }
@@ -78,6 +85,7 @@ namespace Ballz.Network
                 byte[] msgLengthBuf = new byte[4];
                 connectionStream.Read(msgLengthBuf, 0, 4);
                 int msgLength = BitConverter.ToInt32(msgLengthBuf, 0);
+                Console.WriteLine("Received " + msgLength + "bytes");
 
                 byte[] msgTypeBuf = new byte[4];
                 connectionStream.Read(msgTypeBuf, 0, 4);
@@ -90,7 +98,8 @@ namespace Ballz.Network
                 connectionStream.Read(data, 0, msgLength);
 
                 var json = UTF8Encoding.UTF8.GetString(data);
-                return JsonConvert.DeserializeObject(json, GetTypeByMessageTypeId(msgType));
+                var type = GetTypeByMessageTypeId(msgType);
+                return JsonConvert.DeserializeObject(json, type);
             });
             receiveTask.Start();
         }
@@ -112,6 +121,7 @@ namespace Ballz.Network
 				netStr.Write(userDataLen, 0, 4);
 
                 var typeId = GetMessageTypeId(obj.GetType());
+                
                 netStr.Write(BitConverter.GetBytes(typeId), 0, 4);
 
                 netStr.Write(data, 0, data.Length);
