@@ -30,11 +30,20 @@ namespace Ballz.Logic
             state = GameState.MenuState;
         }
 
-        public void startGame(bool random = false)
+        public void StartGame(SessionFactory.SessionFactory factory)
         {
             state = GameState.SimulationState;
+            if (Game.Match != null)
+                Game.Match.Dispose();
 
-            Game.Match.start(random);
+            Game.Match = factory.StartSession(Game);
+            Game.Match.Start();
+            RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
+        }
+
+        public void ContinueGame()
+        {
+            state = GameState.SimulationState;
             RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }
      

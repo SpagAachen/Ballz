@@ -90,6 +90,9 @@
     <Compile Include="Renderer\MenuRenderer.cs" />
     <Compile Include="Ballz.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="SessionFactory\Ballerburg.cs" />
+    <Compile Include="SessionFactory\SessionFactory.cs" />
+    <Compile Include="SessionFactory\Worms.cs" />
     <Compile Include="Utils\VectorExtensions.cs" />
     <None Include="app.config" />
     <None Include="Content.mgcb" />

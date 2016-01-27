@@ -78,9 +78,6 @@ namespace Ballz
 
             Services.AddService(new SoundControl(this));
 
-            Match = new GameSession.Session(this);
-            Components.Add(Match);
-
             //add eventhandlers to events
             input.Input += Logic.HandleInputMessage;
             //input.Input += physics.HandleMessage;
@@ -207,10 +204,10 @@ namespace Ballz
             networkServerMenu.AddItem(NetworkLobbyConnectedClients);
             var networkServerMenuStartGame = new Label ("Start Game", true);
             networkServerMenuStartGame.OnSelect += () => 
-                {
-                    Logic.startGame();
-                    Network.GameStarted();
-                };
+            {
+                Logic.StartGame(new SessionFactory.Worms());
+                Network.GameStarted();
+            };
             networkServerMenu.AddItem(networkServerMenuStartGame);
             //TODO: abort button - close server etc.
 
@@ -222,24 +219,36 @@ namespace Ballz
             // main menu
             var mainMenu = new Composite("Main Menu");
 
-            var play = new Label("DebugWorld",true);
-            play.OnSelect += () =>
+            var continueLabel = new Label("Continue", true);
+            continueLabel.OnSelect += () =>
+            {
+                Logic.ContinueGame();
+            };
+            mainMenu.AddItem(continueLabel);
+            
+            Composite startGame = new Composite("Start New Game", true);
+            foreach(var factory in SessionFactory.SessionFactory.AvailableFactories)
+            {
+                var factoryLabel = new Label(factory.Name, true);
+                factoryLabel.OnSelect += () =>
                 {
-                    Logic.startGame(false);
+                    if(Match == null)
+                    {
+                        continueLabel.Visible = true;
+                        continueLabel.Selectable = true;
+                    }
+                    Logic.StartGame(factory);
                 };
-
-            var playrandom = new Label("Random Mountain",true);
-            playrandom.OnSelect += () =>
-                {
-                    Logic.startGame(true);
-                };
-            Composite startGame = new Composite("Start Game", true);
-            startGame.AddItem(play);
-            startGame.AddItem(playrandom);
+                startGame.AddItem(factoryLabel);
+            }
 
             mainMenu.AddItem(startGame);
             mainMenu.AddItem(optionsMenu);
             mainMenu.AddItem(networkMenu);
+
+            mainMenu.SelectNext();
+            continueLabel.Visible = false;
+            continueLabel.Selectable = false;
 
             var quit = new Label("Quit", true);
             quit.OnSelect += Exit;
