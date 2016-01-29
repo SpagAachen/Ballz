@@ -28,7 +28,7 @@ namespace Ballz.GameSession.World
         /// </summary>
         public float ShootCharge { get; set; } = 0f;
 
-        public Player Player { get; set; } = Player.NPC;
+        public Player Player { get; set; }
         
         public Vector2 AimDirection { get; set; } = Vector2.UnitX;
 
