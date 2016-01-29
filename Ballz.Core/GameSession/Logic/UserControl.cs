@@ -68,7 +68,7 @@ namespace Ballz.GameSession.Logic
                 switch (controlInput)
                 {
                     case InputMessage.MessageType.ControlsJump:
-                        Ball.Velocity = new Vector2(Ball.Velocity.X, 5f);
+                        TryJump();
                         break;
                     default:
                         break;

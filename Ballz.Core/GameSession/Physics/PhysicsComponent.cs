@@ -286,6 +286,22 @@ namespace Ballz.GameSession.Physics
             }
         }
 
+        public void Raycast(Vector2 rayStart, Vector2 rayEnd, Action<Entity, Vector2> callback)
+        {
+            PhysicsWorld.RayCast((Fixture fixture, Vector2 position, Vector2 normal, float fraction) =>
+            {
+                Entity hitEntity = null;
+                if (EntityIdByPhysicsBody.ContainsKey(fixture.Body))
+                {
+                    hitEntity = Game.World.EntityById(EntityIdByPhysicsBody[fixture.Body]);
+                }
+
+                callback(hitEntity, position);
+
+                return fraction;
+            }, rayStart, rayEnd);
+        }
+
         public void HandleMessage(object sender, Message message)
         {
             if (message.Kind == Message.MessageType.LogicMessage)

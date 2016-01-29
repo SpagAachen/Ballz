@@ -42,6 +42,8 @@ namespace Ballz.GameSession.Logic
             }
             else
                 Ball.ShootCharge = 0f;
+
+            JumpCoolDown -= elapsedSeconds;
         }
 
         public void Shoot()
@@ -59,6 +61,31 @@ namespace Ballz.GameSession.Logic
             Ball.ShootCharge = 0f;
         }
 
+        const float PauseBetweenJumps = 0.2f;
+        protected float JumpCoolDown = 0f;
+
+        public void TryJump()
+        {
+            if (JumpCoolDown <= 0f)
+            {
+                // Send raycasts to the bottom. If it hits anything, perform the actual jump.
+
+                for(float angle = -45f; angle < 45f; angle += 5f)
+                {
+                    var rayDirection = new Vector2(0, -(Ball.Radius + 0.3f));
+                    rayDirection = rayDirection.Rotate(angle * (float)Math.PI / 180f);
+                    Match.Physics.Raycast(Ball.Position, Ball.Position + rayDirection, (e, p) =>
+                    {
+                        if (JumpCoolDown < 0)
+                        {
+                            Ball.Velocity = new Vector2(Ball.Velocity.X, 8f);
+                            JumpCoolDown = PauseBetweenJumps;
+                        }
+                    });
+                }
+            }
+        }
+        
         public virtual void HandleMessage(object sender, Message message)
         {
         }
