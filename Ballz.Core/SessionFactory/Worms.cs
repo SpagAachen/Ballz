@@ -14,13 +14,20 @@ namespace Ballz.SessionFactory
 {
     public class Worms : SessionFactory
     {
-        public override string Name { get; } = "Worms";
+        public Worms(string mapName = "TestWorld2")
+        {
+            MapName = mapName;
+        }
+
+        public string MapName;
+
+        public override string Name { get { return "Worms (" + MapName + ")"; } }
 
         public override Session StartSession(Ballz game)
         {
             var session = new Session(game);
 
-            session.Terrain = new Terrain(game.Content.Load<Texture2D>("Worlds/TestWorld2"));
+            session.Terrain = new Terrain(game.Content.Load<Texture2D>("Worlds/" + MapName));
 
             var player1 = new Player
             {
@@ -58,21 +65,21 @@ namespace Ballz.SessionFactory
 
             session.SessionLogic.BallControllers[player2] = new UserControl(game, session, player2Ball);
 
-            var playerAi = new Player
-            {
-                Name = "NPC"
-            };
-            session.Players.Add(playerAi);
+            //var playerAi = new Player
+            //{
+            //    Name = "NPC"
+            //};
+            //session.Players.Add(playerAi);
 
-            var aiBall = new Ball
-            {
-                Position = new Vector2(30, 20),
-                Velocity = new Vector2(0, 0),
-                Player = playerAi
-            };
-            session.Entities.Add(aiBall);
-            session.SessionLogic.BallControllers[playerAi] = new AIControl(game, session, aiBall);
-            
+            //var aiBall = new Ball
+            //{
+            //    Position = new Vector2(30, 20),
+            //    Velocity = new Vector2(0, 0),
+            //    Player = playerAi
+            //};
+            //session.Entities.Add(aiBall);
+            //session.SessionLogic.BallControllers[playerAi] = new AIControl(game, session, aiBall);
+
             var snpsht = new World(session.Entities, session.Terrain);
             session.Game.World = snpsht;
 
