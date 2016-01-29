@@ -101,6 +101,16 @@ namespace Ballz.GameSession.Physics
             }
         }
 
+        public void RemoveBody(Body body)
+        {
+            var fixtures = body.FixtureList.ToArray();
+            foreach (var fixture in fixtures)
+            {
+                fixture.Dispose();
+            }
+            body.Dispose();
+        }
+
         /// <summary>
         /// Removes the physics body of the given entity from the physics world.
         /// </summary>
@@ -111,12 +121,7 @@ namespace Ballz.GameSession.Physics
             if(e.PhysicsBody != null)
             {
                 EntityIdByPhysicsBody.Remove(e.PhysicsBody);
-                var fixtures = e.PhysicsBody.FixtureList.ToArray();
-                foreach (var fixture in fixtures)
-                {
-                    fixture.Dispose();
-                }
-                e.PhysicsBody.Dispose();
+                RemoveBody(e.PhysicsBody);
                 e.PhysicsBody = null;
             }
         }
@@ -286,20 +291,42 @@ namespace Ballz.GameSession.Physics
             }
         }
 
-        public void Raycast(Vector2 rayStart, Vector2 rayEnd, Action<Entity, Vector2> callback)
+        public class RaycastResult
         {
-            PhysicsWorld.RayCast((Fixture fixture, Vector2 position, Vector2 normal, float fraction) =>
-            {
+            public bool HasHit = false;
+            public Entity Entity = null;
+            public Vector2 Position = Vector2.Zero;
+            public Vector2 Normal = Vector2.Zero;
+        }
+
+        public RaycastResult Raycast(Vector2 rayStart, Vector2 rayEnd)
+        {
+            float closestFraction = float.PositiveInfinity;
+            RaycastResult closestHit = new RaycastResult();
+
+            PhysicsWorld.RayCast((Fixture fixture, Vector2 position, Vector2 normal, float fraction) => {
                 Entity hitEntity = null;
                 if (EntityIdByPhysicsBody.ContainsKey(fixture.Body))
                 {
                     hitEntity = Game.World.EntityById(EntityIdByPhysicsBody[fixture.Body]);
                 }
 
-                callback(hitEntity, position);
+                if (fraction < closestFraction)
+                {
+                    closestFraction = fraction;
+                    closestHit = new RaycastResult
+                    {
+                        HasHit = true,
+                        Position = position,
+                        Normal = normal,
+                        Entity = hitEntity
+                    };
+                }
 
                 return fraction;
             }, rayStart, rayEnd);
+
+            return closestHit;
         }
 
         public void HandleMessage(object sender, Message message)
