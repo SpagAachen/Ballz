@@ -14,14 +14,16 @@ namespace Ballz.SessionFactory
 {
     public class Worms : SessionFactory
     {
-        public Worms(string mapName = "TestWorld2")
+        public Worms(string mapName = "TestWorld2", bool includeAI = false)
         {
             MapName = mapName;
+            IncludeAI = includeAI;
         }
 
         public string MapName;
+        public bool IncludeAI;
 
-        public override string Name { get { return "Worms (" + MapName + ")"; } }
+        public override string Name { get { return "Worms (" + MapName + (IncludeAI ? ", with NPC" : "") + ")"; } }
 
         public List<Vector2> SpawnPoints = new List<Vector2>();
 
@@ -84,7 +86,7 @@ namespace Ballz.SessionFactory
             session.Terrain = new Terrain(mapTexture);
 
             FindSpawnPoints(mapTexture, session.Terrain.Scale);
-            var spawnPoints = SelectSpawnpoints(2);
+            var spawnPoints = SelectSpawnpoints(IncludeAI ? 3 : 2);
 
             var player1 = new Player
             {
@@ -121,20 +123,22 @@ namespace Ballz.SessionFactory
 
             session.SessionLogic.BallControllers[player2] = new UserControl(game, session, player2Ball);
 
-            //var playerAi = new Player
-            //{
-            //    Name = "NPC"
-            //};
-            //session.Players.Add(playerAi);
+            if (IncludeAI)
+            {
+                var playerAi = new Player
+                {
+                    Name = "NPC"
+                };
+                session.Players.Add(playerAi);
 
-            //var aiBall = new Ball
-            //{
-            //    Position = new Vector2(30, 20),
-            //    Velocity = new Vector2(0, 0),
-            //    Player = playerAi
-            //};
-            //session.Entities.Add(aiBall);
-            //session.SessionLogic.BallControllers[playerAi] = new AIControl(game, session, aiBall);
+                var aiBall = new Ball
+                {
+                    Position = spawnPoints[2],
+                    Player = playerAi
+                };
+                session.Entities.Add(aiBall);
+                session.SessionLogic.BallControllers[playerAi] = new AIControl(game, session, aiBall);
+            }
 
             var snpsht = new World(session.Entities, session.Terrain);
             session.Game.World = snpsht;
