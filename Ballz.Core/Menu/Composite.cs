@@ -47,5 +47,10 @@ namespace Ballz.Menu
             }
             while (SelectedItem == null || !SelectedItem.Selectable);
         }
+
+        public void SelectIndex(int i)
+        {
+            index = i;
+        }
     }
 }

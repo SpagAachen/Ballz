@@ -32,6 +32,11 @@ namespace Ballz.Logic
 
         public void StartGame(SessionFactory.SessionFactory factory)
         {
+            // Go back to main menu so it will show when the user enters the menu later
+            MenuGoBack();
+            // Select the "Continue" entry
+            activeMenu.Peek().SelectIndex(0);
+
             state = GameState.SimulationState;
             if (Game.Match != null)
                 Game.Match.Dispose();
@@ -170,12 +175,9 @@ namespace Ballz.Logic
                                 rawInput = false;
                             else
                             {
-                                if (top.SelectedItem != null)
-                                    top.SelectedItem.DeActivate();
-                                else
-                                    top.DeActivate();
+                                MenuGoBack();
                             }
-                    }
+                        }
                     RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
                     break;
                 case InputMessage.MessageType.ControlsUp:
@@ -210,6 +212,15 @@ namespace Ballz.Logic
                     break;
             }
             }
+        }
+
+        private void MenuGoBack()
+        {
+            var top = activeMenu.Peek();
+            if (top.SelectedItem != null)
+                top.SelectedItem.DeActivate();
+            else
+                top.DeActivate();
         }
 
         /// <summary>
