@@ -23,11 +23,68 @@ namespace Ballz.SessionFactory
 
         public override string Name { get { return "Worms (" + MapName + ")"; } }
 
+        public List<Vector2> SpawnPoints = new List<Vector2>();
+
+        public void FindSpawnPoints(Texture2D map, float terrainScale)
+        {
+            var w = map.Width;
+            var h = map.Height;
+            Color[] pixels = new Color[w * h];
+            map.GetData<Color>(pixels);
+
+            // Spawn points are identified by green pixels in the map
+            var spawnPointColor = new Color(0f, 1f, 0f);
+            
+            for(int x = 0; x < w; x++)
+            {
+                for(int y = 0; y < h; y++)
+                {
+                    if (pixels[y * w + x] == spawnPointColor)
+                        SpawnPoints.Add(new Vector2(x * terrainScale, (h - y) * terrainScale));
+                }
+            }
+        }
+
+        public List<Vector2> SelectSpawnpoints(int count)
+        {
+            var spawns = new List<int>();
+            var rand = new Random();
+            
+            for(int i = 0; i < count; i++)
+            {
+                bool foundSpawn = false;
+
+                // Make a limited number of tries to find a good spawn point
+                for(int j = 0; j < 20; j++)
+                {
+                    int spawnIndex = rand.Next(SpawnPoints.Count);
+                    if (!spawns.Contains(spawnIndex))
+                    {
+                        spawns.Add(spawnIndex);
+                        foundSpawn = true;
+                        break;
+                    }
+                }
+
+                // If that didn't work, just pick some spawn point
+                if(!foundSpawn)
+                {
+                    spawns.Add(rand.Next(SpawnPoints.Count));
+                }
+            }
+            
+            return spawns.Select((i)=>SpawnPoints[i]).ToList();
+        }
+
         public override Session StartSession(Ballz game)
         {
             var session = new Session(game);
 
-            session.Terrain = new Terrain(game.Content.Load<Texture2D>("Worlds/" + MapName));
+            var mapTexture = game.Content.Load<Texture2D>("Worlds/" + MapName);
+            session.Terrain = new Terrain(mapTexture);
+
+            FindSpawnPoints(mapTexture, session.Terrain.Scale);
+            var spawnPoints = SelectSpawnpoints(2);
 
             var player1 = new Player
             {
@@ -38,8 +95,7 @@ namespace Ballz.SessionFactory
 
             var player1Ball = new Ball
             {
-                Position = new Vector2(4, 10),
-                Velocity = new Vector2(2, 0),
+                Position = spawnPoints[0],
                 IsAiming = true,
                 Player = player1,
                 HoldingWeapon = "Bazooka",
@@ -55,8 +111,8 @@ namespace Ballz.SessionFactory
 
             var player2Ball = new Ball
             {
-                Position = new Vector2(27, 7),
-                Velocity = new Vector2(2, 0),
+                Position = spawnPoints[1],
+                Velocity = Vector2.Zero,
                 IsAiming = true,
                 Player = player2,
                 HoldingWeapon = "HandGun",

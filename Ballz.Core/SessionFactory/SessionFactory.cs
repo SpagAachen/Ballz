@@ -18,9 +18,9 @@ namespace Ballz.SessionFactory
 
         public static IEnumerable<SessionFactory> AvailableFactories = new SessionFactory[]
         {
-            new Worms("TestWorld"),
             new Worms("TestWorld2"),
             new Worms("RopeWorld"),
+            new Worms("Mining"),
             new Ballerburg()
         };
     }
