@@ -54,7 +54,7 @@ namespace Ballz.GameSession.Logic
                 ExplosionRadius = 1.0f,
                 HealthImpactAtDirectHit = 25,
                 IsInstantShot = false,
-                Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.2f),
+                Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.101f),
                 Velocity = Ball.AimDirection * Ball.ShootCharge * 30f,
             });
 
