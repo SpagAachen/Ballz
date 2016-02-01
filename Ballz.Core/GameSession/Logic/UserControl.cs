@@ -34,12 +34,12 @@ namespace Ballz.GameSession.Logic
             {
                 if (KeyPressed[InputMessage.MessageType.ControlsLeft])
                 {
-                    Ball.Velocity = new Vector2(-2f, Ball.Velocity.Y);
+                    Ball.Velocity = new Vector2(Min(-2f, Ball.Velocity.X), Ball.Velocity.Y);
                     Ball.AimDirection = new Vector2(-Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
                 }
                 if (KeyPressed[InputMessage.MessageType.ControlsRight])
                 {
-                    Ball.Velocity = new Vector2(2f, Ball.Velocity.Y);
+                    Ball.Velocity = new Vector2(Max(2f, Ball.Velocity.X), Ball.Velocity.Y);
                     Ball.AimDirection = new Vector2(Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
                 }
 
