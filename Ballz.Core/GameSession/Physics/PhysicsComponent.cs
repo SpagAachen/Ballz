@@ -199,11 +199,13 @@ namespace Ballz.GameSession.Physics
                         };
                     }
                 }
-
-                if(body.Position != e.Position || body.Rotation != e.Rotation)
+                
+                if (body.Position != e.Position || body.Rotation != e.Rotation)
                     body.SetTransform(e.Position, e.Rotation);
                 if (body.LinearVelocity != e.Velocity)
-                    body.LinearVelocity = e.Velocity;
+                    // Apparently, the physics engine likes applying an impulse better than overwriting the velocity.
+                    // So, apply an impulse that changes the old velocity to the new one.
+                    body.ApplyLinearImpulse(body.Mass * (e.Velocity - body.LinearVelocity));
             }
         }
 
