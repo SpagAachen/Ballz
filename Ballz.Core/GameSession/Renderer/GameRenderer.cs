@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using System;
+using System.Linq;
 
 using static MathFloat.MathF;
 using Ballz.Utils;
@@ -21,7 +22,7 @@ namespace Ballz.GameSession.Renderer
         Texture2D CrosshairTexture;
         Texture2D TerrainTexture;
         Texture2D WhiteTexture;
-        BasicEffect BallEffect, TerrainEffect, GraveEffect;
+        BasicEffect BallEffect, TerrainEffect, GraveEffect, RopeEffect;
         SpriteBatch spriteBatch;
 
         private SpriteFont font;
@@ -137,6 +138,9 @@ namespace Ballz.GameSession.Renderer
 
         public void DrawBall(Ball ball)
         {
+            if (ball.AttachedRope != null)
+                DrawRope(ball.AttachedRope);
+
             BallEffect.DiffuseColor = Vector3.One;
 
             Vector2 nV = ball.Direction;
@@ -230,6 +234,75 @@ namespace Ballz.GameSession.Renderer
             BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
         }
 
+        const float RopeWidth = 0.1f;
+
+        public void DrawRope(Rope rope)
+        {
+            var segmentPositions = (from s in rope.PhysicsSegments select s.Position).ToArray();
+
+            var triangleCount = (segmentPositions.Length - 1) * 2;
+            
+            VertexPositionColorTexture[] vpc = new VertexPositionColorTexture[triangleCount * 3];
+            
+            float TerrainTextureScale = 0.01f;
+            float u = 0;
+
+            for(int i = 0; i < segmentPositions.Length - 1; i++)
+            {
+                var p0 = segmentPositions[i + 1];
+                var p1 = segmentPositions[i];
+                var d = Vector2.Normalize(p1 - p0);
+                var n = new Vector2(d.Y, -d.X);
+                
+                var u0 = u - d.Length() * 0.05f;
+                var u1 = u + (p1 - p0).Length() + d.Length() * 0.05f;
+
+                p0 -= d * 0.05f;
+                p1 += d * 0.05f;
+
+
+                var t00 = p0 + n * RopeWidth;
+                var t10 = p1 + n * RopeWidth;
+                var t01 = p0 - n * RopeWidth;
+                var t11 = p1 - n * RopeWidth;
+
+                vpc[i * 6 + 0].Color = Color.White;
+                vpc[i * 6 + 0].Position = new Vector3(t11, -1);
+                vpc[i * 6 + 0].TextureCoordinate = new Vector2(1, u1 / (2f * RopeWidth));
+                vpc[i * 6 + 1].Color = Color.White;
+                vpc[i * 6 + 1].Position = new Vector3(t10, -1);
+                vpc[i * 6 + 1].TextureCoordinate = new Vector2(0, u1 / (2f * RopeWidth));
+                vpc[i * 6 + 2].Color = Color.White;
+                vpc[i * 6 + 2].Position = new Vector3(t00, -1);
+                vpc[i * 6 + 2].TextureCoordinate = new Vector2(0, u0 / (2f * RopeWidth));
+
+                vpc[i * 6 + 3].Color = Color.White;
+                vpc[i * 6 + 3].Position = new Vector3(t01, -1);
+                vpc[i * 6 + 3].TextureCoordinate = new Vector2(1, u0 / (2f * RopeWidth));
+                vpc[i * 6 + 4].Color = Color.White;
+                vpc[i * 6 + 4].Position = new Vector3(t11, -1);
+                vpc[i * 6 + 4].TextureCoordinate = new Vector2(1, u1 / (2f * RopeWidth));
+                vpc[i * 6 + 5].Color = Color.White;
+                vpc[i * 6 + 5].Position = new Vector3(t00, -1);
+                vpc[i * 6 + 5].TextureCoordinate = new Vector2(0, u0 / (2f * RopeWidth));
+
+                u = u1;
+            }
+            
+            RopeEffect.World = Matrix.Identity;
+            RopeEffect.View = Game.Camera.View;
+            RopeEffect.Projection = Game.Camera.Projection;
+            RopeEffect.CurrentTechnique.Passes[0].Apply();
+            GraphicsDevice.SamplerStates[0] = new SamplerState
+            {
+                AddressU = TextureAddressMode.Wrap,
+                AddressV = TextureAddressMode.Wrap
+            };
+
+            GraphicsDevice.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vpc, 0, triangleCount);
+
+        }
+
         public void DrawMessageOverlay()
         {
             if (Game.Match.State == Logic.SessionState.Finished)
@@ -292,6 +365,11 @@ namespace Ballz.GameSession.Renderer
             TerrainEffect.LightingEnabled = false;
             TerrainEffect.Texture = TerrainTexture;
             TerrainEffect.TextureEnabled = true;
+
+            RopeEffect = new BasicEffect(Game.GraphicsDevice);
+            RopeEffect.LightingEnabled = false;
+            RopeEffect.Texture = Game.Content.Load<Texture2D>("Textures/Rope"); 
+            RopeEffect.TextureEnabled = true;
 
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             font = Game.Content.Load<SpriteFont>("Fonts/Menufont");

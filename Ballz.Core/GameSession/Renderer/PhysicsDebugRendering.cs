@@ -40,6 +40,12 @@ namespace Ballz.GameSession.Renderer
 
                 DrawSphere(ball.Position, ball.Rotation, ball.Radius, ball.PhysicsBody?.Awake ?? false);
             }
+
+            foreach(var rope in debugWorld.Ropes)
+            {
+                DrawRope(rope);
+            }
+
             drawTerrain();
 
             base.Draw(gameTime);
@@ -142,6 +148,14 @@ namespace Ballz.GameSession.Renderer
 
             LineEffect.CurrentTechnique.Passes[0].Apply();
             GraphicsDevice.DrawUserPrimitives(PrimitiveType.LineStrip, sphereVertices, 0, sphereVertices.Length - 1);
+        }
+
+        public void DrawRope(Rope rope)
+        {
+            foreach(var segment in rope.PhysicsSegments)
+            {
+                DrawSphere(segment.Position, 0, Rope.SegmentLength * 0.5f, true);
+            }
         }
 
         public void drawTerrain()

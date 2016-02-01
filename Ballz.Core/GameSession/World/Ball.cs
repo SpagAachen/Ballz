@@ -34,6 +34,8 @@ namespace Ballz.GameSession.World
 
         public string HoldingWeapon;
 
+        public Rope AttachedRope = null;
+
         public override void OnEntityCollision(Entity other)
         {
             var shot = other as Shot;
