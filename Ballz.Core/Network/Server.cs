@@ -22,8 +22,14 @@
 
         public void GameStarted()
         {
+            Broadcast(new NetworkMessage(NetworkMessage.MessageType.NumberOfPlayers, this.GetNumberOfClients()));
             Broadcast(new NetworkMessage(NetworkMessage.MessageType.GameStarted));
         }
+
+	    int GetNumberOfClients()
+	    {
+	        return connections.Count;
+	    }
 
         public void Listen(int port)
         {

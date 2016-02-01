@@ -5,6 +5,7 @@ namespace Ballz.Messages
 
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
+    using Utils;
 
     [Serializable]
     [JsonObject(MemberSerialization.OptIn)]
@@ -18,7 +19,14 @@ namespace Ballz.Messages
             ConnectedToServer,
             ServerStarted,
             NewClient,
-            GameStarted
+            GameStarted,
+            NumberOfPlayers
+        }
+
+        public NetworkMessage()
+            : base(Message.MessageType.NetworkMessage)
+        {
+            Kind = MessageType.Invalid;
         }
 
         public NetworkMessage(MessageType type) : base(Message.MessageType.NetworkMessage)
@@ -26,7 +34,17 @@ namespace Ballz.Messages
             Kind = type;
         }
 
+        public NetworkMessage(MessageType type, object data) : base(Message.MessageType.NetworkMessage)
+        {
+            Kind = type;
+            Data = data;
+        }
+
         [JsonProperty("NetworkMessageKind")]
         public new MessageType Kind { get; private set; }
+
+        [JsonProperty("NetworkMessageData")]
+        [JsonConverter(typeof(TypeInfoConverter))]
+        public Object Data { get; set; }
     }
 }
