@@ -8,6 +8,7 @@ using Ballz.GameSession.World;
 using Microsoft.Xna.Framework;
 using Ballz.Sound;
 using Ballz.Utils;
+using static MathFloat.MathF;
 
 namespace Ballz.GameSession.Logic
 {
@@ -26,6 +27,9 @@ namespace Ballz.GameSession.Logic
         InputMessage.MessageType? controlInput = null;
         Dictionary<InputMessage.MessageType, bool> KeyPressed = new Dictionary<InputMessage.MessageType, bool>();
 
+        List<String> AvailableWeapons = new List<string> { "HandGun", "Bazooka", "RopeTool" };
+        int SelectedWeapon = 0;
+
         public override void Update(float elapsedSeconds, World.World worldState)
         {
             base.Update(elapsedSeconds, worldState);
@@ -34,12 +38,12 @@ namespace Ballz.GameSession.Logic
             {
                 if (KeyPressed[InputMessage.MessageType.ControlsLeft])
                 {
-                    Ball.Velocity = new Vector2(-2f, Ball.Velocity.Y);
+                    Ball.Velocity = new Vector2(Min(-2f, Ball.Velocity.X), Ball.Velocity.Y);
                     Ball.AimDirection = new Vector2(-Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
                 }
                 if (KeyPressed[InputMessage.MessageType.ControlsRight])
                 {
-                    Ball.Velocity = new Vector2(2f, Ball.Velocity.Y);
+                    Ball.Velocity = new Vector2(Max(2f, Ball.Velocity.X), Ball.Velocity.Y);
                     Ball.AimDirection = new Vector2(Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
                 }
 
@@ -59,16 +63,45 @@ namespace Ballz.GameSession.Logic
                     Ball.AimDirection = v.Rotate(radians);
                 }
 
-                IsCharging = KeyPressed[InputMessage.MessageType.ControlsAction];
+                if (Ball.HoldingWeapon == "Bazooka" || Ball.HoldingWeapon == "HandGun")
+                {
+                    IsCharging = KeyPressed[InputMessage.MessageType.ControlsAction];
 
-                if (!IsCharging && Ball.ShootCharge > 0)
-                    Shoot();
+                    if (!IsCharging && Ball.ShootCharge > 0)
+                        Shoot();
+                }
 
                 // Handle single-shot input events
                 switch (controlInput)
                 {
                     case InputMessage.MessageType.ControlsJump:
+                        if (Ball.AttachedRope != null)
+                            ToggleRope();
                         TryJump();
+                        break;
+                    case InputMessage.MessageType.ControlsUp:
+                        if (Ball.AttachedRope != null)
+                        {
+                            Match.Physics.ShortenRope(Ball.AttachedRope);
+                        }
+                        break;
+                    case InputMessage.MessageType.ControlsNextWeapon:
+                        SelectedWeapon = (SelectedWeapon+1) % AvailableWeapons.Count;
+                        Ball.HoldingWeapon = AvailableWeapons[SelectedWeapon];
+                        IsCharging = false;
+                        Ball.ShootCharge = 0f;
+                        break;
+                    case InputMessage.MessageType.ControlsPreviousWeapon:
+                        SelectedWeapon = SelectedWeapon-1;
+                        if (SelectedWeapon < 0)
+                            SelectedWeapon += AvailableWeapons.Count;
+                        Ball.HoldingWeapon = AvailableWeapons[SelectedWeapon];
+                        IsCharging = false;
+                        Ball.ShootCharge = 0f;
+                        break;
+                    case InputMessage.MessageType.ControlsAction:
+                        if (Ball.HoldingWeapon == "RopeTool")
+                            ToggleRope();
                         break;
                     default:
                         break;

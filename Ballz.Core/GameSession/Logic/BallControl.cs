@@ -61,6 +61,32 @@ namespace Ballz.GameSession.Logic
             Ball.ShootCharge = 0f;
         }
 
+        public void ToggleRope()
+        {
+            if (Ball.AttachedRope != null)
+            {
+                Match.Physics.RemoveRope(Ball.AttachedRope);
+                Ball.AttachedRope = null;
+                Game.World.Ropes.Remove(Ball.AttachedRope);
+            }
+            else
+            {
+                var rayHit = Match.Physics.Raycast(Ball.Position, Ball.Position + Ball.AimDirection * Rope.MaxLength);
+                if (rayHit.HasHit)
+                {
+                    var rope = new Rope
+                    {
+                        AttachedEntity = Ball,
+                        AttachedPosition = rayHit.Position
+                    };
+
+                    Ball.AttachedRope = rope;
+                    Match.Physics.AddRope(rope);
+                    Game.World.Ropes.Add(rope);
+                }
+            }
+        }
+
         const float PauseBetweenJumps = 0.2f;
         protected float JumpCoolDown = 0f;
 
@@ -77,7 +103,7 @@ namespace Ballz.GameSession.Logic
                     var rayHit = Match.Physics.Raycast(Ball.Position, Ball.Position + rayDirection);
                     if (rayHit.HasHit)
                     {
-                        Ball.Velocity = new Vector2(Ball.Velocity.X, 9f);
+                        Ball.Velocity = new Vector2(Ball.Velocity.X, 5f);
                         JumpCoolDown = PauseBetweenJumps;
                         break;
                     }

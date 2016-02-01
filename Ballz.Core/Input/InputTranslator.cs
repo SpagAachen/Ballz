@@ -259,6 +259,12 @@ namespace Ballz.Input
                     case Keys.Space:
                         OnInput(InputMessage.MessageType.ControlsJump, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
                         break;
+                    case Keys.PageUp:
+                        OnInput(InputMessage.MessageType.ControlsPreviousWeapon, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
+                        break;
+                    case Keys.PageDown:
+                        OnInput(InputMessage.MessageType.ControlsNextWeapon, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
+                        break;
                     case Keys.W:
                         OnInput(InputMessage.MessageType.ControlsUp, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
                         break;

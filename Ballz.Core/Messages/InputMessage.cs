@@ -16,6 +16,8 @@ namespace Ballz.Messages
             ControlsAction,
             ControlsJump,
             ControlsBack,
+            ControlsNextWeapon,
+            ControlsPreviousWeapon,
             RawBack,
             RawInput
         }

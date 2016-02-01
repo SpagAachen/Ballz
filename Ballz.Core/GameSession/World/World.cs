@@ -21,6 +21,8 @@ namespace Ballz.GameSession.World
             private set;
         }
 
+        public List<Rope> Ropes { get; private set; } = new List<Rope>();
+
         public Terrain StaticGeometry
         {
             get;
