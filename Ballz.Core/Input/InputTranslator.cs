@@ -232,6 +232,7 @@ namespace Ballz.Input
                 switch (theKey)
                 {
                     case Keys.OemTilde:
+                    case Keys.OemPipe:
                         OnInput(InputMessage.MessageType.ControlsConsole, pressed);
                         break;
                     case Keys.Escape:
