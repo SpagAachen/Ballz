@@ -148,10 +148,12 @@ namespace Ballz.GameSession.Physics
             {
                 var segmentStart = rope.AttachedPosition + ropeSegmentVector * (i - 0.5f);
                 var segmentCenter = rope.AttachedPosition + ropeSegmentVector * i;
-                var segment = BodyFactory.CreateCircle(PhysicsWorld, Rope.SegmentLength * 0.5f * 0.8f, 2f);// BodyFactory.CreateRectangle(PhysicsWorld, 0.05f, Rope.SegmentLength, 0.5f);
+                var segment = BodyFactory.CreateCircle(PhysicsWorld, Rope.SegmentLength * 0.5f * 0.8f, 5f);// BodyFactory.CreateRectangle(PhysicsWorld, 0.05f, Rope.SegmentLength, 0.5f);
                 segment.BodyType = BodyType.Dynamic;
                 segment.Friction = 0.5f;
                 segment.Restitution = 0.2f;
+                segment.AngularDamping = 0.01f;
+                segment.LinearDamping = 0.01f;
                 segment.CollisionCategories = Category.Cat3;
                 segment.SetTransform(segmentCenter, ropeRotation);
 
@@ -216,7 +218,37 @@ namespace Ballz.GameSession.Physics
                 ballJoint.CollideConnected = false;
                 rope.PhysicsEntityJoint = ballJoint;
             }
-         }
+        }
+
+        public void LoosenRope(Rope rope)
+        {
+            if (rope.PhysicsSegments.Count * Rope.SegmentLength < Rope.MaxLength)
+            {
+                PhysicsWorld.RemoveJoint(rope.PhysicsEntityJoint);
+
+                var lastSegment = rope.PhysicsSegments.Last();
+
+                var segmentCenter = lastSegment.Position + new Vector2(0, -Rope.SegmentLength * 0.5f);
+                var newSegment = BodyFactory.CreateCircle(PhysicsWorld, Rope.SegmentLength * 0.5f * 0.8f, 10f);// BodyFactory.CreateRectangle(PhysicsWorld, 0.05f, Rope.SegmentLength, 0.5f);
+                newSegment.BodyType = BodyType.Dynamic;
+                newSegment.AngularDamping = 0.01f;
+                newSegment.LinearDamping = 0.01f;
+                newSegment.Friction = 0.5f;
+                newSegment.Restitution = 0.2f;
+                newSegment.CollisionCategories = Category.Cat3;
+                newSegment.Position = segmentCenter;
+
+                rope.PhysicsSegments.Add(newSegment);
+
+                var segmentJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, lastSegment, newSegment, new Vector2(0, Rope.SegmentLength * 0.5f), new Vector2(0, -Rope.SegmentLength * 0.5f), false);
+                segmentJoint.CollideConnected = false;
+                rope.PhysicsSegmentJoints.Add(segmentJoint);
+
+                var ballJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, rope.PhysicsSegments.Last(), rope.AttachedEntity.PhysicsBody, Vector2.Zero, Vector2.Zero);
+                ballJoint.CollideConnected = false;
+                rope.PhysicsEntityJoint = ballJoint;
+            }
+        }
 
         /// <summary>
         /// Syncs the given world state into the physics world.

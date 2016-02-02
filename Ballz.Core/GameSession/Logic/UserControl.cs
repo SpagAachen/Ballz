@@ -66,9 +66,13 @@ namespace Ballz.GameSession.Logic
                 if (Ball.HoldingWeapon == "Bazooka" || Ball.HoldingWeapon == "HandGun")
                 {
                     IsCharging = KeyPressed[InputMessage.MessageType.ControlsAction];
-
+                    Ball.IsAiming = true;
                     if (!IsCharging && Ball.ShootCharge > 0)
                         Shoot();
+                }
+                else if (Ball.HoldingWeapon == "RopeTool")
+                {
+                    Ball.IsAiming = Ball.AttachedRope == null;
                 }
 
                 // Handle single-shot input events
@@ -80,9 +84,15 @@ namespace Ballz.GameSession.Logic
                         TryJump();
                         break;
                     case InputMessage.MessageType.ControlsUp:
-                        if (Ball.AttachedRope != null)
+                        if (Ball.HoldingWeapon == "RopeTool" && Ball.AttachedRope != null)
                         {
                             Match.Physics.ShortenRope(Ball.AttachedRope);
+                        }
+                        break;
+                    case InputMessage.MessageType.ControlsDown:
+                        if (Ball.HoldingWeapon == "RopeTool" && Ball.AttachedRope != null)
+                        {
+                            Match.Physics.LoosenRope(Ball.AttachedRope);
                         }
                         break;
                     case InputMessage.MessageType.ControlsNextWeapon:
