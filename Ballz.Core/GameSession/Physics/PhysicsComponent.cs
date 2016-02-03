@@ -152,8 +152,8 @@ namespace Ballz.GameSession.Physics
                 segment.BodyType = BodyType.Dynamic;
                 segment.Friction = 0.5f;
                 segment.Restitution = 0.2f;
-                segment.AngularDamping = 0.01f;
-                segment.LinearDamping = 0.01f;
+                segment.AngularDamping = 0.1f;
+                segment.LinearDamping = 0.1f;
                 segment.CollisionCategories = Category.Cat3;
                 segment.SetTransform(segmentCenter, ropeRotation);
 
@@ -231,8 +231,8 @@ namespace Ballz.GameSession.Physics
                 var segmentCenter = lastSegment.Position + new Vector2(0, -Rope.SegmentLength * 0.5f);
                 var newSegment = BodyFactory.CreateCircle(PhysicsWorld, Rope.SegmentLength * 0.5f * 0.8f, 10f);// BodyFactory.CreateRectangle(PhysicsWorld, 0.05f, Rope.SegmentLength, 0.5f);
                 newSegment.BodyType = BodyType.Dynamic;
-                newSegment.AngularDamping = 0.01f;
-                newSegment.LinearDamping = 0.01f;
+                newSegment.AngularDamping = 0.1f;
+                newSegment.LinearDamping = 0.1f;
                 newSegment.Friction = 0.5f;
                 newSegment.Restitution = 0.2f;
                 newSegment.CollisionCategories = Category.Cat3;
