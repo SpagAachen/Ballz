@@ -154,7 +154,7 @@ namespace Ballz.GameSession.Renderer
         {
             foreach(var segment in rope.PhysicsSegments)
             {
-                DrawSphere(segment.Position, 0, Rope.SegmentLength * 0.5f, true);
+                DrawSphere(segment.Position, segment.Rotation, Rope.SegmentLength * 0.5f * 0.8f, true);
             }
         }
 
