@@ -62,6 +62,9 @@
     <Compile Include="GameSession\Logic\GameLogic.cs" />
     <Compile Include="GameSession\Logic\Player.cs" />
     <Compile Include="GameSession\Logic\UserControl.cs" />
+    <Compile Include="GameSession\Logic\Weapons\Bazooka.cs" />
+    <Compile Include="GameSession\Logic\Weapons\RopeTool.cs" />
+    <Compile Include="GameSession\Logic\Weapons\WeaponControl.cs" />
     <Compile Include="GameSession\Renderer\PhysicsDebugRendering.cs" />
     <Compile Include="GameSession\Session.cs" />
     <Compile Include="GameSession\World\Material.cs" />

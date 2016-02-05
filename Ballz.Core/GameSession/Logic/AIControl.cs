@@ -28,7 +28,7 @@ namespace Ballz.GameSession.Logic
         {
             base.Update(elapsedSeconds, worldState);
 
-            if (IsAlive)
+            if (Ball.IsAlive)
             {
                 ShootCooldown -= elapsedSeconds;
 
@@ -47,14 +47,14 @@ namespace Ballz.GameSession.Logic
                     if (CurrentTarget != null)
                     {
                         Ball.IsAiming = true;
-                        IsCharging = true;
+                        Ball.IsCharging = true;
                         Ball.IsAiming = true;
 
                         Ball.AimDirection = Vector2.Normalize(CurrentTarget.Position - Ball.Position);
 
                         if (Ball.ShootCharge > 0.9f)
                         {
-                            Shoot();
+                            //Shoot();
                             ShootCooldown = PauseBetweenShots;
                         }
                     }
@@ -65,7 +65,7 @@ namespace Ballz.GameSession.Logic
                 }
                 else
                 {
-                    IsCharging = false;
+                    Ball.IsCharging = false;
                 }
             }
         }

@@ -21,7 +21,11 @@ namespace Ballz.GameSession.World
         /// </summary>
         public double Health { get; set; } = 100;
 
+        public bool IsAlive { get { return Health > 0; } }
+
         public bool IsAiming { get; set; } = false;
+
+        public bool IsCharging { get; set; } = false;
 
         /// <summary>
         /// Indicates the "charging level" that is used to control the initial velocity of certain projectiles.

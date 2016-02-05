@@ -53,7 +53,7 @@ namespace Ballz.GameSession.World
         /// <summary>
         /// The world scale of the terrain, in meters per pixel.
         /// </summary>
-        public float Scale = 0.08f;
+        public float Scale = 0.082f;
 
         /// <summary>
         /// The most recent terrain shape. Will be updated by the background worker once <see cref="WorkingShape"/> is finished.

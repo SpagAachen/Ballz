@@ -22,7 +22,7 @@ namespace Ballz.GameSession.Logic
         new private Ballz Game;
 
         public Dictionary<Player, BallControl> BallControllers = new Dictionary<Player, BallControl>();
-
+        
         public GameLogic(Ballz game):
             base(game)
         {
@@ -54,7 +54,7 @@ namespace Ballz.GameSession.Logic
                 Player winner = null;
                 foreach (var controller in BallControllers.Values)
                 {
-                    if (controller.IsAlive)
+                    if (controller.Ball.IsAlive)
                     {
                         alivePlayers++;
                         winner = controller.Ball.Player;
@@ -67,7 +67,6 @@ namespace Ballz.GameSession.Logic
                     Game.Match.Winner = winner;
                 }
             }
-
         }
 
         public void HandleMessage(object sender, Message message)
