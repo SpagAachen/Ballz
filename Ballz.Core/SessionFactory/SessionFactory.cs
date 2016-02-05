@@ -20,6 +20,7 @@ namespace Ballz.SessionFactory
         {
             new Worms("TestWorld2"),
             new Worms("TestWorld2", true),
+            new Worms("TestWorld2", false, true),
             new Worms("RopeWorld"),
             new Worms("Mining"),
             new Worms("Mining", true),

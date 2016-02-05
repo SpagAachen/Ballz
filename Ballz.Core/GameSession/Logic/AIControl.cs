@@ -24,7 +24,7 @@ namespace Ballz.GameSession.Logic
         float ShootCooldown;
         const float PauseBetweenShots = 2.0f;
 
-        public override void Update(float elapsedSeconds, World.World worldState)
+        public override bool Update(float elapsedSeconds, World.World worldState)
         {
             base.Update(elapsedSeconds, worldState);
 
@@ -68,6 +68,8 @@ namespace Ballz.GameSession.Logic
                     Ball.IsCharging = false;
                 }
             }
+
+            return false;
         }
     }
 }

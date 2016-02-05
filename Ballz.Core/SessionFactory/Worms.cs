@@ -14,16 +14,18 @@ namespace Ballz.SessionFactory
 {
     public class Worms : SessionFactory
     {
-        public Worms(string mapName = "TestWorld2", bool includeAI = false)
+        public Worms(string mapName = "TestWorld2", bool includeAI = false, bool usePlayerTurns = false)
         {
             MapName = mapName;
             IncludeAI = includeAI;
+            UsePlayerTurns = usePlayerTurns;
         }
 
         public string MapName;
         public bool IncludeAI;
+        public bool UsePlayerTurns;
 
-        public override string Name { get { return "Worms (" + MapName + (IncludeAI ? ", with NPC" : "") + ")"; } }
+        public override string Name { get { return "Worms (" + MapName + (IncludeAI ? ", with NPC" : "") + (UsePlayerTurns ? ", turn mode" : "") + ")"; } }
 
         public List<Vector2> SpawnPoints = new List<Vector2>();
 
@@ -81,6 +83,8 @@ namespace Ballz.SessionFactory
         public override Session StartSession(Ballz game)
         {
             var session = new Session(game);
+
+            session.UsePlayerTurns = UsePlayerTurns;
 
             var mapTexture = game.Content.Load<Texture2D>("Worlds/" + MapName);
             session.Terrain = new Terrain(mapTexture);

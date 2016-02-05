@@ -37,8 +37,13 @@ namespace Ballz.GameSession.Logic
             KeyPressed[InputMessage.MessageType.ControlsRight] = false;
         }
         
-        public virtual void Update(float elapsedSeconds, World.World worldState)
+        /// <summary>
+        /// Updates the ball state and preforms ball-related actions.
+        /// </summary>
+        /// <returns>Returns true if the ball has performed an action that finishes a player turn.</returns>
+        public virtual bool Update(float elapsedSeconds, World.World worldState)
         {
+            bool ballMadeAction = false;
             if (!Ball.IsAlive)
             {
                 Ball.IsAiming = false;
@@ -47,7 +52,7 @@ namespace Ballz.GameSession.Logic
             }
             else
             {
-                Weapon?.Update(elapsedSeconds, KeyPressed);
+                ballMadeAction = Weapon?.Update(elapsedSeconds, KeyPressed) ?? false;
                 if (Ball.IsCharging)
                 {
                     Ball.ShootCharge += elapsedSeconds * 0.7f;
@@ -59,6 +64,7 @@ namespace Ballz.GameSession.Logic
 
                 JumpCoolDown -= elapsedSeconds;
             }
+            return ballMadeAction;
         }
         
         const float PauseBetweenJumps = 0.2f;

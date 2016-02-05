@@ -28,9 +28,9 @@ namespace Ballz.GameSession.Logic
         List<WeaponControl> AvailableWeapons = new List<WeaponControl>();
         int SelectedWeaponIndex = 0;
 
-        public override void Update(float elapsedSeconds, World.World worldState)
+        public override bool Update(float elapsedSeconds, World.World worldState)
         {
-            base.Update(elapsedSeconds, worldState);
+            bool ballMadeAction = base.Update(elapsedSeconds, worldState);
             
             if(Ball.IsAlive)
             {
@@ -88,6 +88,8 @@ namespace Ballz.GameSession.Logic
                 }
             }
             controlInput = null;
+
+            return ballMadeAction;
         }
 
         private void processInput(InputMessage message)

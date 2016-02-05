@@ -27,6 +27,14 @@ namespace Ballz.GameSession
         public Player Winner { get; set; } = null;
         public SessionState State { get; set; } = SessionState.Starting;
 
+        public bool UsePlayerTurns = false;
+
+        public Player ActivePlayer;
+
+        public const float SecondsPerTurn = 60f;
+
+        public float TurnTimeLeft = SecondsPerTurn;
+
         public Session(Ballz _game)
         {
             Physics = new Physics.PhysicsControl(_game);
@@ -43,7 +51,7 @@ namespace Ballz.GameSession
             DebugRenderer.Visible = false;
             _game.Components.Add(DebugRenderer);
 
-            SessionLogic = new Logic.GameLogic(_game);
+            SessionLogic = new Logic.GameLogic(_game, this);
             SessionLogic.Enabled = false;
             _game.Components.Add(SessionLogic);
 

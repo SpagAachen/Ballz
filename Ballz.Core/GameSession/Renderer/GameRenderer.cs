@@ -305,6 +305,7 @@ namespace Ballz.GameSession.Renderer
 
         public void DrawMessageOverlay()
         {
+            spriteBatch.Begin();
             if (Game.Match.State == Logic.SessionState.Finished)
             {
                 string msg = "";
@@ -314,13 +315,21 @@ namespace Ballz.GameSession.Renderer
                 else
                     msg = "Draw!";
 
-                spriteBatch.Begin();
+                
                 spriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), new Color(Color.Black, 0.5f));
 
                 var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width / 2, Game.GraphicsDevice.Viewport.Height / 2);
                 DrawText(msg, screenPos, 1f, Color.Red, centerHorizontal: true);
-                spriteBatch.End();
             }
+            else if(Game.Match.UsePlayerTurns && Game.Match.ActivePlayer != null)
+            {
+                var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width - 250, Game.GraphicsDevice.Viewport.Height - 100);
+
+                var msg = "Turn: " + Game.Match.ActivePlayer.Name + " / " + (int)Game.Match.TurnTimeLeft;
+
+                DrawText(msg, screenPos, 1f, Color.Black, centerHorizontal: true);
+            }
+            spriteBatch.End();
         }
 
         public void DrawText(string text, Vector2 position, float size, Color color, int shadowOffset=2, bool centerVertical = false, bool centerHorizontal = false)

@@ -22,16 +22,41 @@ namespace Ballz.GameSession.Logic
         new private Ballz Game;
 
         public Dictionary<Player, BallControl> BallControllers = new Dictionary<Player, BallControl>();
+
+        public Session Session;
         
-        public GameLogic(Ballz game):
+        public GameLogic(Ballz game, Session session) :
             base(game)
         {
             Game = game;
+            Session = session;
         }
         
+        public void NextTurn()
+        {
+            if (Session.UsePlayerTurns)
+            {
+                Session.ActivePlayer = Session.Players[(Session.Players.IndexOf(Session.ActivePlayer) + 1) % Session.Players.Count];
+                Session.TurnTimeLeft = Session.SecondsPerTurn;
+            }
+        }
+
         public override void Update(GameTime time)
         {
             var elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
+            if (Session.UsePlayerTurns)
+            {
+                if (Session.ActivePlayer == null)
+                {
+                    Session.ActivePlayer = Session.Players[0];
+                }
+
+                Session.TurnTimeLeft -= elapsedSeconds;
+                if (Session.TurnTimeLeft < 0f)
+                {
+                    NextTurn();
+                }
+            }
 
             var worldState = Game.World;
 
@@ -45,8 +70,12 @@ namespace Ballz.GameSession.Logic
                     {
                         BallControllers.Remove(controller.Ball.Player);
                     }
-                    else
-                        controller.Update(elapsedSeconds, worldState);
+                    else if(controller.Ball.Player == Session.ActivePlayer || !Session.UsePlayerTurns)
+                    {
+                        var playerMadeAction = controller.Update(elapsedSeconds, worldState);
+                        if (playerMadeAction)
+                            NextTurn();
+                    }
                 }
                 
                 // Check for dead players
@@ -75,7 +104,14 @@ namespace Ballz.GameSession.Logic
             {
                 // Pass input messages to the respective ball controllers
                 InputMessage msg = (InputMessage)message;
-                if(msg.Player != null && BallControllers.ContainsKey(msg.Player))
+
+                // When using turn mode in hot-seat, direct all input messages to the active player
+                if (Session.UsePlayerTurns && Session.ActivePlayer != null)
+                {
+                    BallControllers[Session.ActivePlayer].HandleMessage(sender, msg);
+                }
+                // Otherwise, redirect input messages to the player given by msg.Player
+                else if(msg.Player != null && BallControllers.ContainsKey(msg.Player))
                 {
                     BallControllers[msg.Player].HandleMessage(sender, msg);
                 }
