@@ -1,19 +1,16 @@
 ﻿using Ballz.GameSession.World;
 using Ballz.Messages;
 using Ballz.Utils;
-using Microsoft.Xna.Framework;
 using FarseerPhysics;
-using FarseerPhysics.Dynamics;
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using FarseerPhysics.Collision.Shapes;
 using FarseerPhysics.Common;
-using System.Diagnostics;
+using FarseerPhysics.Dynamics;
 using FarseerPhysics.Factories;
-
+using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using static MathFloat.MathF;
 
 namespace Ballz.GameSession.Physics
@@ -76,16 +73,16 @@ namespace Ballz.GameSession.Physics
                 {
                     fixture.Dispose();
                 }
+
                 body.Dispose();
             }
 
             TerrainBodies.Clear();
 
             // Update the terrain explicitly
-            terrain.update();
-            var outlines = terrain.getOutline();
-
-
+            terrain.Update();
+            var outlines = terrain.GetOutline();
+            
             foreach (var outline in outlines)
             {
                 var vertices = new Vector2[outline.Count];
@@ -113,6 +110,7 @@ namespace Ballz.GameSession.Physics
             {
                 fixture.Dispose();
             }
+
             body.Dispose();
         }
 
@@ -185,6 +183,7 @@ namespace Ballz.GameSession.Physics
             {
                 PhysicsWorld.RemoveJoint(joint);
             }
+
             rope.PhysicsSegmentJoints.Clear();
 
             foreach (var body in rope.PhysicsSegments)
@@ -294,7 +293,6 @@ namespace Ballz.GameSession.Physics
                         var shot = e as Shot;
                         body.OnCollision += (a, b, contact) =>
                         {
-
                             Vector2 normal;
                             FixedArray2<Vector2> points;
                             contact.GetWorldManifold(out normal, out points);
@@ -319,6 +317,7 @@ namespace Ballz.GameSession.Physics
                                 entity.OnEntityCollision(shot);
                                 shot.OnEntityCollision(entity);
                             }
+
                             return true;
                         };
                     }
@@ -411,6 +410,7 @@ namespace Ballz.GameSession.Physics
                             entity.OnEntityCollision(shot);
                             shot.OnEntityCollision(entity);
                         }
+
                         worldState.Entities.Remove(shot);
                     }
                 }
@@ -419,10 +419,13 @@ namespace Ballz.GameSession.Physics
 
         public class RaycastResult
         {
-            public bool HasHit = false;
-            public Entity Entity = null;
-            public Vector2 Position = Vector2.Zero;
-            public Vector2 Normal = Vector2.Zero;
+            public bool HasHit { get; set; } = false;
+
+            public Entity Entity { get; set; } = null;
+
+            public Vector2 Position { get; set; } = Vector2.Zero;
+
+            public Vector2 Normal { get; set; } = Vector2.Zero;
         }
 
         public RaycastResult Raycast(Vector2 rayStart, Vector2 rayEnd)
@@ -430,7 +433,8 @@ namespace Ballz.GameSession.Physics
             float closestFraction = float.PositiveInfinity;
             RaycastResult closestHit = new RaycastResult();
 
-            PhysicsWorld.RayCast((Fixture fixture, Vector2 position, Vector2 normal, float fraction) => {
+            PhysicsWorld.RayCast((Fixture fixture, Vector2 position, Vector2 normal, float fraction) =>
+            {
                 Entity hitEntity = null;
                 if (EntityIdByPhysicsBody.ContainsKey(fixture.Body))
                 {
@@ -467,7 +471,5 @@ namespace Ballz.GameSession.Physics
                 }
             }
         }
-
-
     }
 }

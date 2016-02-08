@@ -1,11 +1,11 @@
-﻿using Ballz.GameSession.World;
-using Ballz.Messages;
-using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Ballz.GameSession.World;
+using Ballz.Messages;
+using Microsoft.Xna.Framework;
 
 namespace Ballz.GameSession.Logic
 {
@@ -19,11 +19,11 @@ namespace Ballz.GameSession.Logic
 
     public class GameLogic: GameComponent
     {
-        new private Ballz Game;
+        new Ballz Game;
 
-        public Dictionary<Player, BallControl> BallControllers = new Dictionary<Player, BallControl>();
+        public Dictionary<Player, BallControl> BallControllers { get; set; } = new Dictionary<Player, BallControl>();
 
-        public Session Session;
+        public Session Session { get; set; }
         
         public GameLogic(Ballz game, Session session) :
             base(game)

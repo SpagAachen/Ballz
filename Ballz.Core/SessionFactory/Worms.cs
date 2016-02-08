@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Ballz.GameSession;
+using Ballz.GameSession.Logic;
+using Ballz.GameSession.World;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Ballz.GameSession;
-using Ballz.GameSession.World;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Ballz.GameSession.Logic;
 
 namespace Ballz.SessionFactory
 {

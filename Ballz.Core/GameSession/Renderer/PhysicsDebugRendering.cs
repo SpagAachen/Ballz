@@ -1,23 +1,20 @@
-﻿using System;
+﻿using Ballz.GameSession.World;
+using Ballz.Messages;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using Ballz.Messages;
-using Ballz.GameSession.World;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
-
 using static MathFloat.MathF;
 
 namespace Ballz.GameSession.Renderer
 {
     public class DebugRenderer : DrawableGameComponent
     {
-        new private Ballz Game;
+        new Ballz Game;
         BasicEffect LineEffect;
         VertexPositionColor[] sphereVertices;
         List<VertexPositionColor[]> terrainVertices = new List<VertexPositionColor[]>();
@@ -46,7 +43,7 @@ namespace Ballz.GameSession.Renderer
                 DrawRope(rope);
             }
 
-            drawTerrain();
+            DrawTerrain();
 
             base.Draw(gameTime);
         }
@@ -88,11 +85,11 @@ namespace Ballz.GameSession.Renderer
             base.UnloadContent();
         }
 
-        private void updateTerrain()
+        private void UpdateTerrain()
         {
             if(terrainRevision != Game.World.StaticGeometry.Revision)
             {
-                List<List<Vector2>> outline = Game.World.StaticGeometry.getOutline();
+                List<List<Vector2>> outline = Game.World.StaticGeometry.GetOutline();
                 terrainVertices.Clear();
                 foreach (List<Vector2> lineStrip in outline)
                 {
@@ -102,6 +99,7 @@ namespace Ballz.GameSession.Renderer
                         lineVertices[i].Color = Color.GreenYellow;
                         lineVertices[i].Position = new Vector3(lineStrip[i],0) * Game.World.StaticGeometry.Scale;
                     }
+
                     terrainVertices.Add(lineVertices);
                 }
 
@@ -112,7 +110,7 @@ namespace Ballz.GameSession.Renderer
         public override void Update(GameTime gameTime)
         {
             debugWorld = Game.World;
-            updateTerrain();
+            UpdateTerrain();
             base.Update(gameTime);
         }
 
@@ -141,7 +139,7 @@ namespace Ballz.GameSession.Renderer
             LineEffect.View = Game.Camera.View;
             LineEffect.World = Matrix.CreateScale(radius);
             LineEffect.World *= Matrix.CreateRotationZ(direction);
-            LineEffect.World *= Matrix.CreateTranslation((new Vector3(position, 0)));
+            LineEffect.World *= Matrix.CreateTranslation(new Vector3(position, 0));
 
             if(awake)
                 LineEffect.DiffuseColor = new Vector3(1, 0, 0);
@@ -158,7 +156,7 @@ namespace Ballz.GameSession.Renderer
             }
         }
 
-        public void drawTerrain()
+        public void DrawTerrain()
         {
             LineEffect.Projection = Game.Camera.Projection;
             LineEffect.View = Game.Camera.View;

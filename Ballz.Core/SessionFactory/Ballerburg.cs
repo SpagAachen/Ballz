@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Ballz.GameSession;
+using Ballz.GameSession.Logic;
+using Ballz.GameSession.World;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Ballz.GameSession;
-using Ballz.GameSession.World;
-using Ballz.GameSession.Logic;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace Ballz.SessionFactory
 {
@@ -65,14 +65,12 @@ namespace Ballz.SessionFactory
 
             return session;
         }
-
-
+        
         public static Texture2D GenerateMountain()
         {
             var width = 1920 / 4;
             var height = 1080 / 4;
-
-
+            
             var rand = new Random();
 
             var heightmap = new float[width];
@@ -81,32 +79,31 @@ namespace Ballz.SessionFactory
             var mountainHeight = 800 / 4;
             var leftHeight = 200 / 4;
             var rightHeight = 200 / 4;
-
-
-
+            
             var i = 0; var start_i = 0; var end_i = 0;
             for (end_i = castleWidth, start_i = i; i < end_i; i++)
             {
                 heightmap[i] = leftHeight;
             }
+
             for (end_i = width / 2, start_i = i; i < end_i; i++)
             {
-                heightmap[i] = linmap(i, start_i, end_i, leftHeight, mountainHeight);
+                heightmap[i] = LinMap(i, start_i, end_i, leftHeight, mountainHeight);
             }
 
             for (end_i = width - castleWidth, start_i = i; i < end_i; i++)
             {
-                heightmap[i] = linmap(i, start_i, end_i, mountainHeight, rightHeight);
+                heightmap[i] = LinMap(i, start_i, end_i, mountainHeight, rightHeight);
             }
+
             for (end_i = width, start_i = i; i < end_i; i++)
             {
                 heightmap[i] = rightHeight;
             }
 
-            randomize(rand, heightmap, castleWidth, width / 2);
-            randomize(rand, heightmap, width / 2, width - castleWidth);
-
-
+            Randomize(rand, heightmap, castleWidth, width / 2);
+            Randomize(rand, heightmap, width / 2, width - castleWidth);
+            
             Color[] pixels = new Color[width * height];
 
             for (int y = 0; y < height; ++y)
@@ -122,7 +119,7 @@ namespace Ballz.SessionFactory
             return texture;
         }
 
-        static private void randomize(Random rand, float[] data, int left, int right)
+        private static void Randomize(Random rand, float[] data, int left, int right)
         {
             if (right - 1 <= left)
             {
@@ -139,14 +136,13 @@ namespace Ballz.SessionFactory
 
             data[mid] = (float)(midHeight + (right - left) * 0.2 * randNormal);
 
-            randomize(rand, data, left, mid);
-            randomize(rand, data, mid, right);
+            Randomize(rand, data, left, mid);
+            Randomize(rand, data, mid, right);
         }
 
-        static float linmap(float a, float min1, float max1, float min2, float max2)
+        static float LinMap(float a, float min1, float max1, float min2, float max2)
         {
             return ((a - min1) / (max1 - min1)) * (max2 - min2) + min2;
         }
-
     }
 }

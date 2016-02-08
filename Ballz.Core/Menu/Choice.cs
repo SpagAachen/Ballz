@@ -34,7 +34,8 @@ namespace Ballz.Menu
             SelectedChoice = selectedValue;
             Choices = chooseableValues;
 
-            OnSelect += () => {
+            OnSelect += () =>
+            {
                 if(!Active)
                 {
                     ActiveChanged = true;
@@ -43,7 +44,8 @@ namespace Ballz.Menu
                 else
                     ActiveChanged = false;
             };
-            OnUnSelect += () => {
+            OnUnSelect += () =>
+            {
                 if(Active)
                 {
                     ActiveChanged = true;
@@ -53,11 +55,11 @@ namespace Ballz.Menu
                     ActiveChanged = false;
             };
 
-            OnSelect += selectionChanged;
-            OnUnSelect += selectionChanged;
+            OnSelect += SelectionChanged;
+            OnUnSelect += SelectionChanged;
         }
 
-        private void selectionChanged()
+        private void SelectionChanged()
         {
             if(Active)
             {
@@ -73,7 +75,7 @@ namespace Ballz.Menu
 
         public override string DisplayName => (Name + previousDecorator+SelectedChoice.Value.ToString()+nextDecorator);
 
-        public void selectNext()
+        public void SelectNext()
         {
             if(Active)
             {
@@ -82,7 +84,7 @@ namespace Ballz.Menu
             }
         }
 
-        public void selectPrevious()
+        public void SelectPrevious()
         {
             if (Active)
             {
@@ -93,4 +95,3 @@ namespace Ballz.Menu
         }
     }
 }
-

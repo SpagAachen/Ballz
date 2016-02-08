@@ -16,9 +16,9 @@ namespace Ballz.GameSession.World
         public const float SegmentLength = 0.75f;
 
         public List<FarseerPhysics.Dynamics.Body> PhysicsSegments { get; set; } = new List<FarseerPhysics.Dynamics.Body>();
+
         public List<FarseerPhysics.Dynamics.Joints.Joint> PhysicsSegmentJoints { get; set; } = new List<FarseerPhysics.Dynamics.Joints.Joint>();
 
         public FarseerPhysics.Dynamics.Joints.Joint PhysicsEntityJoint { get; set; }
-
     }
 }

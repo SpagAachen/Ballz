@@ -1,11 +1,11 @@
-﻿using Ballz.GameSession.World;
-using Ballz.Messages;
-using Ballz.Sound;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Ballz.GameSession.World;
+using Ballz.Messages;
+using Ballz.Sound;
 
 namespace Ballz.GameSession.Logic
 {
@@ -17,9 +17,9 @@ namespace Ballz.GameSession.Logic
             Game = game;
         }
 
-        protected Ballz Game;
+        protected Ballz Game { get; set; }
 
-        public Ball Ball;
+        public Ball Ball { get; set; }
 
         public abstract string Name { get; }
 
@@ -27,7 +27,7 @@ namespace Ballz.GameSession.Logic
 
         public void FireProjectile()
         {
-            Game.Services.GetService<SoundControl>().playSound(SoundControl.shotSound);
+            Game.Services.GetService<SoundControl>().PlaySound(SoundControl.ShotSound);
             Game.World.Entities.Add(new Shot
             {
                 ExplosionRadius = 1.0f,

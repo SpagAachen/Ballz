@@ -1,7 +1,7 @@
 ﻿using Ballz.GameSession.World;
 using Ballz.Messages;
-using Ballz.Utils;
 using Ballz.Sound;
+using Ballz.Utils;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -13,12 +13,13 @@ namespace Ballz.GameSession.Logic
 {
     public abstract class BallControl
     {
-        public Session Match;
-        public Ballz Game;
+        public Session Match { get; set; }
 
-        public Ball Ball;
+        public Ballz Game { get; set; }
 
-        public WeaponControl Weapon;
+        public Ball Ball { get; set; }
+
+        public WeaponControl Weapon { get; set; }
 
         protected Dictionary<InputMessage.MessageType, bool> KeyPressed = new Dictionary<InputMessage.MessageType, bool>();
 
@@ -64,6 +65,7 @@ namespace Ballz.GameSession.Logic
 
                 JumpCoolDown -= elapsedSeconds;
             }
+
             return ballMadeAction;
         }
         
@@ -99,7 +101,6 @@ namespace Ballz.GameSession.Logic
                 Weapon?.HandleInput(input);
                 KeyPressed[input.Kind] = input.Pressed.Value;
             }
-        }
-        
+        }   
     }
 }

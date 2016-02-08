@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Ballz.GameSession.World;
+using Ballz.Messages;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Ballz.Messages;
-using Ballz.GameSession.World;
 
 namespace Ballz.GameSession.Logic.Weapons
 {
@@ -13,6 +13,7 @@ namespace Ballz.GameSession.Logic.Weapons
         public RopeTool(Ball ball, Ballz game) : base(ball, game) { }
 
         public override string Icon { get; } = "RopeTool";
+
         public override string Name { get; } = "Rope";
 
         public override void HandleInput(InputMessage input)
@@ -47,6 +48,7 @@ namespace Ballz.GameSession.Logic.Weapons
                                 Game.World.Ropes.Add(rope);
                             }
                         }
+
                         break;
                     case InputMessage.MessageType.ControlsUp:
                         // Make rope shorter
@@ -59,7 +61,6 @@ namespace Ballz.GameSession.Logic.Weapons
                             Game.Match.Physics.LoosenRope(Ball.AttachedRope);
                         break;
                 }
-
             }
         }
     }

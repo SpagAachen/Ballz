@@ -7,7 +7,7 @@ namespace Ballz.GameSession.World
     /// <summary>
     /// Represents a Ball character. 
     /// </summary>
-	[Serializable]
+    [Serializable]
     public class Ball : Entity
     {
         public Ball()
@@ -33,7 +33,7 @@ namespace Ballz.GameSession.World
         public float ShootCharge { get; set; } = 0f;
 
         public Player Player { get; set; }
-        
+
         public Vector2 AimDirection { get; set; } = Vector2.UnitX;
 
         public string HoldingWeapon;
@@ -54,7 +54,7 @@ namespace Ballz.GameSession.World
                 if (Health < 0)
                     Health = 0;
 
-                PhysicsBody.ApplyLinearImpulse(10*shot.Velocity);
+                PhysicsBody.ApplyLinearImpulse(10 * shot.Velocity);
             }
             else
             {

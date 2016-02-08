@@ -12,9 +12,7 @@ namespace Ballz.SessionFactory
     {
         public abstract Session StartSession(Ballz game);
 
-        public abstract string Name {
-            get;
-        }
+        public abstract string Name { get; }
 
         public static IEnumerable<SessionFactory> AvailableFactories = new SessionFactory[]
         {

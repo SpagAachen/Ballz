@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Ballz.GameSession.World
 {
@@ -10,10 +10,7 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class World
     {
-        public TimeSpan GameTime
-        {
-            get; protected set;
-        } = new TimeSpan(0, 0, 0);
+        public TimeSpan GameTime { get; protected set; } = new TimeSpan(0, 0, 0);
 
         public List<Entity> Entities
         {

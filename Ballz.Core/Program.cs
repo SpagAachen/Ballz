@@ -6,8 +6,7 @@ namespace Ballz
    using MonoMac.AppKit;
    using MonoMac.Foundation;
    #endif
-
-
+    
     internal static class Program
     {
         private static Ballz game;

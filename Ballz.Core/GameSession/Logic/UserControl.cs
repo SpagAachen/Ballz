@@ -1,13 +1,13 @@
-﻿using Ballz.Messages;
+﻿using Ballz.GameSession.World;
+using Ballz.Messages;
+using Ballz.Sound;
+using Ballz.Utils;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Ballz.GameSession.World;
-using Microsoft.Xna.Framework;
-using Ballz.Sound;
-using Ballz.Utils;
 using static MathFloat.MathF;
 
 namespace Ballz.GameSession.Logic
@@ -39,6 +39,7 @@ namespace Ballz.GameSession.Logic
                     Ball.Velocity = new Vector2(Min(-2f, Ball.Velocity.X), Ball.Velocity.Y);
                     Ball.AimDirection = new Vector2(-Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
                 }
+
                 if (KeyPressed[InputMessage.MessageType.ControlsRight])
                 {
                     Ball.Velocity = new Vector2(Max(2f, Ball.Velocity.X), Ball.Velocity.Y);
@@ -53,6 +54,7 @@ namespace Ballz.GameSession.Logic
                     var radians = (v.X > 0 ? 1 : -1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
                     Ball.AimDirection = v.Rotate(radians);
                 }
+
                 if (KeyPressed[InputMessage.MessageType.ControlsDown])
                 {
                     var v = Ball.AimDirection;
@@ -87,14 +89,14 @@ namespace Ballz.GameSession.Logic
                         break;
                 }
             }
+
             controlInput = null;
 
             return ballMadeAction;
         }
 
-        private void processInput(InputMessage message)
+        private void ProcessInput(InputMessage message)
         {
-            
         }
 
         public override void HandleMessage(object sender, Message message)
@@ -107,6 +109,5 @@ namespace Ballz.GameSession.Logic
                 controlInput = input.Kind;
             }
         }
-
     }
 }
