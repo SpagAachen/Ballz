@@ -220,10 +220,15 @@ namespace Ballz.GameSession.Renderer
                 {
                     var velocity = water.Velocity(x, y);
                     velocity /= MaxWaterVelocity;
+
+                    velocity *= 0.5f;
+                    velocity += new Vector2(0.5f);
+
                     if (velocity.X > 1)
                         velocity.X = 1;
                     if (velocity.Y > 1)
                         velocity.Y = 1;
+
                     waterColors[y * w + x] = new Color(new Vector4(new Vector3(velocity.X, velocity.Y, 0), water[x, y]));
                 }
 
