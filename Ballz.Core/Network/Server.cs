@@ -7,14 +7,13 @@
     using Microsoft.Xna.Framework;
     using System.Net.Sockets;
 
-	class Server
+    class Server
     {
         private static int nextId = 1;
         TcpListener listener = null;
         private readonly Network network = null;
         private readonly List<Connection> connections = new List<Connection>();
-
-
+        
         public Server(Network net)
         {
             network = net;
@@ -31,13 +30,13 @@
             listener.Start();
             // start lobby first
             network.GameState = Network.GameStateT.InLobby;
-            updateLobbyList();
+            UpdateLobbyList();
         }
 
-        public void updateLobbyList()
+        public void UpdateLobbyList()
         {
             Ballz.The().NetworkLobbyConnectedClients.Name = "Myself";
-            foreach(var c in connections)
+            foreach (var c in connections)
             {
                 Ballz.The().NetworkLobbyConnectedClients.Name += ", " + c.Id;
             }
@@ -55,7 +54,7 @@
                     connections.Add(new Connection(client, nextId++));
                     network.RaiseMessageEvent(NetworkMessage.MessageType.NewClient);
                     // update lobby list
-                    updateLobbyList();
+                    UpdateLobbyList();
                 }
                 else
                 {
@@ -68,25 +67,24 @@
                 if (c.DataAvailable())
                 {
                     var data = c.ReceiveData();
-                    onData(data, c.Id);
+                    OnData(data, c.Id);
                 }
             }
 
-			// TEST
-			{
-				//Broadcast(Ballz.The().World.Entities);
-			}
+            // TEST
+            {
+                //Broadcast(Ballz.The().World.Entities);
+            }
             //TODO: Implement
         }
 
-        private void onData(object data, int sender)
+        private void OnData(object data, int sender)
         {
-			//Console.WriteLine("Received data from " + sender + ": " + data.ToString()); // Debug
-			// Input Message
-			if (data.GetType() == typeof(InputMessage))
-			{
-				
-			}
+            //Console.WriteLine("Received data from " + sender + ": " + data.ToString()); // Debug
+            // Input Message
+            if (data.GetType() == typeof(InputMessage))
+            {
+            }
         }
 
         public void Broadcast(object data)

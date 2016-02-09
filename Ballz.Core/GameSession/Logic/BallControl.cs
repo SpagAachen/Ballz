@@ -1,7 +1,7 @@
 ﻿using Ballz.GameSession.World;
 using Ballz.Messages;
-using Ballz.Utils;
 using Ballz.Sound;
+using Ballz.Utils;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -13,80 +13,62 @@ namespace Ballz.GameSession.Logic
 {
     public abstract class BallControl
     {
-        public Session Match;
-        public Ballz Game;
+        public Session Match { get; set; }
 
-        public Ball Ball;
+        public Ballz Game { get; set; }
 
-        public bool IsCharging;
+        public Ball Ball { get; set; }
+
+        public WeaponControl Weapon { get; set; }
+
+        protected Dictionary<InputMessage.MessageType, bool> KeyPressed = new Dictionary<InputMessage.MessageType, bool>();
 
         public BallControl(Ballz game, Session match, Ball ball)
         {
             Game = game;
             Match = match;
             Ball = ball;
+
+            Weapon = new Weapons.RopeTool(ball, game);
+
+            KeyPressed[InputMessage.MessageType.ControlsAction] = false;
+            KeyPressed[InputMessage.MessageType.ControlsUp] = false;
+            KeyPressed[InputMessage.MessageType.ControlsDown] = false;
+            KeyPressed[InputMessage.MessageType.ControlsLeft] = false;
+            KeyPressed[InputMessage.MessageType.ControlsRight] = false;
         }
         
-        public virtual void Update(float elapsedSeconds, World.World worldState)
+        /// <summary>
+        /// Updates the ball state and preforms ball-related actions.
+        /// </summary>
+        /// <returns>Returns true if the ball has performed an action that finishes a player turn.</returns>
+        public virtual bool Update(float elapsedSeconds, World.World worldState)
         {
-            if (!IsAlive)
+            bool ballMadeAction = false;
+            if (!Ball.IsAlive)
             {
                 Ball.IsAiming = false;
-            }
-
-            if(IsCharging)
-            {
-                Ball.ShootCharge += elapsedSeconds * 0.7f;
-                if (Ball.ShootCharge > 1f)
-                    Ball.ShootCharge = 1f;
-            }
-            else
                 Ball.ShootCharge = 0f;
-
-            JumpCoolDown -= elapsedSeconds;
-        }
-
-        public void Shoot()
-        {
-            Game.Services.GetService<SoundControl>().playSound(SoundControl.shotSound);
-            Game.World.Entities.Add(new Shot
-            {
-                ExplosionRadius = 1.0f,
-                HealthImpactAtDirectHit = 25,
-                IsInstantShot = false,
-                Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.101f),
-                Velocity = Ball.AimDirection * Ball.ShootCharge * 30f,
-            });
-
-            Ball.ShootCharge = 0f;
-        }
-
-        public void ToggleRope()
-        {
-            if (Ball.AttachedRope != null)
-            {
-                Match.Physics.RemoveRope(Ball.AttachedRope);
-                Ball.AttachedRope = null;
-                Game.World.Ropes.Remove(Ball.AttachedRope);
+                Ball.IsCharging = false;
             }
             else
             {
-                var rayHit = Match.Physics.Raycast(Ball.Position, Ball.Position + Ball.AimDirection * Rope.MaxLength);
-                if (rayHit.HasHit)
+                ballMadeAction = Weapon?.Update(elapsedSeconds, KeyPressed) ?? false;
+                if (Ball.IsCharging)
                 {
-                    var rope = new Rope
-                    {
-                        AttachedEntity = Ball,
-                        AttachedPosition = rayHit.Position
-                    };
-
-                    Ball.AttachedRope = rope;
-                    Match.Physics.AddRope(rope);
-                    Game.World.Ropes.Add(rope);
+                    Ball.ShootCharge += elapsedSeconds * 0.7f;
+                    if (Ball.ShootCharge > 1f)
+                        Ball.ShootCharge = 1f;
                 }
-            }
-        }
+                else
+                    Ball.ShootCharge = 0f;
 
+                JumpCoolDown -= elapsedSeconds;
+            }
+
+            return ballMadeAction;
+        }
+        
         const float PauseBetweenJumps = 0.2f;
         protected float JumpCoolDown = 0f;
 
@@ -113,9 +95,12 @@ namespace Ballz.GameSession.Logic
         
         public virtual void HandleMessage(object sender, Message message)
         {
-        }
-
-        public bool IsAlive {  get { return Ball.Health > 0;  } }
-
+            InputMessage input = message as InputMessage;
+            if (input?.Pressed != null)
+            {
+                Weapon?.HandleInput(input);
+                KeyPressed[input.Kind] = input.Pressed.Value;
+            }
+        }   
     }
 }

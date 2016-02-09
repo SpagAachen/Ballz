@@ -24,6 +24,7 @@ namespace Ballz.GameSession.World
                 return mat;
             }
         }
+
         public enum PhysicsShape
         {
             Polygon,

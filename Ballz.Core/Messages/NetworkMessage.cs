@@ -1,11 +1,9 @@
-﻿
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System;
+
 namespace Ballz.Messages
 {
-    using System;
-
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
-
     [Serializable]
     [JsonObject(MemberSerialization.OptIn)]
     public class NetworkMessage : Message

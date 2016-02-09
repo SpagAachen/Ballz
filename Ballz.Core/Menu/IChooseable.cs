@@ -24,8 +24,8 @@ namespace Ballz
 {
     public interface IChooseable
     {
-        void selectNext();
-        void selectPrevious();
+        void SelectNext();
+
+        void SelectPrevious();
     }
 }
-

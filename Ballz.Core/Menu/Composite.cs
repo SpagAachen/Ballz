@@ -24,6 +24,7 @@ namespace Ballz.Menu
         }
 
         public override IReadOnlyList<Item> Items => members;
+
         public override Item SelectedItem => members[index].Selectable ? members[index] : null;
 
         public void SelectNext()

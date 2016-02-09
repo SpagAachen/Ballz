@@ -16,7 +16,7 @@ namespace Ballz.Menu
         
         public void HandleRawKey(char key)
         {
-            if(!Char.IsControl(key))
+            if(!char.IsControl(key))
                 Value += key;
         }
 

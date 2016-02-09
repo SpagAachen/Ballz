@@ -38,4 +38,3 @@ namespace Ballz.Messages
         }
     }
 }
-

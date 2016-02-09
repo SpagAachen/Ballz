@@ -12,14 +12,13 @@ namespace Ballz.SessionFactory
     {
         public abstract Session StartSession(Ballz game);
 
-        public abstract string Name {
-            get;
-        }
+        public abstract string Name { get; }
 
         public static IEnumerable<SessionFactory> AvailableFactories = new SessionFactory[]
         {
             new Worms("TestWorld2"),
             new Worms("TestWorld2", true),
+            new Worms("TestWorld2", false, true),
             new Worms("RopeWorld"),
             new Worms("Mining"),
             new Worms("Mining", true),

@@ -20,14 +20,14 @@ namespace Ballz.Input
         private KeyboardState currentState;
         private GamePadState[] previousGamePadState;
         private PlayerIndex[] gamePadPlayerIndex;
-
-
+        
         public InputMode Mode
         {
             get
             {
                 return mMode;
             }
+
             set
             {
                 if (value == InputMode.RAW && !subscribed)
@@ -43,6 +43,7 @@ namespace Ballz.Input
                         subscribed = false;
                     }
                 }
+
                 mMode = value;
             }
         }
@@ -70,7 +71,7 @@ namespace Ballz.Input
             //previousGamePadState = GamePad.GetState(
         }
 
-        void RawHandler(Object sender, TextInputEventArgs eventArgs)
+        void RawHandler(object sender, TextInputEventArgs eventArgs)
         {
             OnInput(InputMessage.MessageType.RawInput, null, eventArgs.Character);
         }
@@ -80,7 +81,7 @@ namespace Ballz.Input
             Input?.Invoke(this, new InputMessage(inputMessage, pressed, key, player)); //todo: use object pooling and specify message better
         }
 
-        private void processGamePadInput(int p)
+        private void ProcessGamePadInput(int p)
         {       
             int sign = 1;
             GamePadState currentState = GamePad.GetState(gamePadPlayerIndex[p-1]);
@@ -140,6 +141,7 @@ namespace Ballz.Input
                 if (previousGamePadState[p - 1].IsButtonDown(Buttons.X) && currentState.IsButtonUp(Buttons.X))
                     OnInput(InputMessage.MessageType.ControlsJump, false, null, Ballz.The().Match?.PlayerByNumber(p));
             }
+
             previousGamePadState[p - 1] = currentState;
         }
 
@@ -147,7 +149,7 @@ namespace Ballz.Input
         {
             for (int i = 1; i < 5; i++)
             {
-                processGamePadInput(i);
+                ProcessGamePadInput(i);
             }
 
             currentState = Keyboard.GetState();
@@ -155,12 +157,13 @@ namespace Ballz.Input
             {
                 if (Mode == InputMode.PROCESSED)
                 {
-                    processInput();
+                    ProcessInput();
                 }
                 else
                 {
-                    processRawInput();
+                    ProcessRawInput();
                 }
+
                 previousState = currentState;
             }
 
@@ -172,7 +175,7 @@ namespace Ballz.Input
         /// 
         /// TODO: add GamePad Support for raw inputs.
         /// </summary>
-        private void processRawInput()
+        private void ProcessRawInput()
         {
             //the back key is supposed to switch back to processed InputMode
             //note that the RAW inputs themselves are processed by the RawHandler function.
@@ -181,6 +184,7 @@ namespace Ballz.Input
                 Mode = InputMode.PROCESSED;
                 OnInput(InputMessage.MessageType.ControlsBack,true);
             }
+
             if (Keyboard.GetState().IsKeyDown(Keys.Back))
             {
                 OnInput(InputMessage.MessageType.RawBack);
@@ -195,7 +199,7 @@ namespace Ballz.Input
         /// <returns>The keys.</returns>
         /// <param name="a">The alpha component.</param>
         /// <param name="b">The blue component.</param>
-        private List<Keys> changedKeys(Keys[] a , Keys[] b)
+        private List<Keys> ChangedKeys(Keys[] a , Keys[] b)
         {
             List<Keys> result = new List<Keys>();
             foreach (var keyA in a)
@@ -208,24 +212,26 @@ namespace Ballz.Input
                         keyChanged = false;
                     }
                 }
+
                 if (keyChanged)
                     result.Add(keyA);
             }
+
             return result;
         }
 
-        private void processInput()
+        private void ProcessInput()
         {
             //Keys that are pressed now but where not pressed previously are keys that got pressed
-            List<Keys> pressedKeys = changedKeys(currentState.GetPressedKeys(), previousState.GetPressedKeys());
+            List<Keys> pressedKeys = ChangedKeys(currentState.GetPressedKeys(), previousState.GetPressedKeys());
             //keys that where pressed previously but are not currently are Keys that got released
-            List<Keys> releasedKeys = changedKeys(previousState.GetPressedKeys(), currentState.GetPressedKeys());
+            List<Keys> releasedKeys = ChangedKeys(previousState.GetPressedKeys(), currentState.GetPressedKeys());
 
-            emitKeyMessages(pressedKeys, true);
-            emitKeyMessages(releasedKeys, false);
+            EmitKeyMessages(pressedKeys, true);
+            EmitKeyMessages(releasedKeys, false);
         }
 
-        private void emitKeyMessages(List<Keys> keyList, bool pressed)
+        private void EmitKeyMessages(List<Keys> keyList, bool pressed)
         {
             foreach(Keys theKey in keyList)
             {
@@ -284,7 +290,6 @@ namespace Ballz.Input
                     case Keys.Q:
                         OnInput(InputMessage.MessageType.ControlsJump, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
                         break;
-
                 }
             }
         }

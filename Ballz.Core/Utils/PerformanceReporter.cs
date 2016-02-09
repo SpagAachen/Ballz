@@ -27,8 +27,11 @@ namespace Ballz.Utils
     public sealed class PerformanceReporter : IDisposable
     {
         private Stopwatch Sw;
+
         Ballz Game;
+
         private string Name;
+
         public PerformanceReporter(Ballz game)
         {     
             StackFrame frame = new StackFrame(1);
@@ -45,9 +48,8 @@ namespace Ballz.Utils
             Sw.Stop();
             foreach (GameComponent c in Game.Components )
             {
-                (c as PerformanceRenderer)?.reportTime(Name, Sw.Elapsed);
+                (c as PerformanceRenderer)?.ReportTime(Name, Sw.Elapsed);
             }
         }
     }
 }
-

@@ -9,6 +9,7 @@ namespace Ballz.Menu
     interface IRawInputConsumer
     {
         void HandleRawKey(char key);
+
         void HandleBackspace();
     }
 }

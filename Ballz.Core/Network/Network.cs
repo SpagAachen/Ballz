@@ -9,17 +9,22 @@
     /// </summary>
     public class Network : GameComponent
     {
-        public enum StateT { None, Client, Server };
-        public enum GameStateT { None, InLobby, InGame };
+        public enum StateT { None, Client, Server }
+
+        public enum GameStateT { None, InLobby, InGame }
+
         private Server server;
+
         private Client client;
+
         public event EventHandler<Message> Message;
 
         /// <summary>
         /// The state of the game: Unconnected/None, Client or Server
         /// </summary>
         public StateT State { get; private set; } = StateT.None;
-        public GameStateT GameState { get;  set; } = GameStateT.None;
+
+        public GameStateT GameState { get; set; } = GameStateT.None;
 
         public void RaiseMessageEvent(NetworkMessage.MessageType msg)
         {
@@ -52,9 +57,9 @@
                 Disconnect();
             State = StateT.Client;
             client = new Client(this);
-			RaiseMessageEvent(NetworkMessage.MessageType.ConnectingToServer);
+            RaiseMessageEvent(NetworkMessage.MessageType.ConnectingToServer);
             client.ConnectToServer(hostname, port); // blocking atm
-			RaiseMessageEvent(NetworkMessage.MessageType.ConnectedToServer);
+            RaiseMessageEvent(NetworkMessage.MessageType.ConnectedToServer);
             Console.WriteLine("Connected to server");
             //TODO: Implement
         }
@@ -82,7 +87,7 @@
                 case StateT.Client:
                     client.Update(time);
                     break;
-               case StateT.Server:
+                case StateT.Server:
                     server.Update(time);
                     break;
                 default:

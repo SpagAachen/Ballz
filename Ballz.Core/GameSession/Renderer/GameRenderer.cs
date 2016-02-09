@@ -1,14 +1,12 @@
-﻿using Ballz.Messages;
-using Ballz.GameSession.World;
-
+﻿using Ballz.GameSession.World;
+using Ballz.Messages;
+using Ballz.Utils;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
-
 using static MathFloat.MathF;
-using Ballz.Utils;
 
 namespace Ballz.GameSession.Renderer
 {
@@ -38,7 +36,7 @@ namespace Ballz.GameSession.Renderer
 
         public Vector2 WorldToScreen(Vector3 Position)
         {
-            var screenSpace = Vector4.Transform(Position, (Game.Camera.Projection * Game.Camera.View));
+            var screenSpace = Vector4.Transform(Position, Game.Camera.Projection * Game.Camera.View);
             screenSpace /= screenSpace.W;
             return new Vector2
             {
@@ -57,14 +55,15 @@ namespace Ballz.GameSession.Renderer
         /// </summary>
         /// <param name="time">time since start of game (cf BallzGame draw).</param>
         public override void Draw(GameTime time)
-        { using (new PerformanceReporter(Game))
+        {
+            using (new PerformanceReporter(Game))
             {
                 GraphicsDevice.Clear(Color.CornflowerBlue);
                 if (lastModification == null)
                     lastModification = time.TotalGameTime;
-                Game.Camera.setProjection(Matrix.Identity);
+                Game.Camera.SetProjection(Matrix.Identity);
 
-                Game.Camera.setView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
+                Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
 
                 BallEffect.View = Game.Camera.View;
                 BallEffect.Projection = Game.Camera.Projection;
@@ -75,7 +74,7 @@ namespace Ballz.GameSession.Renderer
                 spriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), Color.CornflowerBlue);
                 spriteBatch.End();
 
-                var tris = worldState.StaticGeometry.getTriangles();
+                var tris = worldState.StaticGeometry.GetTriangles();
                 VertexPositionColorTexture[] vpc = new VertexPositionColorTexture[tris.Count * 3];
 
                 int i = 0;
@@ -85,14 +84,14 @@ namespace Ballz.GameSession.Renderer
                 foreach (var t in tris)
                 {
                     vpc[i + 0].Color = Color.Maroon;
-                    vpc[i + 0].Position = new Vector3(t.a.X, t.a.Y, -1);
-                    vpc[i + 0].TextureCoordinate = new Vector2(t.a.X, t.a.Y) * TerrainTextureScale;
+                    vpc[i + 0].Position = new Vector3(t.A.X, t.A.Y, -1);
+                    vpc[i + 0].TextureCoordinate = new Vector2(t.A.X, t.A.Y) * TerrainTextureScale;
                     vpc[i + 1].Color = Color.Maroon;
-                    vpc[i + 1].Position = new Vector3(t.b.X, t.b.Y, -1);
-                    vpc[i + 1].TextureCoordinate = new Vector2(t.b.X, t.b.Y) * TerrainTextureScale;
+                    vpc[i + 1].Position = new Vector3(t.B.X, t.B.Y, -1);
+                    vpc[i + 1].TextureCoordinate = new Vector2(t.B.X, t.B.Y) * TerrainTextureScale;
                     vpc[i + 2].Color = Color.Maroon;
-                    vpc[i + 2].Position = new Vector3(t.c.X, t.c.Y, -1);
-                    vpc[i + 2].TextureCoordinate = new Vector2(t.c.X, t.c.Y) * TerrainTextureScale;
+                    vpc[i + 2].Position = new Vector3(t.C.X, t.C.Y, -1);
+                    vpc[i + 2].TextureCoordinate = new Vector2(t.C.X, t.C.Y) * TerrainTextureScale;
                     i += 3;
                 }
 
@@ -130,6 +129,7 @@ namespace Ballz.GameSession.Renderer
                     if (shot != null)
                         DrawShot(shot);
                 }
+
                 spriteBatch.End();
 
                 DrawMessageOverlay();
@@ -158,7 +158,7 @@ namespace Ballz.GameSession.Renderer
 
                 var effects =  SpriteEffects.None;
 
-                if (!String.IsNullOrEmpty(ball.HoldingWeapon))
+                if (!string.IsNullOrEmpty(ball.HoldingWeapon))
                 {
                     var weaponRotation = aimRotation;
                     if (ball.AimDirection.X < 0)
@@ -224,7 +224,6 @@ namespace Ballz.GameSession.Renderer
                 var t = Max(0, Min((charge - 0.5f) * 2, 1f));
                 return c1 * (1 - t) + c2 * t;
             }
-            
         }
 
         public void DrawShot(Shot shot)
@@ -244,7 +243,6 @@ namespace Ballz.GameSession.Renderer
             
             VertexPositionColorTexture[] vpc = new VertexPositionColorTexture[triangleCount * 3];
             
-            float TerrainTextureScale = 0.01f;
             float u = 0;
 
             for(int i = 0; i < segmentPositions.Length - 1; i++)
@@ -259,7 +257,6 @@ namespace Ballz.GameSession.Renderer
 
                 p0 -= d * 0.05f;
                 p1 += d * 0.05f;
-
 
                 var t00 = p0 + n * RopeWidth;
                 var t10 = p1 + n * RopeWidth;
@@ -300,11 +297,11 @@ namespace Ballz.GameSession.Renderer
             };
 
             GraphicsDevice.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vpc, 0, triangleCount);
-
         }
 
         public void DrawMessageOverlay()
         {
+            spriteBatch.Begin();
             if (Game.Match.State == Logic.SessionState.Finished)
             {
                 string msg = "";
@@ -313,14 +310,22 @@ namespace Ballz.GameSession.Renderer
                     msg = Game.Match.Winner.Name + " won the match!";
                 else
                     msg = "Draw!";
-
-                spriteBatch.Begin();
+                
                 spriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), new Color(Color.Black, 0.5f));
 
                 var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width / 2, Game.GraphicsDevice.Viewport.Height / 2);
                 DrawText(msg, screenPos, 1f, Color.Red, centerHorizontal: true);
-                spriteBatch.End();
             }
+            else if(Game.Match.UsePlayerTurns && Game.Match.ActivePlayer != null)
+            {
+                var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width - 250, Game.GraphicsDevice.Viewport.Height - 100);
+
+                var msg = "Turn: " + Game.Match.ActivePlayer.Name + " / " + (int)Game.Match.TurnTimeLeft;
+
+                DrawText(msg, screenPos, 1f, Color.Black, centerHorizontal: true);
+            }
+
+            spriteBatch.End();
         }
 
         public void DrawText(string text, Vector2 position, float size, Color color, int shadowOffset=2, bool centerVertical = false, bool centerHorizontal = false)
@@ -340,6 +345,7 @@ namespace Ballz.GameSession.Renderer
                 spriteBatch.DrawString(font, text, position, new Color(Color.Black, 0.5f), 0, Vector2.Zero, size, SpriteEffects.None, 0);
                 position -= new Vector2(shadowOffset);
             }
+
             spriteBatch.DrawString(font, text, position, color, 0, Vector2.Zero, size, SpriteEffects.None, 0);
         }
 

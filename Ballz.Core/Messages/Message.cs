@@ -24,8 +24,7 @@ namespace Ballz.Messages
         {
             Kind = type;
         }
-
-
+        
         public MessageType Kind { get; private set; }
     }
 }
