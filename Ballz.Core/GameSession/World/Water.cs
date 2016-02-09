@@ -41,6 +41,7 @@ namespace Ballz.GameSession.World
 
         public void Initialize(World worldState)
         {
+            var rng = new Random(); 
             for (var x = 0; x < ArrayWidth; ++x)
                 for (var y = 0; y < ArrayHeight; ++y)
                 {
@@ -55,7 +56,7 @@ namespace Ballz.GameSession.World
                     if (worldState.StaticGeometry.PublicShape.TerrainBitmap[x*cellSize, y * cellSize])
                         pressure[x, y] = 0;
                     else
-                        pressure[x, y] = relativeY*relativeX;
+                        pressure[x, y] = (float) rng.NextDouble();
                     
                     force[x, y] = new Vector2(0,0);
                 }
@@ -75,6 +76,8 @@ namespace Ballz.GameSession.World
                 bounds |= 0x4;
             if (y == ArrayHeight - 1 || terrain[x * cellSize, (y + 1) * cellSize])
                 bounds |= 0x8;
+            if (terrain[x*cellSize, y*cellSize])
+                bounds = 0xFF;
             return bounds;
         }
         
@@ -165,8 +168,8 @@ namespace Ballz.GameSession.World
                             continue;
                         }
                         var div = (force[x + 1, y].X - force[x - 1, y].X)/2 + (force[x, y + 1].Y - force[x, y - 1].Y)/2;
-                        pressure[x, y] = (pressure[x - 1, y] + pressure[x + 1, y] + pressure[x, y - 1] +
-                                         pressure[x, y + 1] - div)/4;
+                        pressure[x, y] = ((pressure[x - 1, y] + pressure[x + 1, y] + pressure[x, y - 1] +
+                                         pressure[x, y + 1] - div)/4).Clamp(0,float.MaxValue);
 
                     }
                 for (var x = 0; x < ArrayWidth; ++x)
@@ -189,7 +192,7 @@ namespace Ballz.GameSession.World
                                 pressure[x, y] = pressure[x, y - 1];
                                 break;
                             default:
-                                pressure[x, y] = pressure[x, y];
+                                pressure[x, y] = 0;
                                 break;
                         }
                     }
@@ -230,7 +233,28 @@ namespace Ballz.GameSession.World
                             force[x, y] = -force[x, y - 1];
                             break;
                         default:
-                            force[x, y] = force[x, y];
+                            force[x, y] = new Vector2(0,0);
+                            break;
+                    }
+                }
+            for (var x = 0; x < ArrayWidth; ++x)
+                for (var y = 0; y < ArrayHeight; ++y)
+                {
+                    switch (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
+                    {
+                        case 5:
+                            force[x, y] = new Vector2(-force[x + 1, y].X, -force[x, y + 1].Y);
+                            break;
+                        case 6:
+                            force[x, y] = new Vector2(-force[x - 1, y].X, -force[x, y + 1].Y);
+                            break;
+                        case 9:
+                            force[x, y] = new Vector2(-force[x + 1, y].X, -force[x, y - 1].Y);
+                            break;
+                        case 10:
+                            force[x, y] = new Vector2(-force[x - 1, y].X, -force[x, y - 1].Y);
+                            break;
+                        default:
                             break;
                     }
                 }
@@ -240,7 +264,7 @@ namespace Ballz.GameSession.World
         public void Step(World worldState, float elapsedSeconds)
         {
             Advect(worldState, elapsedSeconds);
-            Diffuse(worldState,elapsedSeconds);
+            Diffuse(worldState, elapsedSeconds);
             AddForce(worldState, elapsedSeconds);
             ComputePressure(worldState, elapsedSeconds);
             SubtractPressureGradient(worldState, elapsedSeconds);
