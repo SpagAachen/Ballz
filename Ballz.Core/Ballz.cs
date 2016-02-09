@@ -21,6 +21,8 @@ namespace Ballz
         //SpriteBatch spriteBatch;
         private static Ballz _instance;
 
+        public List<string> Teamnames{ get; private set;}
+
         public GraphicsDeviceManager Graphics { get; set; }
 
         public LogicControl Logic { get; set; }
@@ -41,6 +43,7 @@ namespace Ballz
 
         private Ballz()
         {
+            Teamnames = new List<string>();
             Graphics = new GraphicsDeviceManager(this);
             InitSettings();
             Content.RootDirectory = "Content";
@@ -255,6 +258,19 @@ namespace Ballz
             return mainMenu;
         }
 
+        void loadTeamnames()
+        {
+            string path = Content.RootDirectory + "/Textures/Teams";
+            DirectoryInfo d = new DirectoryInfo(path);
+            FileInfo[] Files = d.GetFiles(); //Getting Text files
+            //string str = "";
+            foreach(FileInfo file in Files )
+            {
+                //str = str + ", " + file.Name;
+                Teamnames.Add(Path.GetFileNameWithoutExtension(file.Name));
+            }
+        }
+
         /// <summary>
         ///     Allows the game to perform any initialization it needs to before starting to run.
         ///     This is where it can query for any required services and load any non-graphic
@@ -264,7 +280,7 @@ namespace Ballz
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            loadTeamnames();
             base.Initialize();
         }
 

@@ -23,7 +23,8 @@ namespace Ballz.SessionFactory
 
             var player1 = new Player
             {
-                Name = "Player1"
+                Name = "Player1",
+                TeamName = "Murica"
             };
 
             session.Players.Add(player1);
@@ -43,7 +44,8 @@ namespace Ballz.SessionFactory
 
             var player2 = new Player
             {
-                Name = "Player2"
+                Name = "Player2",
+                TeamName = "Germoney"
             };
             session.Players.Add(player2);
 
