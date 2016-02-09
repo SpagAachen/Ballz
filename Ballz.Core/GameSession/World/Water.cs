@@ -36,7 +36,7 @@ namespace Ballz.GameSession.World
 
         public Vector2 Velocity(int x, int y)
         {
-            return force[x, y];
+            return force[x/cellSize, y/cellSize];
         }
 
         public void Initialize(World worldState)
@@ -68,7 +68,7 @@ namespace Ballz.GameSession.World
                         continue;
                     }
 
-                    var prePos = new Vector2(x, y) - force[x, y] * elapsedSeconds * 0.001f;
+                    var prePos = new Vector2(x, y) - force[x, y]*elapsedSeconds;
                     var left = (int)Math.Floor(prePos.X).Clamp(0, ArrayWidth - 1);
                     var bottom = (int)Math.Floor(prePos.Y).Clamp(0, ArrayHeight - 1);
                     var alpha = prePos.X - left;
@@ -99,7 +99,7 @@ namespace Ballz.GameSession.World
                         continue;
                     }
 
-                    force[x, y] = force[x, y] - new Vector2(0, 1 * elapsedSeconds);
+                    force[x, y] = force[x, y] - new Vector2(0, 1 * elapsedSeconds * 0.001f);
                 }
 
             force.Unbuffer();
