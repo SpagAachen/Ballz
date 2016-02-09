@@ -197,6 +197,8 @@ namespace Ballz.GameSession.Renderer
 
         Texture2D WaterTexture = null;
 
+        const float MaxWaterVelocity = 0.01f;
+
         public void drawWater()
         {
             var blending = new BlendState();
@@ -215,7 +217,15 @@ namespace Ballz.GameSession.Renderer
             Color[] waterColors = new Color[w*h];
             for (int x = 0; x < w; x++)
                 for (int y = 0; y < h; y++)
-                    waterColors[y * w + x] = new Color(new Vector4(new Vector3(1, 0, 0), water[x, y]));
+                {
+                    var velocity = water.Velocity(x, y);
+                    velocity /= MaxWaterVelocity;
+                    if (velocity.X > 1)
+                        velocity.X = 1;
+                    if (velocity.Y > 1)
+                        velocity.Y = 1;
+                    waterColors[y * w + x] = new Color(new Vector4(new Vector3(velocity.X, velocity.Y, 0), water[x, y]));
+                }
 
             WaterTexture.SetData(waterColors);
 
