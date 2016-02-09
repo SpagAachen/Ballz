@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using Ballz.GameSession.Physics;
+using System.Linq;
 
 namespace Ballz.GameSession.World
 {
@@ -11,15 +11,14 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class World
     {
-        public TimeSpan GameTime
-        {
-            get; protected set;
-        } = new TimeSpan(0, 0, 0);
+        public TimeSpan GameTime { get; protected set; } = new TimeSpan(0, 0, 0);
 
         public List<Entity> Entities
         {
             get;
         }
+
+        public List<Rope> Ropes { get; private set; } = new List<Rope>();
 
         public Terrain StaticGeometry
         {
@@ -36,11 +35,12 @@ namespace Ballz.GameSession.World
                     select e).FirstOrDefault();
         }
 
-        public World(List<Entity> newEntitites, Terrain newTerrain, Water newWater)
+        public World(List<Entity> newEntitites, Terrain newTerrain)
         {
             Entities = newEntitites;
             StaticGeometry = newTerrain;
-            Water = newWater;
+            Water = new Water(newTerrain.width, newTerrain.height);
+            Water.Initialize(this);
         }
     }
 }

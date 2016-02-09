@@ -1,18 +1,15 @@
-﻿
+﻿using Ballz.GameSession.World;
+using Ballz.Messages;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+
 namespace Ballz.Network
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Net.Sockets;
-    using System.Diagnostics;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Bson;
-    using GameSession.World;
-    using System.Threading.Tasks;
-    using System.Text;
-    using Messages;
-
     /// <summary>
     /// Provides an abstraction of the protocol layer. Use it to establish a network connection with another game instance.
     /// </summary>
@@ -23,18 +20,22 @@ namespace Ballz.Network
         NetworkStream connectionStream;
 
         byte[] readBuffer;
-		int readDataLength = -1;
-		int readDataLengthMissing = -1;
-		bool unfinishedObject = false;
+        int readDataLength = -1;
+        int readDataLengthMissing = -1;
+        bool unfinishedObject = false;
 
         public List<Type> MessageTypes = new List<Type>();
 
         public int GetMessageTypeId(Type type)
         {
-            return MessageTypes.IndexOf(type);
+            var res = MessageTypes.IndexOf(type);
+            Debug.Assert(res >= 0, "Unknown type!");
+            return res;
         }
+
         public Type GetTypeByMessageTypeId(int id)
         {
+            Debug.Assert(id >= 0, "Invalid id!");
             return MessageTypes[id];
         }
 
@@ -46,7 +47,7 @@ namespace Ballz.Network
         /// <param name="host">The DNS name of the remote host to which you intend to connect. </param>
         /// <param name="port">The port number of the remote host to which you intend to connect. </param>
         /// <param name="id">Id for this connection</param>
-        public Connection(string host, int port, int id):
+        public Connection(string host, int port, int id) :
             this(new TcpClient(host, port), id)
         {
         }
@@ -64,6 +65,7 @@ namespace Ballz.Network
 
             MessageTypes.Add(typeof(List<Entity>));
             MessageTypes.Add(typeof(InputMessage));
+            MessageTypes.Add(typeof(NetworkMessage));
 
             BeginReceive();
         }
@@ -78,48 +80,53 @@ namespace Ballz.Network
                 byte[] msgLengthBuf = new byte[4];
                 connectionStream.Read(msgLengthBuf, 0, 4);
                 int msgLength = BitConverter.ToInt32(msgLengthBuf, 0);
+                Console.WriteLine("Received " + msgLength + "bytes");
 
                 byte[] msgTypeBuf = new byte[4];
                 connectionStream.Read(msgTypeBuf, 0, 4);
                 int msgType = BitConverter.ToInt32(msgTypeBuf, 0);
-                
+
+                if (msgType < 0) return null;
+
                 byte[] data = new byte[msgLength];
 
                 connectionStream.Read(data, 0, msgLength);
 
                 var json = UTF8Encoding.UTF8.GetString(data);
-                return JsonConvert.DeserializeObject(json, GetTypeByMessageTypeId(msgType));
+                var type = GetTypeByMessageTypeId(msgType);
+                return JsonConvert.DeserializeObject(json, type);
             });
             receiveTask.Start();
         }
 
-		/// <summary>
-		/// Serializes on object and send it to another game instance.
-		/// </summary>
-		/// <param name="obj">The object to send</param>
-		public void Send(object obj)
-		{
-			try
-			{
-				var netStr = tcpClient.GetStream ();
+        /// <summary>
+        /// Serializes on object and send it to another game instance.
+        /// </summary>
+        /// <param name="obj">The object to send</param>
+        public void Send(object obj)
+        {
+            try
+            {
+                var netStr = tcpClient.GetStream();
                 // serialize object and get size of it
                 var json = JsonConvert.SerializeObject(obj);
                 var data = UTF8Encoding.UTF8.GetBytes(json);
-				// write size of object into tcp stream
-				var userDataLen = BitConverter.GetBytes(data.Length);
-				netStr.Write(userDataLen, 0, 4);
+                // write size of object into tcp stream
+                var userDataLen = BitConverter.GetBytes(data.Length);
+                netStr.Write(userDataLen, 0, 4);
 
                 var typeId = GetMessageTypeId(obj.GetType());
+
                 netStr.Write(BitConverter.GetBytes(typeId), 0, 4);
 
                 netStr.Write(data, 0, data.Length);
                 Console.WriteLine("Serialized " + data.Length + "bytes");
-			}
-			catch(Exception e)
-			{
-				Console.WriteLine("Network: Warning: Failed to send some data: " + e.Message);
-			}
-		}
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Network: Warning: Failed to send some data: " + e.Message);
+            }
+        }
 
         /// <summary>
         /// Returns true iff data is ready to read.
@@ -136,11 +143,12 @@ namespace Ballz.Network
             if (receiveTask == null)
 
                 throw new InvalidOperationException("No receiving is in progress");
-            try{
-                receiveTask.Wait();            
+            try
+            {
+                receiveTask.Wait();
                 result = receiveTask.Result;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 System.Console.Out.WriteLine("Network: Warning: Failed to receive data");
             }
@@ -148,6 +156,7 @@ namespace Ballz.Network
             {
                 receiveTask = null;
             }
+
             BeginReceive();
             return result;
         }

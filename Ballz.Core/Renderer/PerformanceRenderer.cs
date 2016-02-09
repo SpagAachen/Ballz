@@ -18,12 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-using System;
-using System.Diagnostics;
 using Ballz.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Ballz
 {
@@ -54,7 +54,7 @@ namespace Ballz
 
         public override void Initialize()
         {
-            Game.Services.GetService<Logic.LogicControl>().Message += handleMessage;
+            Game.Services.GetService<Logic.LogicControl>().Message += HandleMessage;
             base.Initialize();
         }
 
@@ -109,7 +109,7 @@ namespace Ballz
             base.OnDrawOrderChanged(sender, args);
         }
 
-        public void handleMessage(object sender, Message msg)
+        public void HandleMessage(object sender, Message msg)
         {
             if (msg.Kind == Message.MessageType.LogicMessage)
             {
@@ -118,13 +118,11 @@ namespace Ballz
                     Visible = !Visible;
                 }
             }
-                
         }
 
-        public void reportTime(string name, TimeSpan time)
+        public void ReportTime(string name, TimeSpan time)
         {
             reportedMsecs[name] = time.TotalMilliseconds;
         }
     }
 }
-

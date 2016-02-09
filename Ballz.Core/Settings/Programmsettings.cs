@@ -24,7 +24,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Ballz.Settings
 {
-    [Serializable()]
+    [Serializable]
     public class ProgrammSettings
     {
         public Setting<bool> Fullscreen = new Setting<bool>();
@@ -38,4 +38,3 @@ namespace Ballz.Settings
         }
     }
 }
-

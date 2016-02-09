@@ -1,18 +1,17 @@
 ﻿using Ballz.GameSession.World;
 using Ballz.Messages;
 using Ballz.Utils;
-using Microsoft.Xna.Framework;
 using FarseerPhysics;
-using FarseerPhysics.Dynamics;
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using FarseerPhysics.Collision.Shapes;
 using FarseerPhysics.Common;
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.Factories;
+using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Linq;
+using static MathFloat.MathF;
 
 namespace Ballz.GameSession.Physics
 {
@@ -38,6 +37,8 @@ namespace Ballz.GameSession.Physics
         }
         
         Dictionary<Body, int> EntityIdByPhysicsBody = new Dictionary<Body, int>();
+
+        Dictionary<Body, Rope> RopesByPhysicsBody = new Dictionary<Body, Rope>();
 
         /// <summary>
         /// List of the physics bodies that represent the terrain
@@ -72,16 +73,16 @@ namespace Ballz.GameSession.Physics
                 {
                     fixture.Dispose();
                 }
+
                 body.Dispose();
             }
 
             TerrainBodies.Clear();
 
             // Update the terrain explicitly
-            terrain.update();
-            var outlines = terrain.getOutline();
-
-
+            terrain.Update();
+            var outlines = terrain.GetOutline();
+            
             foreach (var outline in outlines)
             {
                 var vertices = new Vector2[outline.Count];
@@ -102,6 +103,17 @@ namespace Ballz.GameSession.Physics
             }
         }
 
+        public void RemoveBody(Body body)
+        {
+            var fixtures = body.FixtureList.ToArray();
+            foreach (var fixture in fixtures)
+            {
+                fixture.Dispose();
+            }
+
+            body.Dispose();
+        }
+
         /// <summary>
         /// Removes the physics body of the given entity from the physics world.
         /// </summary>
@@ -112,13 +124,128 @@ namespace Ballz.GameSession.Physics
             if(e.PhysicsBody != null)
             {
                 EntityIdByPhysicsBody.Remove(e.PhysicsBody);
-                var fixtures = e.PhysicsBody.FixtureList.ToArray();
-                foreach (var fixture in fixtures)
-                {
-                    fixture.Dispose();
-                }
-                e.PhysicsBody.Dispose();
+                RemoveBody(e.PhysicsBody);
                 e.PhysicsBody = null;
+            }
+        }
+
+        public void AddRope(Rope rope)
+        {
+            float ropeLength = (rope.AttachedEntity.Position - rope.AttachedPosition).Length();
+            int segmentCount = (int)Round(1 + (ropeLength / Rope.SegmentLength));
+
+            if (segmentCount < 2)
+                segmentCount = 2;
+
+            var ropeSegmentVector = Vector2.Normalize(rope.AttachedEntity.Position - rope.AttachedPosition) * Rope.SegmentLength;
+            var ropeRotation = ropeSegmentVector.RotationFromDirection();
+
+            rope.PhysicsSegments.Clear();
+
+            for (int i = 0; i<segmentCount; i++)
+            {
+                var segmentStart = rope.AttachedPosition + ropeSegmentVector * (i - 0.5f);
+                var segmentCenter = rope.AttachedPosition + ropeSegmentVector * i;
+                var segment = BodyFactory.CreateCircle(PhysicsWorld, Rope.SegmentLength * 0.5f * 0.8f, 5f);// BodyFactory.CreateRectangle(PhysicsWorld, 0.05f, Rope.SegmentLength, 0.5f);
+                segment.BodyType = BodyType.Dynamic;
+                segment.Friction = 0.5f;
+                segment.Restitution = 0.2f;
+                segment.AngularDamping = 0.1f;
+                segment.LinearDamping = 0.1f;
+                segment.CollisionCategories = Category.Cat3;
+                segment.SetTransform(segmentCenter, ropeRotation);
+
+                rope.PhysicsSegments.Add(segment);
+
+                if (i > 0)
+                {
+                    var segmentJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, rope.PhysicsSegments[i - 1], segment, segmentStart, segmentStart, true);
+                    segmentJoint.CollideConnected = false;
+                    rope.PhysicsSegmentJoints.Add(segmentJoint);
+                }
+                else
+                {
+                    segment.BodyType = BodyType.Static;
+                 }
+             }
+            //var ballAnchor = rope.AttachedEntity.Position + new Vector2(0, rope.AttachedEntity.Radius + 1f);
+            var ballJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, rope.PhysicsSegments.Last(), rope.AttachedEntity.PhysicsBody, Vector2.Zero, Vector2.Zero);
+            ballJoint.CollideConnected = false;
+            rope.PhysicsEntityJoint = ballJoint;
+            
+            rope.AttachedEntity.PhysicsBody.FixedRotation = false;
+            //rope.AttachedEntity.PhysicsBody.Mass = 2f;
+        }
+
+        public void RemoveRope(Rope rope)
+        {
+            foreach (var joint in rope.PhysicsSegmentJoints)
+            {
+                PhysicsWorld.RemoveJoint(joint);
+            }
+
+            rope.PhysicsSegmentJoints.Clear();
+
+            foreach (var body in rope.PhysicsSegments)
+            {
+                RopesByPhysicsBody.Remove(body);
+                RemoveBody(body);
+            }
+
+            rope.PhysicsSegments.Clear();
+            if (rope.AttachedEntity is Ball)
+            {
+                (rope.AttachedEntity as Ball).PhysicsBody.Mass = 10f;
+                (rope.AttachedEntity as Ball).PhysicsBody.FixedRotation = true;
+            }
+        }
+
+        public void ShortenRope(Rope rope)
+        {
+            if (rope.PhysicsSegments.Count > 2)
+            {
+                PhysicsWorld.RemoveJoint(rope.PhysicsEntityJoint);
+                PhysicsWorld.RemoveJoint(rope.PhysicsSegmentJoints.Last());
+                rope.PhysicsSegmentJoints.Remove(rope.PhysicsSegmentJoints.Last());
+
+                var anchorPos = rope.PhysicsSegments.Last().Position;
+
+                RemoveBody(rope.PhysicsSegments.Last());
+                rope.PhysicsSegments.Remove(rope.PhysicsSegments.Last());
+
+                var ballJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, rope.PhysicsSegments.Last(), rope.AttachedEntity.PhysicsBody, Vector2.Zero, Vector2.Zero);
+                ballJoint.CollideConnected = false;
+                rope.PhysicsEntityJoint = ballJoint;
+            }
+        }
+
+        public void LoosenRope(Rope rope)
+        {
+            if (rope.PhysicsSegments.Count * Rope.SegmentLength < Rope.MaxLength)
+            {
+                PhysicsWorld.RemoveJoint(rope.PhysicsEntityJoint);
+
+                var lastSegment = rope.PhysicsSegments.Last();
+
+                var segmentCenter = lastSegment.Position + new Vector2(0, -Rope.SegmentLength * 0.5f);
+                var newSegment = BodyFactory.CreateCircle(PhysicsWorld, Rope.SegmentLength * 0.5f * 0.8f, 10f);// BodyFactory.CreateRectangle(PhysicsWorld, 0.05f, Rope.SegmentLength, 0.5f);
+                newSegment.BodyType = BodyType.Dynamic;
+                newSegment.AngularDamping = 0.1f;
+                newSegment.LinearDamping = 0.1f;
+                newSegment.Friction = 0.5f;
+                newSegment.Restitution = 0.2f;
+                newSegment.CollisionCategories = Category.Cat3;
+                newSegment.Position = segmentCenter;
+
+                rope.PhysicsSegments.Add(newSegment);
+
+                var segmentJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, lastSegment, newSegment, new Vector2(0, Rope.SegmentLength * 0.5f), new Vector2(0, -Rope.SegmentLength * 0.5f), false);
+                segmentJoint.CollideConnected = false;
+                rope.PhysicsSegmentJoints.Add(segmentJoint);
+
+                var ballJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, rope.PhysicsSegments.Last(), rope.AttachedEntity.PhysicsBody, Vector2.Zero, Vector2.Zero);
+                ballJoint.CollideConnected = false;
+                rope.PhysicsEntityJoint = ballJoint;
             }
         }
 
@@ -166,7 +293,6 @@ namespace Ballz.GameSession.Physics
                         var shot = e as Shot;
                         body.OnCollision += (a, b, contact) =>
                         {
-
                             Vector2 normal;
                             FixedArray2<Vector2> points;
                             contact.GetWorldManifold(out normal, out points);
@@ -191,15 +317,18 @@ namespace Ballz.GameSession.Physics
                                 entity.OnEntityCollision(shot);
                                 shot.OnEntityCollision(entity);
                             }
+
                             return true;
                         };
                     }
                 }
-
-                if(body.Position != e.Position || body.Rotation != e.Rotation)
+                
+                if (body.Position != e.Position || body.Rotation != e.Rotation)
                     body.SetTransform(e.Position, e.Rotation);
                 if (body.LinearVelocity != e.Velocity)
-                    body.LinearVelocity = e.Velocity;
+                    // Apparently, the physics engine likes applying an impulse better than overwriting the velocity.
+                    // So, apply an impulse that changes the old velocity to the new one.
+                    body.ApplyLinearImpulse(body.Mass * (e.Velocity - body.LinearVelocity));
             }
         }
 
@@ -210,6 +339,7 @@ namespace Ballz.GameSession.Physics
         {
             // Update the physics world
             PhysicsWorld.Step(elapsedSeconds);
+            worldState.Water.Step(worldState, elapsedSeconds);
 
             // Sync back the positions and velocities
             foreach (var e in worldState.Entities)
@@ -245,7 +375,6 @@ namespace Ballz.GameSession.Physics
 
                 PreparePhysicsEngine(worldState);
                 PhysicsStep(worldState, elapsedSeconds);
-                worldState.Water.Step(worldState, elapsedSeconds);
 
                 // Update shots
                 var shots = (from e in worldState.Entities
@@ -282,10 +411,53 @@ namespace Ballz.GameSession.Physics
                             entity.OnEntityCollision(shot);
                             shot.OnEntityCollision(entity);
                         }
+
                         worldState.Entities.Remove(shot);
                     }
                 }
             }
+        }
+
+        public class RaycastResult
+        {
+            public bool HasHit { get; set; } = false;
+
+            public Entity Entity { get; set; } = null;
+
+            public Vector2 Position { get; set; } = Vector2.Zero;
+
+            public Vector2 Normal { get; set; } = Vector2.Zero;
+        }
+
+        public RaycastResult Raycast(Vector2 rayStart, Vector2 rayEnd)
+        {
+            float closestFraction = float.PositiveInfinity;
+            RaycastResult closestHit = new RaycastResult();
+
+            PhysicsWorld.RayCast((Fixture fixture, Vector2 position, Vector2 normal, float fraction) =>
+            {
+                Entity hitEntity = null;
+                if (EntityIdByPhysicsBody.ContainsKey(fixture.Body))
+                {
+                    hitEntity = Game.World.EntityById(EntityIdByPhysicsBody[fixture.Body]);
+                }
+
+                if (fraction < closestFraction)
+                {
+                    closestFraction = fraction;
+                    closestHit = new RaycastResult
+                    {
+                        HasHit = true,
+                        Position = position,
+                        Normal = normal,
+                        Entity = hitEntity
+                    };
+                }
+
+                return fraction;
+            }, rayStart, rayEnd);
+
+            return closestHit;
         }
 
         public void HandleMessage(object sender, Message message)
@@ -300,7 +472,5 @@ namespace Ballz.GameSession.Physics
                 }
             }
         }
-
-
     }
 }

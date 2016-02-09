@@ -60,11 +60,10 @@ namespace Ballz.GameSession.World
                     if (worldState.StaticGeometry.PublicShape.TerrainBitmap[x * cellSize, y * cellSize])
                     {
                         force[x, y] = force[x, y];
-                        pressure[x, y] = pressure[x, y];
                         continue;
                     }
 
-                    var prePos = new Vector2(x, y) - force[x, y] * elapsedSeconds;
+                    var prePos = new Vector2(x, y) - force[x, y] * elapsedSeconds * 0.001f;
                     var left = (int)Math.Floor(prePos.X).Clamp(0, ArrayWidth - 1);
                     var bottom = (int)Math.Floor(prePos.Y).Clamp(0, ArrayHeight - 1);
                     var alpha = prePos.X - left;
@@ -78,21 +77,10 @@ namespace Ballz.GameSession.World
                         + force3 * alpha * (1 - beta)
                         + force4 * alpha * beta;
 
-                    var pressure1 = pressure[left, bottom];
-                    var pressure2 = pressure[left, (bottom + 1).Clamp(0, ArrayHeight - 1)];
-                    var pressure3 = pressure[(left + 1).Clamp(0, ArrayWidth - 1), bottom];
-                    var pressure4 = pressure[(left + 1).Clamp(0, ArrayWidth - 1), (bottom + 1).Clamp(0, ArrayHeight - 1)];
-                    var prePressure = pressure1 * (1 - alpha) * (1 - beta)
-                        + pressure2 * (1 - alpha) * beta
-                        + pressure3 * alpha * (1 - beta)
-                        + pressure4 * alpha * beta;
-
                     force[x, y] = preForce;
-                    pressure[x, y] = prePressure;
                 }
 
             force.Unbuffer();
-            pressure.Unbuffer();
         }
 
         private void AddForce(World worldState, float elapsedSeconds)
@@ -114,32 +102,36 @@ namespace Ballz.GameSession.World
 
         private void Diffuse(World worldState, float elapsedSeconds)
         {
-            for (var x = 0; x < ArrayWidth; ++x)
+            for (var i = 0; i < 40; ++i)
+            {
+                for (var x = 0; x < ArrayWidth; ++x)
+                    for (var y = 0; y < ArrayHeight; ++y)
+                    {
+                        if (x == 0 || y == 0 || x == ArrayWidth - 1 || y == ArrayHeight - 1)
+                        {
+                            continue;
+                        }
+                        if (worldState.StaticGeometry.PublicShape.TerrainBitmap[x * cellSize, y * cellSize])
+                        {
+                            force[x, y] = force[x, y];
+                            continue;
+                        }
+                        var alpha = 1/(1000*elapsedSeconds);
+                        force[x, y] = (force[x - 1, y] + force[x + 1, y] + force[x, y - 1] + force[x, y + 1] + force[x,y]*alpha) / (4+alpha);
+
+                    }
+                for (var x = 0; x < ArrayWidth; ++x)
+                {
+                    pressure[x, 0] = pressure[x, 1];
+                    pressure[x, ArrayHeight - 1] = pressure[x, ArrayHeight - 2];
+                }
                 for (var y = 0; y < ArrayHeight; ++y)
                 {
-                    if (worldState.StaticGeometry.PublicShape.TerrainBitmap[x * cellSize, y * cellSize])
-                    {
-                        force[x, y] = force[x, y];
-                        continue;
-                    }
-
-                    var hasAbove = y < ArrayHeight - 1 && !worldState.StaticGeometry.PublicShape.TerrainBitmap[x * cellSize, y * cellSize + cellSize];
-                    var hasBelow = y > 0 && !worldState.StaticGeometry.PublicShape.TerrainBitmap[x * cellSize, y * cellSize - cellSize];
-                    var hasRight = x < ArrayWidth - 1 && !worldState.StaticGeometry.PublicShape.TerrainBitmap[x * cellSize + cellSize, y * cellSize];
-                    var hasLeft = x > 0 && !worldState.StaticGeometry.PublicShape.TerrainBitmap[x * cellSize - cellSize, y * cellSize]; ;
-                    var neighbors = (hasAbove ? 1 : 0) + (hasBelow ? 1 : 0) + (hasRight ? 1 : 0) +
-                                    (hasLeft ? 1 : 0);
-
-                    var aboveForce = hasAbove ? force[x, y + 1] : new Vector2(0, 0);
-                    var belowForce = hasBelow ? force[x, y - 1] : new Vector2(0, 0);
-                    var leftForce = hasLeft ? force[x - 1, y] : new Vector2(0, 0);
-                    var rightForce = hasRight ? force[x + 1, y] : new Vector2(0, 0);
-                    
-                    var diffusedForce = (aboveForce + belowForce + leftForce + rightForce + force[x, y] * neighbors) / (neighbors * 2);
-                    force[x, y] = diffusedForce;
+                    pressure[0, y] = pressure[1, y];
+                    pressure[ArrayWidth - 1, y] = pressure[ArrayWidth - 2, y];
                 }
-
-            force.Unbuffer();
+                pressure.Unbuffer();
+            }
         }
 
         private void ComputePressure(World worldState, float elapsedSeconds)
@@ -163,17 +155,17 @@ namespace Ballz.GameSession.World
                                          pressure[x, y + 1] - div)/4;
 
                     }
+                for (var x = 0; x < ArrayWidth; ++x)
+                {
+                    pressure[x, 0] = pressure[x, 1];
+                    pressure[x, ArrayHeight - 1] = pressure[x, ArrayHeight - 2];
+                }
+                for (var y = 0; y < ArrayHeight; ++y)
+                {
+                    pressure[0, y] = pressure[1, y];
+                    pressure[ArrayWidth - 1, y] = pressure[ArrayWidth - 2, y];
+                }
                 pressure.Unbuffer();
-            }
-            for (var x = 0; x < ArrayWidth; ++x)
-            {
-                pressure[x, 0] = pressure[x, 1];
-                pressure[x, ArrayHeight-1] = pressure[x, ArrayHeight-2];
-            }
-            for (var y = 0; y < ArrayHeight; ++y)
-            {
-                pressure[0,y] = pressure[1,y];
-                pressure[ArrayWidth - 1, y] = pressure[ArrayWidth - 2, y];
             }
         }
 

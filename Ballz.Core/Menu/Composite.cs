@@ -15,12 +15,16 @@ namespace Ballz.Menu
         {
         }
 
-        public void AddItem(Item item)
+        public void AddItem(Item item, int index = -1)
         {
-            members.Add(item);
+            if (index >= 0)
+                members.Insert(index, item);
+            else
+                members.Add(item);
         }
 
         public override IReadOnlyList<Item> Items => members;
+
         public override Item SelectedItem => members[index].Selectable ? members[index] : null;
 
         public void SelectNext()
@@ -31,7 +35,7 @@ namespace Ballz.Menu
             {
                 index = (index + 1) % members.Count;
             }
-            while (!SelectedItem.Selectable);
+            while (SelectedItem == null || !SelectedItem.Selectable);
         }
 
         public void SelectPrevious()
@@ -42,7 +46,12 @@ namespace Ballz.Menu
             {
                 index = (index + members.Count - 1) % members.Count;
             }
-            while (!SelectedItem.Selectable);
+            while (SelectedItem == null || !SelectedItem.Selectable);
+        }
+
+        public void SelectIndex(int i)
+        {
+            index = i;
         }
     }
 }

@@ -27,22 +27,23 @@ namespace Ballz
     public class Camera
     {
         public Matrix View{ get; private set;}
+
         public Matrix Projection{ get; private set;}
+
         public Camera()
         {
             View = new Matrix();
             Projection = new Matrix();
         }
 
-        public void setView( Matrix view)
+        public void SetView( Matrix view)
         {
             View = view;
         }
 
-        public void setProjection(Matrix projection)
+        public void SetProjection(Matrix projection)
         {
             Projection = projection;
         }
     }
 }
-

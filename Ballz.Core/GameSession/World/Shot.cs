@@ -38,8 +38,7 @@ namespace Ballz.GameSession.World
         /// If this value is true, the shot velocity is ignored and the projectile will hit its target instantly.
         /// </summary>
         public bool IsInstantShot { get; set; }
-
-
+        
         public bool DisposeOnCollision { get; set; } = true;
 
         public override void OnEntityCollision(Entity other)
@@ -61,6 +60,5 @@ namespace Ballz.GameSession.World
             if(DisposeOnCollision)
                 Dispose();
         }
-
     }
 }

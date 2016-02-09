@@ -25,6 +25,7 @@ namespace Ballz.Menu
     public class CheckBox : Leaf
     {
         readonly Settings.Setting<bool> value;
+
         public CheckBox(string name, Settings.Setting<bool> value = null, bool selectable = true ) : base(name, selectable)
         {
             this.value = value;
@@ -35,4 +36,3 @@ namespace Ballz.Menu
         public override string DisplayName => Name + (value?.Value.ToString() ?? "");
     }
 }
-

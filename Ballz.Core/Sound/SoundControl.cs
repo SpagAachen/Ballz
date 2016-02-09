@@ -18,9 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-using System;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using System;
 using System.Collections.Generic;
 
 namespace Ballz.Sound
@@ -28,7 +28,7 @@ namespace Ballz.Sound
     public class SoundControl
     {
         private Ballz Game;
-        public static string shotSound = "Sounds/pew";
+        public static string ShotSound = "Sounds/pew";
         private Dictionary<string,SoundEffect> loadedSounds;
 
         public SoundControl(Ballz game)
@@ -37,19 +37,17 @@ namespace Ballz.Sound
             loadedSounds = new Dictionary<string, SoundEffect>();
         }
 
-        public void playSound(string name)
+        public void PlaySound(string name)
         {
             //load sound if it is not already loaded
             if(!loadedSounds.ContainsKey(name))
                 loadedSounds.Add(name,Game.Content.Load<SoundEffect>(name));
             SoundEffect sndEffect;
             if(loadedSounds.TryGetValue(name, out sndEffect))
-                {
-                    SoundEffectInstance soundInstance = sndEffect.CreateInstance();
-                    soundInstance.Play();
-                }
+            {
+                SoundEffectInstance soundInstance = sndEffect.CreateInstance();
+                soundInstance.Play();
+            }
         }
-
     }
 }
-

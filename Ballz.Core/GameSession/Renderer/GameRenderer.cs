@@ -1,13 +1,12 @@
-﻿using Ballz.Messages;
-using Ballz.GameSession.World;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
-using System;
-
-using static MathFloat.MathF;
+﻿using Ballz.GameSession.World;
+using Ballz.Messages;
 using Ballz.Utils;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Linq;
+using static MathFloat.MathF;
 
 namespace Ballz.GameSession.Renderer
 {
@@ -21,7 +20,7 @@ namespace Ballz.GameSession.Renderer
         Texture2D CrosshairTexture;
         Texture2D TerrainTexture;
         Texture2D WhiteTexture;
-        BasicEffect BallEffect, TerrainEffect, GraveEffect;
+        BasicEffect BallEffect, TerrainEffect, GraveEffect, RopeEffect;
         SpriteBatch spriteBatch;
 
         private SpriteFont font;
@@ -37,7 +36,7 @@ namespace Ballz.GameSession.Renderer
 
         public Vector2 WorldToScreen(Vector3 Position)
         {
-            var screenSpace = Vector4.Transform(Position, (Game.Camera.Projection * Game.Camera.View));
+            var screenSpace = Vector4.Transform(Position, Game.Camera.Projection * Game.Camera.View);
             screenSpace /= screenSpace.W;
             return new Vector2
             {
@@ -56,14 +55,15 @@ namespace Ballz.GameSession.Renderer
         /// </summary>
         /// <param name="time">time since start of game (cf BallzGame draw).</param>
         public override void Draw(GameTime time)
-        { using (new PerformanceReporter(Game))
+        {
+            using (new PerformanceReporter(Game))
             {
                 GraphicsDevice.Clear(Color.CornflowerBlue);
                 if (lastModification == null)
                     lastModification = time.TotalGameTime;
-                Game.Camera.setProjection(Matrix.Identity);
+                Game.Camera.SetProjection(Matrix.Identity);
 
-                Game.Camera.setView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
+                Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
 
                 BallEffect.View = Game.Camera.View;
                 BallEffect.Projection = Game.Camera.Projection;
@@ -74,7 +74,7 @@ namespace Ballz.GameSession.Renderer
                 spriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), Color.CornflowerBlue);
                 spriteBatch.End();
 
-                var tris = worldState.StaticGeometry.getTriangles();
+                var tris = worldState.StaticGeometry.GetTriangles();
                 VertexPositionColorTexture[] vpc = new VertexPositionColorTexture[tris.Count * 3];
 
                 int i = 0;
@@ -84,14 +84,14 @@ namespace Ballz.GameSession.Renderer
                 foreach (var t in tris)
                 {
                     vpc[i + 0].Color = Color.Maroon;
-                    vpc[i + 0].Position = new Vector3(t.a.X, t.a.Y, -1);
-                    vpc[i + 0].TextureCoordinate = new Vector2(t.a.X, t.a.Y) * TerrainTextureScale;
+                    vpc[i + 0].Position = new Vector3(t.A.X, t.A.Y, -1);
+                    vpc[i + 0].TextureCoordinate = new Vector2(t.A.X, t.A.Y) * TerrainTextureScale;
                     vpc[i + 1].Color = Color.Maroon;
-                    vpc[i + 1].Position = new Vector3(t.b.X, t.b.Y, -1);
-                    vpc[i + 1].TextureCoordinate = new Vector2(t.b.X, t.b.Y) * TerrainTextureScale;
+                    vpc[i + 1].Position = new Vector3(t.B.X, t.B.Y, -1);
+                    vpc[i + 1].TextureCoordinate = new Vector2(t.B.X, t.B.Y) * TerrainTextureScale;
                     vpc[i + 2].Color = Color.Maroon;
-                    vpc[i + 2].Position = new Vector3(t.c.X, t.c.Y, -1);
-                    vpc[i + 2].TextureCoordinate = new Vector2(t.c.X, t.c.Y) * TerrainTextureScale;
+                    vpc[i + 2].Position = new Vector3(t.C.X, t.C.Y, -1);
+                    vpc[i + 2].TextureCoordinate = new Vector2(t.C.X, t.C.Y) * TerrainTextureScale;
                     i += 3;
                 }
 
@@ -129,6 +129,7 @@ namespace Ballz.GameSession.Renderer
                     if (shot != null)
                         DrawShot(shot);
                 }
+
                 spriteBatch.End();
 
                 DrawMessageOverlay();
@@ -137,6 +138,9 @@ namespace Ballz.GameSession.Renderer
 
         public void DrawBall(Ball ball)
         {
+            if (ball.AttachedRope != null)
+                DrawRope(ball.AttachedRope);
+
             BallEffect.DiffuseColor = Vector3.One;
 
             Vector2 nV = ball.Direction;
@@ -154,7 +158,7 @@ namespace Ballz.GameSession.Renderer
 
                 var effects =  SpriteEffects.None;
 
-                if (!String.IsNullOrEmpty(ball.HoldingWeapon))
+                if (!string.IsNullOrEmpty(ball.HoldingWeapon))
                 {
                     var weaponRotation = aimRotation;
                     if (ball.AimDirection.X < 0)
@@ -176,13 +180,15 @@ namespace Ballz.GameSession.Renderer
                     var aimIndicator = ball.Position + ball.AimDirection * 2.1f;
                     var aimIndicatorScreen = WorldToScreen(aimIndicator);
                     var aimIndicatorSize = new Vector2(width, 20);
-                    
-                    var chargeColor = GetChargeColor(ball.ShootCharge);
 
-                    // Draw charge indicator
-                    spriteBatch.Draw(WhiteTexture, position: aimIndicatorScreen, scale: aimIndicatorSize + new Vector2(2, 4), color: new Color(Color.Black, 64), rotation: aimRotation, origin: new Vector2(0, 0.5f));
-                    spriteBatch.Draw(WhiteTexture, position: aimIndicatorScreen, scale: aimIndicatorSize, color: new Color(chargeColor), rotation: aimRotation, origin: new Vector2(0, 0.5f));
+                    if (ball.ShootCharge > 0)
+                    {
+                        var chargeColor = GetChargeColor(ball.ShootCharge);
 
+                        // Draw charge indicator
+                        spriteBatch.Draw(WhiteTexture, position: aimIndicatorScreen, scale: new Vector2(100, 20), color: new Color(Color.Black, (int)(64*ball.ShootCharge)), rotation: aimRotation, origin: new Vector2(0, 0.5f));
+                        spriteBatch.Draw(WhiteTexture, position: aimIndicatorScreen, scale: aimIndicatorSize, color: new Color(chargeColor), rotation: aimRotation, origin: new Vector2(0, 0.5f));
+                    }
                     // Draw crosshair
                     spriteBatch.Draw(CrosshairTexture, position: aimTargetScreen, color: Color.White, rotation: aimRotation, origin: new Vector2(16, 16));
                 }
@@ -218,7 +224,6 @@ namespace Ballz.GameSession.Renderer
                 var t = Max(0, Min((charge - 0.5f) * 2, 1f));
                 return c1 * (1 - t) + c2 * t;
             }
-            
         }
 
         public void DrawShot(Shot shot)
@@ -228,8 +233,75 @@ namespace Ballz.GameSession.Renderer
             BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
         }
 
+        const float RopeWidth = 0.1f;
+
+        public void DrawRope(Rope rope)
+        {
+            var segmentPositions = (from s in rope.PhysicsSegments select s.Position).ToArray();
+
+            var triangleCount = (segmentPositions.Length - 1) * 2;
+            
+            VertexPositionColorTexture[] vpc = new VertexPositionColorTexture[triangleCount * 3];
+            
+            float u = 0;
+
+            for(int i = 0; i < segmentPositions.Length - 1; i++)
+            {
+                var p0 = segmentPositions[i + 1];
+                var p1 = segmentPositions[i];
+                var d = Vector2.Normalize(p1 - p0);
+                var n = new Vector2(d.Y, -d.X);
+                
+                var u0 = u - d.Length() * 0.05f;
+                var u1 = u + (p1 - p0).Length() + d.Length() * 0.05f;
+
+                p0 -= d * 0.05f;
+                p1 += d * 0.05f;
+
+                var t00 = p0 + n * RopeWidth;
+                var t10 = p1 + n * RopeWidth;
+                var t01 = p0 - n * RopeWidth;
+                var t11 = p1 - n * RopeWidth;
+
+                vpc[i * 6 + 0].Color = Color.White;
+                vpc[i * 6 + 0].Position = new Vector3(t11, -1);
+                vpc[i * 6 + 0].TextureCoordinate = new Vector2(1, u1 / (2f * RopeWidth));
+                vpc[i * 6 + 1].Color = Color.White;
+                vpc[i * 6 + 1].Position = new Vector3(t10, -1);
+                vpc[i * 6 + 1].TextureCoordinate = new Vector2(0, u1 / (2f * RopeWidth));
+                vpc[i * 6 + 2].Color = Color.White;
+                vpc[i * 6 + 2].Position = new Vector3(t00, -1);
+                vpc[i * 6 + 2].TextureCoordinate = new Vector2(0, u0 / (2f * RopeWidth));
+
+                vpc[i * 6 + 3].Color = Color.White;
+                vpc[i * 6 + 3].Position = new Vector3(t01, -1);
+                vpc[i * 6 + 3].TextureCoordinate = new Vector2(1, u0 / (2f * RopeWidth));
+                vpc[i * 6 + 4].Color = Color.White;
+                vpc[i * 6 + 4].Position = new Vector3(t11, -1);
+                vpc[i * 6 + 4].TextureCoordinate = new Vector2(1, u1 / (2f * RopeWidth));
+                vpc[i * 6 + 5].Color = Color.White;
+                vpc[i * 6 + 5].Position = new Vector3(t00, -1);
+                vpc[i * 6 + 5].TextureCoordinate = new Vector2(0, u0 / (2f * RopeWidth));
+
+                u = u1;
+            }
+            
+            RopeEffect.World = Matrix.Identity;
+            RopeEffect.View = Game.Camera.View;
+            RopeEffect.Projection = Game.Camera.Projection;
+            RopeEffect.CurrentTechnique.Passes[0].Apply();
+            GraphicsDevice.SamplerStates[0] = new SamplerState
+            {
+                AddressU = TextureAddressMode.Wrap,
+                AddressV = TextureAddressMode.Wrap
+            };
+
+            GraphicsDevice.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vpc, 0, triangleCount);
+        }
+
         public void DrawMessageOverlay()
         {
+            spriteBatch.Begin();
             if (Game.Match.State == Logic.SessionState.Finished)
             {
                 string msg = "";
@@ -238,14 +310,22 @@ namespace Ballz.GameSession.Renderer
                     msg = Game.Match.Winner.Name + " won the match!";
                 else
                     msg = "Draw!";
-
-                spriteBatch.Begin();
+                
                 spriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), new Color(Color.Black, 0.5f));
 
                 var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width / 2, Game.GraphicsDevice.Viewport.Height / 2);
                 DrawText(msg, screenPos, 1f, Color.Red, centerHorizontal: true);
-                spriteBatch.End();
             }
+            else if(Game.Match.UsePlayerTurns && Game.Match.ActivePlayer != null)
+            {
+                var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width - 250, Game.GraphicsDevice.Viewport.Height - 100);
+
+                var msg = "Turn: " + Game.Match.ActivePlayer.Name + " / " + (int)Game.Match.TurnTimeLeft;
+
+                DrawText(msg, screenPos, 1f, Color.Black, centerHorizontal: true);
+            }
+
+            spriteBatch.End();
         }
 
         public void DrawText(string text, Vector2 position, float size, Color color, int shadowOffset=2, bool centerVertical = false, bool centerHorizontal = false)
@@ -265,6 +345,7 @@ namespace Ballz.GameSession.Renderer
                 spriteBatch.DrawString(font, text, position, new Color(Color.Black, 0.5f), 0, Vector2.Zero, size, SpriteEffects.None, 0);
                 position -= new Vector2(shadowOffset);
             }
+
             spriteBatch.DrawString(font, text, position, color, 0, Vector2.Zero, size, SpriteEffects.None, 0);
         }
 
@@ -290,6 +371,11 @@ namespace Ballz.GameSession.Renderer
             TerrainEffect.LightingEnabled = false;
             TerrainEffect.Texture = TerrainTexture;
             TerrainEffect.TextureEnabled = true;
+
+            RopeEffect = new BasicEffect(Game.GraphicsDevice);
+            RopeEffect.LightingEnabled = false;
+            RopeEffect.Texture = Game.Content.Load<Texture2D>("Textures/Rope"); 
+            RopeEffect.TextureEnabled = true;
 
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             font = Game.Content.Load<SpriteFont>("Fonts/Menufont");
