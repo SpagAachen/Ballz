@@ -34,6 +34,11 @@ namespace Ballz.GameSession.World
             set { pressure[x/ cellSize, y/ cellSize] = value; }
         }
 
+        public Vector2 Velocity(int x, int y)
+        {
+            return force[x, y];
+        }
+
         public void Initialize(World worldState)
         {
             for (var x = 0; x < ArrayWidth; ++x)
