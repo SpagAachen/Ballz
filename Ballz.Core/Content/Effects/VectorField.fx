@@ -44,7 +44,10 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
    uint2 cell = uint2(input.texCoord * GridSize);
    float2 innerCellPos = (input.texCoord * GridSize) - cell;
 
-   float2 vl = tex2D(fieldSampler, cell / GridSize).xy * 2.0 - 1.0;
+   float4 data = tex2D(fieldSampler, cell / GridSize);
+   float pressure = data.w;
+
+   float2 vl = data.xy * 2.0 - 1.0;
    float l = length(vl);
    float2 v = vl/l;
    float2 n = float2(v.y, -v.x);
@@ -54,11 +57,15 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
       //* float3x3(float3(1, 0, 0), float3(0, 1, 0), float3(0.5, 0.5, 1));
 
    float2 arrowTexCoords = mul(float3(innerCellPos, 1), arrowMat).xy;
-   
-   if(l<=1)
-      return float4(tex2D(arrowSampler, arrowTexCoords).rgb * l, 1);
-   else
-      return float4(tex2D(arrowSampler, arrowTexCoords).r * l, 0, 0, 1);
+   float3 arrowBase = tex2D(arrowSampler, arrowTexCoords).rgb;
+   float3 arrowColor = arrowBase * l;
+   if (l >= 1)
+      arrowColor = float3(arrowColor.r, 0, 0);
+
+   float pressureColorMix = arrowBase.r;
+   float3 pressureColor = float3(0, pressure, 0);
+
+   return float4(lerp(pressureColor, arrowColor, pressureColorMix), 1);
 }
 
 technique Technique1
