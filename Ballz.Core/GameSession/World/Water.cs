@@ -38,6 +38,22 @@ namespace Ballz.GameSession.World
         {
             return force[x/cellSize, y/cellSize];
         }
+        
+        public Vector2 LerpVelocity(float x, float y)
+        {
+            var left = (int)Math.Floor(x/cellSize).Clamp(0, ArrayWidth - 1);
+            var bottom = (int)Math.Floor(y/cellSize).Clamp(0, ArrayHeight - 1);
+            var alpha = x / cellSize - left;
+            var beta = y / cellSize - bottom;
+            var force1 = force[left, bottom];
+            var force2 = force[left, (bottom + 1).Clamp(0, ArrayHeight - 1)];
+            var force3 = force[(left + 1).Clamp(0, ArrayWidth - 1), bottom];
+            var force4 = force[(left + 1).Clamp(0, ArrayWidth - 1), (bottom + 1).Clamp(0, ArrayHeight - 1)];
+            return force1 * (1 - alpha) * (1 - beta)
+                + force2 * (1 - alpha) * beta
+                + force3 * alpha * (1 - beta)
+                + force4 * alpha * beta;
+        }
 
         public void Initialize(World worldState)
         {
@@ -68,15 +84,15 @@ namespace Ballz.GameSession.World
         private int getBoundary(bool[,] terrain, int x, int y)
         {
             var bounds = 0;
-            if (x == 0 || terrain[(x - 1) * cellSize, y * cellSize])
+            if (x == 0 || terrain[(x - 1) * cellSize + cellSize/2, y * cellSize + cellSize / 2])
                 bounds |= 0x1;
-            if (x == ArrayWidth - 1 || terrain[(x + 1) * cellSize, y * cellSize])
+            if (x == ArrayWidth - 1 || terrain[(x + 1) * cellSize + cellSize / 2, y * cellSize + cellSize / 2])
                 bounds |= 0x2;
-            if (y == 0 || terrain[x * cellSize, (y - 1) * cellSize])
+            if (y == 0 || terrain[x * cellSize + cellSize / 2, (y - 1) * cellSize + cellSize / 2])
                 bounds |= 0x4;
-            if (y == ArrayHeight - 1 || terrain[x * cellSize, (y + 1) * cellSize])
+            if (y == ArrayHeight - 1 || terrain[x * cellSize + cellSize / 2, (y + 1) * cellSize + cellSize / 2])
                 bounds |= 0x8;
-            if (terrain[x*cellSize, y*cellSize])
+            if (terrain[x*cellSize + cellSize / 2, y*cellSize + cellSize / 2])
                 bounds = 0xFF;
             return bounds;
         }
@@ -130,7 +146,7 @@ namespace Ballz.GameSession.World
                         continue;
                     }
 
-                    force[x, y] = force[x, y] - new Vector2(0, elapsedSeconds * 0.01f);
+                    force[x, y] = force[x, y] - new Vector2(0, elapsedSeconds*0.01f);
                 }
 
             force.Unbuffer();
@@ -172,12 +188,14 @@ namespace Ballz.GameSession.World
                                          pressure[x, y + 1] - div)/4).Clamp(0,float.MaxValue);
 
                     }
+                pressure.Unbuffer();
                 for (var x = 0; x < ArrayWidth; ++x)
                     for (var y = 0; y < ArrayHeight; ++y)
                     {
                         switch (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
                         {
                             case 0:
+                                pressure[x, y] = pressure[x, y];
                                 break;
                             case 1:
                                 pressure[x, y] = pressure[x + 1, y];
@@ -193,6 +211,27 @@ namespace Ballz.GameSession.World
                                 break;
                             default:
                                 pressure[x, y] = 0;
+                                break;
+                        }
+                    }
+                for (var x = 0; x < ArrayWidth; ++x)
+                    for (var y = 0; y < ArrayHeight; ++y)
+                    {
+                        switch (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
+                        {
+                            case 5:
+                                pressure[x, y] = (pressure[x + 1, y] + pressure[x, y + 1]) / 2;
+                                break;
+                            case 6:
+                                pressure[x, y] = (pressure[x - 1, y] + pressure[x, y + 1]) / 2;
+                                break;
+                            case 9:
+                                pressure[x, y] = (pressure[x + 1, y] + pressure[x, y - 1]) / 2;
+                                break;
+                            case 10:
+                                pressure[x, y] = (pressure[x - 1, y] + pressure[x, y - 1]) / 2;
+                                break;
+                            default:
                                 break;
                         }
                     }
@@ -212,6 +251,7 @@ namespace Ballz.GameSession.World
                     var grad = new Vector2((pressure[x + 1, y] - pressure[x - 1, y])/2, (pressure[x, y + 1] - pressure[x, y - 1])/2);
                     force[x, y] -= grad;
                 }
+            force.Unbuffer();
 
             for (var x = 0; x < ArrayWidth; ++x)
                 for (var y = 0; y < ArrayHeight; ++y)
@@ -219,6 +259,7 @@ namespace Ballz.GameSession.World
                     switch (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
                     {
                         case 0:
+                            force[x, y] = force[x, y];
                             break;
                         case 1:
                             force[x, y] = -force[x + 1, y];
@@ -237,7 +278,7 @@ namespace Ballz.GameSession.World
                             break;
                     }
                 }
-            for (var x = 0; x < ArrayWidth; ++x)
+            /*for (var x = 0; x < ArrayWidth; ++x)
                 for (var y = 0; y < ArrayHeight; ++y)
                 {
                     switch (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
@@ -257,7 +298,7 @@ namespace Ballz.GameSession.World
                         default:
                             break;
                     }
-                }
+                }*/
             force.Unbuffer();
         }
 
