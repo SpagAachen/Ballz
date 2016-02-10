@@ -103,6 +103,9 @@
     <Compile Include="Utils\VectorExtensions.cs" />
     <None Include="app.config" />
     <None Include="Content.mgcb" />
+    <None Include="Content\Effects\VectorField.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Content\Worlds\TestWorld.png" />
     <None Include="Content\Textures\Balls.jpg" />
     <Compile Include="Messages\MenuMessage.cs" />
@@ -124,10 +127,14 @@
     <None Include="Icon.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Effects\VectorField.fx" />
     <Content Include="Content\Fonts\Menufont.spritefont">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\Fonts\Menufont.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Textures\Arrow.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\Textures\Balls.xnb">

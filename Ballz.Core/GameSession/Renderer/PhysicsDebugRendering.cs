@@ -17,11 +17,14 @@ namespace Ballz.GameSession.Renderer
         new Ballz Game;
         BasicEffect LineEffect;
         VertexPositionColor[] sphereVertices;
+        VertexPositionTexture[] quad;
         List<VertexPositionColor[]> terrainVertices = new List<VertexPositionColor[]>();
         private World.World debugWorld;
         private int terrainRevision = -1;
         private SpriteBatch spriteBatch;
         private Texture2D whiteTexture;
+
+        private Effect VectorFieldEffect;
 
         public DebugRenderer(Ballz _game) : base(_game)
         {
@@ -66,6 +69,8 @@ namespace Ballz.GameSession.Renderer
             LineEffect.LightingEnabled = false;
             LineEffect.TextureEnabled = false;
 
+            VectorFieldEffect = Game.Content.Load<Effect>("Effects/VectorField");
+
             sphereVertices = new VertexPositionColor[18];
 
             for (int i = 0; i <= 16; i++)
@@ -77,6 +82,16 @@ namespace Ballz.GameSession.Renderer
 
             sphereVertices[17].Color = Color.GreenYellow;
             sphereVertices[17].Position = Vector3.Zero;
+
+            quad = new VertexPositionTexture[]
+            {
+                new VertexPositionTexture(new Vector3(0, 0, 0.5f), new Vector2(0, 0)),
+                new VertexPositionTexture(new Vector3(1, 1, 0.5f), new Vector2(1, 1)),
+                new VertexPositionTexture(new Vector3(0, 1, 0.5f), new Vector2(0, 1)),
+                new VertexPositionTexture(new Vector3(0, 0, 0.5f), new Vector2(0, 0)),
+                new VertexPositionTexture(new Vector3(1, 0, 0.5f), new Vector2(1, 0)),
+                new VertexPositionTexture(new Vector3(1, 1, 0.5f), new Vector2(1, 1)),
+            };
 
             Matrix terrainWorld = Matrix.CreateScale(0.03f);
 
@@ -198,6 +213,7 @@ namespace Ballz.GameSession.Renderer
         Texture2D WaterTexture = null;
 
         const float MaxWaterVelocity = 0.01f;
+        const int WaterGridSize = 5;
 
         public void drawWater()
         {
@@ -208,8 +224,8 @@ namespace Ballz.GameSession.Renderer
             blending.ColorDestinationBlend = Blend.InverseSourceAlpha;
 
             var water = debugWorld.Water;
-            var w = water.Width;
-            var h = water.Height;
+            var w = water.Width / WaterGridSize;
+            var h = water.Height / WaterGridSize;
 
             if (WaterTexture == null)
                 WaterTexture = new Texture2D(Game.GraphicsDevice, w, h, false, SurfaceFormat.Color);
@@ -218,7 +234,7 @@ namespace Ballz.GameSession.Renderer
             for (int x = 0; x < w; x++)
                 for (int y = 0; y < h; y++)
                 {
-                    var velocity = water.Velocity(x, y);
+                    var velocity = water.Velocity(x * WaterGridSize, y * WaterGridSize);
                     velocity /= MaxWaterVelocity;
 
                     velocity *= 0.5f;
@@ -229,7 +245,7 @@ namespace Ballz.GameSession.Renderer
                     if (velocity.Y > 1)
                         velocity.Y = 1;
 
-                    waterColors[y * w + x] = new Color(new Vector4(new Vector3(velocity.X, velocity.Y, 0), water[x, y]));
+                    waterColors[y * w + x] = new Color(new Vector4(new Vector3(velocity.X, velocity.Y, 0), water[x * WaterGridSize, y * WaterGridSize]));
                 }
 
             WaterTexture.SetData(waterColors);
@@ -242,9 +258,18 @@ namespace Ballz.GameSession.Renderer
 
             var destRect = new Rectangle(topLeft.ToPoint(), (bottomRight - topLeft).ToPoint());
 
-            spriteBatch.Begin(blendState: blending);
-            spriteBatch.Draw(WaterTexture, destinationRectangle: destRect, color: Color.White, effects: SpriteEffects.FlipVertically);
-            spriteBatch.End();
+            VectorFieldEffect.Techniques[0].Passes[0].Apply();
+            VectorFieldEffect.Parameters["VectorField"].SetValue(WaterTexture);
+            VectorFieldEffect.Parameters["ArrowSymbol"].SetValue(Game.Content.Load<Texture2D>("Textures/Arrow"));
+            VectorFieldEffect.Parameters["GridSize"].SetValue(new Vector2(w, h));
+            
+
+            GraphicsDevice.RasterizerState = new RasterizerState
+            {
+                CullMode = CullMode.None
+            };
+            GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);
+
         }
     }
 }
