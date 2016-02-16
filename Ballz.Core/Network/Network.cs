@@ -31,6 +31,13 @@
             Message?.Invoke(this, new NetworkMessage(msg));
         }
 
+        public int GetNumberOfPlayers()
+        {
+            if (State == StateT.Client) return client.NumberOfPlayers;
+            if (State == StateT.Server) return server.NumberOfClients() + 1; // +1 for ourselfs
+            return -1;
+        }
+
         public void StartServer(int port)
         {
             if (State != StateT.None)
