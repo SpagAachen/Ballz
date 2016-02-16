@@ -10,6 +10,8 @@
     {
         private Network network = null;
 
+        public int NumberOfPlayers { get; private set; } = -1;
+
         private Connection connectionToServer = null;
 
         public Client(Network net)
@@ -63,6 +65,9 @@
                 {
                     case NetworkMessage.MessageType.GameStarted:
                         Ballz.The().Logic.StartGame(new SessionFactory.Worms());
+                        break;
+                    case NetworkMessage.MessageType.NumberOfPlayers:
+                        NumberOfPlayers = (int)netMsg.Data;
                         break;
                     default:
                         Console.WriteLine("Unknown netMsg received: " + netMsg.Kind.ToString());

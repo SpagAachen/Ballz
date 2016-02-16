@@ -7,13 +7,16 @@
     using Microsoft.Xna.Framework;
     using System.Net.Sockets;
 
+    using Microsoft.Xna.Framework.Graphics;
+
     class Server
     {
         private static int nextId = 1;
         TcpListener listener = null;
         private readonly Network network = null;
         private readonly List<Connection> connections = new List<Connection>();
-        
+
+
         public Server(Network net)
         {
             network = net;
@@ -21,11 +24,19 @@
 
         public void GameStarted()
         {
-            Broadcast(new NetworkMessage(NetworkMessage.MessageType.NumberOfPlayers, this.GetNumberOfClients()));
+            Broadcast(new NetworkMessage(NetworkMessage.MessageType.NumberOfPlayers, this.NumberOfClients()));
             Broadcast(new NetworkMessage(NetworkMessage.MessageType.GameStarted));
         }
 
-	    int GetNumberOfClients()
+	    private void BroadcastMap(string mapName)
+	    {
+            var mapTexture = Ballz.The().Content.Load<Texture2D>("Worlds/" + mapName);
+            //mapTexture.
+            //TODO: implement
+	        throw new NotImplementedException();
+	    }
+
+	    public int NumberOfClients()
 	    {
 	        return connections.Count;
 	    }
@@ -36,13 +47,13 @@
             listener.Start();
             // start lobby first
             network.GameState = Network.GameStateT.InLobby;
-            UpdateLobbyList();
+            updateLobbyList();
         }
 
-        public void UpdateLobbyList()
+        public void updateLobbyList()
         {
             Ballz.The().NetworkLobbyConnectedClients.Name = "Myself";
-            foreach (var c in connections)
+            foreach(var c in connections)
             {
                 Ballz.The().NetworkLobbyConnectedClients.Name += ", " + c.Id;
             }
@@ -60,7 +71,7 @@
                     connections.Add(new Connection(client, nextId++));
                     network.RaiseMessageEvent(NetworkMessage.MessageType.NewClient);
                     // update lobby list
-                    UpdateLobbyList();
+                    updateLobbyList();
                 }
                 else
                 {
@@ -73,24 +84,25 @@
                 if (c.DataAvailable())
                 {
                     var data = c.ReceiveData();
-                    OnData(data, c.Id);
+                    onData(data, c.Id);
                 }
             }
 
-            // TEST
-            {
-                //Broadcast(Ballz.The().World.Entities);
-            }
+			// TEST
+			{
+				//Broadcast(Ballz.The().World.Entities);
+			}
             //TODO: Implement
         }
 
-        private void OnData(object data, int sender)
+        private void onData(object data, int sender)
         {
-            //Console.WriteLine("Received data from " + sender + ": " + data.ToString()); // Debug
-            // Input Message
-            if (data.GetType() == typeof(InputMessage))
-            {
-            }
+			//Console.WriteLine("Received data from " + sender + ": " + data.ToString()); // Debug
+			// Input Message
+			if (data.GetType() == typeof(InputMessage))
+			{
+				
+			}
         }
 
         public void Broadcast(object data)

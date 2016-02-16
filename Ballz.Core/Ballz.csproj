@@ -60,6 +60,7 @@
     <Compile Include="GameSession\Logic\AIControl.cs" />
     <Compile Include="GameSession\Logic\BallControl.cs" />
     <Compile Include="GameSession\Logic\GameLogic.cs" />
+    <Compile Include="GameSession\Logic\GameSettings.cs" />
     <Compile Include="GameSession\Logic\Player.cs" />
     <Compile Include="GameSession\Logic\UserControl.cs" />
     <Compile Include="GameSession\Logic\Weapons\Bazooka.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="SessionFactory\Ballerburg.cs" />
     <Compile Include="SessionFactory\SessionFactory.cs" />
     <Compile Include="SessionFactory\Worms.cs" />
+    <Compile Include="Utils\TextureHelper.cs" />
     <Compile Include="Utils\TypeInfoConverter.cs" />
     <Compile Include="Utils\VectorExtensions.cs" />
     <None Include="app.config" />
