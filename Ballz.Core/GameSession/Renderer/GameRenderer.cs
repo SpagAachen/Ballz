@@ -29,9 +29,12 @@ namespace Ballz.GameSession.Renderer
 
         TimeSpan lastModification;
 
+        WaterRenderer WaterRenderer;
+
         public GameRenderer(Ballz game) : base(game)
         {
             Game = game;
+            WaterRenderer = new WaterRenderer(game);
         }
 
         public Vector2 WorldToScreen(Vector3 Position)
@@ -131,6 +134,8 @@ namespace Ballz.GameSession.Renderer
                 }
 
                 spriteBatch.End();
+
+                WaterRenderer.DrawWater(worldState);
 
                 DrawMessageOverlay();
             }
@@ -398,7 +403,7 @@ namespace Ballz.GameSession.Renderer
                 WhiteTexture.SetData(color);
             }
 
-            //PrepareDebugRendering();
+            WaterRenderer.LoadContent();
 
             base.LoadContent();
         }

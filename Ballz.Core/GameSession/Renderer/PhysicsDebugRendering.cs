@@ -24,16 +24,16 @@ namespace Ballz.GameSession.Renderer
         private SpriteBatch spriteBatch;
         private Texture2D whiteTexture;
 
-        private Effect VectorFieldEffect;
+        WaterRenderer WaterRenderer;
 
         public DebugRenderer(Ballz _game) : base(_game)
         {
             Game = _game;
+            WaterRenderer = new WaterRenderer(_game);
         }
 
         public override void Draw(GameTime gameTime)
         {
-            //DrawSphere(Vector2.Zero, new Vector2(0.0f,1.0f));
             debugWorld = Game.World;
             foreach (Entity ball in debugWorld.Entities)
             {
@@ -49,7 +49,7 @@ namespace Ballz.GameSession.Renderer
             }
 
             DrawTerrain();
-            drawWater();
+            WaterRenderer.DrawWaterDebug(debugWorld);
 
             base.Draw(gameTime);
         }
@@ -69,8 +69,6 @@ namespace Ballz.GameSession.Renderer
             LineEffect.LightingEnabled = false;
             LineEffect.TextureEnabled = false;
 
-            VectorFieldEffect = Game.Content.Load<Effect>("Effects/VectorField");
-
             sphereVertices = new VertexPositionColor[18];
 
             for (int i = 0; i <= 16; i++)
@@ -83,16 +81,6 @@ namespace Ballz.GameSession.Renderer
             sphereVertices[17].Color = Color.GreenYellow;
             sphereVertices[17].Position = Vector3.Zero;
 
-            quad = new VertexPositionTexture[]
-            {
-                new VertexPositionTexture(new Vector3(0, 0, 0.5f), new Vector2(0, 0)),
-                new VertexPositionTexture(new Vector3(1, 1, 0.5f), new Vector2(1, 1)),
-                new VertexPositionTexture(new Vector3(0, 1, 0.5f), new Vector2(0, 1)),
-                new VertexPositionTexture(new Vector3(0, 0, 0.5f), new Vector2(0, 0)),
-                new VertexPositionTexture(new Vector3(1, 0, 0.5f), new Vector2(1, 0)),
-                new VertexPositionTexture(new Vector3(1, 1, 0.5f), new Vector2(1, 1)),
-            };
-
             Matrix terrainWorld = Matrix.CreateScale(0.03f);
 
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
@@ -101,6 +89,9 @@ namespace Ballz.GameSession.Renderer
             {
                 Color.White
             });
+
+            WaterRenderer.LoadContent();
+
             base.LoadContent();
         }
 
@@ -209,67 +200,6 @@ namespace Ballz.GameSession.Renderer
         {
             return WorldToScreen(new Vector3(Position, 0));
         }
-
-        Texture2D WaterTexture = null;
-
-        const float MaxWaterVelocity = 0.01f;
-        const int WaterGridSize = 5;
-
-        public void drawWater()
-        {
-            var blending = new BlendState();
-            blending.AlphaSourceBlend = Blend.SourceAlpha;
-            blending.AlphaDestinationBlend = Blend.InverseSourceAlpha;
-            blending.ColorSourceBlend = Blend.SourceAlpha;
-            blending.ColorDestinationBlend = Blend.InverseSourceAlpha;
-
-            var water = debugWorld.Water;
-            var w = water.Width / WaterGridSize;
-            var h = water.Height / WaterGridSize;
-
-            if (WaterTexture == null)
-                WaterTexture = new Texture2D(Game.GraphicsDevice, w, h, false, SurfaceFormat.Color);
-
-            Color[] waterColors = new Color[w*h];
-            for (int x = 0; x < w; x++)
-                for (int y = 0; y < h; y++)
-                {
-                    var velocity = water.Velocity(x * WaterGridSize, y * WaterGridSize);
-                    velocity /= MaxWaterVelocity;
-
-                    velocity *= 0.5f;
-                    velocity += new Vector2(0.5f);
-
-                    if (velocity.X > 1)
-                        velocity.X = 1;
-                    if (velocity.Y > 1)
-                        velocity.Y = 1;
-
-                    waterColors[y * w + x] = new Color(new Vector4(velocity.X, velocity.Y, 0, water[x * WaterGridSize, y * WaterGridSize]));
-                }
-
-            WaterTexture.SetData(waterColors);
-
-            //var pos = new Vector2(x * debugWorld.StaticGeometry.Scale, y * debugWorld.StaticGeometry.Scale);
-            //var sPos = WorldToScreen(pos);
-
-            var topLeft = WorldToScreen(new Vector2(0, h) * debugWorld.StaticGeometry.Scale);
-            var bottomRight = WorldToScreen(new Vector2(w, 0) * debugWorld.StaticGeometry.Scale);
-
-            var destRect = new Rectangle(topLeft.ToPoint(), (bottomRight - topLeft).ToPoint());
-
-            VectorFieldEffect.Techniques[0].Passes[0].Apply();
-            VectorFieldEffect.Parameters["VectorField"].SetValue(WaterTexture);
-            VectorFieldEffect.Parameters["ArrowSymbol"].SetValue(Game.Content.Load<Texture2D>("Textures/Arrow"));
-            VectorFieldEffect.Parameters["GridSize"].SetValue(new Vector2(w, h));
-            
-
-            GraphicsDevice.RasterizerState = new RasterizerState
-            {
-                CullMode = CullMode.None
-            };
-            GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);
-
-        }
+        
     }
 }

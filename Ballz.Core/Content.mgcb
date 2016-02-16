@@ -102,3 +102,9 @@
 /processorParam:DebugMode=Auto
 /build:Content/Effects/VectorField.fx
 
+#begin Content/Effects/Water.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Content/Effects/Water.fx
+

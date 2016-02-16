@@ -66,6 +66,7 @@
     <Compile Include="GameSession\Logic\Weapons\RopeTool.cs" />
     <Compile Include="GameSession\Logic\Weapons\WeaponControl.cs" />
     <Compile Include="GameSession\Renderer\PhysicsDebugRendering.cs" />
+    <Compile Include="GameSession\Renderer\WaterRenderer.cs" />
     <Compile Include="GameSession\Session.cs" />
     <Compile Include="GameSession\World\Material.cs" />
     <Compile Include="GameSession\World\Rope.cs" />
@@ -106,6 +107,9 @@
     <None Include="Content\Effects\VectorField.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Content\Effects\Water.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Content\Worlds\TestWorld.png" />
     <None Include="Content\Textures\Balls.jpg" />
     <Compile Include="Messages\MenuMessage.cs" />
@@ -128,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\Effects\VectorField.fx" />
+    <Content Include="Content\Effects\Water.fx" />
     <Content Include="Content\Fonts\Menufont.spritefont">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
