@@ -10,7 +10,7 @@ namespace Ballz.SessionFactory
 {
     public abstract class SessionFactory
     {
-        public abstract Session StartSession(Ballz game);
+        public abstract Session StartSession(Ballz game, GameSession.Logic.GameSettings settings);
 
         public abstract string Name { get; }
 
@@ -18,7 +18,7 @@ namespace Ballz.SessionFactory
         {
             new Worms("TestWorld2"),
             new Worms("TestWorld2", true),
-            new Worms("TestWorld2", false, true),
+            new Worms("TestWorld2", true),
             new Worms("RopeWorld"),
             new Worms("Mining"),
             new Worms("Mining", true),

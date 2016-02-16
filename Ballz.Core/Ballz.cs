@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
+using Ballz.GameSession.Logic;
 
 namespace Ballz
 {
@@ -205,7 +206,8 @@ namespace Ballz
             var networkServerMenuStartGame = new Label("Start Game", true);
             networkServerMenuStartGame.OnSelect += () =>
             {
-                Logic.StartGame(new SessionFactory.Worms());
+                    throw new NotImplementedException();
+                //Logic.StartGame(new SessionFactory.Worms());
                 Network.GameStarted();
             };
             networkServerMenu.AddItem(networkServerMenuStartGame);
@@ -227,6 +229,30 @@ namespace Ballz
             mainMenu.AddItem(continueLabel);
 
             Composite startGame = new Composite("Start New Game", true);
+            var currGameSettings = new GameSession.Logic.GameSettings();
+            // hard-coded game settings
+            //TODO(MS): Make a "build team, game-settings whatsoever" menu and store it in currGameSettings
+            {
+                {
+                    var player1 = new Player
+                    {
+                        Name = "Player1",
+                        TeamName = "Murica"
+                    };
+                    var team1 = new Team{ ControlledByAI = false, Name = "Team1", NumberOfBallz = 1, player = player1 };
+                    currGameSettings.Teams.Add(team1);
+                }
+                {
+                    var player2 = new Player
+                    {
+                        Name = "Player2",
+                        TeamName = "Germoney"
+                    };
+                    var team2 = new Team{ ControlledByAI = false, Name = "Team2", NumberOfBallz = 1, player = player2 };
+                    currGameSettings.Teams.Add(team2);
+                }
+            }
+
             foreach (var factory in SessionFactory.SessionFactory.AvailableFactories)
             {
                 var factoryLabel = new Label(factory.Name, true);
@@ -238,7 +264,8 @@ namespace Ballz
                         continueLabel.Selectable = true;
                     }
 
-                    Logic.StartGame(factory);
+                    currGameSettings.GameMode = factory;
+                    Logic.StartGame(currGameSettings);
                 };
                 startGame.AddItem(factoryLabel);
             }

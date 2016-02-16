@@ -64,7 +64,8 @@
                 switch (netMsg.Kind)
                 {
                     case NetworkMessage.MessageType.GameStarted:
-                        Ballz.The().Logic.StartGame(new SessionFactory.Worms());
+                        //Ballz.The().Logic.StartGame(new SessionFactory.Worms());
+                        throw new NotImplementedException();
                         break;
                     case NetworkMessage.MessageType.NumberOfPlayers:
                         NumberOfPlayers = (int)netMsg.Data;

@@ -1,20 +1,25 @@
 ﻿using System.Collections.Generic;
+using Ballz.SessionFactory;
 
 namespace Ballz.GameSession.Logic
 {
-    class Team
+    public class Team
     {
         public string Name { get; set; } = "Unnamed";
 
         public int NumberOfBallz { get; set; } = 0;
 
+        public Player player { get; set; }
+
         public bool ControlledByAI { get; set; } = false;
     }
 
-    class GameSettings
+    public class GameSettings
     {
-        public string MapName { get; set; } = "TestWorld2";
+        public string MapName { get; set; } = "TestWorld2"; //TODO: Unused field.Reserved for after refactoring.
 
-        public List<Team> Teams { get; set; }
+        public SessionFactory.SessionFactory GameMode { get; set; }
+
+        public List<Team> Teams { get; set; } = new List<Team>();
     }
 }

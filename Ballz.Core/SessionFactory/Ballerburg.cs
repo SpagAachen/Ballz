@@ -15,52 +15,38 @@ namespace Ballz.SessionFactory
     {
         public override string Name { get; } = "Ballerburg";
 
-        public override Session StartSession(Ballz game)
+        public override Session StartSession(Ballz game, GameSession.Logic.GameSettings settings)
         {
-            var session = new Session(game);
+            var session = new Session(game, settings);
 
             session.Terrain = new Terrain(GenerateMountain());
 
-            var player1 = new Player
+            // Create players and Ballz
+            var ballzPositions = new List<Vector2> { new Vector2(1,5), new Vector2(35,5) };
+            var currBallCreating = 0;
+            foreach (var team in settings.Teams)
             {
-                Name = "Player1",
-                TeamName = "Murica"
-            };
-
-            session.Players.Add(player1);
-
-            var player1Ball = new Ball
-            {
-                Position = new Vector2(1, 5),
-                Velocity = new Vector2(0, 0),
-                IsAiming = true,
-                Player = player1,
-                HoldingWeapon = "Bazooka",
-                IsStatic = true
-            };
-            session.Entities.Add(player1Ball);
-
-            session.SessionLogic.BallControllers[player1] = new UserControl(game, session, player1Ball);
-
-            var player2 = new Player
-            {
-                Name = "Player2",
-                TeamName = "Germoney"
-            };
-            session.Players.Add(player2);
-
-            var player2Ball = new Ball
-            {
-                Position = new Vector2(35, 5),
-                Velocity = new Vector2(0, 0),
-                IsAiming = true,
-                Player = player2,
-                HoldingWeapon = "HandGun",
-                IsStatic = true
-            };
-            session.Entities.Add(player2Ball);
-
-            session.SessionLogic.BallControllers[player2] = new UserControl(game, session, player2Ball);
+                session.Players.Add(team.player);
+                // Create ballz
+                for (var i = 0; i < team.NumberOfBallz; ++i)
+                {
+                    var playerBall = new Ball
+                    {
+                        Position = ballzPositions[currBallCreating],
+                        Velocity = new Vector2(0, 0),
+                        IsAiming = true,
+                            Player = team.player,
+                        HoldingWeapon = "Bazooka",
+                        IsStatic = true
+                    };
+                    ++currBallCreating;
+                    session.Entities.Add(playerBall);
+                    if (team.ControlledByAI)
+                        session.SessionLogic.BallControllers[team.player] = new AIControl(game, session, playerBall);
+                    else
+                        session.SessionLogic.BallControllers[team.player] = new UserControl(game, session, playerBall);
+                }
+            }
 
             var snpsht = new World(session.Entities, session.Terrain);
             session.Game.World = snpsht;

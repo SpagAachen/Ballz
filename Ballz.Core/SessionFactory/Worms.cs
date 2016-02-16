@@ -13,18 +13,16 @@ namespace Ballz.SessionFactory
 {
     public class Worms : SessionFactory
     {
-        public Worms(string mapName = "TestWorld2", bool includeAI = false, bool usePlayerTurns = false)
+        public Worms(string mapName = "TestWorld2", bool usePlayerTurns = false)
         {
             MapName = mapName;
-            IncludeAI = includeAI;
             UsePlayerTurns = usePlayerTurns;
         }
 
         public string MapName;
-        public bool IncludeAI;
         public bool UsePlayerTurns;
 
-        public override string Name { get { return "Worms (" + MapName + (IncludeAI ? ", with NPC" : "") + (UsePlayerTurns ? ", turn mode" : "") + ")"; } }
+        public override string Name { get { return "Worms (" + MapName + (UsePlayerTurns ? ", turn mode" : "") + ")"; } }
 
         public List<Vector2> SpawnPoints = new List<Vector2>();
 
@@ -79,9 +77,9 @@ namespace Ballz.SessionFactory
             return spawns.Select((i)=>SpawnPoints[i]).ToList();
         }
 
-        public override Session StartSession(Ballz game)
+        public override Session StartSession(Ballz game, GameSession.Logic.GameSettings settings)
         {
-            var session = new Session(game);
+            var session = new Session(game, settings);
 
             session.UsePlayerTurns = UsePlayerTurns;
 
@@ -89,60 +87,32 @@ namespace Ballz.SessionFactory
             session.Terrain = new Terrain(mapTexture);
 
             FindSpawnPoints(mapTexture, session.Terrain.Scale);
-            var spawnPoints = SelectSpawnpoints(IncludeAI ? 3 : 2);
+            var spawnPoints = SelectSpawnpoints(settings.Teams.Count);
 
-            var player1 = new Player
+            // Create players and Ballz
+            var currBallCreating = 0;
+            foreach (var team in settings.Teams)
             {
-                Name = "Player1",
-                TeamName = "Murica"
-            };
-
-            session.Players.Add(player1);
-
-            var player1Ball = new Ball
-            {
-                Position = spawnPoints[0],
-                IsAiming = true,
-                Player = player1,
-                HoldingWeapon = "Bazooka",
-            };
-            session.Entities.Add(player1Ball);
-            session.SessionLogic.BallControllers[player1] = new UserControl(game, session, player1Ball);
-
-            var player2 = new Player
-            {
-                Name = "Player2",
-                TeamName = "Germoney"
-            };
-            session.Players.Add(player2);
-
-            var player2Ball = new Ball
-            {
-                Position = spawnPoints[1],
-                Velocity = Vector2.Zero,
-                IsAiming = true,
-                Player = player2,
-                HoldingWeapon = "HandGun",
-            };
-            session.Entities.Add(player2Ball);
-
-            session.SessionLogic.BallControllers[player2] = new UserControl(game, session, player2Ball);
-
-            if (IncludeAI)
-            {
-                var playerAi = new Player
+                session.Players.Add(team.player);
+                // Create ballz
+                for (var i = 0; i < team.NumberOfBallz; ++i)
                 {
-                    Name = "NPC"
-                };
-                session.Players.Add(playerAi);
-
-                var aiBall = new Ball
-                {
-                    Position = spawnPoints[2],
-                    Player = playerAi
-                };
-                session.Entities.Add(aiBall);
-                session.SessionLogic.BallControllers[playerAi] = new AIControl(game, session, aiBall);
+                    var playerBall = new Ball
+                        {
+                            Position = spawnPoints[currBallCreating],
+                            Velocity = new Vector2(0, 0),
+                            IsAiming = true,
+                            Player = team.player,
+                            HoldingWeapon = "Bazooka",
+                            IsStatic = false
+                        };
+                    ++currBallCreating;
+                    session.Entities.Add(playerBall);
+                    if (team.ControlledByAI)
+                        session.SessionLogic.BallControllers[team.player] = new AIControl(game, session, playerBall);
+                    else
+                        session.SessionLogic.BallControllers[team.player] = new UserControl(game, session, playerBall);
+                }
             }
 
             var snpsht = new World(session.Entities, session.Terrain);

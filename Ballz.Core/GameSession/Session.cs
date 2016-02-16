@@ -45,8 +45,12 @@ namespace Ballz.GameSession
 
         public float TurnTimeLeft { get; set; } = SecondsPerTurn;
 
-        public Session(Ballz _game)
+        public GameSession.Logic.GameSettings GameSettings { get; set; }
+
+        public Session(Ballz _game, GameSession.Logic.GameSettings settings)
         {
+            GameSettings = settings;
+
             Physics = new Physics.PhysicsControl(_game);
             Physics.Enabled = false;
             _game.Components.Add(Physics);
