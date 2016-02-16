@@ -66,7 +66,7 @@ namespace Ballz.GameSession.Renderer
                     if (velocity.Y > 1)
                         velocity.Y = 1;
 
-                    waterColors[y * w + x] = new Color(new Vector4(velocity.X, velocity.Y, 0, water[x * WaterGridSize, y * WaterGridSize]));
+                    waterColors[y * w + x] = new Color(new Vector4(velocity.X, velocity.Y, 0, water.Colour(x * WaterGridSize, y * WaterGridSize)));
                 }
 
             WaterTexture.SetData(waterColors);

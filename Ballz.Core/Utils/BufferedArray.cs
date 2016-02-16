@@ -5,6 +5,32 @@ namespace Ballz.Utils
 {
     public class BufferedArray<T>
     {
+        public class Interactor<T> : IDisposable
+        {
+            private BufferedArray<T> array;
+
+            internal Interactor(BufferedArray<T> array)
+            {
+                this.array = array;
+            }
+
+            public T this[params int[] pos]
+            {
+                get { return array[pos]; }
+                set { array[pos] = value; }
+            }
+
+            public void Dispose()
+            {
+                array.Unbuffer();
+            }
+        }
+
+        public Interactor<T> Open()
+        {
+            return new Interactor<T>(this);
+        } 
+
         private T[] data;
         private T[] buffer;
 
@@ -33,13 +59,18 @@ namespace Ballz.Utils
             return val;
         }
 
-        public T this[params int[] pos]
+        private T this[params int[] pos]
         {
             get { return data[ToIndex(pos)]; }
             set { buffer[ToIndex(pos)] = value; }
         }
 
-        public void Unbuffer()
+        public T Read(params int[] pos)
+        {
+            return this[pos];
+        }
+
+        private void Unbuffer()
         {
             var tmp = buffer;
             buffer = data;

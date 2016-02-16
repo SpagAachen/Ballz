@@ -3,8 +3,8 @@ float2 GridSize;
 texture WaterTexture;
 
 const float4 waterColor = float4(0, 0.2, 1, 0.75);
-const float pressureWaterMin = 0.3;
-const float pressureWaterFull = 0.31;
+const float pressureWaterMin = 0;
+const float pressureWaterFull = 1;
 
 sampler waterSampler = sampler_state
 {

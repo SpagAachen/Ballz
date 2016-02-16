@@ -14,6 +14,7 @@ namespace Ballz.GameSession.World
             Width = width;
             Height = height;
             pressure = new BufferedArray<float>(ArrayWidth, ArrayHeight);
+            colour = new BufferedArray<float>(ArrayWidth,ArrayHeight);
             force = new BufferedArray<Vector2>(ArrayWidth, ArrayHeight);
         }
 
@@ -24,64 +25,62 @@ namespace Ballz.GameSession.World
         private int ArrayHeight => Height / cellSize;
 
         private BufferedArray<float> pressure;
+        private BufferedArray<float> colour;
         private BufferedArray<Vector2> force;
 
         private const int cellSize = 5;
 
-        public float this[int x, int y]
+        public float Pressure(int x, int y)
         {
-            get { return pressure[x/ cellSize, y/cellSize]; }
-            set { pressure[x/ cellSize, y/ cellSize] = value; }
+            return pressure.Read(x / cellSize, y / cellSize);
+        }
+
+        public float Colour(int x, int y)
+        {
+            return colour.Read(x / cellSize, y / cellSize);
         }
 
         public Vector2 Velocity(int x, int y)
         {
-            return force[x/cellSize, y/cellSize];
-        }
-        
-        public Vector2 LerpVelocity(float x, float y)
-        {
-            var left = (int)Math.Floor(x/cellSize).Clamp(0, ArrayWidth - 1);
-            var bottom = (int)Math.Floor(y/cellSize).Clamp(0, ArrayHeight - 1);
-            var alpha = x / cellSize - left;
-            var beta = y / cellSize - bottom;
-            var force1 = force[left, bottom];
-            var force2 = force[left, (bottom + 1).Clamp(0, ArrayHeight - 1)];
-            var force3 = force[(left + 1).Clamp(0, ArrayWidth - 1), bottom];
-            var force4 = force[(left + 1).Clamp(0, ArrayWidth - 1), (bottom + 1).Clamp(0, ArrayHeight - 1)];
-            return force1 * (1 - alpha) * (1 - beta)
-                + force2 * (1 - alpha) * beta
-                + force3 * alpha * (1 - beta)
-                + force4 * alpha * beta;
+            return force.Read(x / cellSize, y / cellSize);
         }
 
         public void Initialize(World worldState)
         {
-            var rng = new Random(); 
-            for (var x = 0; x < ArrayWidth; ++x)
-                for (var y = 0; y < ArrayHeight; ++y)
+            using (var forceI = force.Open())
+            {
+                using (var pressureI = pressure.Open())
                 {
-                    if (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0)
+                    using (var colourI = colour.Open())
                     {
-                        force[x, y] = new Vector2(0, 0);
-                        pressure[x, y] = 0;
-                        continue;
-                    }
-                    var relativeX = x * 1.0f / ArrayWidth;
-                    var relativeY = y*1.0f/ ArrayHeight;
-                    if (worldState.StaticGeometry.PublicShape.TerrainBitmap[x*cellSize, y * cellSize])
-                        pressure[x, y] = 0;
-                    else
-                        pressure[x, y] = (float) rng.NextDouble();
-                    
-                    force[x, y] = new Vector2(0,0);
-                }
+                        var rng = new Random();
+                        for (var x = 0; x < ArrayWidth; ++x)
+                            for (var y = 0; y < ArrayHeight; ++y)
+                            {
+                                if (GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0)
+                                {
+                                    forceI[x, y] = new Vector2(0, 0);
+                                    pressureI[x, y] = 0;
+                                    continue;
+                                }
+                                var relativeX = x*1.0f/ArrayWidth;
+                                var relativeY = y*1.0f/ArrayHeight;
+                                if (worldState.StaticGeometry.PublicShape.TerrainBitmap[x*cellSize, y*cellSize])
+                                    pressureI[x, y] = 0;
+                                else
+                                {
+                                    pressureI[x, y] = (float) rng.NextDouble();
+                                    colourI[x, y] = (float) rng.NextDouble();
+                                }
 
-            pressure.Unbuffer();
-            force.Unbuffer();
+                                forceI[x, y] = new Vector2(0, 0);
+                            }
+                    }
+                }
+            }
         }
 
-        private int getBoundary(bool[,] terrain, int x, int y)
+        private int GetBoundary(bool[,] terrain, int x, int y)
         {
             var bounds = 0;
             if (x == 0 || terrain[(x - 1) * cellSize + cellSize/2, y * cellSize + cellSize / 2])
@@ -99,207 +98,238 @@ namespace Ballz.GameSession.World
         
         private void Advect(World worldState, float elapsedSeconds)
         {
-            for (var x = 0; x < ArrayWidth; ++x)
-                for (var y = 0; y < ArrayHeight; ++y)
+            using (var forceI = force.Open())
+            {
+                using (var colourI = colour.Open())
                 {
-                    if (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap,x,y) != 0)
-                    {
-                        force[x, y] = force[x, y];
-                        continue;
-                    }
+                    for (var x = 0; x < ArrayWidth; ++x)
+                        for (var y = 0; y < ArrayHeight; ++y)
+                        {
+                            if (GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0)
+                            {
+                                colourI[x, y] = colourI[x, y];
+                                forceI[x, y] = forceI[x, y];
+                                continue;
+                            }
 
-                    var curPos = new Vector2(x,y);
-                    const int its = 5;
-                    var curForce = force[x, y]*1f;
-                    for (var i = 0; i < its; ++i)
-                    {
-                        curPos -= curForce * elapsedSeconds / its;
-                        var left = (int)Math.Floor(curPos.X).Clamp(0, ArrayWidth - 1);
-                        var bottom = (int)Math.Floor(curPos.Y).Clamp(0, ArrayHeight - 1);
-                        var alpha = curPos.X - left;
-                        var beta = curPos.Y - bottom;
-                        var force1 = force[left, bottom];
-                        var force2 = force[left, (bottom + 1).Clamp(0, ArrayHeight - 1)];
-                        var force3 = force[(left + 1).Clamp(0, ArrayWidth - 1), bottom];
-                        var force4 = force[(left + 1).Clamp(0, ArrayWidth - 1), (bottom + 1).Clamp(0, ArrayHeight - 1)];
-                        curForce = force1 * (1 - alpha) * (1 - beta)
-                            + force2 * (1 - alpha) * beta
-                            + force3 * alpha * (1 - beta)
-                            + force4 * alpha * beta;
+                            var curPos = new Vector2(x, y);
+                            const int its = 5;
+                            var curForce = forceI[x, y]*1f;
+                            var curColour = colourI[x, y];
+                            for (var i = 0; i < its; ++i)
+                            {
+                                curPos -= curForce*elapsedSeconds/its;
+                                var left = (int) Math.Floor(curPos.X).Clamp(0, ArrayWidth - 1);
+                                var bottom = (int) Math.Floor(curPos.Y).Clamp(0, ArrayHeight - 1);
+                                var alpha = curPos.X - left;
+                                var beta = curPos.Y - bottom;
+                                var force1 = forceI[left, bottom];
+                                var force2 = forceI[left, (bottom + 1).Clamp(0, ArrayHeight - 1)];
+                                var force3 = forceI[(left + 1).Clamp(0, ArrayWidth - 1), bottom];
+                                var force4 =
+                                    forceI[(left + 1).Clamp(0, ArrayWidth - 1), (bottom + 1).Clamp(0, ArrayHeight - 1)];
+                                var colour1 = colourI[left, bottom];
+                                var colour2 = colourI[left, (bottom + 1).Clamp(0, ArrayHeight - 1)];
+                                var colour3 = colourI[(left + 1).Clamp(0, ArrayWidth - 1), bottom];
+                                var colour4 =
+                                    colourI[(left + 1).Clamp(0, ArrayWidth - 1), (bottom + 1).Clamp(0, ArrayHeight - 1)];
+                                curForce = force1*(1 - alpha)*(1 - beta)
+                                           + force2*(1 - alpha)*beta
+                                           + force3*alpha*(1 - beta)
+                                           + force4*alpha*beta;
+                                curColour = colour1*(1 - alpha)*(1 - beta)
+                                            + colour2*(1 - alpha)*beta
+                                            + colour3*alpha*(1 - beta)
+                                            + colour4*alpha*beta;
 
-                    }
-                    force[x, y] = curForce;
-
+                            }
+                            forceI[x, y] = curForce;
+                            colourI[x, y] = curColour;
+                        }
                 }
-
-            force.Unbuffer();
+            }
         }
 
         private void AddForce(World worldState, float elapsedSeconds)
         {
-            for (var x = 0; x < ArrayWidth; ++x)
-                for (var y = 0; y < ArrayHeight; ++y)
-                {
-                    if (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0)
-                    {
-                        force[x, y] = force[x, y];
-                        continue;
-                    }
-
-                    force[x, y] = force[x, y] - new Vector2(0, elapsedSeconds*0.01f);
-                }
-
-            force.Unbuffer();
-        }
-
-        private void Diffuse(World worldState, float elapsedSeconds)
-        {
-            for (var i = 0; i < 40; ++i)
+            using (var forceI = force.Open())
             {
                 for (var x = 0; x < ArrayWidth; ++x)
                     for (var y = 0; y < ArrayHeight; ++y)
                     {
-                        if (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0)
+                        if (GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0 || (x != ArrayWidth/2+5 || y != ArrayHeight/2))
                         {
-                            force[x, y] = force[x, y];
+                            forceI[x, y] = forceI[x, y];
                             continue;
                         }
-                        var alpha = 1/(1000*elapsedSeconds);
-                        force[x, y] = (force[x - 1, y] + force[x + 1, y] + force[x, y - 1] + force[x, y + 1] + force[x,y]*alpha) / (4+alpha);
-
+                        forceI[x, y] = forceI[x, y] - new Vector2(0,1000f);
                     }
-                force.Unbuffer();
+            }
+        }
+
+        private void Diffuse(World worldState, float elapsedSeconds)
+        {
+            using (var forceI = force.Open())
+            {
+                    for (var i = 0; i < 40; ++i)
+                    {
+                        for (var x = 0; x < ArrayWidth; ++x)
+                            for (var y = 0; y < ArrayHeight; ++y)
+                            {
+                                if (GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0)
+                                {
+                                    forceI[x, y] = forceI[x, y];
+                                    continue;
+                                }
+                                var alpha = 1/(1000*elapsedSeconds);
+                                forceI[x, y] = (forceI[x - 1, y] + forceI[x + 1, y] + forceI[x, y - 1] +
+                                                forceI[x, y + 1] +
+                                                forceI[x, y]*alpha)/(4 + alpha);
+
+                            }
+                    }
             }
         }
 
         private void ComputePressure(World worldState, float elapsedSeconds)
         {
-            for (var i = 0; i < 40; ++i)
+                for (var i = 0; i < 40; ++i)
             {
-                for (var x = 0; x < ArrayWidth; ++x)
-                    for (var y = 0; y < ArrayHeight; ++y)
-                    {
-                        if (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0)
+                using (var pressureI = pressure.Open())
+                {
+                    for (var x = 0; x < ArrayWidth; ++x)
+                        for (var y = 0; y < ArrayHeight; ++y)
                         {
-                            continue;
-                        }
-                        var div = (force[x + 1, y].X - force[x - 1, y].X)/2 + (force[x, y + 1].Y - force[x, y - 1].Y)/2;
-                        pressure[x, y] = ((pressure[x - 1, y] + pressure[x + 1, y] + pressure[x, y - 1] +
-                                         pressure[x, y + 1] - div)/4).Clamp(0,float.MaxValue);
+                            if (GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0)
+                            {
+                                continue;
+                            }
+                            var div = (force.Read(x + 1, y).X - force.Read(x - 1, y).X)/2 +
+                                      (force.Read(x, y + 1).Y - force.Read(x, y - 1).Y)/2;
+                            pressureI[x, y] = ((pressureI[x - 1, y] + pressureI[x + 1, y] + pressureI[x, y - 1] +
+                                                pressureI[x, y + 1] - div)/4).Clamp(0, float.MaxValue);
 
-                    }
-                pressure.Unbuffer();
-                for (var x = 0; x < ArrayWidth; ++x)
-                    for (var y = 0; y < ArrayHeight; ++y)
-                    {
-                        switch (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
-                        {
-                            case 0:
-                                pressure[x, y] = pressure[x, y];
-                                break;
-                            case 1:
-                                pressure[x, y] = pressure[x + 1, y];
-                                break;
-                            case 2:
-                                pressure[x, y] = pressure[x - 1, y];
-                                break;
-                            case 4:
-                                pressure[x, y] = pressure[x, y + 1];
-                                break;
-                            case 8:
-                                pressure[x, y] = pressure[x, y - 1];
-                                break;
-                            default:
-                                pressure[x, y] = 0;
-                                break;
                         }
-                    }
-                for (var x = 0; x < ArrayWidth; ++x)
-                    for (var y = 0; y < ArrayHeight; ++y)
-                    {
-                        switch (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
+                }
+                using (var pressureI = pressure.Open())
+                {
+                    for (var x = 0; x < ArrayWidth; ++x)
+                        for (var y = 0; y < ArrayHeight; ++y)
                         {
-                            case 5:
-                                pressure[x, y] = (pressure[x + 1, y] + pressure[x, y + 1]) / 2;
-                                break;
-                            case 6:
-                                pressure[x, y] = (pressure[x - 1, y] + pressure[x, y + 1]) / 2;
-                                break;
-                            case 9:
-                                pressure[x, y] = (pressure[x + 1, y] + pressure[x, y - 1]) / 2;
-                                break;
-                            case 10:
-                                pressure[x, y] = (pressure[x - 1, y] + pressure[x, y - 1]) / 2;
-                                break;
-                            default:
-                                break;
+                            switch (GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
+                            {
+                                case 0:
+                                    pressureI[x, y] = pressureI[x, y];
+                                    break;
+                                case 1:
+                                    pressureI[x, y] = pressureI[x + 1, y];
+                                    break;
+                                case 2:
+                                    pressureI[x, y] = pressureI[x - 1, y];
+                                    break;
+                                case 4:
+                                    pressureI[x, y] = pressureI[x, y + 1];
+                                    break;
+                                case 8:
+                                    pressureI[x, y] = pressureI[x, y - 1];
+                                    break;
+                                default:
+                                    pressureI[x, y] = 0;
+                                    break;
+                            }
                         }
-                    }
-                pressure.Unbuffer();
+                    for (var x = 0; x < ArrayWidth; ++x)
+                        for (var y = 0; y < ArrayHeight; ++y)
+                        {
+                            switch (GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
+                            {
+                                case 5:
+                                    pressureI[x, y] = (pressureI[x + 1, y] + pressureI[x, y + 1])/2;
+                                    break;
+                                case 6:
+                                    pressureI[x, y] = (pressureI[x - 1, y] + pressureI[x, y + 1])/2;
+                                    break;
+                                case 9:
+                                    pressureI[x, y] = (pressureI[x + 1, y] + pressureI[x, y - 1])/2;
+                                    break;
+                                case 10:
+                                    pressureI[x, y] = (pressureI[x - 1, y] + pressureI[x, y - 1])/2;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                }
             }
+            
         }
 
         private void SubtractPressureGradient(World worldState, float elapsedSeconds)
         {
-            for (var x = 0; x < ArrayWidth; ++x)
-                for (var y = 0; y < ArrayHeight; ++y)
-                {
-                    if (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0)
+            using (var forceI = force.Open())
+            {
+                for (var x = 0; x < ArrayWidth; ++x)
+                    for (var y = 0; y < ArrayHeight; ++y)
                     {
-                        continue;
+                        if (GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0)
+                        {
+                            continue;
+                        }
+                        var grad = new Vector2((pressure.Read(x + 1, y) - pressure.Read(x - 1, y))/2,
+                            (pressure.Read(x, y + 1) - pressure.Read(x, y - 1))/2);
+                        forceI[x, y] -= grad;
                     }
-                    var grad = new Vector2((pressure[x + 1, y] - pressure[x - 1, y])/2, (pressure[x, y + 1] - pressure[x, y - 1])/2);
-                    force[x, y] -= grad;
-                }
-            force.Unbuffer();
+            }
 
-            for (var x = 0; x < ArrayWidth; ++x)
-                for (var y = 0; y < ArrayHeight; ++y)
-                {
-                    switch (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
+            using (var forceI = force.Open())
+            {
+                for (var x = 0; x < ArrayWidth; ++x)
+                    for (var y = 0; y < ArrayHeight; ++y)
                     {
-                        case 0:
-                            force[x, y] = force[x, y];
-                            break;
-                        case 1:
-                            force[x, y] = -force[x + 1, y];
-                            break;
-                        case 2:
-                            force[x, y] = -force[x - 1, y];
-                            break;
-                        case 4:
-                            force[x, y] = -force[x, y + 1];
-                            break;
-                        case 8:
-                            force[x, y] = -force[x, y - 1];
-                            break;
-                        default:
-                            force[x, y] = new Vector2(0,0);
-                            break;
+                        switch (GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
+                        {
+                            case 0:
+                                forceI[x, y] = forceI[x, y];
+                                break;
+                            case 1:
+                                forceI[x, y] = -forceI[x + 1, y];
+                                break;
+                            case 2:
+                                forceI[x, y] = -forceI[x - 1, y];
+                                break;
+                            case 4:
+                                forceI[x, y] = -forceI[x, y + 1];
+                                break;
+                            case 8:
+                                forceI[x, y] = -forceI[x, y - 1];
+                                break;
+                            default:
+                                forceI[x, y] = new Vector2(0, 0);
+                                break;
+                        }
                     }
-                }
-            /*for (var x = 0; x < ArrayWidth; ++x)
-                for (var y = 0; y < ArrayHeight; ++y)
-                {
-                    switch (getBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
+                for (var x = 0; x < ArrayWidth; ++x)
+                    for (var y = 0; y < ArrayHeight; ++y)
                     {
-                        case 5:
-                            force[x, y] = new Vector2(-force[x + 1, y].X, -force[x, y + 1].Y);
-                            break;
-                        case 6:
-                            force[x, y] = new Vector2(-force[x - 1, y].X, -force[x, y + 1].Y);
-                            break;
-                        case 9:
-                            force[x, y] = new Vector2(-force[x + 1, y].X, -force[x, y - 1].Y);
-                            break;
-                        case 10:
-                            force[x, y] = new Vector2(-force[x - 1, y].X, -force[x, y - 1].Y);
-                            break;
-                        default:
-                            break;
+                        switch (GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y))
+                        {
+                            case 5:
+                                forceI[x, y] = new Vector2(-forceI[x + 1, y].X, -forceI[x, y + 1].Y);
+                                break;
+                            case 6:
+                                forceI[x, y] = new Vector2(-forceI[x - 1, y].X, -forceI[x, y + 1].Y);
+                                break;
+                            case 9:
+                                forceI[x, y] = new Vector2(-forceI[x + 1, y].X, -forceI[x, y - 1].Y);
+                                break;
+                            case 10:
+                                forceI[x, y] = new Vector2(-forceI[x - 1, y].X, -forceI[x, y - 1].Y);
+                                break;
+                            default:
+                                break;
+                        }
                     }
-                }*/
-            force.Unbuffer();
+            }
         }
 
         public void Step(World worldState, float elapsedSeconds)
