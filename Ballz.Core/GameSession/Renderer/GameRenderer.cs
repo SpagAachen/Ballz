@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using static MathFloat.MathF;
 
 namespace Ballz.GameSession.Renderer
@@ -16,7 +17,7 @@ namespace Ballz.GameSession.Renderer
     public class GameRenderer : DrawableGameComponent
     {
         Model BallModel, GraveModel;
-        Texture2D GermoneyTexture;
+        Dictionary<string,Texture2D> TeamTextures;
         Texture2D CrosshairTexture;
         Texture2D TerrainTexture;
         Texture2D WhiteTexture;
@@ -32,6 +33,7 @@ namespace Ballz.GameSession.Renderer
         public GameRenderer(Ballz game) : base(game)
         {
             Game = game;
+            TeamTextures = new Dictionary<string, Texture2D>();
         }
 
         public Vector2 WorldToScreen(Vector3 Position)
@@ -142,6 +144,8 @@ namespace Ballz.GameSession.Renderer
                 DrawRope(ball.AttachedRope);
 
             BallEffect.DiffuseColor = Vector3.One;
+            if(ball.Player.TeamName != null)
+                BallEffect.Texture = TeamTextures[ball.Player.TeamName];
 
             Vector2 nV = ball.Direction;
             Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * 50 * nV.X / 360.0)) * Matrix.CreateTranslation(new Vector3(ball.Position, 0));
@@ -351,12 +355,18 @@ namespace Ballz.GameSession.Renderer
 
         protected override void LoadContent()
         {
-            GermoneyTexture = Game.Content.Load<Texture2D>("Textures/Germoney");
+            //load a texture for each team
+            foreach (string s in Game.Teamnames)
+            {
+                TeamTextures.Add(s,Game.Content.Load<Texture2D>("Textures/Teams/"+s));
+            }
+
             CrosshairTexture = Game.Content.Load<Texture2D>("Textures/Crosshair");
 
             BallEffect = new BasicEffect(Game.GraphicsDevice);
             BallEffect.EnableDefaultLighting();
-            BallEffect.Texture = GermoneyTexture;
+
+            BallEffect.Texture = TeamTextures.Values.ElementAt(0);    //default texture
             BallEffect.TextureEnabled = true;
             BallEffect.DirectionalLight0.Direction = new Vector3(1, -1, -1);
             BallEffect.AmbientLightColor = new Vector3(0.3f, 0.3f, 0.3f);

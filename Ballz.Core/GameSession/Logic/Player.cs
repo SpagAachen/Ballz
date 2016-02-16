@@ -13,5 +13,7 @@ namespace Ballz.GameSession.Logic
         public int Id { get; set; } = IdCounter++;
 
         public string Name { get; set; }
+
+        public string TeamName{ get; set; }
     }
 }
