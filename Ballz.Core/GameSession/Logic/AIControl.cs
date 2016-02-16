@@ -1,13 +1,6 @@
-﻿using Ballz.Messages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Ballz.GameSession.World;
 using Microsoft.Xna.Framework;
-using Ballz.Sound;
-using Ballz.Utils;
 
 namespace Ballz.GameSession.Logic
 {
@@ -16,7 +9,6 @@ namespace Ballz.GameSession.Logic
         public AIControl(Ballz game, Session match, Ball ball):
             base(game, match, ball)
         {
-
         }
 
         Ball CurrentTarget;
@@ -24,11 +16,11 @@ namespace Ballz.GameSession.Logic
         float ShootCooldown;
         const float PauseBetweenShots = 2.0f;
 
-        public override void Update(float elapsedSeconds, World.World worldState)
+        public override bool Update(float elapsedSeconds, World.World worldState)
         {
             base.Update(elapsedSeconds, worldState);
 
-            if (IsAlive)
+            if (Ball.IsAlive)
             {
                 ShootCooldown -= elapsedSeconds;
 
@@ -47,14 +39,14 @@ namespace Ballz.GameSession.Logic
                     if (CurrentTarget != null)
                     {
                         Ball.IsAiming = true;
-                        IsCharging = true;
+                        Ball.IsCharging = true;
                         Ball.IsAiming = true;
 
                         Ball.AimDirection = Vector2.Normalize(CurrentTarget.Position - Ball.Position);
 
                         if (Ball.ShootCharge > 0.9f)
                         {
-                            Shoot();
+                            //Shoot();
                             ShootCooldown = PauseBetweenShots;
                         }
                     }
@@ -65,9 +57,11 @@ namespace Ballz.GameSession.Logic
                 }
                 else
                 {
-                    IsCharging = false;
+                    Ball.IsCharging = false;
                 }
             }
+
+            return false;
         }
     }
 }

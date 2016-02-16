@@ -1,24 +1,18 @@
-﻿using System;
-using System.IO;
-using System.Xml.Serialization;
-using Ballz.GameSession.World;
+﻿using Ballz.GameSession.World;
 using Ballz.Input;
 using Ballz.Logic;
+using Ballz.Menu;
 using Ballz.Renderer;
 using Ballz.Sound;
 using Microsoft.Xna.Framework;
-using Ballz.Menu;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
 
 namespace Ballz
 {
-    #region Using Statements
-
-    
-
-    #endregion
-
     /// <summary>
     ///     This is the main type for your game.
     /// </summary>
@@ -27,36 +21,38 @@ namespace Ballz
         //SpriteBatch spriteBatch;
         private static Ballz _instance;
 
+        public List<string> Teamnames{ get; private set;}
+
         public GraphicsDeviceManager Graphics { get; set; }
 
         public LogicControl Logic { get; set; }
 
         public World World { get; set; }
 
-		public Network.Network Network { get; set; }
+        public Network.Network Network { get; set; }
 
-        public GameSession.Session Match;
+        public GameSession.Session Match { get; set; }
 
-        public Settings.ProgrammSettings GameSettings;
+        public Settings.ProgrammSettings GameSettings { get; set; }
 
-        public Label NetworkLobbyConnectedClients = new Label ("test", true);
+        public Label NetworkLobbyConnectedClients { get; set; } = new Label("test", true);
 
-        public Composite MainMenu;
+        public Composite MainMenu { get; set; }
 
-        public Camera Camera;
+        public Camera Camera { get; set; }
 
         private Ballz()
         {
+            Teamnames = new List<string>();
             Graphics = new GraphicsDeviceManager(this);
-            initSettings();
+            InitSettings();
             Content.RootDirectory = "Content";
             Graphics.IsFullScreen = GameSettings.Fullscreen.Value;
             Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Value.Height;
             Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
             Window.AllowUserResizing = true;
             IsFixedTimeStep = false;
-
-
+            
             Camera = new Camera();
             // create the Game Components
             var menuRendering = new MenuRenderer(this, DefaultMenu());
@@ -66,7 +62,7 @@ namespace Ballz
 
             Components.Add(input);
             //Components.Add(physics);
-			Components.Add(Network);
+            Components.Add(Network);
             Components.Add(menuRendering);
             Components.Add(new PerformanceRenderer(this));
 
@@ -81,14 +77,14 @@ namespace Ballz
             //add eventhandlers to events
             input.Input += Logic.HandleInputMessage;
             //input.Input += physics.HandleMessage;
-			input.Input += Network.HandleMessage;
+            input.Input += Network.HandleMessage;
 
             //Logic.Message += physics.HandleMessage;
-			Logic.Message += Network.HandleMessage;
+            Logic.Message += Network.HandleMessage;
             //Logic.Message += gameRendering.HandleMessage;
             Logic.Message += menuRendering.HandleMessage;
 
-			Network.Message += Logic.HandleNetworkMessage;
+            Network.Message += Logic.HandleNetworkMessage;
         }
 
         public static Ballz The()
@@ -103,7 +99,7 @@ namespace Ballz
         /// Inits the settings, by deserializing an existing Settings file.
         /// If no setingsFile is found, the default Settings are provided and serialized.
         /// </summary>
-        private void initSettings()
+        private void InitSettings()
         {
             try
             {
@@ -111,35 +107,36 @@ namespace Ballz
                 //found an existing Settings file try to deserialize it
                 try
                 {
-                    loadSettings(stream);
-                    sanitizeSettings();
+                    LoadSettings(stream);
+                    SanitizeSettings();
                 }
-                catch(Exception )    //loading failed so throw away the old xml
+                catch (Exception) // Loading failed so throw away the old xml
                 {
                     stream.Close();
                     File.Delete("Settings.xml");
                     FileStream theStream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
                     GameSettings = new Settings.ProgrammSettings();
-                    storeSettings(theStream);
+                    StoreSettings(theStream);
                 }
+
                 stream.Close();
             }
-            catch(Exception )
+            catch (Exception)
             {
                 //no settings file was found, create one.
                 FileStream theStream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
                 GameSettings = new Settings.ProgrammSettings();
-                storeSettings(theStream);
+                StoreSettings(theStream);
             }
         }
 
-        private void sanitizeSettings()
+        private void SanitizeSettings()
         {
-            if (!getResolutions().Contains(GameSettings.ScreenResolution.Value))
+            if (!GetResolutions().Contains(GameSettings.ScreenResolution.Value))
                 throw new Exception("Settings.xml holds bogus values");
         }
 
-        private List<Settings.Resolution> getResolutions()
+        private List<Settings.Resolution> GetResolutions()
         {
             List<Settings.Resolution> result = new List<Settings.Resolution>();
             DisplayModeCollection dmc = GraphicsAdapter.DefaultAdapter.SupportedDisplayModes;
@@ -149,62 +146,64 @@ namespace Ballz
                 if (!result.Contains(resolution))
                     result.Add(resolution);
             }
+
             return result;
         }
 
-        private void loadSettings(FileStream stream)
+        private void LoadSettings(FileStream stream)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Settings.ProgrammSettings));
             GameSettings = (Settings.ProgrammSettings)serializer.Deserialize(stream);
         }
 
-        private void storeSettings(FileStream stream)
+        private void StoreSettings(FileStream stream)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Settings.ProgrammSettings));
             serializer.Serialize(stream, GameSettings);
         }
 
         private Composite DefaultMenu()
-		{
-			// options menu
-			var optionsMenu = new Composite ("Options", true);
-			//optionsMenu.AddItem(new Label("Not Implemented", false));
-			optionsMenu.AddItem (new CheckBox ("FullScreen: ", GameSettings.Fullscreen));
-			optionsMenu.AddItem (new Choice<Settings.Resolution> ("Resolution: ", GameSettings.ScreenResolution, getResolutions ()));
-			Label apply = new Label ("Apply", true);
-			apply.OnSelect += () => {
-				File.Delete ("Settings.xml");
-				FileStream stream = new FileStream ("Settings.xml", FileMode.OpenOrCreate);
-				storeSettings (stream);
-				stream.Close ();
-				Graphics.IsFullScreen = GameSettings.Fullscreen.Value;
-				Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
-				Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Value.Height;
-				Graphics.ApplyChanges ();
-			};
-			optionsMenu.AddItem (apply);
+        {
+            // options menu
+            var optionsMenu = new Composite("Options", true);
+            //optionsMenu.AddItem(new Label("Not Implemented", false));
+            optionsMenu.AddItem(new CheckBox("FullScreen: ", GameSettings.Fullscreen));
+            optionsMenu.AddItem(new Choice<Settings.Resolution>("Resolution: ", GameSettings.ScreenResolution, GetResolutions()));
+            Label apply = new Label("Apply", true);
+            apply.OnSelect += () =>
+            {
+                File.Delete("Settings.xml");
+                FileStream stream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
+                StoreSettings(stream);
+                stream.Close();
+                Graphics.IsFullScreen = GameSettings.Fullscreen.Value;
+                Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
+                Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Value.Height;
+                Graphics.ApplyChanges();
+            };
+            optionsMenu.AddItem(apply);
 
-			// multiplayer menu
-			var networkMenu = new Composite ("Multiplayer", true);
-			// - connect to server
-			var networkConnectToMenu = new Composite ("Connect to", true);
-			var networkHostInput = new InputBox ("Host Name: ", true);
+            // multiplayer menu
+            var networkMenu = new Composite("Multiplayer", true);
+            // - connect to server
+            var networkConnectToMenu = new Composite("Connect to", true);
+            var networkHostInput = new InputBox("Host Name: ", true);
             networkHostInput.Value = "localhost";
-            networkConnectToMenu.AddItem (networkHostInput);
-			var networkConnectToLabel = new Label ("Connect", true);
-			networkConnectToLabel.OnSelect += () => Network.ConnectToServer (networkHostInput.Value, 13337);
-			networkConnectToMenu.AddItem (networkConnectToLabel);
+            networkConnectToMenu.AddItem(networkHostInput);
+            var networkConnectToLabel = new Label("Connect", true);
+            networkConnectToLabel.OnSelect += () => Network.ConnectToServer(networkHostInput.Value, 13337);
+            networkConnectToMenu.AddItem(networkConnectToLabel);
             // - start server
             var networkServerMenu = new Composite("Start Server", true);
 
-			networkServerMenu.OnSelect += () => 
-			{
-				Network.StartServer(13337); //TODO: port input
-			};
+            networkServerMenu.OnSelect += () =>
+            {
+                Network.StartServer(13337); //TODO: port input
+            };
             // network lobby
             networkServerMenu.AddItem(NetworkLobbyConnectedClients);
-            var networkServerMenuStartGame = new Label ("Start Game", true);
-            networkServerMenuStartGame.OnSelect += () => 
+            var networkServerMenuStartGame = new Label("Start Game", true);
+            networkServerMenuStartGame.OnSelect += () =>
             {
                 Logic.StartGame(new SessionFactory.Worms());
                 Network.GameStarted();
@@ -226,18 +225,19 @@ namespace Ballz
                 Logic.ContinueGame();
             };
             mainMenu.AddItem(continueLabel);
-            
+
             Composite startGame = new Composite("Start New Game", true);
-            foreach(var factory in SessionFactory.SessionFactory.AvailableFactories)
+            foreach (var factory in SessionFactory.SessionFactory.AvailableFactories)
             {
                 var factoryLabel = new Label(factory.Name, true);
                 factoryLabel.OnSelect += () =>
                 {
-                    if(Match == null)
+                    if (Match == null)
                     {
                         continueLabel.Visible = true;
                         continueLabel.Selectable = true;
                     }
+
                     Logic.StartGame(factory);
                 };
                 startGame.AddItem(factoryLabel);
@@ -258,6 +258,19 @@ namespace Ballz
             return mainMenu;
         }
 
+        void loadTeamnames()
+        {
+            string path = Content.RootDirectory + "/Textures/Teams";
+            DirectoryInfo d = new DirectoryInfo(path);
+            FileInfo[] Files = d.GetFiles(); //Getting Text files
+            //string str = "";
+            foreach(FileInfo file in Files )
+            {
+                //str = str + ", " + file.Name;
+                Teamnames.Add(Path.GetFileNameWithoutExtension(file.Name));
+            }
+        }
+
         /// <summary>
         ///     Allows the game to perform any initialization it needs to before starting to run.
         ///     This is where it can query for any required services and load any non-graphic
@@ -267,7 +280,7 @@ namespace Ballz
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            loadTeamnames();
             base.Initialize();
         }
 

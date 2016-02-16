@@ -6,16 +6,16 @@ namespace Ballz.GameSession.World
     /// <summary>
     ///     Entity is the Base class for all types of Entities in our Game.
     /// </summary>
-    public class Entity: IDisposable
+    public class Entity : IDisposable
     {
         private static int InstanceCounter = 1;
 
-		public int ID
+        public int ID
         {
             get;
             set;
         }
-        
+
         public Vector2 Position
         {
             get;
@@ -34,14 +34,14 @@ namespace Ballz.GameSession.World
             set;
         }
 
-		public Vector2 Direction
+        public Vector2 Direction
         {
             get
             {
                 return new Vector2((float)Math.Sin(Rotation), (float)Math.Cos(Rotation));
             }
         }
-			
+
         public PhysicsMaterial Material
         {
             get;

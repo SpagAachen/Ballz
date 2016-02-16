@@ -1,19 +1,16 @@
 ﻿using Ballz.GameSession.World;
 using Ballz.Messages;
 using Ballz.Utils;
-using Microsoft.Xna.Framework;
 using FarseerPhysics;
-using FarseerPhysics.Dynamics;
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using FarseerPhysics.Collision.Shapes;
 using FarseerPhysics.Common;
-using System.Diagnostics;
+using FarseerPhysics.Dynamics;
 using FarseerPhysics.Factories;
-
+using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using static MathFloat.MathF;
 
 namespace Ballz.GameSession.Physics
@@ -76,16 +73,16 @@ namespace Ballz.GameSession.Physics
                 {
                     fixture.Dispose();
                 }
+
                 body.Dispose();
             }
 
             TerrainBodies.Clear();
 
             // Update the terrain explicitly
-            terrain.update();
-            var outlines = terrain.getOutline();
-
-
+            terrain.Update();
+            var outlines = terrain.GetOutline();
+            
             foreach (var outline in outlines)
             {
                 var vertices = new Vector2[outline.Count];
@@ -113,6 +110,7 @@ namespace Ballz.GameSession.Physics
             {
                 fixture.Dispose();
             }
+
             body.Dispose();
         }
 
@@ -148,10 +146,12 @@ namespace Ballz.GameSession.Physics
             {
                 var segmentStart = rope.AttachedPosition + ropeSegmentVector * (i - 0.5f);
                 var segmentCenter = rope.AttachedPosition + ropeSegmentVector * i;
-                var segment = BodyFactory.CreateCircle(PhysicsWorld, Rope.SegmentLength * 0.5f * 0.8f, 2f);// BodyFactory.CreateRectangle(PhysicsWorld, 0.05f, Rope.SegmentLength, 0.5f);
+                var segment = BodyFactory.CreateCircle(PhysicsWorld, Rope.SegmentLength * 0.5f * 0.8f, 5f);// BodyFactory.CreateRectangle(PhysicsWorld, 0.05f, Rope.SegmentLength, 0.5f);
                 segment.BodyType = BodyType.Dynamic;
                 segment.Friction = 0.5f;
                 segment.Restitution = 0.2f;
+                segment.AngularDamping = 0.1f;
+                segment.LinearDamping = 0.1f;
                 segment.CollisionCategories = Category.Cat3;
                 segment.SetTransform(segmentCenter, ropeRotation);
 
@@ -183,6 +183,7 @@ namespace Ballz.GameSession.Physics
             {
                 PhysicsWorld.RemoveJoint(joint);
             }
+
             rope.PhysicsSegmentJoints.Clear();
 
             foreach (var body in rope.PhysicsSegments)
@@ -216,7 +217,37 @@ namespace Ballz.GameSession.Physics
                 ballJoint.CollideConnected = false;
                 rope.PhysicsEntityJoint = ballJoint;
             }
-         }
+        }
+
+        public void LoosenRope(Rope rope)
+        {
+            if (rope.PhysicsSegments.Count * Rope.SegmentLength < Rope.MaxLength)
+            {
+                PhysicsWorld.RemoveJoint(rope.PhysicsEntityJoint);
+
+                var lastSegment = rope.PhysicsSegments.Last();
+
+                var segmentCenter = lastSegment.Position + new Vector2(0, -Rope.SegmentLength * 0.5f);
+                var newSegment = BodyFactory.CreateCircle(PhysicsWorld, Rope.SegmentLength * 0.5f * 0.8f, 10f);// BodyFactory.CreateRectangle(PhysicsWorld, 0.05f, Rope.SegmentLength, 0.5f);
+                newSegment.BodyType = BodyType.Dynamic;
+                newSegment.AngularDamping = 0.1f;
+                newSegment.LinearDamping = 0.1f;
+                newSegment.Friction = 0.5f;
+                newSegment.Restitution = 0.2f;
+                newSegment.CollisionCategories = Category.Cat3;
+                newSegment.Position = segmentCenter;
+
+                rope.PhysicsSegments.Add(newSegment);
+
+                var segmentJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, lastSegment, newSegment, new Vector2(0, Rope.SegmentLength * 0.5f), new Vector2(0, -Rope.SegmentLength * 0.5f), false);
+                segmentJoint.CollideConnected = false;
+                rope.PhysicsSegmentJoints.Add(segmentJoint);
+
+                var ballJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, rope.PhysicsSegments.Last(), rope.AttachedEntity.PhysicsBody, Vector2.Zero, Vector2.Zero);
+                ballJoint.CollideConnected = false;
+                rope.PhysicsEntityJoint = ballJoint;
+            }
+        }
 
         /// <summary>
         /// Syncs the given world state into the physics world.
@@ -262,7 +293,6 @@ namespace Ballz.GameSession.Physics
                         var shot = e as Shot;
                         body.OnCollision += (a, b, contact) =>
                         {
-
                             Vector2 normal;
                             FixedArray2<Vector2> points;
                             contact.GetWorldManifold(out normal, out points);
@@ -287,6 +317,7 @@ namespace Ballz.GameSession.Physics
                                 entity.OnEntityCollision(shot);
                                 shot.OnEntityCollision(entity);
                             }
+
                             return true;
                         };
                     }
@@ -379,6 +410,7 @@ namespace Ballz.GameSession.Physics
                             entity.OnEntityCollision(shot);
                             shot.OnEntityCollision(entity);
                         }
+
                         worldState.Entities.Remove(shot);
                     }
                 }
@@ -387,10 +419,13 @@ namespace Ballz.GameSession.Physics
 
         public class RaycastResult
         {
-            public bool HasHit = false;
-            public Entity Entity = null;
-            public Vector2 Position = Vector2.Zero;
-            public Vector2 Normal = Vector2.Zero;
+            public bool HasHit { get; set; } = false;
+
+            public Entity Entity { get; set; } = null;
+
+            public Vector2 Position { get; set; } = Vector2.Zero;
+
+            public Vector2 Normal { get; set; } = Vector2.Zero;
         }
 
         public RaycastResult Raycast(Vector2 rayStart, Vector2 rayEnd)
@@ -398,7 +433,8 @@ namespace Ballz.GameSession.Physics
             float closestFraction = float.PositiveInfinity;
             RaycastResult closestHit = new RaycastResult();
 
-            PhysicsWorld.RayCast((Fixture fixture, Vector2 position, Vector2 normal, float fraction) => {
+            PhysicsWorld.RayCast((Fixture fixture, Vector2 position, Vector2 normal, float fraction) =>
+            {
                 Entity hitEntity = null;
                 if (EntityIdByPhysicsBody.ContainsKey(fixture.Body))
                 {
@@ -435,7 +471,5 @@ namespace Ballz.GameSession.Physics
                 }
             }
         }
-
-
     }
 }

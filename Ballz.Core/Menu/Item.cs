@@ -6,9 +6,12 @@ namespace Ballz.Menu
     public abstract class Item
     {
         public bool Visible { get; set; } = true;
+
         public bool Active{ get; protected set;}
+
         //TODO: if necessary use an event for this.
         public bool ActiveChanged{ get; protected set;}
+
         protected Item(string name, bool selectable = false)
         {
             Name = name;

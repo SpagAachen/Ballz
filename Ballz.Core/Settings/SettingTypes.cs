@@ -33,7 +33,9 @@ namespace Ballz.Settings
     public class Resolution : IComparable
     {
         public int Width{ get; set;}
+
         public int Height{ get; set;}
+
         public Resolution()
         {
         }
@@ -46,7 +48,7 @@ namespace Ballz.Settings
             
         public override string ToString()
         {
-            return string.Format("{0}x{1}",Width,Height);
+            return $"{Width}x{Height}";
         }
 
         public override bool Equals(object obj)
@@ -73,6 +75,7 @@ namespace Ballz.Settings
                 {
                     result = Width.CompareTo(toCompare.Width);
                 }
+
                 if (result.HasValue)
                     return result.Value;
                 else
@@ -83,4 +86,3 @@ namespace Ballz.Settings
         }
     }
 }
-

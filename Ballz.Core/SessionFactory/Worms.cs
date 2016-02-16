@@ -1,29 +1,30 @@
-﻿using System;
+﻿using Ballz.GameSession;
+using Ballz.GameSession.Logic;
+using Ballz.GameSession.World;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Ballz.GameSession;
-using Ballz.GameSession.World;
-
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Ballz.GameSession.Logic;
 
 namespace Ballz.SessionFactory
 {
     public class Worms : SessionFactory
     {
-        public Worms(string mapName = "TestWorld2", bool includeAI = false)
+        public Worms(string mapName = "TestWorld2", bool includeAI = false, bool usePlayerTurns = false)
         {
             MapName = mapName;
             IncludeAI = includeAI;
+            UsePlayerTurns = usePlayerTurns;
         }
 
         public string MapName;
         public bool IncludeAI;
+        public bool UsePlayerTurns;
 
-        public override string Name { get { return "Worms (" + MapName + (IncludeAI ? ", with NPC" : "") + ")"; } }
+        public override string Name { get { return "Worms (" + MapName + (IncludeAI ? ", with NPC" : "") + (UsePlayerTurns ? ", turn mode" : "") + ")"; } }
 
         public List<Vector2> SpawnPoints = new List<Vector2>();
 
@@ -82,6 +83,8 @@ namespace Ballz.SessionFactory
         {
             var session = new Session(game);
 
+            session.UsePlayerTurns = UsePlayerTurns;
+
             var mapTexture = game.Content.Load<Texture2D>("Worlds/" + MapName);
             session.Terrain = new Terrain(mapTexture);
 
@@ -90,7 +93,8 @@ namespace Ballz.SessionFactory
 
             var player1 = new Player
             {
-                Name = "Player1"
+                Name = "Player1",
+                TeamName = "Murica"
             };
 
             session.Players.Add(player1);
@@ -107,7 +111,8 @@ namespace Ballz.SessionFactory
 
             var player2 = new Player
             {
-                Name = "Player2"
+                Name = "Player2",
+                TeamName = "Germoney"
             };
             session.Players.Add(player2);
 

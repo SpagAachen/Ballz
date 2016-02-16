@@ -1,31 +1,49 @@
-﻿using System;
+﻿using Ballz.GameSession.Logic;
+using Ballz.GameSession.World;
+using Ballz.Logic;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Ballz.GameSession.World;
-using Ballz.Logic;
-using Ballz.GameSession.Logic;
 
 namespace Ballz.GameSession
 {
     public class Session: IDisposable
     {
-        public List<Entity> Entities = new List<Entity>();
-        public Terrain Terrain;
-        public Physics.PhysicsControl Physics;
-        public Logic.GameLogic SessionLogic;
-        public Renderer.GameRenderer GameRenderer;
-        public Renderer.DebugRenderer DebugRenderer;
-        public LogicControl Logic;
-        public Input.InputTranslator Input;
-        public Ballz Game;
+        public List<Entity> Entities { get; set; } = new List<Entity>();
+
+        public Terrain Terrain { get; set; }
+
+        public Physics.PhysicsControl Physics { get; set; }
+
+        public Logic.GameLogic SessionLogic { get; set; }
+
+        public Renderer.GameRenderer GameRenderer { get; set; }
+
+        public Renderer.DebugRenderer DebugRenderer { get; set; }
+
+        public LogicControl Logic { get; set; }
+
+        public Input.InputTranslator Input { get; set; }
+
+        public Ballz Game { get; set; }
 
         public List<Player> Players { get; set; } = new List<Player>();
+
         public Player Winner { get; set; } = null;
+
         public SessionState State { get; set; } = SessionState.Starting;
+
+        public bool UsePlayerTurns { get; set; } = false;
+
+        public Player ActivePlayer { get; set; }
+
+        public const float SecondsPerTurn = 60f;
+
+        public float TurnTimeLeft { get; set; } = SecondsPerTurn;
 
         public Session(Ballz _game)
         {
@@ -43,7 +61,7 @@ namespace Ballz.GameSession
             DebugRenderer.Visible = false;
             _game.Components.Add(DebugRenderer);
 
-            SessionLogic = new Logic.GameLogic(_game);
+            SessionLogic = new Logic.GameLogic(_game, this);
             SessionLogic.Enabled = false;
             _game.Components.Add(SessionLogic);
 
