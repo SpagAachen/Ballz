@@ -19,7 +19,10 @@ namespace Ballz.SessionFactory
         {
             var session = new Session(game, settings);
 
-            session.Terrain = new Terrain(GenerateMountain());
+            var texture = GenerateMountain();
+            session.Terrain = new Terrain(texture);
+            settings.MapName = "RandomGeneratedMap";
+            settings.MapTexture = texture;
 
             // Create players and Ballz
             var ballzPositions = new List<Vector2> { new Vector2(1,5), new Vector2(35,5) };

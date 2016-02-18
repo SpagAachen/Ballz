@@ -77,7 +77,7 @@ namespace Ballz.SessionFactory
             return spawns.Select((i)=>SpawnPoints[i]).ToList();
         }
 
-        public override Session StartSession(Ballz game, GameSession.Logic.GameSettings settings)
+        public override Session StartSession(Ballz game, GameSettings settings)
         {
             var session = new Session(game, settings);
 
@@ -85,6 +85,8 @@ namespace Ballz.SessionFactory
 
             var mapTexture = game.Content.Load<Texture2D>("Worlds/" + MapName);
             session.Terrain = new Terrain(mapTexture);
+            settings.MapName = MapName;
+            settings.MapTexture = mapTexture;
 
             FindSpawnPoints(mapTexture, session.Terrain.Scale);
             var spawnPoints = SelectSpawnpoints(settings.Teams.Count);

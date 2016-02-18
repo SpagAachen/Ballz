@@ -5,6 +5,7 @@
     using Microsoft.Xna.Framework;
     using System;
     using System.Collections.Generic;
+    using System.IO;
 
     class Client
     {
@@ -63,12 +64,16 @@
             {
                 switch (netMsg.Kind)
                 {
-                    case NetworkMessage.MessageType.GameStarted:
+                    case NetworkMessage.MessageType.StartGame:
                         //Ballz.The().Logic.StartGame(new SessionFactory.Worms());
                         throw new NotImplementedException();
                         break;
                     case NetworkMessage.MessageType.NumberOfPlayers:
                         NumberOfPlayers = (int)netMsg.Data;
+                        break;
+                    case NetworkMessage.MessageType.Map:
+                        var mapData = (Tuple<string, string>)netMsg.Data;
+                        HandleReceivedMapData(mapData.Item1, mapData.Item2);
                         break;
                     default:
                         Console.WriteLine("Unknown netMsg received: " + netMsg.Kind.ToString());
@@ -82,6 +87,15 @@
                 Console.WriteLine("Unknown object received: " + data.ToString());
             else
                 Console.WriteLine("Empty data");
+        }
+
+        private void HandleReceivedMapData(string mapName, string mapData)
+        {
+            using (var texture = Utils.TextureHelper.LoadTextureData(mapData))
+            using (var stream = File.Create("Worlds/Downloaded_" + mapName + ".png"))
+            {
+                texture.SaveAsPng(stream, texture.Width, texture.Height);
+            }
         }
 
         public void HandleInputMessage(InputMessage message)

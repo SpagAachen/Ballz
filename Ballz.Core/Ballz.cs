@@ -14,6 +14,8 @@ using Ballz.GameSession.Logic;
 
 namespace Ballz
 {
+    using System.Linq;
+
     /// <summary>
     ///     This is the main type for your game.
     /// </summary>
@@ -206,9 +208,14 @@ namespace Ballz
             var networkServerMenuStartGame = new Label("Start Game", true);
             networkServerMenuStartGame.OnSelect += () =>
             {
-                    throw new NotImplementedException();
-                //Logic.StartGame(new SessionFactory.Worms());
-                Network.GameStarted();
+                var currGameSettings = new GameSettings
+                                           {
+                    //TODO: Let server select game mode
+                                               GameMode =
+                                                   SessionFactory.SessionFactory.AvailableFactories
+                                                   .ElementAt(0)
+                                           };
+                Network.StartNetworkGame(currGameSettings);
             };
             networkServerMenu.AddItem(networkServerMenuStartGame);
             //TODO: abort button - close server etc.
@@ -228,46 +235,54 @@ namespace Ballz
             };
             mainMenu.AddItem(continueLabel);
 
-            Composite startGame = new Composite("Start New Game", true);
-            var currGameSettings = new GameSession.Logic.GameSettings();
-            // hard-coded game settings
-            //TODO(MS): Make a "build team, game-settings whatsoever" menu and store it in currGameSettings
+            var startGame = new Composite("Start New Game", true);
             {
+                var currGameSettings = new GameSettings();
+                // hard-coded game settings
+                //TODO(MS): Make a "build team, game-settings whatsoever" menu and store it in currGameSettings
                 {
-                    var player1 = new Player
+                    // Player 1
                     {
-                        Name = "Player1",
-                        TeamName = "Murica"
-                    };
-                    var team1 = new Team{ ControlledByAI = false, Name = "Team1", NumberOfBallz = 1, player = player1 };
-                    currGameSettings.Teams.Add(team1);
-                }
-                {
-                    var player2 = new Player
-                    {
-                        Name = "Player2",
-                        TeamName = "Germoney"
-                    };
-                    var team2 = new Team{ ControlledByAI = false, Name = "Team2", NumberOfBallz = 1, player = player2 };
-                    currGameSettings.Teams.Add(team2);
-                }
-            }
-
-            foreach (var factory in SessionFactory.SessionFactory.AvailableFactories)
-            {
-                var factoryLabel = new Label(factory.Name, true);
-                factoryLabel.OnSelect += () =>
-                {
-                    if (Match == null)
-                    {
-                        continueLabel.Visible = true;
-                        continueLabel.Selectable = true;
+                        var player1 = new Player { Name = "Player1", TeamName = "Murica" };
+                        var team1 = new Team
+                                        {
+                                            ControlledByAI = false,
+                                            Name = "Team1",
+                                            NumberOfBallz = 1,
+                                            player = player1
+                                        };
+                        currGameSettings.Teams.Add(team1);
                     }
+                    // Player 2
+                    {
+                        var player2 = new Player { Name = "Player2", TeamName = "Germoney" };
+                        var team2 = new Team
+                                        {
+                                            ControlledByAI = false,
+                                            Name = "Team2",
+                                            NumberOfBallz = 1,
+                                            player = player2
+                                        };
+                        currGameSettings.Teams.Add(team2);
+                    }
+                }
+                // Select GameMode
+                foreach (var factory in SessionFactory.SessionFactory.AvailableFactories)
+                {
+                    var factoryLabel = new Label(factory.Name, true);
+                    factoryLabel.OnSelect += () =>
+                        {
+                            if (Match == null)
+                            {
+                                continueLabel.Visible = true;
+                                continueLabel.Selectable = true;
+                            }
 
-                    currGameSettings.GameMode = factory;
-                    Logic.StartGame(currGameSettings);
-                };
-                startGame.AddItem(factoryLabel);
+                            currGameSettings.GameMode = factory;
+                            Logic.StartGame(currGameSettings);
+                        };
+                    startGame.AddItem(factoryLabel);
+                }
             }
 
             mainMenu.AddItem(startGame);
