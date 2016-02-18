@@ -13,7 +13,7 @@ namespace Ballz.Test
     using Newtonsoft.Json;
 
     [TestFixture]
-    public class GameSettingsTest
+    public class GameSettingsTests
     {
         // Arrange
         public GameSettings CreateTestObject()
@@ -95,11 +95,14 @@ namespace Ballz.Test
         [Test]
         public void SerializeDeserialize()
         {
+            //Arrange
             var obj = CreateTestObject();
 
+            // Act
             var json = JsonConvert.SerializeObject(obj);
             var obj2 = JsonConvert.DeserializeObject<GameSettings>(json);
 
+            // Assert
             ValidateTestObject(obj2);
         }
     }

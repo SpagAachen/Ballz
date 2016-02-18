@@ -5,7 +5,10 @@
     using Microsoft.Xna.Framework;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
+
+    using global::Ballz.GameSession.Logic;
 
     class Client
     {
@@ -64,12 +67,12 @@
             {
                 switch (netMsg.Kind)
                 {
-                    case NetworkMessage.MessageType.StartGame:
-                        //Ballz.The().Logic.StartGame(new SessionFactory.Worms());
-                        throw new NotImplementedException();
-                        break;
                     case NetworkMessage.MessageType.NumberOfPlayers:
                         NumberOfPlayers = (int)netMsg.Data;
+                        break;
+                    case NetworkMessage.MessageType.StartGame:
+                        Debug.Assert(netMsg.Data != null, "Received invalid game-settings");
+                        ParseGameSettings((GameSettings)netMsg.Data);
                         break;
                     default:
                         Console.WriteLine("Unknown netMsg received: " + netMsg.Kind.ToString());
@@ -83,6 +86,11 @@
                 Console.WriteLine("Unknown object received: " + data.ToString());
             else
                 Console.WriteLine("Empty data");
+        }
+
+        private void ParseGameSettings(GameSettings settings)
+        {
+            Ballz.The().Logic.StartGame(settings);
         }
 
         public void HandleInputMessage(InputMessage message)

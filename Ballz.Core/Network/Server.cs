@@ -27,24 +27,26 @@
 
         public void StartNetworkGame(GameSettings gameSettings)
         {
-            CreateTeams();
-            Broadcast(new NetworkMessage(NetworkMessage.MessageType.NumberOfPlayers, this.NumberOfClients()));
-            Broadcast(new NetworkMessage(NetworkMessage.MessageType.StartGame));
+            // create teams
+            CreateTeams(gameSettings);
+            // Create map etc.
+            gameSettings.GameMode.InitializeSession(Ballz.The(), gameSettings);
+            //// Broadcast gameSettings incl. map to clients
+            Broadcast(new NetworkMessage(NetworkMessage.MessageType.NumberOfPlayers, this.NumberOfClients() + 1)); // +1 for ourselfs
+            Broadcast(new NetworkMessage(NetworkMessage.MessageType.StartGame, gameSettings));
+            // Start our game session
+            Ballz.The().Logic.StartGame(gameSettings);
         }
 
-        private void CreateTeams()
+        private void CreateTeams(GameSettings gameSettings)
         {
-            var currGameSettings = Ballz.The().Match.GameSettings;
-            Debug.Assert(currGameSettings.Teams.Count == 0);
+            Debug.Assert(gameSettings.Teams.Count == 0);
             var counter = 0;
-            foreach (var c in connections)
+            for (var index = 0; index < NumberOfClients() + 1 /* +1 for ourself */; index++)
             {
-                var player = new Player
-                {
-                    Name = "Player" + counter
-                };
+                var player = new Player { Name = "Player" + counter };
                 var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1, player = player };
-                currGameSettings.Teams.Add(team);
+                gameSettings.Teams.Add(team);
                 ++counter;
             }
         }

@@ -20,8 +20,7 @@ namespace Ballz.Messages
             ServerStarted,
             NewClient,
             StartGame,
-            NumberOfPlayers,
-            GameSettings
+            NumberOfPlayers
         }
 
         public NetworkMessage()
