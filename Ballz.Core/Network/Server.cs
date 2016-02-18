@@ -27,6 +27,7 @@
 
         public void StartNetworkGame(GameSettings gameSettings)
         {
+            CreateTeams();
             Broadcast(new NetworkMessage(NetworkMessage.MessageType.NumberOfPlayers, this.NumberOfClients()));
             Broadcast(new NetworkMessage(NetworkMessage.MessageType.StartGame));
         }

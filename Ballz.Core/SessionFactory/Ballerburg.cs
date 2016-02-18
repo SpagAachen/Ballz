@@ -15,14 +15,16 @@ namespace Ballz.SessionFactory
     {
         public override string Name { get; } = "Ballerburg";
 
-        public override Session StartSession(Ballz game, GameSession.Logic.GameSettings settings)
+        protected override void ImplInitializeSession(Ballz game, GameSession.Logic.GameSettings settings)
         {
-            var session = new Session(game, settings);
-
             var texture = GenerateMountain();
-            session.Terrain = new Terrain(texture);
             settings.MapName = "RandomGeneratedMap";
             settings.MapTexture = texture;
+        }
+
+        protected override Session ImplStartSession(Ballz game, GameSession.Logic.GameSettings settings)
+        {
+            var session = new Session(game, settings) { Terrain = new Terrain(settings.MapTexture) };
 
             // Create players and Ballz
             var ballzPositions = new List<Vector2> { new Vector2(1,5), new Vector2(35,5) };

@@ -13,6 +13,7 @@ namespace Ballz.SessionFactory
 {
     public class Worms : SessionFactory
     {
+
         public Worms(string mapName = "TestWorld2", bool usePlayerTurns = false)
         {
             MapName = mapName;
@@ -77,18 +78,22 @@ namespace Ballz.SessionFactory
             return spawns.Select((i)=>SpawnPoints[i]).ToList();
         }
 
-        public override Session StartSession(Ballz game, GameSettings settings)
+        protected override void ImplInitializeSession(Ballz game, GameSession.Logic.GameSettings settings)
         {
-            var session = new Session(game, settings);
-
-            session.UsePlayerTurns = UsePlayerTurns;
-
             var mapTexture = game.Content.Load<Texture2D>("Worlds/" + MapName);
-            session.Terrain = new Terrain(mapTexture);
             settings.MapName = MapName;
             settings.MapTexture = mapTexture;
+        }
 
-            FindSpawnPoints(mapTexture, session.Terrain.Scale);
+        protected override Session ImplStartSession(Ballz game, GameSettings settings)
+        {
+            var session = new Session(game, settings)
+                              {
+                                  UsePlayerTurns = this.UsePlayerTurns,
+                                  Terrain = new Terrain(settings.MapTexture)
+                              };
+
+            FindSpawnPoints(settings.MapTexture, session.Terrain.Scale);
             var spawnPoints = SelectSpawnpoints(settings.Teams.Count);
 
             // Create players and Ballz
