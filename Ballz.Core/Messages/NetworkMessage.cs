@@ -21,7 +21,6 @@ namespace Ballz.Messages
             NewClient,
             StartGame,
             NumberOfPlayers,
-            Map,
             GameSettings
         }
 

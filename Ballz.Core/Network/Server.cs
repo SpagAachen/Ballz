@@ -28,7 +28,6 @@
         public void StartNetworkGame(GameSettings gameSettings)
         {
             Broadcast(new NetworkMessage(NetworkMessage.MessageType.NumberOfPlayers, this.NumberOfClients()));
-            BroadcastMap(Ballz.The().Match.GameSettings.MapName, Ballz.The().Match.GameSettings.MapTexture);
             Broadcast(new NetworkMessage(NetworkMessage.MessageType.StartGame));
         }
 
@@ -47,13 +46,6 @@
                 currGameSettings.Teams.Add(team);
                 ++counter;
             }
-        }
-
-	    private void BroadcastMap(string mapName, Texture2D mapTexture)
-	    {
-            Debug.Assert(mapTexture != null);
-	        var mapData = Utils.TextureHelper.SaveTextureData(mapTexture);
-            Broadcast(new NetworkMessage(NetworkMessage.MessageType.Map, Tuple.Create(mapName,mapData)));
         }
 
 	    public int NumberOfClients()
