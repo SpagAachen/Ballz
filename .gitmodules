@@ -1,0 +1,3 @@
+[submodule "ObjectSynch"]
+	path = ObjectSynch
+	url = https://github.com/LukasBoersma/ObjectSync.git
