@@ -11,15 +11,20 @@ using System.Threading.Tasks;
 
 namespace Ballz.SessionFactory
 {
+    using System.Diagnostics;
+
     public class Ballerburg : SessionFactory
     {
         public override string Name { get; } = "Ballerburg";
 
         protected override void ImplInitializeSession(Ballz game, GameSession.Logic.GameSettings settings)
         {
-            var texture = GenerateMountain();
-            settings.MapName = "RandomGeneratedMap";
-            settings.MapTexture = texture;
+            if (settings.MapTexture == null)
+            { // Multiplayer clients will already have a map
+                var texture = GenerateMountain();
+                settings.MapName = "RandomGeneratedMap";
+                settings.MapTexture = texture;
+            }
         }
 
         protected override Session ImplStartSession(Ballz game, GameSession.Logic.GameSettings settings)

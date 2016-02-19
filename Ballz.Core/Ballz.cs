@@ -213,7 +213,7 @@ namespace Ballz
                     //TODO: Let server select game mode
                                                GameMode =
                                                    SessionFactory.SessionFactory.AvailableFactories
-                                                   .ElementAt(0)
+                                                   .ElementAt(6)
                                            };
                 Network.StartNetworkGame(currGameSettings);
             };
