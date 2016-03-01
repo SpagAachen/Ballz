@@ -30,7 +30,7 @@ namespace Ballz.Logic
             state = GameState.MenuState;
         }
 
-        public void StartGame(SessionFactory.SessionFactory factory)
+        public void StartGame(GameSession.Logic.GameSettings settings)
         {
             // Go back to main menu so it will show when the user enters the menu later
             MenuGoBack();
@@ -41,7 +41,7 @@ namespace Ballz.Logic
             if (Game.Match != null)
                 Game.Match.Dispose();
 
-            Game.Match = factory.StartSession(Game);
+            Game.Match = settings.GameMode.StartSession(Game, settings);
             Game.Match.Start();
             RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }
@@ -98,7 +98,7 @@ namespace Ballz.Logic
             {
                 case NetworkMessage.MessageType.ConnectedToServer:
                     //TODO: show lobby!!!!<<<<<<<<<<<<<<<<<<<<<<<<<
-                    //startGame ();
+                    //Game is started by a message from server
                     break;
             }
         }

@@ -2,18 +2,21 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Net;
     using Messages;
     using Microsoft.Xna.Framework;
     using System.Net.Sockets;
+
+    using global::Ballz.GameSession.Logic;
 
     using Microsoft.Xna.Framework.Graphics;
 
     class Server
     {
         private static int nextId = 1;
-        TcpListener listener = null;
-        private readonly Network network = null;
+        TcpListener listener;
+        private readonly Network network;
         private readonly List<Connection> connections = new List<Connection>();
 
 
@@ -22,19 +25,31 @@
             network = net;
         }
 
-        public void GameStarted()
+        public void StartNetworkGame(GameSettings gameSettings)
         {
-            Broadcast(new NetworkMessage(NetworkMessage.MessageType.NumberOfPlayers, this.NumberOfClients()));
-            Broadcast(new NetworkMessage(NetworkMessage.MessageType.GameStarted));
+            // create teams
+            CreateTeams(gameSettings);
+            // Create map etc.
+            gameSettings.GameMode.InitializeSession(Ballz.The(), gameSettings);
+            //// Broadcast gameSettings incl. map to clients
+            Broadcast(new NetworkMessage(NetworkMessage.MessageType.NumberOfPlayers, this.NumberOfClients() + 1)); // +1 for ourselfs
+            Broadcast(new NetworkMessage(NetworkMessage.MessageType.StartGame, gameSettings));
+            // Start our game session
+            Ballz.The().Logic.StartGame(gameSettings);
         }
 
-	    private void BroadcastMap(string mapName)
-	    {
-            var mapTexture = Ballz.The().Content.Load<Texture2D>("Worlds/" + mapName);
-            //mapTexture.
-            //TODO: implement
-	        throw new NotImplementedException();
-	    }
+        private void CreateTeams(GameSettings gameSettings)
+        {
+            Debug.Assert(gameSettings.Teams.Count == 0);
+            var counter = 0;
+            for (var index = 0; index < NumberOfClients() + 1 /* +1 for ourself */; index++)
+            {
+                var player = new Player { Name = "Player" + counter };
+                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1, player = player };
+                gameSettings.Teams.Add(team);
+                ++counter;
+            }
+        }
 
 	    public int NumberOfClients()
 	    {
@@ -47,10 +62,10 @@
             listener.Start();
             // start lobby first
             network.GameState = Network.GameStateT.InLobby;
-            updateLobbyList();
+            this.UpdateLobbyList();
         }
 
-        public void updateLobbyList()
+        public void UpdateLobbyList()
         {
             Ballz.The().NetworkLobbyConnectedClients.Name = "Myself";
             foreach(var c in connections)
@@ -71,7 +86,7 @@
                     connections.Add(new Connection(client, nextId++));
                     network.RaiseMessageEvent(NetworkMessage.MessageType.NewClient);
                     // update lobby list
-                    updateLobbyList();
+                    this.UpdateLobbyList();
                 }
                 else
                 {
@@ -84,7 +99,7 @@
                 if (c.DataAvailable())
                 {
                     var data = c.ReceiveData();
-                    onData(data, c.Id);
+                    this.OnData(data, c.Id);
                 }
             }
 
@@ -95,7 +110,7 @@
             //TODO: Implement
         }
 
-        private void onData(object data, int sender)
+        private void OnData(object data, int sender)
         {
 			//Console.WriteLine("Received data from " + sender + ": " + data.ToString()); // Debug
 			// Input Message

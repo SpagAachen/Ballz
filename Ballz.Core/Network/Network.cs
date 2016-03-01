@@ -4,6 +4,8 @@
     using Microsoft.Xna.Framework;
     using System;
 
+    using global::Ballz.GameSession.Logic;
+
     /// <summary>
     /// Network takes care of all network related stuff independent of an existing game session.
     /// </summary>
@@ -50,11 +52,11 @@
             //TODO: Implement
         }
 
-        public void GameStarted()
+        public void StartNetworkGame(GameSettings gameSettings)
         {
             if (State == StateT.Server)
             {
-                server.GameStarted();
+                server.StartNetworkGame(gameSettings);
             }
         }
 
