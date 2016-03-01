@@ -45,6 +45,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
    float2 innerCellPos = (input.texCoord * GridSize) - cell;
 
    float4 data = tex2D(fieldSampler, cell / GridSize);
+
    float pressure = data.w;
 
    float2 vl = data.xy * 2.0 - 1.0;

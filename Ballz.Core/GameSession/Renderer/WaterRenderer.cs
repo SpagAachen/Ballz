@@ -45,8 +45,8 @@ namespace Ballz.GameSession.Renderer
         Texture2D WaterTexture = null;
         public Texture2D WaterToTexture(Water water)
         {
-            var w = water.Width / WaterGridSize;
-            var h = water.Height / WaterGridSize;
+            var w = water.Width;
+            var h = water.Height;
 
             if (WaterTexture == null)
                 WaterTexture = new Texture2D(Ballz.The().GraphicsDevice, w, h, false, SurfaceFormat.Color);
@@ -55,7 +55,7 @@ namespace Ballz.GameSession.Renderer
             for (int x = 0; x < w; x++)
                 for (int y = 0; y < h; y++)
                 {
-                    var velocity = water.Velocity(x * WaterGridSize, y * WaterGridSize);
+                    var velocity = water.Velocity(x, y);
                     velocity /= MaxWaterVelocity;
 
                     velocity *= 0.5f;
@@ -66,7 +66,7 @@ namespace Ballz.GameSession.Renderer
                     if (velocity.Y > 1)
                         velocity.Y = 1;
 
-                    waterColors[y * w + x] = new Color(new Vector4(velocity.X, velocity.Y, 0, water.Colour(x * WaterGridSize, y * WaterGridSize)));
+                    waterColors[y * w + x] = new Color(new Vector4(velocity.X, velocity.Y, 0, water.HasFluid(x, y) ? 1 : 0));
                 }
 
             WaterTexture.SetData(waterColors);

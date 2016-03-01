@@ -88,7 +88,7 @@ namespace Ballz.GameSession.World
                                 for (var y = 0; y < ArrayHeight*CellSize; ++y)
                                 {
                                     var val = (x - ArrayWidth*CellSize/2)*(x - ArrayWidth*CellSize/2) +
-                                              (y - ArrayHeight*CellSize/2)*(y - ArrayHeight*CellSize/2) < 36;
+                                              (y - ArrayHeight*CellSize/2)*(y - ArrayHeight*CellSize/2) < 36*25;
                                     val &= GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x/5, y/5) ==
                                            0;
                                     particleI[x, y] = val;
