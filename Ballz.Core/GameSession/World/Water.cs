@@ -21,28 +21,34 @@ namespace Ballz.GameSession.World
         public int Width { get; }
         public int Height { get; }
 
-        private int ArrayWidth => Width / cellSize;
-        private int ArrayHeight => Height / cellSize;
+        private int ArrayWidth => Width / CellSize;
+        private int ArrayHeight => Height / CellSize;
 
         private BufferedArray<float> pressure;
         private BufferedArray<float> colour;
         private BufferedArray<Vector2> force;
+        private BufferedArray<bool> particles; 
 
-        private const int cellSize = 5;
+        public const int CellSize = 5;
 
         public float Pressure(int x, int y)
         {
-            return pressure.Read(x / cellSize, y / cellSize);
+            return pressure.Read(x / CellSize, y / CellSize);
         }
 
         public float Colour(int x, int y)
         {
-            return colour.Read(x / cellSize, y / cellSize);
+            return colour.Read(x / CellSize, y / CellSize);
         }
 
         public Vector2 Velocity(int x, int y)
         {
-            return force.Read(x / cellSize, y / cellSize);
+            return force.Read(x / CellSize, y / CellSize);
+        }
+
+        public bool HasFluid(int x, int y)
+        {
+            return particles.Read(x, y);
         }
 
         public void Initialize(World worldState)
@@ -53,28 +59,40 @@ namespace Ballz.GameSession.World
                 {
                     using (var colourI = colour.Open())
                     {
-                        var rng = new Random();
-                        for (var x = 0; x < ArrayWidth; ++x)
-                            for (var y = 0; y < ArrayHeight; ++y)
-                            {
-                                if (GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0)
+                        using (var particleI = particles.Open())
+                        {
+                            var rng = new Random();
+                            for (var x = 0; x < ArrayWidth; ++x)
+                                for (var y = 0; y < ArrayHeight; ++y)
                                 {
-                                    forceI[x, y] = new Vector2(0, 0);
-                                    pressureI[x, y] = 0;
-                                    continue;
-                                }
-                                var relativeX = x*1.0f/ArrayWidth;
-                                var relativeY = y*1.0f/ArrayHeight;
-                                if (worldState.StaticGeometry.PublicShape.TerrainBitmap[x*cellSize, y*cellSize])
-                                    pressureI[x, y] = 0;
-                                else
-                                {
-                                    pressureI[x, y] = (float) rng.NextDouble();
-                                    colourI[x, y] = (float) rng.NextDouble();
-                                }
+                                    if (GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x, y) != 0)
+                                    {
+                                        forceI[x, y] = new Vector2(0, 0);
+                                        pressureI[x, y] = 0;
+                                        continue;
+                                    }
+                                    var relativeX = x*1.0f/ArrayWidth;
+                                    var relativeY = y*1.0f/ArrayHeight;
+                                    if (worldState.StaticGeometry.PublicShape.TerrainBitmap[x*CellSize, y*CellSize])
+                                        pressureI[x, y] = 0;
+                                    else
+                                    {
+                                        pressureI[x, y] = (float) rng.NextDouble();
+                                        colourI[x, y] = (float) rng.NextDouble();
+                                    }
 
-                                forceI[x, y] = new Vector2(0, 0);
-                            }
+                                    forceI[x, y] = new Vector2(0, 0);
+                                }
+                            for (var x = 0; x < ArrayWidth*CellSize; ++x)
+                                for (var y = 0; y < ArrayHeight*CellSize; ++y)
+                                {
+                                    var val = (x - ArrayWidth*CellSize/2)*(x - ArrayWidth*CellSize/2) +
+                                              (y - ArrayHeight*CellSize/2)*(y - ArrayHeight*CellSize/2) < 36;
+                                    val &= GetBoundary(worldState.StaticGeometry.PublicShape.TerrainBitmap, x/5, y/5) ==
+                                           0;
+                                    particleI[x, y] = val;
+                                }
+                        }
                     }
                 }
             }
@@ -83,15 +101,15 @@ namespace Ballz.GameSession.World
         private int GetBoundary(bool[,] terrain, int x, int y)
         {
             var bounds = 0;
-            if (x == 0 || terrain[(x - 1) * cellSize + cellSize/2, y * cellSize + cellSize / 2])
+            if (x == 0 || terrain[(x - 1) * CellSize + CellSize/2, y * CellSize + CellSize / 2])
                 bounds |= 0x1;
-            if (x == ArrayWidth - 1 || terrain[(x + 1) * cellSize + cellSize / 2, y * cellSize + cellSize / 2])
+            if (x == ArrayWidth - 1 || terrain[(x + 1) * CellSize + CellSize / 2, y * CellSize + CellSize / 2])
                 bounds |= 0x2;
-            if (y == 0 || terrain[x * cellSize + cellSize / 2, (y - 1) * cellSize + cellSize / 2])
+            if (y == 0 || terrain[x * CellSize + CellSize / 2, (y - 1) * CellSize + CellSize / 2])
                 bounds |= 0x4;
-            if (y == ArrayHeight - 1 || terrain[x * cellSize + cellSize / 2, (y + 1) * cellSize + cellSize / 2])
+            if (y == ArrayHeight - 1 || terrain[x * CellSize + CellSize / 2, (y + 1) * CellSize + CellSize / 2])
                 bounds |= 0x8;
-            if (terrain[x*cellSize + cellSize / 2, y*cellSize + cellSize / 2])
+            if (terrain[x*CellSize + CellSize / 2, y*CellSize + CellSize / 2])
                 bounds = 0xFF;
             return bounds;
         }
