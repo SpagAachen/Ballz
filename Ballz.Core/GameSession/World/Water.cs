@@ -16,6 +16,7 @@ namespace Ballz.GameSession.World
             pressure = new BufferedArray<float>(ArrayWidth, ArrayHeight);
             colour = new BufferedArray<float>(ArrayWidth,ArrayHeight);
             force = new BufferedArray<Vector2>(ArrayWidth, ArrayHeight);
+            particles = new BufferedArray<bool>(ArrayWidth*CellSize,ArrayHeight*CellSize);
         }
 
         public int Width { get; }
