@@ -371,6 +371,8 @@ namespace Ballz.GameSession.Renderer
             BallEffect.DirectionalLight0.Direction = new Vector3(1, -1, -1);
             BallEffect.AmbientLightColor = new Vector3(0.3f, 0.3f, 0.3f);
             BallEffect.PreferPerPixelLighting = true;
+            BallEffect.SpecularColor = new Vector3(0.5f, 0.5f, 0.5f);
+            BallEffect.SpecularPower = 4;
 
             BallModel = Game.Content.Load<Model>("Models/Ball");
             BallModel.Meshes[0].MeshParts[0].Effect = BallEffect;
