@@ -11,8 +11,11 @@ using System.Threading.Tasks;
 
 namespace Ballz.SessionFactory
 {
+    using System.Diagnostics;
+
     public class Worms : SessionFactory
     {
+
         public Worms(string mapName = "TestWorld2", bool usePlayerTurns = false)
         {
             MapName = mapName;
@@ -77,16 +80,30 @@ namespace Ballz.SessionFactory
             return spawns.Select((i)=>SpawnPoints[i]).ToList();
         }
 
-        public override Session StartSession(Ballz game, GameSession.Logic.GameSettings settings)
+        protected override void ImplInitializeSession(Ballz game, GameSession.Logic.GameSettings settings)
         {
-            var session = new Session(game, settings);
+            if (settings.MapTexture == null)
+            { // Multiplayer clients will already have a map
+                var mapTexture = game.Content.Load<Texture2D>("Worlds/" + MapName);
+                settings.MapName = MapName;
+                settings.MapTexture = mapTexture;
+            }
+            else
+            {
+                Debug.Assert(settings.MapName != String.Empty);
+                MapName = settings.MapName;
+            }
+        }
 
-            session.UsePlayerTurns = UsePlayerTurns;
+        protected override Session ImplStartSession(Ballz game, GameSettings settings)
+        {
+            var session = new Session(game, settings)
+                              {
+                                  UsePlayerTurns = this.UsePlayerTurns,
+                                  Terrain = new Terrain(settings.MapTexture)
+                              };
 
-            var mapTexture = game.Content.Load<Texture2D>("Worlds/" + MapName);
-            session.Terrain = new Terrain(mapTexture);
-
-            FindSpawnPoints(mapTexture, session.Terrain.Scale);
+            FindSpawnPoints(settings.MapTexture, session.Terrain.Scale);
             var spawnPoints = SelectSpawnpoints(settings.Teams.Count);
 
             // Create players and Ballz

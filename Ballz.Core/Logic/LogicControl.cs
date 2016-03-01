@@ -98,7 +98,7 @@ namespace Ballz.Logic
             {
                 case NetworkMessage.MessageType.ConnectedToServer:
                     //TODO: show lobby!!!!<<<<<<<<<<<<<<<<<<<<<<<<<
-                    //startGame ();
+                    //Game is started by a message from server
                     break;
             }
         }
