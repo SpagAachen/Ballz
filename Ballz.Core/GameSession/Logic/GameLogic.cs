@@ -89,7 +89,7 @@ namespace Ballz.GameSession.Logic
                 var ballControllers = BallControllers.Values.ToArray();
                 foreach (var controller in ballControllers)
                 {
-                    if (controller.Ball.Disposed)
+                    if (controller.Ball.Disposed || !controller.Ball.IsAlive)
                     {
                         ActiveControllers.Remove(controller.Ball.Player);
                         BallControllers.Remove(controller.Ball);
