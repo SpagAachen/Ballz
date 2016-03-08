@@ -62,7 +62,7 @@ namespace Ballz.GameSession.Renderer
         {
             using (new PerformanceReporter(Game))
             {
-                GraphicsDevice.SetRenderTarget(WorldRenderTarget);
+                //GraphicsDevice.SetRenderTarget(WorldRenderTarget);
                 GraphicsDevice.Clear(Color.CornflowerBlue);
                 if (lastModification == null)
                     lastModification = time.TotalGameTime;
@@ -146,7 +146,7 @@ namespace Ballz.GameSession.Renderer
 
         public void PostProcess()
         {
-            CelShading.Techniques[0].Passes[0].Apply();
+            /*CelShading.Techniques[0].Passes[0].Apply();
 
             CelShading.Parameters["InputTexture"].SetValue(WorldRenderTarget);
 
@@ -154,7 +154,7 @@ namespace Ballz.GameSession.Renderer
             {
                 CullMode = CullMode.None
             };
-            Game.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);
+            Game.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);*/
         }
 
         public void DrawBall(Ball ball)
@@ -436,7 +436,7 @@ namespace Ballz.GameSession.Renderer
             GraveModel = Game.Content.Load<Model>("Models/RIP");
             GraveModel.Meshes[0].MeshParts[0].Effect = GraveEffect;
 
-            CelShading = Game.Content.Load<Effect>("Effects/CelShading");
+            //CelShading = Game.Content.Load<Effect>("Effects/CelShading");
 
             {
                 WhiteTexture = new Texture2D(Game.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
