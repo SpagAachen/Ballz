@@ -39,7 +39,7 @@ namespace Ballz.GameSession.World
         {
             Entities = newEntitites;
             StaticGeometry = newTerrain;
-            Water = new Water(30, 10);
+            Water = new Water(50, 25);
         }
     }
 }
