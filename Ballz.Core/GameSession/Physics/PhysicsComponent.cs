@@ -217,6 +217,14 @@ namespace Ballz.GameSession.Physics
                 return;
             }
 
+            // Only allow shortening rope if all joints are restful
+            for(int i = 0; i < rope.PhysicsSegmentJoints.Count; ++i)
+            {
+                var joint = rope.PhysicsSegmentJoints[i];
+                if (Vector2.Distance(joint.WorldAnchorA, joint.WorldAnchorB) > 0.1f * Rope.SegmentLength)
+                    return;
+            }
+
             PhysicsWorld.RemoveJoint(rope.PhysicsEntityJoint);
             PhysicsWorld.RemoveJoint(rope.PhysicsSegmentJoints.Last());
             rope.PhysicsSegmentJoints.Remove(rope.PhysicsSegmentJoints.Last());
