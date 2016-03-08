@@ -52,9 +52,9 @@ namespace Ballz.SessionFactory
                     ++currBallCreating;
                     session.Entities.Add(playerBall);
                     if (team.ControlledByAI)
-                        session.SessionLogic.BallControllers[team.player] = new AIControl(game, session, playerBall);
+                        session.SessionLogic.ActiveControllers[team.player] = new AIControl(game, session, playerBall);
                     else
-                        session.SessionLogic.BallControllers[team.player] = new UserControl(game, session, playerBall);
+                        session.SessionLogic.ActiveControllers[team.player] = new UserControl(game, session, playerBall);
                 }
             }
 

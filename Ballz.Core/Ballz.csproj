@@ -64,6 +64,7 @@
     <Compile Include="GameSession\Logic\Player.cs" />
     <Compile Include="GameSession\Logic\UserControl.cs" />
     <Compile Include="GameSession\Logic\Weapons\Bazooka.cs" />
+    <Compile Include="GameSession\Logic\Weapons\Pistol.cs" />
     <Compile Include="GameSession\Logic\Weapons\RopeTool.cs" />
     <Compile Include="GameSession\Logic\Weapons\WeaponControl.cs" />
     <Compile Include="GameSession\Renderer\PhysicsDebugRendering.cs" />
@@ -113,7 +114,8 @@
     <None Include="Content\Effects\VectorField.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Content\Effects\Water.xnb">
+    <None Include="Content\Effects\Water.xnb"/>
+    <None Include="Content\Effects\CelShading.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Content\Worlds\TestWorld.png" />
@@ -139,6 +141,7 @@
   <ItemGroup>
     <Content Include="Content\Effects\VectorField.fx" />
     <Content Include="Content\Effects\Water.fx" />
+    <Content Include="Content\Effects\CelShading.fx" />
     <Content Include="Content\Fonts\Menufont.spritefont">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -161,6 +164,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\Textures\HandGun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Textures\RedArrow.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\Textures\Rope.png">

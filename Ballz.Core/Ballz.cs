@@ -248,7 +248,7 @@ namespace Ballz
                                         {
                                             ControlledByAI = false,
                                             Name = "Team1",
-                                            NumberOfBallz = 1,
+                                            NumberOfBallz = 2,
                                             player = player1
                                         };
                         currGameSettings.Teams.Add(team1);
@@ -260,12 +260,13 @@ namespace Ballz
                                         {
                                             ControlledByAI = false,
                                             Name = "Team2",
-                                            NumberOfBallz = 1,
+                                            NumberOfBallz = 2,
                                             player = player2
                                         };
                         currGameSettings.Teams.Add(team2);
                     }
                 }
+
                 // Select GameMode
                 foreach (var factory in SessionFactory.SessionFactory.AvailableFactories)
                 {
