@@ -22,9 +22,11 @@ namespace Ballz.GameSession.Renderer
         Texture2D TerrainTexture;
         Texture2D WhiteTexture;
         BasicEffect BallEffect, TerrainEffect, GraveEffect, RopeEffect;
+        Effect CelShading;
+        RenderTarget2D WorldRenderTarget;
         SpriteBatch spriteBatch;
-
-        private SpriteFont font;
+        VertexPositionTexture[] quad;
+        SpriteFont font;
 
         new Ballz Game;
 
@@ -60,6 +62,7 @@ namespace Ballz.GameSession.Renderer
         {
             using (new PerformanceReporter(Game))
             {
+                GraphicsDevice.SetRenderTarget(WorldRenderTarget);
                 GraphicsDevice.Clear(Color.CornflowerBlue);
                 if (lastModification == null)
                     lastModification = time.TotalGameTime;
@@ -134,8 +137,24 @@ namespace Ballz.GameSession.Renderer
 
                 spriteBatch.End();
 
+                GraphicsDevice.SetRenderTarget(null);
+                PostProcess();
+
                 DrawMessageOverlay();
             }
+        }
+
+        public void PostProcess()
+        {
+            CelShading.Techniques[0].Passes[0].Apply();
+
+            CelShading.Parameters["InputTexture"].SetValue(WorldRenderTarget);
+
+            Game.GraphicsDevice.RasterizerState = new RasterizerState
+            {
+                CullMode = CullMode.None
+            };
+            Game.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);
         }
 
         public void DrawBall(Ball ball)
@@ -173,9 +192,11 @@ namespace Ballz.GameSession.Renderer
 
                     var weaponPosScreen = WorldToScreen(ball.Position - new Vector2(0, 0.33f));
                     var weaponTexture = Game.Content.Load<Texture2D>("Textures/" + ball.HoldingWeapon);
+                    var weaponTextureScale = 256f / weaponTexture.Width;
 
                     // Draw weapon
-                    spriteBatch.Draw(weaponTexture, position: weaponPosScreen, color: Color.White, rotation: weaponRotation, origin: new Vector2(32, 32), effects: effects);
+                    spriteBatch.Draw(weaponTexture, position: weaponPosScreen, color: Color.White, rotation: weaponRotation, scale: new Vector2(weaponTextureScale, weaponTextureScale), origin: new Vector2(weaponTexture.Width / 2f, weaponTexture.Height / 2f), effects: effects);
+
                 }
 
                 if (ball.IsAiming)
@@ -207,6 +228,12 @@ namespace Ballz.GameSession.Renderer
             DrawText(ball.Player.Name, screenPos, 0.5f, Color.LawnGreen, 1, true, true);
             screenPos += new Vector2(0, 20);
             DrawText(ball.Health.ToString("0"), screenPos, 0.5f, Color.White, 1, true, true);
+
+            if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer == ball.Player && ball.Player.ActiveBall == ball)
+            {
+                screenPos -= new Vector2(0, 50);
+                spriteBatch.Draw(Game.Content.Load<Texture2D>("Textures/RedArrow"), screenPos, color: Color.White, origin: new Vector2(29, 38));
+            }
         }
 
         /// <summary>
@@ -358,7 +385,7 @@ namespace Ballz.GameSession.Renderer
 
             spriteBatch.DrawString(font, text, position, color, 0, Vector2.Zero, size, SpriteEffects.None, 0);
         }
-
+        
         protected override void LoadContent()
         {
             //load a texture for each team
@@ -409,6 +436,8 @@ namespace Ballz.GameSession.Renderer
             GraveModel = Game.Content.Load<Model>("Models/RIP");
             GraveModel.Meshes[0].MeshParts[0].Effect = GraveEffect;
 
+            CelShading = Game.Content.Load<Effect>("Effects/CelShading");
+
             {
                 WhiteTexture = new Texture2D(Game.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
                 Color[] color = new Color[1];
@@ -416,7 +445,17 @@ namespace Ballz.GameSession.Renderer
                 WhiteTexture.SetData(color);
             }
 
-            //PrepareDebugRendering();
+            quad = new VertexPositionTexture[]
+            {
+                new VertexPositionTexture(new Vector3(0, 0, 0.5f), new Vector2(0, 1)),
+                new VertexPositionTexture(new Vector3(1, 1, 0.5f), new Vector2(1, 0)),
+                new VertexPositionTexture(new Vector3(0, 1, 0.5f), new Vector2(0, 0)),
+                new VertexPositionTexture(new Vector3(0, 0, 0.5f), new Vector2(0, 1)),
+                new VertexPositionTexture(new Vector3(1, 0, 0.5f), new Vector2(1, 1)),
+                new VertexPositionTexture(new Vector3(1, 1, 0.5f), new Vector2(1, 0)),
+            };
+
+            WorldRenderTarget = new RenderTarget2D(GraphicsDevice, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
             base.LoadContent();
         }
