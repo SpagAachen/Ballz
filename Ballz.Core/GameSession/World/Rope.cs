@@ -14,6 +14,8 @@ namespace Ballz.GameSession.World
 
         public const float MaxLength = 15f;
         public const float SegmentLength = 0.75f;
+        public const float Diameter = 0.1f;
+        public const float SegmentDensity = 10.0f;
 
         public List<FarseerPhysics.Dynamics.Body> PhysicsSegments { get; set; } = new List<FarseerPhysics.Dynamics.Body>();
 

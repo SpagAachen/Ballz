@@ -237,11 +237,17 @@ namespace Ballz.GameSession.Renderer
             BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
         }
 
-        const float RopeWidth = 0.1f;
+        const float RopeWidth = Rope.Diameter;
 
         public void DrawRope(Rope rope)
         {
-            var segmentPositions = (from s in rope.PhysicsSegments select s.Position).ToArray();
+            //var segmentPositions = (from s in rope.PhysicsSegments select s.Position).ToArray();
+            //var segmentPositions = (from s in rope.PhysicsSegments select s.GetWorldPoint(new Vector2(0, 0.5f))).ToArray();
+
+            var segmentPositionsList = (from s in rope.PhysicsSegmentJoints select s.WorldAnchorA).ToList();
+            segmentPositionsList.Insert(0, rope.AttachedPosition);
+            segmentPositionsList.Add(rope.AttachedEntity.Position);
+            var segmentPositions = segmentPositionsList.ToArray();
 
             var triangleCount = (segmentPositions.Length - 1) * 2;
             
