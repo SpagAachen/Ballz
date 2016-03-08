@@ -11,7 +11,7 @@ namespace Ballz.GameSession.Renderer
 {
     public class WaterRenderer
     {
-        public const int WaterGridSize = 5;
+        public const int WaterGridSize = Water.CellSize;
         public const float MaxWaterVelocity = 0.01f;
 
         public Ballz Game;
