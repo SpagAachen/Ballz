@@ -39,8 +39,7 @@ namespace Ballz.GameSession.World
         {
             Entities = newEntitites;
             StaticGeometry = newTerrain;
-            Water = new Water(newTerrain.width, newTerrain.height);
-            Water.Initialize(this);
+            Water = new Water(30, 10);
         }
     }
 }

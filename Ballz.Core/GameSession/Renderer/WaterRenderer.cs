@@ -11,14 +11,8 @@ namespace Ballz.GameSession.Renderer
 {
     public class WaterRenderer
     {
-        public const int WaterGridSize = Water.CellSize;
-        public const float MaxWaterVelocity = 0.01f;
-
         public Ballz Game;
-        VertexPositionTexture[] quad;
-
-        Effect VectorFieldEffect;
-        Effect WaterEffect;
+        BasicEffect ParticleEffect;
 
         public WaterRenderer(Ballz game)
         {
@@ -28,67 +22,15 @@ namespace Ballz.GameSession.Renderer
 
         public void LoadContent()
         {
-            VectorFieldEffect = Game.Content.Load<Effect>("Effects/VectorField");
-            WaterEffect = Game.Content.Load<Effect>("Effects/Water");
-
-            quad = new VertexPositionTexture[]
-            {
-                new VertexPositionTexture(new Vector3(0, 0, 0.5f), new Vector2(0, 0)),
-                new VertexPositionTexture(new Vector3(1, 1, 0.5f), new Vector2(1, 1)),
-                new VertexPositionTexture(new Vector3(0, 1, 0.5f), new Vector2(0, 1)),
-                new VertexPositionTexture(new Vector3(0, 0, 0.5f), new Vector2(0, 0)),
-                new VertexPositionTexture(new Vector3(1, 0, 0.5f), new Vector2(1, 0)),
-                new VertexPositionTexture(new Vector3(1, 1, 0.5f), new Vector2(1, 1)),
-            };
+            ParticleEffect = new BasicEffect(Game.GraphicsDevice);
+            ParticleEffect.EnableDefaultLighting();
+            ParticleEffect.DiffuseColor = new Vector3(1, 1, 1);
+            ParticleEffect.VertexColorEnabled = true;
+            ParticleEffect.LightingEnabled = false;
+            ParticleEffect.TextureEnabled = false;
         }
 
-        Texture2D WaterTexture = null;
-        public Texture2D WaterToTexture(Water water)
-        {
-            var w = water.Width;
-            var h = water.Height;
-
-            if (WaterTexture == null)
-                WaterTexture = new Texture2D(Ballz.The().GraphicsDevice, w, h, false, SurfaceFormat.Color);
-
-            Color[] waterColors = new Color[w * h];
-            for (int x = 0; x < w; x++)
-                for (int y = 0; y < h; y++)
-                {
-                    var velocity = water.Velocity(x, y);
-                    velocity /= MaxWaterVelocity;
-
-                    velocity *= 0.5f;
-                    velocity += new Vector2(0.5f);
-
-                    if (velocity.X > 1)
-                        velocity.X = 1;
-                    if (velocity.Y > 1)
-                        velocity.Y = 1;
-
-                    waterColors[y * w + x] = new Color(new Vector4(velocity.X, velocity.Y, 0, water.HasFluid(x, y) ? 1 : 0));
-                }
-
-            WaterTexture.SetData(waterColors);
-
-            return WaterTexture;
-        }
-
-        public Vector2 WorldToScreen(Vector3 Position)
-        {
-            var screenSpace = Vector4.Transform(Position, (Game.Camera.Projection * Game.Camera.View));
-            screenSpace /= screenSpace.W;
-            return new Vector2
-            {
-                X = (0.5f + 0.5f * screenSpace.X) * Game.GraphicsDevice.Viewport.Width,
-                Y = (1 - (0.5f + 0.5f * screenSpace.Y)) * Game.GraphicsDevice.Viewport.Height,
-            };
-        }
-
-        public Vector2 WorldToScreen(Vector2 Position)
-        {
-            return WorldToScreen(new Vector3(Position, 0));
-        }
+        const float DebugParticleSize = 0.05f;
 
         public void DrawWaterDebug(World.World world)
         {
@@ -99,61 +41,40 @@ namespace Ballz.GameSession.Renderer
             blending.ColorDestinationBlend = Blend.InverseSourceAlpha;
 
             var water = world.Water;
+            var particles = water.Particles;
 
-            var w = water.Width / WaterRenderer.WaterGridSize;
-            var h = water.Height / WaterRenderer.WaterGridSize;
+            VertexPositionColor[] lines = new VertexPositionColor[particles.Length * 6];
 
-            var WaterTexture = WaterToTexture(water);
+            for(int i = 0; i < particles.Length; i++)
+            {
+                var bottom = particles[i] + new Vector2(0, -DebugParticleSize);
+                var right = particles[i] + new Vector2(-DebugParticleSize, DebugParticleSize);
+                var left = particles[i] + new Vector2(DebugParticleSize, DebugParticleSize);
+                lines[i * 6 + 0].Position = new Vector3(bottom, 0f);
+                lines[i * 6 + 1].Position = new Vector3(right, 0f);
+                lines[i * 6 + 2].Position = new Vector3(right, 0f);
+                lines[i * 6 + 3].Position = new Vector3(left, 0f);
+                lines[i * 6 + 4].Position = new Vector3(left, 0f);
+                lines[i * 6 + 5].Position = new Vector3(bottom, 0f);
 
-            //var pos = new Vector2(x * debugWorld.StaticGeometry.Scale, y * debugWorld.StaticGeometry.Scale);
-            //var sPos = WorldToScreen(pos);
+                lines[i * 6 + 0].Color = Color.White;
+                lines[i * 6 + 1].Color = Color.White;
+                lines[i * 6 + 2].Color = Color.White;
+                lines[i * 6 + 3].Color = Color.White;
+                lines[i * 6 + 4].Color = Color.White;
+                lines[i * 6 + 5].Color = Color.White;
+            }
 
-            var topLeft = WorldToScreen(new Vector2(0, h) * world.StaticGeometry.Scale);
-            var bottomRight = WorldToScreen(new Vector2(w, 0) * world.StaticGeometry.Scale);
-
-            var destRect = new Rectangle(topLeft.ToPoint(), (bottomRight - topLeft).ToPoint());
-
-            VectorFieldEffect.Techniques[0].Passes[0].Apply();
-            VectorFieldEffect.Parameters["VectorField"].SetValue(WaterTexture);
-            VectorFieldEffect.Parameters["ArrowSymbol"].SetValue(Game.Content.Load<Texture2D>("Textures/Arrow"));
-            VectorFieldEffect.Parameters["GridSize"].SetValue(new Vector2(w, h));
-            
             Game.GraphicsDevice.RasterizerState = new RasterizerState
             {
                 CullMode = CullMode.None
             };
-            Game.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);
+            Game.GraphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, lines, 0, particles.Length * 3);
         }
 
         public void DrawWater(World.World world)
         {
-            var blending = new BlendState();
-            blending.AlphaSourceBlend = Blend.SourceAlpha;
-            blending.AlphaDestinationBlend = Blend.InverseSourceAlpha;
-            blending.ColorSourceBlend = Blend.SourceAlpha;
-            blending.ColorDestinationBlend = Blend.InverseSourceAlpha;
-
-            var water = world.Water;
-
-            var w = water.Width / WaterGridSize;
-            var h = water.Height / WaterGridSize;
-
-            var WaterTexture = WaterToTexture(water);
             
-            var topLeft = WorldToScreen(new Vector2(0, h) * world.StaticGeometry.Scale);
-            var bottomRight = WorldToScreen(new Vector2(w, 0) * world.StaticGeometry.Scale);
-
-            var destRect = new Rectangle(topLeft.ToPoint(), (bottomRight - topLeft).ToPoint());
-
-            WaterEffect.Techniques[0].Passes[0].Apply();
-
-            WaterEffect.Parameters["WaterTexture"].SetValue(WaterTexture);
-
-            Game.GraphicsDevice.RasterizerState = new RasterizerState
-            {
-                CullMode = CullMode.None
-            };
-            Game.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, quad, 0, 2);
         }
     }
 }
