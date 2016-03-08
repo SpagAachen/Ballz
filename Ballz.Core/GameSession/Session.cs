@@ -82,11 +82,15 @@ namespace Ballz.GameSession
 
         public void Start()
         {
+            Physics.UpdateTerrainBody(Game.World.StaticGeometry);
+            Game.World.Water.Initialize(Game.World, Physics);
+
             Input.Input += Physics.HandleMessage;
             Input.Input += GameRenderer.HandleMessage;
             Input.Input += SessionLogic.HandleMessage;
             Input.Input += DebugRenderer.HandleMessage;
             State = SessionState.Running;
+
         }
 
         public Player PlayerByNumber(int number)

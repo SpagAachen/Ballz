@@ -200,6 +200,6 @@ namespace Ballz.GameSession.Renderer
         {
             return WorldToScreen(new Vector3(Position, 0));
         }
-        
+
     }
 }

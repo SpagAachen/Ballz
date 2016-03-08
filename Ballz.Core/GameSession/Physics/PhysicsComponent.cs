@@ -45,6 +45,8 @@ namespace Ballz.GameSession.Physics
         /// </summary>
         List<Body> TerrainBodies = new List<Body>();
 
+        Terrain Terrain = null;
+
         /// <summary>
         /// Terrain revision of the physics terrain shapes in <see cref="TerrainBodies"/>
         /// </summary>
@@ -66,6 +68,7 @@ namespace Ballz.GameSession.Physics
         /// </summary>
         public void UpdateTerrainBody(Terrain terrain)
         {
+            Terrain = terrain;
             foreach (var body in TerrainBodies)
             {
                 var fixtures = body.FixtureList.ToArray();
@@ -464,6 +467,20 @@ namespace Ballz.GameSession.Physics
             }, rayStart, rayEnd);
 
             return closestHit;
+        }
+        
+        public bool IsEmpty(Vector2 Position)
+        {
+            var fixture = PhysicsWorld.TestPoint(Position);
+            int terrainPosX = (int)(Position.X / Terrain.Scale);
+            int terrainPosY = (int)(Position.Y / Terrain.Scale);
+            bool hasTerrain = false;
+            if (terrainPosX > 0 && terrainPosX < Terrain.width && terrainPosY > 0 && terrainPosY < Terrain.height)
+            {
+                hasTerrain = Terrain.PublicShape.TerrainBitmap[terrainPosX, terrainPosY];
+            }
+            
+            return fixture == null && !hasTerrain;
         }
 
         public void HandleMessage(object sender, Message message)
