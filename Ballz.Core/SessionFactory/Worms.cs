@@ -104,7 +104,7 @@ namespace Ballz.SessionFactory
                               };
 
             FindSpawnPoints(settings.MapTexture, session.Terrain.Scale);
-            var spawnPoints = SelectSpawnpoints(settings.Teams.Count);
+            var spawnPoints = SelectSpawnpoints(settings.Teams.Select(t=>t.NumberOfBallz).Sum());
 
             // Create players and Ballz
             var currBallCreating = 0;
@@ -115,21 +115,31 @@ namespace Ballz.SessionFactory
                 for (var i = 0; i < team.NumberOfBallz; ++i)
                 {
                     var playerBall = new Ball
-                        {
-                            Position = spawnPoints[currBallCreating],
-                            Velocity = new Vector2(0, 0),
-                            IsAiming = true,
-                            Player = team.player,
-                            HoldingWeapon = "Bazooka",
-                            IsStatic = false
-                        };
+                    {
+                        Position = spawnPoints[currBallCreating],
+                        Velocity = new Vector2(0, 0),
+                        IsAiming = true,
+                        Player = team.player,
+                        HoldingWeapon = "Bazooka",
+                        IsStatic = false
+                    };
+                    team.player.OwnedBalls.Add(playerBall);
                     ++currBallCreating;
                     session.Entities.Add(playerBall);
+
+                    BallControl controller;
+
                     if (team.ControlledByAI)
-                        session.SessionLogic.BallControllers[team.player] = new AIControl(game, session, playerBall);
+                        controller = new AIControl(game, session, playerBall);
                     else
-                        session.SessionLogic.BallControllers[team.player] = new UserControl(game, session, playerBall);
+                        controller = new UserControl(game, session, playerBall);
+
+                    session.SessionLogic.BallControllers[playerBall] = controller;
+
                 }
+
+                team.player.ActiveBall = team.player.OwnedBalls.FirstOrDefault();
+                session.SessionLogic.ActiveControllers[team.player] = session.SessionLogic.BallControllers[team.player.ActiveBall];
             }
 
             var snpsht = new World(session.Entities, session.Terrain);

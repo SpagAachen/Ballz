@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ballz.GameSession.World;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,5 +19,9 @@ namespace Ballz.GameSession.Logic
         //TODO(MS): This is somehow redundant to GameSession.Logic.GameSettings.Teams
         //TODO(MS): TeamName currently specifies how Ballz are rendered. The name is currently somehow misleading.
         public string TeamName{ get; set; }
+
+        public List<Ball> OwnedBalls { get; set; } = new List<Ball>();
+
+        public Ball ActiveBall = null;
     }
 }

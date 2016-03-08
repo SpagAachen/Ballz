@@ -40,7 +40,6 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
    //color.b = int(color.b * steps) / float(steps);
 
    return color;
-
 }
 
 technique Technique1

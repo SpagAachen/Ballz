@@ -228,6 +228,12 @@ namespace Ballz.GameSession.Renderer
             DrawText(ball.Player.Name, screenPos, 0.5f, Color.LawnGreen, 1, true, true);
             screenPos += new Vector2(0, 20);
             DrawText(ball.Health.ToString("0"), screenPos, 0.5f, Color.White, 1, true, true);
+
+            if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer == ball.Player && ball.Player.ActiveBall == ball)
+            {
+                screenPos -= new Vector2(0, 50);
+                spriteBatch.Draw(Game.Content.Load<Texture2D>("Textures/RedArrow"), screenPos, color: Color.White, origin: new Vector2(29, 38));
+            }
         }
 
         /// <summary>
