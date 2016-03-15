@@ -38,6 +38,8 @@ namespace Ballz.GameSession.World
             public bool[,] TerrainBitmap = null;
         }
 
+        public bool[,] WaterSpawnBitmap = null;
+
         /// <summary>
         /// The revision number of the <see cref="PublicShape"/> triangles and outline.
         /// </summary>
@@ -93,6 +95,7 @@ namespace Ballz.GameSession.World
             PublicShape.TerrainBitmap = new bool[width, height];
             terrainSmoothmap = new float[width, height];
             terrainSmoothmapCopy = new float[width, height];
+            WaterSpawnBitmap = new bool[width, height];
 
             Color[] pixels = new Color[width * height];
             terrainData.GetData<Color>(pixels);
@@ -109,6 +112,10 @@ namespace Ballz.GameSession.World
                         PublicShape.TerrainBitmap[x, height - y - 1] = true;
                         terrainSmoothmap[x, height - y - 1] = 1.0f;
                     }
+                    if (curPixel == Color.Blue)
+                    {
+                        WaterSpawnBitmap[x, height - y - 1] = true;
+                    }
                 }
             }
 
@@ -119,6 +126,16 @@ namespace Ballz.GameSession.World
             allEdges = new List<Edge>();
 
             Update();
+        }
+
+        public bool IsWaterSpawn(float x, float y)
+        {
+            x /= Scale;
+            y /= Scale;
+            if (x < 0 || x >= width || y < 0 || y >= height)
+                return false;
+            else
+                return WaterSpawnBitmap[(int)x, (int)y];
         }
         
         private float Distance(float x1, float y1, float x2, float y2)
