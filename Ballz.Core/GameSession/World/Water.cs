@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Ballz.GameSession.Physics;
+using Ballz.Utils;
 using Microsoft.Xna.Framework;
 
 namespace Ballz.GameSession.World
@@ -55,13 +56,13 @@ namespace Ballz.GameSession.World
 
         private Vector2[] _velocityBuffer;
 
-        private static readonly float[,] w = new float[ParticleCount,ParticleCount];
+        private readonly float[,] w = new float[ParticleCount,ParticleCount];
 
         private void Collision(float elapsedSeconds)
         {
             const int cellRadius = (int) (D*GridMultiplier);
-            const float w0 = 0.5f;
-            const float eta = 0.1f;
+            const float w0 = 0.0005f;
+            const float eta = 0.0005f;
             var h = new float[ParticleCount];
             for (var i = 0; i < ParticleCount; ++i)
             {
@@ -169,6 +170,22 @@ namespace Ballz.GameSession.World
                     n.Normalize();
                     _velocityBuffer[i] += elapsedSeconds * k * (dist-l) * n;
                 }
+                for (var j = 0; j < 8; ++j)
+                {
+                    var wall = Particles[i] + Vector2.UnitX.Rotate((float) Math.PI*j/4)*l;
+                    if (!_physics.IsEmpty(wall))
+                    {
+                        var res = _physics.Raycast(Particles[i], wall);
+                        if (!res.HasHit)
+                            continue;
+                        var n = res.Position - Particles[i];
+                        var dist = Vector2.Distance(Particles[i], res.Position);
+                        if (n.Length() == 0)
+                            continue;
+                        n.Normalize();
+                        _velocityBuffer[i] += elapsedSeconds*k*(dist - l)*n;
+                    }
+                }
             }
 
             var tmp = _velocityBuffer;
@@ -185,7 +202,16 @@ namespace Ballz.GameSession.World
                 {
                     var res = _physics.Raycast(Particles[i], newPos);
                     if (!res.HasHit)
-                        Velocities[i] = new Vector2((float)rng.NextDouble() * 2 - 1, (float)rng.NextDouble() * 2 - 1)*.1f;
+                    {
+                        Velocities[i] = new Vector2((float) rng.NextDouble()*2 - 1, (float) rng.NextDouble()*2 - 1);
+                        var newPos2 = Particles[i] + Velocities[i] * elapsedSeconds;
+                        var res2 = _physics.Raycast(Particles[i], newPos2);
+                        if (!_physics.IsEmpty(newPos2) || res2.HasHit)
+                        {
+                            Velocities[i] = Vector2.Zero;
+                        }
+                        continue;
+                    }
 
                     Velocities[i] = (Velocities[i] - (Vector2.Dot(Velocities[i], res.Normal))*res.Normal*2)*0.5f;
                 }
