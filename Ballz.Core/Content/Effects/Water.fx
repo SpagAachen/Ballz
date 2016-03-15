@@ -1,10 +1,8 @@
 ﻿
-float2 GridSize;
 texture WaterTexture;
 
 const float4 waterColor = float4(0, 0.2, 1, 0.75);
-const float pressureWaterMin = 0;
-const float pressureWaterFull = 1;
+const float waterThreshold = 0.25;
 
 sampler waterSampler = sampler_state
 {
@@ -37,19 +35,17 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-   float waterPressure = tex2D(waterSampler, input.texCoord).w;
-   float waterMix = smoothstep(pressureWaterMin, pressureWaterFull, waterPressure);
-   float4 color = waterColor;
-   color *= waterMix;
-   return color;
+   float water = tex2D(waterSampler, input.texCoord).r;
+   float4 c = float4(0, 0, 0, 0);
+   if (water > waterThreshold)
+      c = waterColor;
+   return c;
 }
 
 technique Technique1
 {
    pass Pass1
    {
-      // TODO: set renderstates here.
-
       VertexShader = compile vs_4_0 VertexShaderFunction();
       PixelShader = compile ps_4_0 PixelShaderFunction();
    }
