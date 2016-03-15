@@ -155,6 +155,7 @@ namespace Ballz.GameSession.Renderer
             var waterDomainScreenPos = WorldToScreen(Vector2.Zero);
             WaterEffect.Parameters["WaterTexture"].SetValue(WaterRenderTarget);
             WaterEffect.Techniques[0].Passes[0].Apply();
+            var oldRasterizerState = Game.GraphicsDevice.RasterizerState;
             Game.GraphicsDevice.RasterizerState = new RasterizerState
             {
                 CullMode = CullMode.None,
@@ -162,10 +163,12 @@ namespace Ballz.GameSession.Renderer
             var oldDepthState = Game.GraphicsDevice.DepthStencilState;
             Game.GraphicsDevice.DepthStencilState = new DepthStencilState
             {
-                DepthBufferEnable = false
+                DepthBufferEnable = false,
+                DepthBufferWriteEnable = false
             };
             Game.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, FullscreenQuad, 0, 2);
             Game.GraphicsDevice.DepthStencilState = oldDepthState;
+            Game.GraphicsDevice.RasterizerState = oldRasterizerState;
         }
     }
 }
