@@ -24,19 +24,19 @@ namespace Ballz.GameSession.World
                 for (var y = 0; y < _height* GridMultiplier; ++y)
                     _grid[x,y] = new List<int>();
         }
-        
+        Random rng = new Random();
+
         public void Initialize(World world, PhysicsControl physics)
         {
             _physics = physics;
             Particles = new Vector2[ParticleCount];
             Velocities = new Vector2[ParticleCount];
             _velocityBuffer = new Vector2[ParticleCount];
-            var rng = new Random();
             for (var i = 0; i < ParticleCount; ++i)
             {
                 do
                 {
-                    Particles[i] = new Vector2((float)(rng.NextDouble() * _width), (float)(rng.NextDouble() * _height));
+                    Particles[i] = new Vector2((float)(rng.NextDouble() * _width/5 + (2f *_width)/5), (float)(rng.NextDouble() * _height/5 +4f*_height/5));
                 } while (!_physics.IsEmpty(Particles[i]));
                 Velocities[i] = new Vector2((float) rng.NextDouble()*2-1, (float) rng.NextDouble()*2-1);
             }
@@ -45,7 +45,9 @@ namespace Ballz.GameSession.World
                 _grid[(int)(Particles[i].X * GridMultiplier), (int)(Particles[i].Y * GridMultiplier)].Add(i);
         }
 
-        public const int ParticleCount = 10000;
+        public const int ParticleCount = 1000;
+        public const float R = 0.05f;
+        public const float D = 2*R;
 
         public Vector2[] Particles { get; private set; }
         public Vector2[] Velocities { get; private set; }
@@ -53,27 +55,83 @@ namespace Ballz.GameSession.World
 
         private Vector2[] _velocityBuffer;
 
+        private static readonly float[,] w = new float[ParticleCount,ParticleCount];
+
+        private void Collision(float elapsedSeconds)
+        {
+            const int cellRadius = (int) (D*GridMultiplier);
+            const float w0 = 0.5f;
+            const float eta = 0.1f;
+            var h = new float[ParticleCount];
+            for (var i = 0; i < ParticleCount; ++i)
+            {
+                var ix = (int) (Particles[i].X*GridMultiplier);
+                var iy = (int) (Particles[i].Y*GridMultiplier);
+
+                var neighbors = new List<int>();
+                for (var dx = Math.Max(-cellRadius, -ix);
+                    dx < Math.Min(cellRadius, _width*GridMultiplier - ix - 1);
+                    ++dx)
+                    for (var dy = Math.Max(-cellRadius, -iy);
+                        dy < Math.Min(cellRadius, _height*GridMultiplier - iy - 1);
+                        ++dy)
+                        neighbors.AddRange(_grid[ix + dx, iy + dy]);
+
+                var wi = 0f;
+                foreach (var j in neighbors)
+                {
+                    if (i <= j)
+                        continue;
+                    var dist = Vector2.Distance(Particles[i], Particles[j]);
+                    if (dist > 0.1f)
+                        continue;
+
+                    var n = Particles[j] - Particles[i];
+                    w[i, j] += (1 - n.Length())/D;
+                    wi += w[i, j];
+                }
+                h[i] = Math.Max(0, (wi - w0)*eta);
+            }
+            for (var i = 0; i < ParticleCount; ++i)
+            {
+                var ix = (int) (Particles[i].X*GridMultiplier);
+                var iy = (int) (Particles[i].Y*GridMultiplier);
+
+                var neighbors = new List<int>();
+                for (var dx = Math.Max(-cellRadius, -ix);
+                    dx < Math.Min(cellRadius, _width*GridMultiplier - ix - 1);
+                    ++dx)
+                    for (var dy = Math.Max(-cellRadius, -iy);
+                        dy < Math.Min(cellRadius, _height*GridMultiplier - iy - 1);
+                        ++dy)
+                        neighbors.AddRange(_grid[ix + dx, iy + dy]);
+                
+                foreach (var j in neighbors)
+                {
+                    Velocities[i] += elapsedSeconds*0.5f*(h[i] + h[j])*w[i, j]*(Particles[i] - Particles[j]);
+                }
+            }
+        }
 
         private void Viscosity(float elapsedSeconds)
         {
             const float µ = 0.5f;
+            const float l = 0.5f;
+            const int cellRadius = (int)(GridMultiplier * l);
             for (var i = 0; i < ParticleCount; ++i)
             {
                 var ix = (int)(Particles[i].X*GridMultiplier);
                 var iy = (int)(Particles[i].Y*GridMultiplier);
 
                 var neighbors = new List<int>();
-                neighbors.AddRange(_grid[ix, iy]);
-                if (ix < _width - 1)
-                    neighbors.AddRange(_grid[ix + 1, iy]);
-                if (iy < _height - 1)
-                    neighbors.AddRange(_grid[ix, iy + 1]);
-                if (ix > 0)
-                    neighbors.AddRange(_grid[ix - 1, iy]);
-                if (iy > 0)
-                    neighbors.AddRange(_grid[ix, iy - 1]);
+                for (var dx = Math.Max(-cellRadius, -ix); dx < Math.Min(cellRadius, _width * GridMultiplier - ix - 1); ++dx)
+                    for (var dy = Math.Max(-cellRadius, -iy); dy < Math.Min(cellRadius, _height * GridMultiplier - iy - 1); ++dy)
+                        neighbors.AddRange(_grid[ix + dx, iy + dy]);
 
-                var avg = neighbors.Select(ii => Velocities[ii]).Aggregate((l, r) => l + r);
+                if (!neighbors.Any())
+                    continue;
+
+                var avg = neighbors.Select(ii => Velocities[ii]).Aggregate((ll, r) => ll + r);
                 avg /= neighbors.Count;
                 _velocityBuffer[i] = Velocities[i] + elapsedSeconds * µ * (avg - Velocities[i]);
             }
@@ -84,23 +142,18 @@ namespace Ballz.GameSession.World
         }
         private void Avoidance(float elapsedSeconds)
         {
-            const float k = 5f;
+            const float k = 15f;
             const float l = 0.5f;
+            const int cellRadius = (int) (GridMultiplier*l);
             for (var i = 0; i < ParticleCount; ++i)
             {
                 var ix = (int)(Particles[i].X * GridMultiplier);
                 var iy = (int)(Particles[i].Y * GridMultiplier);
 
                 var neighbors = new List<int>();
-                neighbors.AddRange(_grid[ix, iy]);
-                if (ix < _width - 1)
-                    neighbors.AddRange(_grid[ix + 1, iy]);
-                if (iy < _height - 1)
-                    neighbors.AddRange(_grid[ix, iy + 1]);
-                if (ix > 0)
-                    neighbors.AddRange(_grid[ix - 1, iy]);
-                if (iy > 0)
-                    neighbors.AddRange(_grid[ix, iy - 1]);
+                for (var dx = Math.Max(-cellRadius,-ix); dx < Math.Min(cellRadius,_width*GridMultiplier-ix-1); ++dx)
+                    for (var dy = Math.Max(-cellRadius,-iy); dy < Math.Min(cellRadius,_height*GridMultiplier-iy-1); ++dy)
+                        neighbors.AddRange(_grid[ix + dx, iy + dy]);
 
                 _velocityBuffer[i] = Velocities[i];
                 foreach (var j in neighbors)
@@ -123,24 +176,48 @@ namespace Ballz.GameSession.World
             Velocities = tmp;
         }
 
+        private void WorldCollision(float elapsedSeconds)
+        {
+            for (var i = 0; i < ParticleCount; ++i)
+            {
+                var newPos = Particles[i] + Velocities[i]*elapsedSeconds;
+                if (!_physics.IsEmpty(newPos))
+                {
+                    var res = _physics.Raycast(Particles[i], newPos);
+                    if (!res.HasHit)
+                        Velocities[i] = new Vector2((float)rng.NextDouble() * 2 - 1, (float)rng.NextDouble() * 2 - 1)*.1f;
+
+                    Velocities[i] = (Velocities[i] - (Vector2.Dot(Velocities[i], res.Normal))*res.Normal*2)*0.5f;
+                }
+            }
+        }
+
         public void Step(World worldState, float elapsedSeconds)
         {
+            //Collision(elapsedSeconds);
             Viscosity(elapsedSeconds);
             Avoidance(elapsedSeconds);
-            
+
 
             for (var i = 0; i < ParticleCount; ++i)
             {
-                //Velocities[i].Y += -.81f*elapsedSeconds;
+                Velocities[i].Y += -9.81f*elapsedSeconds;
+            }
+
+            WorldCollision(elapsedSeconds);
+
+
+            for (var i = 0; i < ParticleCount; ++i)
+            {
                 Particles[i] = Particles[i] + Velocities[i]*elapsedSeconds;
                 var x = Math.Max(0, Math.Min(Particles[i].X,_width-1));
                 var y = Math.Max(0, Math.Min(Particles[i].Y,_height-1));
 
                 if (x != Particles[i].X)
-                    Velocities[i].X = -Velocities[i].X;
+                    Velocities[i].X = -Velocities[i].X*0.5f;
 
                 if (y != Particles[i].Y)
-                    Velocities[i].Y = -Velocities[i].Y;
+                    Velocities[i].Y = -Velocities[i].Y*0.5f;
 
                 Particles[i].X = x;
                 Particles[i].Y = y;
