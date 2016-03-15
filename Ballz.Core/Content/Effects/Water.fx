@@ -2,7 +2,7 @@
 texture WaterTexture;
 
 const float4 waterColor = float4(0, 0.2, 1, 0.75);
-const float waterThreshold = 0.25;
+const float waterThreshold = 0.35;
 
 sampler waterSampler = sampler_state
 {
@@ -35,6 +35,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
+   //return tex2D(waterSampler, input.texCoord);
    float water = tex2D(waterSampler, input.texCoord).r;
    float4 c = float4(0, 0, 0, 0);
    if (water > waterThreshold)

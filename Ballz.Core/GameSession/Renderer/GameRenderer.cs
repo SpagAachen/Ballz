@@ -84,8 +84,6 @@ namespace Ballz.GameSession.Renderer
                 spriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), Color.CornflowerBlue);
                 spriteBatch.End();
 
-                WaterRenderer.DrawWater(worldState);
-
                 var tris = worldState.StaticGeometry.GetTriangles();
                 VertexPositionColorTexture[] vpc = new VertexPositionColorTexture[tris.Count * 3];
 
@@ -143,8 +141,11 @@ namespace Ballz.GameSession.Renderer
                 }
 
                 spriteBatch.End();
-                
+
+                WaterRenderer.DrawWater(worldState);
+
                 GraphicsDevice.SetRenderTarget(null);
+                
                 PostProcess();
 
                 DrawMessageOverlay();

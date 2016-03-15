@@ -16,6 +16,8 @@ namespace Ballz.GameSession.Renderer
         Effect WaterEffect;
         SpriteBatch spriteBatch;
         Texture2D MetaBallTexture;
+        const int MetaBallRadius = 32;
+        const int MetaBallWidth = MetaBallRadius * 2;
         RenderTarget2D WaterRenderTarget;
         VertexPositionTexture[] FullscreenQuad;
 
@@ -39,17 +41,18 @@ namespace Ballz.GameSession.Renderer
 
             WaterRenderTarget = new RenderTarget2D(Game.GraphicsDevice, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height);
 
-            MetaBallTexture = new Texture2D(Game.GraphicsDevice, 32, 32);
-            var metaBallData = new byte[32 * 32 * 4];
+            MetaBallTexture = new Texture2D(Game.GraphicsDevice, MetaBallWidth, MetaBallWidth);
+            var metaBallData = new byte[MetaBallWidth * MetaBallWidth * 4];
             int i = 0;
-            for(int x = 0; x < 32; x++)
+            for(int x = 0; x < MetaBallWidth; x++)
             {
-                for(int y = 0; y < 32; y++)
+                for(int y = 0; y < MetaBallWidth; y++)
                 {
-                    var dx = x - 16.0;
-                    var dy = y - 16.0;
-                    var d = 16 - Math.Min(16, Math.Sqrt(dx * dx + dy * dy));
-                    var b = (byte)(255 * (d / 16.0));
+                    var dx = x - MetaBallRadius;
+                    var dy = y - MetaBallRadius;
+                    var distance = Math.Sqrt(dx * dx + dy * dy) / MetaBallRadius;
+                    var blob = 1 - (0.1 + 0.9 * distance);
+                    var b = (byte)(127 * Math.Max(0, Math.Min(1, blob)));
                     metaBallData[i++] = b;
                     metaBallData[i++] = b;
                     metaBallData[i++] = b;
@@ -142,7 +145,7 @@ namespace Ballz.GameSession.Renderer
             for (int i = 0; i < particles.Length; i++)
             {
                 var pos = WorldToScreen(particles[i]);
-                spriteBatch.Draw(MetaBallTexture, position: pos, origin: new Vector2(16, 16));
+                spriteBatch.Draw(MetaBallTexture, position: pos, origin: new Vector2(MetaBallRadius, MetaBallRadius));
             }
 
             spriteBatch.End();
