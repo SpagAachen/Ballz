@@ -46,7 +46,7 @@ namespace Ballz.GameSession.World
                 _grid[(int)(Particles[i].X * GridMultiplier), (int)(Particles[i].Y * GridMultiplier)].Add(i);
         }
 
-        public const int ParticleCount = 1000;
+        public const int ParticleCount = 500;
         public const float R = 0.05f;
         public const float D = 2*R;
 
@@ -213,7 +213,8 @@ namespace Ballz.GameSession.World
                         continue;
                     }
 
-                    Velocities[i] = (Velocities[i] - (Vector2.Dot(Velocities[i], res.Normal))*res.Normal*2)*0.5f;
+                    res.Entity?.PhysicsBody.ApplyForce(Velocities[i]*125f);
+                    Velocities[i] = (Velocities[i] - (Vector2.Dot(Velocities[i], res.Normal)) * res.Normal * 2) * 0.5f;
                 }
             }
         }
