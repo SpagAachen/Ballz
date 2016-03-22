@@ -19,7 +19,6 @@
         private readonly Network network;
         private readonly List<Connection> connections = new List<Connection>();
 
-
         public Server(Network net)
         {
             network = net;
@@ -103,11 +102,20 @@
                 }
             }
 
-			// TEST
+			// Update Client data
+            if (Ballz.The().Network.GameState == Network.GameStateT.InGame)
 			{
-				//Broadcast(Ballz.The().World.Entities);
+                SendEntityDataToClients();
+                //TODO: world updates
+                //TODO: more?
 			}
             //TODO: Implement
+        }
+
+        private void SendEntityDataToClients()
+        {
+            var entities = Ballz.The().World.Entities;
+            Broadcast(new NetworkMessage(NetworkMessage.MessageType.Entities, entities));
         }
 
         private void OnData(object data, int sender)
@@ -116,7 +124,7 @@
 			// Input Message
 			if (data.GetType() == typeof(InputMessage))
 			{
-				
+				//TODO: implement
 			}
         }
 
