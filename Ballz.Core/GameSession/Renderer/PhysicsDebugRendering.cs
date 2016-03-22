@@ -163,11 +163,42 @@ namespace Ballz.GameSession.Renderer
             GraphicsDevice.DrawUserPrimitives(PrimitiveType.LineStrip, sphereVertices, 0, sphereVertices.Length - 1);
         }
 
+        public void DrawRectangle(Vector2 position, float width, float height, float direction, bool awake)
+        {
+            LineEffect.Projection = Game.Camera.Projection;
+            LineEffect.View = Game.Camera.View;
+            LineEffect.World = Matrix.CreateScale(1.0f);
+            LineEffect.World *= Matrix.CreateRotationZ(direction);
+            LineEffect.World *= Matrix.CreateTranslation(new Vector3(position, 0));
+
+            if(awake)
+                LineEffect.DiffuseColor = new Vector3(1, 0, 0);
+
+            VertexPositionColor[] rectVerts = new VertexPositionColor[5];
+            rectVerts[0].Position = new Vector3(-width / 2, -height / 2, 0);
+            rectVerts[0].Color = Color.GreenYellow;
+            rectVerts[1].Position = new Vector3(width / 2, -height / 2, 0);
+            rectVerts[1].Color = Color.GreenYellow;
+            rectVerts[2].Position = new Vector3(width / 2, height / 2, 0);
+            rectVerts[2].Color = Color.GreenYellow;
+            rectVerts[3].Position = new Vector3(-width / 2, height / 2, 0);
+            rectVerts[3].Color = Color.GreenYellow;
+            rectVerts[4].Position = new Vector3(-width / 2, -height / 2, 0);
+            rectVerts[4].Color = Color.GreenYellow;
+
+            LineEffect.CurrentTechnique.Passes[0].Apply();
+            GraphicsDevice.DrawUserPrimitives(PrimitiveType.LineStrip, rectVerts, 0, 4);
+        }
+
         public void DrawRope(Rope rope)
         {
+            bool first = true;
             foreach(var segment in rope.PhysicsSegments)
             {
-                DrawSphere(segment.Position, segment.Rotation, Rope.SegmentLength * 0.5f * 0.8f, true);
+                
+               //DrawSphere(segment.Position, segment.Rotation, Rope.JointRadius, true);
+                DrawRectangle(segment.Position, Rope.Diameter, first ? Rope.Diameter : Rope.SegmentLength, segment.Rotation, true);
+                first = false;
             }
         }
 

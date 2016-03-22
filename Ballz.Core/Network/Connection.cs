@@ -105,8 +105,8 @@ namespace Ballz.Network
         /// <param name="obj">The object to send</param>
         public void Send(object obj)
         {
-            try
-            {
+            //try
+            //{
                 var netStr = tcpClient.GetStream();
                 // serialize object and get size of it
                 var json = JsonConvert.SerializeObject(obj);
@@ -121,11 +121,11 @@ namespace Ballz.Network
 
                 netStr.Write(data, 0, data.Length);
                 Console.WriteLine("Serialized " + data.Length + "bytes");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Network: Warning: Failed to send some data: " + e.Message);
-            }
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine("Network: Warning: Failed to send some data: " + e.ToString());
+            //}
         }
 
         /// <summary>
@@ -148,9 +148,9 @@ namespace Ballz.Network
                 receiveTask.Wait();
                 result = receiveTask.Result;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                System.Console.Out.WriteLine("Network: Warning: Failed to receive data");
+                System.Console.Out.WriteLine("Network: Warning: Failed to receive data. Error: " + e.ToString());
             }
             finally
             {

@@ -37,8 +37,8 @@ namespace Ballz.GameSession.World
             {
                 do
                 {
-                    Particles[i] = new Vector2((float)(rng.NextDouble() * _width/5 + (2f *_width)/5), (float)(rng.NextDouble() * _height/5 +4f*_height/5));
-                } while (!_physics.IsEmpty(Particles[i]) /*&& world.StaticGeometry.IsWaterSpawn(Particles[i].X,Particles[i].Y)*/);
+                    Particles[i] = new Vector2((float)(rng.NextDouble() * _width), (float)(rng.NextDouble() * _height));//new Vector2((float)(rng.NextDouble() * _width/5 + (2f *_width)/5), (float)(rng.NextDouble() * _height/5 +4f*_height/5));
+                } while (/*!_physics.IsEmpty(Particles[i]) &&*/ !world.StaticGeometry.IsWaterSpawn(Particles[i].X,Particles[i].Y));
                 Velocities[i] = new Vector2((float) rng.NextDouble()*2-1, (float) rng.NextDouble()*2-1);
             }
 
@@ -46,7 +46,7 @@ namespace Ballz.GameSession.World
                 _grid[(int)(Particles[i].X * GridMultiplier), (int)(Particles[i].Y * GridMultiplier)].Add(i);
         }
 
-        public const int ParticleCount = 1000;
+        public const int ParticleCount = 500;
         public const float R = 0.05f;
         public const float D = 2*R;
 

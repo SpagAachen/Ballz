@@ -11,6 +11,8 @@ namespace Ballz.GameSession.Logic
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
+    //TODO: Use UsePlayerTurns variable
+
     [Serializable]
     public class Team
     {
@@ -24,8 +26,7 @@ namespace Ballz.GameSession.Logic
     }
 
     [Serializable]
-    [JsonConverter(typeof(GameSettingsSerializer))]
-    public class GameSettings
+    [JsonConverter(typeof(GameSettingsSerializer))]    public class GameSettings
     {
         public string MapName { get; set; } = "Invalid";
 
@@ -34,6 +35,8 @@ namespace Ballz.GameSession.Logic
         public SessionFactory.SessionFactory GameMode { get; set; }
 
         public List<Team> Teams { get; set; } = new List<Team>();
+
+        public bool UsePlayerTurns { get; set; } = false;
     }
 
     public class GameSettingsSerializer : JsonConverter
@@ -47,6 +50,11 @@ namespace Ballz.GameSession.Logic
             {
                 writer.WritePropertyName("MapName");
                 serializer.Serialize(writer, gameSettings.MapName);
+            }
+            // UsePlayerTurns
+            {
+                writer.WritePropertyName("UsePlayerTurns");
+                serializer.Serialize(writer, gameSettings.UsePlayerTurns);
             }
             // MapTexture
             {
@@ -83,9 +91,10 @@ namespace Ballz.GameSession.Logic
             return new GameSettings
             {
                 MapName = (string)properties[0].Value,
-                MapTexture = mapTex == null?null:Utils.TextureHelper.LoadTextureData((string)properties[1].Value),
-                GameMode = SessionFactory.SessionFactory.AvailableFactories.ElementAt((int)properties[2].Value),
-                Teams = JsonConvert.DeserializeObject<List<Team>>(properties[3].Value.ToString())
+                UsePlayerTurns = (bool)properties[1].Value,
+                MapTexture = mapTex == null?null:Utils.TextureHelper.LoadTextureData((string)properties[2].Value),
+                GameMode = SessionFactory.SessionFactory.AvailableFactories.ElementAt((int)properties[3].Value),
+                Teams = JsonConvert.DeserializeObject<List<Team>>(properties[4].Value.ToString())
             };
         }
 

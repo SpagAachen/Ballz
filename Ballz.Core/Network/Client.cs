@@ -7,6 +7,7 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using ObjectSync;
 
     using global::Ballz.GameSession.Logic;
 
@@ -74,6 +75,9 @@
                         Debug.Assert(netMsg.Data != null, "Received invalid game-settings");
                         ParseGameSettings((GameSettings)netMsg.Data);
                         break;
+                    case NetworkMessage.MessageType.Entities:
+                        ParseEntities((List<Entity>)netMsg.Data);
+                        break;
                     default:
                         Console.WriteLine("Unknown netMsg received: " + netMsg.Kind.ToString());
                         break;
@@ -86,6 +90,17 @@
                 Console.WriteLine("Unknown object received: " + data.ToString());
             else
                 Console.WriteLine("Empty data");
+        }
+
+        private void ParseEntities(List<Entity> entities)
+        {
+            // synch local entities
+            foreach(var e in entities)
+            {
+                var rId = e.ID;
+                var localEntity = Ballz.The().World.EntityById(rId);
+                Sync.SyncState(e, localEntity);
+            }
         }
 
         private void ParseGameSettings(GameSettings settings)

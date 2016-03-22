@@ -143,7 +143,9 @@
   <ItemGroup>
     <Content Include="Content\Effects\VectorField.fx" />
     <Content Include="Content\Effects\Water.fx" />
-    <Content Include="Content\Effects\CelShading.fx" />
+    <Content Include="Content\Effects\CelShading.fx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\Fonts\Menufont.spritefont">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -211,7 +213,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\ObjectSynch\ObjectSync\ObjectSync.csproj">
+      <Project>{B186DF64-93E8-441E-8F43-85A8F9E4DD0B}</Project>
+      <Name>ObjectSync</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="FarseerPhysics MonoGame">
       <HintPath>..\packages\FarseerPhysics.MonoGame.Unofficial.3.5.0\lib\FarseerPhysics MonoGame.dll</HintPath>
@@ -219,8 +226,7 @@
     <Reference Include="MathFloat, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\MathFloat.1.0.0.0\lib\net20\MathFloat.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>

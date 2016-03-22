@@ -12,6 +12,7 @@ namespace Ballz.GameSession.Logic.Weapons
     {
         const float ExplosionRadius = 0.3f;
         const float Damage = 25f;
+        int shotsFired = 0;
 
         public Pistol(Ball ball, Ballz game) : base(ball, game) { }
 
@@ -35,6 +36,7 @@ namespace Ballz.GameSession.Logic.Weapons
         {
             if((input.Pressed ?? false) && input.Kind == InputMessage.MessageType.ControlsAction)
             {
+                ++shotsFired;
                 var rayHit = Game.Match.Physics.Raycast(Ball.Position, Ball.Position + Ball.AimDirection * 1000f);
                 if(rayHit.HasHit)
                 {
@@ -43,13 +45,26 @@ namespace Ballz.GameSession.Logic.Weapons
                     {
                         if(rayHit.Entity is Ball)
                         {
-                            (rayHit.Entity as Ball).Health -= Damage;
+                            Ball theBall = rayHit.Entity as Ball;
+                            if (theBall.Health > 0)
+                                theBall.Health -= Damage;                            
                         }
                     }
                 }
             }
 
             base.HandleInput(input);
+        }
+
+        public override bool Update(float elapsedSeconds, Dictionary<InputMessage.MessageType, bool> KeysPressed)
+        {
+            //reset the shotsFired counter after 2 shots and end the current turn.
+            if (shotsFired > 0 && (shotsFired % 2) == 0)
+            {
+                shotsFired = 0;
+                return true;
+            }
+            return base.Update(elapsedSeconds, KeysPressed);
         }
     }
     }
