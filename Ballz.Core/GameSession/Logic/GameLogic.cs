@@ -21,7 +21,8 @@ namespace Ballz.GameSession.Logic
     {
         new Ballz Game;
 
-        public Dictionary<Player, BallControl> BallControllers { get; set; } = new Dictionary<Player, BallControl>();
+        public Dictionary<Player, BallControl> ActiveControllers { get; set; } = new Dictionary<Player, BallControl>();
+        public Dictionary<Ball, BallControl> BallControllers { get; set; } = new Dictionary<Ball, BallControl>();
 
         public Session Session { get; set; }
         
@@ -36,9 +37,17 @@ namespace Ballz.GameSession.Logic
         {
             if (Session.UsePlayerTurns)
             {
-                Session.ActivePlayer = Session.Players[(Session.Players.IndexOf(Session.ActivePlayer) + 1) % Session.Players.Count];
+                var player = Session.Players[(Session.Players.IndexOf(Session.ActivePlayer) + 1) % Session.Players.Count];
+                Session.ActivePlayer = player;
+                player.ActiveBall = ChooseNextBall(player);
+                ActiveControllers[player] = BallControllers[player.ActiveBall];
                 Session.TurnTimeLeft = Session.SecondsPerTurn;
             }
+        }
+
+        public Ball ChooseNextBall(Player player)
+        {
+            return player.OwnedBalls[(player.OwnedBalls.IndexOf(player.ActiveBall) + 1) % player.OwnedBalls.Count];
         }
 
         public override void Update(GameTime time)
@@ -62,15 +71,11 @@ namespace Ballz.GameSession.Logic
 
             if (Game.Match.State == SessionState.Running)
             {
-                // Update all balls
-                var currentControllers = BallControllers.Values.ToArray();
+                // Update all active balls
+                var currentControllers = ActiveControllers.Values.ToArray();
                 foreach (var controller in currentControllers)
                 {
-                    if (controller.Ball.Disposed)
-                    {
-                        BallControllers.Remove(controller.Ball.Player);
-                    }
-                    else if(controller.Ball.Player == Session.ActivePlayer || !Session.UsePlayerTurns)
+                    if(controller.Ball.Player == Session.ActivePlayer || !Session.UsePlayerTurns)
                     {
                         var playerMadeAction = controller.Update(elapsedSeconds, worldState);
                         if (playerMadeAction)
@@ -78,12 +83,30 @@ namespace Ballz.GameSession.Logic
                     }
                 }
                 
-                // Check for dead players
+                // Check for dead balls
                 int alivePlayers = 0;
                 Player winner = null;
-                foreach (var controller in BallControllers.Values)
+                var ballControllers = BallControllers.Values.ToArray();
+                foreach (var controller in ballControllers)
                 {
-                    if (controller.Ball.IsAlive)
+                    if (controller.Ball.Disposed || !controller.Ball.IsAlive)
+                    {
+                        ActiveControllers.Remove(controller.Ball.Player);
+                        BallControllers.Remove(controller.Ball);
+
+                        if (controller.Ball.Player.ActiveBall == controller.Ball)
+                        {
+                            controller.Ball.Player.ActiveBall = ChooseNextBall(controller.Ball.Player);
+                        }
+
+                        if(controller.Ball.Player == Session.ActivePlayer)
+                        {
+                            NextTurn();
+                        }
+
+                        controller.Ball.Player.OwnedBalls.Remove(controller.Ball);
+                    }
+                    else if (controller.Ball.IsAlive)
                     {
                         alivePlayers++;
                         winner = controller.Ball.Player;
@@ -106,14 +129,14 @@ namespace Ballz.GameSession.Logic
                 InputMessage msg = (InputMessage)message;
 
                 // When using turn mode in hot-seat, direct all input messages to the active player
-                if (Session.UsePlayerTurns && Session.ActivePlayer != null)
+                if (Session.UsePlayerTurns && Session.ActivePlayer != null && ActiveControllers.ContainsKey(Session.ActivePlayer))
                 {
-                    BallControllers[Session.ActivePlayer].HandleMessage(sender, msg);
+                    ActiveControllers[Session.ActivePlayer].HandleMessage(sender, msg);
                 }
                 // Otherwise, redirect input messages to the player given by msg.Player
-                else if(msg.Player != null && BallControllers.ContainsKey(msg.Player))
+                else if(msg.Player != null && ActiveControllers.ContainsKey(msg.Player) && ActiveControllers.ContainsKey(msg.Player))
                 {
-                    BallControllers[msg.Player].HandleMessage(sender, msg);
+                    ActiveControllers[msg.Player].HandleMessage(sender, msg);
                 }
             }
 
