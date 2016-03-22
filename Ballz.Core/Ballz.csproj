@@ -195,7 +195,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\ObjectSynch\ObjectSync\ObjectSync.csproj">
+      <Project>{B186DF64-93E8-441E-8F43-85A8F9E4DD0B}</Project>
+      <Name>ObjectSync</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="FarseerPhysics MonoGame">
       <HintPath>..\packages\FarseerPhysics.MonoGame.Unofficial.3.5.0\lib\FarseerPhysics MonoGame.dll</HintPath>

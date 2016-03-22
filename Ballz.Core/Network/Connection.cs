@@ -10,6 +10,10 @@ using System.Threading.Tasks;
 
 namespace Ballz.Network
 {
+    using System.IO;
+
+    using ObjectSync;
+
     /// <summary>
     /// Provides an abstraction of the protocol layer. Use it to establish a network connection with another game instance.
     /// </summary>
@@ -18,6 +22,8 @@ namespace Ballz.Network
         public readonly int Id;
         private readonly TcpClient tcpClient;
         NetworkStream connectionStream;
+        private StreamSync streamSync;
+        private MemoryStream streamSyncHelper;
 
         byte[] readBuffer;
         int readDataLength = -1;
@@ -68,6 +74,25 @@ namespace Ballz.Network
             MessageTypes.Add(typeof(NetworkMessage));
 
             BeginReceive();
+            streamSync = new StreamSync(streamSyncHelper);
+        }
+
+        public void SynchObjects(IEnumerable<object> objects)
+        {
+            streamSync.WriteUpdates(objects);
+        }
+
+        // by https://stackoverflow.com/questions/13021866/any-way-to-use-stream-copyto-to-copy-only-certain-number-of-bytes
+        public static void CopyStream(Stream input, Stream output, int bytes)
+        {
+            var buffer = new byte[32768];
+            int read;
+            while (bytes > 0 &&
+                   (read = input.Read(buffer, 0, Math.Min(buffer.Length, bytes))) > 0)
+            {
+                output.Write(buffer, 0, read);
+                bytes -= read;
+            }
         }
 
         protected void BeginReceive()
@@ -85,6 +110,13 @@ namespace Ballz.Network
                 byte[] msgTypeBuf = new byte[4];
                 connectionStream.Read(msgTypeBuf, 0, 4);
                 int msgType = BitConverter.ToInt32(msgTypeBuf, 0);
+
+                if (msgType == 42)
+                { // magic number for StreamSync data
+                    CopyStream(connectionStream, streamSyncHelper, msgLength);
+                    streamSync.BeginReceive();
+                    return null;
+                }
 
                 if (msgType < 0) return null;
 
@@ -121,6 +153,28 @@ namespace Ballz.Network
 
                 netStr.Write(data, 0, data.Length);
                 Console.WriteLine("Serialized " + data.Length + "bytes");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Network: Warning: Failed to send some data: " + e.Message);
+            }
+        }
+
+        private void Send(Stream stream)
+        {
+            try
+            {
+                var netStr = tcpClient.GetStream();
+                // write size of stream into tcp stream
+                var streamDataLen = BitConverter.GetBytes(stream.Length);
+                netStr.Write(streamDataLen, 0, 4);
+
+                var typeId = -42; // magic number for StreamSync data
+                netStr.Write(BitConverter.GetBytes(typeId), 0, 4);
+
+                stream.CopyTo(netStr);
+
+                Console.WriteLine("Sent stream with " + stream.Length + "bytes");
             }
             catch (Exception e)
             {

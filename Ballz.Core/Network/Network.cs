@@ -5,6 +5,9 @@
     using System;
 
     using global::Ballz.GameSession.Logic;
+    using global::Ballz.GameSession.World;
+
+    using ObjectSync;
 
     /// <summary>
     /// Network takes care of all network related stuff independent of an existing game session.
@@ -89,6 +92,7 @@
 
         public Network(Game game) : base(game)
         {
+            Sync.RegisterClass(() => new Entity());
         }
 
         public override void Update(GameTime time)
