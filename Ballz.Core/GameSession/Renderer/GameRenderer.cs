@@ -30,7 +30,7 @@ namespace Ballz.GameSession.Renderer
 
         new Ballz Game;
 
-        TimeSpan lastModification;
+        TimeSpan elTime;
 
         WaterRenderer WaterRenderer;
 
@@ -68,8 +68,7 @@ namespace Ballz.GameSession.Renderer
                 WaterRenderer.PrepareDrawWater(Game.World);
                 //GraphicsDevice.SetRenderTarget(WorldRenderTarget);
                 GraphicsDevice.Clear(Color.CornflowerBlue);
-                if (lastModification == null)
-                    lastModification = time.TotalGameTime;
+                elTime = time.TotalGameTime;
                 Game.Camera.SetProjection(Matrix.Identity);
 
                 Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
@@ -238,8 +237,13 @@ namespace Ballz.GameSession.Renderer
 
             if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer == ball.Player && ball.Player.ActiveBall == ball)
             {
-                screenPos -= new Vector2(0, 50);
-                spriteBatch.Draw(Game.Content.Load<Texture2D>("Textures/RedArrow"), screenPos, color: Color.White, origin: new Vector2(29, 38));
+                // Show turn-indicator for a couple of seconds only
+                var timeLeft = Game.Match.TurnTimeLeft;
+                if (Session.SecondsPerTurn - timeLeft < 4)
+                {
+                    screenPos -= new Vector2(0, 30 + (float)(15 * Math.Sin(5 * elTime.TotalSeconds)));
+                    spriteBatch.Draw(Game.Content.Load<Texture2D>("Textures/RedArrow"), screenPos, color: Color.White, origin: new Vector2(29, 38));
+                }
             }
         }
 
