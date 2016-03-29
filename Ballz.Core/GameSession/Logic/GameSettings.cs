@@ -87,7 +87,7 @@ namespace Ballz.GameSession.Logic
         {
             var jsonObject = JObject.Load(reader);
             var properties = jsonObject.Properties().ToList();
-            var mapTex = (string)properties[1].Value;
+            var mapTex = (string)properties[2].Value;
             return new GameSettings
             {
                 MapName = (string)properties[0].Value,
