@@ -36,16 +36,16 @@ namespace Ballz.GameSession.World
             Particles = new Vector2[ParticleCount];
             Velocities = new Vector2[ParticleCount];
             _velocityBuffer = new Vector2[ParticleCount];
-            const float initGridSize = 0.2f;
+            const float initGridSize = 0.4f;
             for (var x = 0.0f; x < _width; x += initGridSize)
                 for (var y = 0.0f; y < _height; y += initGridSize)
                 {
-                    if (world.StaticGeometry.IsWaterSpawn(x,y))
-                    {
-                        particles.Add(new Vector2(x, y));
-                        velocities.Add(new Vector2(0,0));
-                        _grid[(int)(particles.Last().X * GridMultiplier), (int)(particles.Last().Y * GridMultiplier)].Add(particles.Count-1);
-                    }
+                    if (!world.StaticGeometry.IsWaterSpawn(x, y))
+                        continue;
+
+                    particles.Add(new Vector2(x, y));
+                    velocities.Add(new Vector2(0,0));
+                    _grid[(int)(particles.Last().X * GridMultiplier), (int)(particles.Last().Y * GridMultiplier)].Add(particles.Count-1);
                 }
 
             Particles = particles.ToArray();
@@ -70,8 +70,8 @@ namespace Ballz.GameSession.World
         private void Collision(float elapsedSeconds)
         {
             const int cellRadius = (int) (D*GridMultiplier);
-            const float w0 = 0.0005f;
-            const float η = 0.0005f;
+            const float w0 = 0.5f;
+            const float η = 0.5f;
             var h = new float[ParticleCount];
             for (var i = 0; i < ParticleCount; ++i)
             {
@@ -125,7 +125,7 @@ namespace Ballz.GameSession.World
 
         private void Viscosity(float elapsedSeconds)
         {
-            const float µ = 0.5f;
+            const float µ = 5f;
             const float l = 0.5f;
             const int cellRadius = (int)(GridMultiplier * l);
             Parallel.For(0, ParticleCount, i =>
@@ -157,8 +157,8 @@ namespace Ballz.GameSession.World
 
         private void Avoidance(float elapsedSeconds)
         {
-            const float k = 15f;
-            const float l = 0.5f;
+            const float k = 25f;
+            const float l = 0.6f;
             const int cellRadius = (int) (GridMultiplier*l);
             for (var i = 0; i < ParticleCount; ++i)
             {
