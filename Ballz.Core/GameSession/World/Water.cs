@@ -237,6 +237,9 @@ namespace Ballz.GameSession.World
         private int seldomCtr = 0;
         public void Step(World worldState, float elapsedSeconds)
         {
+            if (GameSession.Renderer.WaterRenderer.NOWATER)
+                return;
+            
             if (++seldomCtr < 2)
                 return;
             //Collision(elapsedSeconds);

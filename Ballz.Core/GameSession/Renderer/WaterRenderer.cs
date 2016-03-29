@@ -11,6 +11,8 @@ namespace Ballz.GameSession.Renderer
 {
     public class WaterRenderer
     {
+        public static readonly bool NOWATER = true;
+
         public Ballz Game;
         BasicEffect ParticleEffect;
         Effect WaterEffect;
@@ -28,6 +30,9 @@ namespace Ballz.GameSession.Renderer
 
         public void LoadContent()
         {
+            if (NOWATER)
+                return;
+            
             spriteBatch = new SpriteBatch(Game.GraphicsDevice);
 
             ParticleEffect = new BasicEffect(Game.GraphicsDevice);
@@ -76,6 +81,9 @@ namespace Ballz.GameSession.Renderer
 
         public void DrawWaterDebug(World.World world)
         {
+            if (NOWATER)
+                return;
+            
             var blending = new BlendState();
             blending.AlphaSourceBlend = Blend.SourceAlpha;
             blending.AlphaDestinationBlend = Blend.InverseSourceAlpha;
@@ -132,6 +140,9 @@ namespace Ballz.GameSession.Renderer
 
         public void PrepareDrawWater(World.World world)
         {
+            if (NOWATER)
+                return;
+            
             var blending = BlendState.Additive;
 
             var water = world.Water;
@@ -155,6 +166,9 @@ namespace Ballz.GameSession.Renderer
 
         public void DrawWater(World.World world)
         {
+            if (NOWATER)
+                return;
+            
             var waterDomainScreenPos = WorldToScreen(Vector2.Zero);
             WaterEffect.Parameters["WaterTexture"].SetValue(WaterRenderTarget);
             WaterEffect.Techniques[0].Passes[0].Apply();
