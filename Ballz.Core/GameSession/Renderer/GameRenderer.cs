@@ -73,7 +73,7 @@ namespace Ballz.GameSession.Renderer
                 BallEffect.View = Game.Camera.View;
                 BallEffect.Projection = Game.Camera.Projection;
 
-                var worldState = Game.World;
+                var worldState = Game.Match.World;
 
                 spriteBatch.Begin();
                 spriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), Color.CornflowerBlue);

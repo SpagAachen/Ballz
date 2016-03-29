@@ -40,7 +40,7 @@ namespace Ballz.GameSession.Logic.Weapons
                 var rayHit = Game.Match.Physics.Raycast(Ball.Position, Ball.Position + Ball.AimDirection * 1000f);
                 if(rayHit.HasHit)
                 {
-                    Game.World.StaticGeometry.SubtractCircle(rayHit.Position.X, rayHit.Position.Y, ExplosionRadius);
+                    Game.Match.World.StaticGeometry.SubtractCircle(rayHit.Position.X, rayHit.Position.Y, ExplosionRadius);
                     if(rayHit.Entity != null)
                     {
                         if(rayHit.Entity is Ball)

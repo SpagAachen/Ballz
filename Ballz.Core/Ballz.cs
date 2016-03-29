@@ -22,15 +22,13 @@ namespace Ballz
     public class Ballz : Game
     {
         //SpriteBatch spriteBatch;
-        private static Ballz _instance;
+        static Ballz _instance;
 
         public List<string> Teamnames{ get; private set;}
 
         public GraphicsDeviceManager Graphics { get; set; }
 
         public LogicControl Logic { get; set; }
-
-        public World World { get; set; }
 
         public Network.Network Network { get; set; }
 

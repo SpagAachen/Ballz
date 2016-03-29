@@ -13,7 +13,7 @@ namespace Ballz.GameSession
 {
     public class Session: IDisposable
     {
-        public List<Entity> Entities { get; set; } = new List<Entity>();
+        public World.World World;
 
         public Terrain Terrain { get; set; }
 
@@ -47,8 +47,9 @@ namespace Ballz.GameSession
 
         public GameSession.Logic.GameSettings GameSettings { get; set; }
 
-        public Session(Ballz _game, GameSession.Logic.GameSettings settings)
+        public Session(Ballz _game, World.World world, GameSession.Logic.GameSettings settings)
         {
+            World = world;
             GameSettings = settings;
 
             Physics = new Physics.PhysicsControl(_game);

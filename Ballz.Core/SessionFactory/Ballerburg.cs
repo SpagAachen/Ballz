@@ -29,7 +29,7 @@ namespace Ballz.SessionFactory
 
         protected override Session ImplStartSession(Ballz game, GameSession.Logic.GameSettings settings)
         {
-            var session = new Session(game, settings) { Terrain = new Terrain(settings.MapTexture) };
+            var session = new Session(game, new World(new Terrain(settings.MapTexture)), settings);
 
             // Create players and Ballz
             var ballzPositions = new List<Vector2> { new Vector2(1,5), new Vector2(35,5) };
@@ -50,7 +50,7 @@ namespace Ballz.SessionFactory
                         IsStatic = true
                     };
                     ++currBallCreating;
-                    session.Entities.Add(playerBall);
+                    session.World.AddEntity(playerBall);
                     if (team.ControlledByAI)
                         session.SessionLogic.ActiveControllers[team.player] = new AIControl(game, session, playerBall);
                     else
@@ -58,8 +58,8 @@ namespace Ballz.SessionFactory
                 }
             }
 
-            var snpsht = new World(session.Entities, session.Terrain);
-            session.Game.World = snpsht;
+            var snpsht = new World(session.Terrain);
+            session.Game.Match.World = snpsht;
 
             return session;
         }

@@ -28,7 +28,7 @@ namespace Ballz.GameSession.Logic
         public void FireProjectile()
         {
             Game.Services.GetService<SoundControl>().PlaySound(SoundControl.ShotSound);
-            Game.World.Entities.Add(new Shot
+            Game.Match.World.AddEntity(new Shot
             {
                 ExplosionRadius = 1.0f,
                 HealthImpactAtDirectHit = 25,

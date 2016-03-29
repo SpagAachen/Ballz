@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using ObjectSync;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace Ballz.GameSession.World
     /// <summary>
     /// Represents a shot in the 
     /// </summary>
+    [Serializable]
     public class Shot : Entity
     {
         public Shot()
@@ -24,6 +26,7 @@ namespace Ballz.GameSession.World
         /// <remarks>
         /// If this value is greater than zero, a sphere of the given size is substracted from the terrain.
         /// </remarks>
+        [Synced]
         public float ExplosionRadius;
 
         /// <summary>
@@ -32,11 +35,13 @@ namespace Ballz.GameSession.World
         /// <remarks>
         /// If a ball is not hit directly, the damage is linearly interpolated based on the ExplosionRadius and the distance to the ball.
         /// </remarks>
+        [Synced]
         public float HealthImpactAtDirectHit;
-        
+
         /// <summary>
         /// If this value is true, the shot velocity is ignored and the projectile will hit its target instantly.
         /// </summary>
+        [Synced]
         public bool IsInstantShot { get; set; }
         
         public bool DisposeOnCollision { get; set; } = true;

@@ -11,9 +11,16 @@
     using global::Ballz.GameSession.Logic;
 
     using Microsoft.Xna.Framework.Graphics;
-
+    using GameSession.World;
     class Server
     {
+        static Server()
+        {
+            ObjectSync.Sync.RegisterClass<Entity>(() => new Entity());
+            ObjectSync.Sync.RegisterClass<Ball>(() => new Ball());
+            ObjectSync.Sync.RegisterClass<Shot>(() => new Shot());
+        }
+
         private static int nextId = 1;
         TcpListener listener;
         private readonly Network network;
@@ -74,6 +81,8 @@
             }
         }
 
+        DateTime LastUpdate = DateTime.Now;
+
         public void Update(GameTime time)
         {
             // new clients
@@ -102,10 +111,18 @@
                     this.OnData(data, c.Id);
                 }
             }
-
-			// TEST
+            
+            if(Ballz.The().Match != null && Ballz.The().Match.State == SessionState.Running)
 			{
-				//Broadcast(Ballz.The().World.Entities);
+                var now = DateTime.Now;
+                if ((now - LastUpdate).TotalSeconds > 0.1)
+                {
+                    foreach (var e in Ballz.The().Match.World.Entities)
+                    {
+                        Broadcast(e);
+                    }
+                    LastUpdate = DateTime.Now;
+                }
 			}
             //TODO: Implement
         }
@@ -116,7 +133,7 @@
 			// Input Message
 			if (data.GetType() == typeof(InputMessage))
 			{
-				
+                Console.WriteLine("Input!");
 			}
         }
 

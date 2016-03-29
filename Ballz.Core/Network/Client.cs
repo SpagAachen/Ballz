@@ -12,6 +12,13 @@
 
     class Client
     {
+        static Client()
+        {
+            ObjectSync.Sync.RegisterClass<Entity>(() => new Entity());
+            ObjectSync.Sync.RegisterClass<Ball>(() => new Ball());
+            ObjectSync.Sync.RegisterClass<Shot>(() => new Shot());
+        }
+
         private Network network = null;
 
         public int NumberOfPlayers { get; private set; } = -1;
@@ -48,17 +55,14 @@
         private void OnData(object data)
         {
             // Entities
-            var entities = data as IEnumerable<Entity>;
-            if (entities != null)
+            var entity = data as Entity;
+            if (entity != null)
             {
-                foreach (var e in entities)
-                {
-                    var ourE = Ballz.The().World.EntityById(e.ID);
-                    ourE.Position = e.Position;
-                    ourE.Velocity = e.Velocity;
-                    ourE.Rotation = e.Rotation;
-                }
-
+                var localEntity = Ballz.The().Match.World.EntityById(entity.ID);
+                if (localEntity != null)
+                    ObjectSync.Sync.SyncState(entity, localEntity);
+                else
+                    Ballz.The().Match.World.AddEntity(entity);
                 return;
             }
             // network message

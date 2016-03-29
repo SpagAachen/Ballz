@@ -97,7 +97,7 @@ namespace Ballz.SessionFactory
 
         protected override Session ImplStartSession(Ballz game, GameSettings settings)
         {
-            var session = new Session(game, settings)
+            var session = new Session(game, new World(new Terrain(settings.MapTexture)), settings)
                               {
                                   UsePlayerTurns = this.UsePlayerTurns,
                                   Terrain = new Terrain(settings.MapTexture)
@@ -125,7 +125,7 @@ namespace Ballz.SessionFactory
                     };
                     team.player.OwnedBalls.Add(playerBall);
                     ++currBallCreating;
-                    session.Entities.Add(playerBall);
+                    session.World.AddEntity(playerBall);
 
                     BallControl controller;
 
@@ -141,9 +141,6 @@ namespace Ballz.SessionFactory
                 team.player.ActiveBall = team.player.OwnedBalls.FirstOrDefault();
                 session.SessionLogic.ActiveControllers[team.player] = session.SessionLogic.BallControllers[team.player.ActiveBall];
             }
-
-            var snpsht = new World(session.Entities, session.Terrain);
-            session.Game.World = snpsht;
 
             return session;
         }

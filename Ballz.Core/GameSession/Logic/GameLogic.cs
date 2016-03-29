@@ -67,7 +67,7 @@ namespace Ballz.GameSession.Logic
                 }
             }
 
-            var worldState = Game.World;
+            var worldState = Session.World;
 
             if (Game.Match.State == SessionState.Running)
             {
