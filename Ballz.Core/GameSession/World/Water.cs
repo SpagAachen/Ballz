@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Ballz.GameSession.Physics;
 using Ballz.Utils;
 using Microsoft.Xna.Framework;
@@ -30,23 +31,31 @@ namespace Ballz.GameSession.World
         public void Initialize(World world, PhysicsControl physics)
         {
             _physics = physics;
+            var particles = new List<Vector2>();
+            var velocities = new List<Vector2>();
             Particles = new Vector2[ParticleCount];
             Velocities = new Vector2[ParticleCount];
             _velocityBuffer = new Vector2[ParticleCount];
-            for (var i = 0; i < ParticleCount; ++i)
-            {
-                do
+            const float initGridSize = 0.2f;
+            for (var x = 0.0f; x < _width; x += initGridSize)
+                for (var y = 0.0f; y < _height; y += initGridSize)
                 {
-                    Particles[i] = new Vector2((float)(rng.NextDouble() * _width), (float)(rng.NextDouble() * _height));//new Vector2((float)(rng.NextDouble() * _width/5 + (2f *_width)/5), (float)(rng.NextDouble() * _height/5 +4f*_height/5));
-                } while (/*!_physics.IsEmpty(Particles[i]) &&*/ !world.StaticGeometry.IsWaterSpawn(Particles[i].X,Particles[i].Y));
-                Velocities[i] = new Vector2((float) rng.NextDouble()*2-1, (float) rng.NextDouble()*2-1);
-            }
+                    if (world.StaticGeometry.IsWaterSpawn(x,y))
+                    {
+                        particles.Add(new Vector2(x, y));
+                        velocities.Add(new Vector2(0,0));
+                        _grid[(int)(particles.Last().X * GridMultiplier), (int)(particles.Last().Y * GridMultiplier)].Add(particles.Count-1);
+                    }
+                }
 
-            for (var i = 0; i < ParticleCount; ++i)
-                _grid[(int)(Particles[i].X * GridMultiplier), (int)(Particles[i].Y * GridMultiplier)].Add(i);
+            Particles = particles.ToArray();
+            Velocities = velocities.ToArray();
+            _velocityBuffer = Velocities.ToArray();
+            ParticleCount = particles.Count;
+            w = new float[ParticleCount, ParticleCount];
         }
 
-        public const int ParticleCount = 500;
+        public int ParticleCount;
         public const float R = 0.05f;
         public const float D = 2*R;
 
@@ -56,13 +65,13 @@ namespace Ballz.GameSession.World
 
         private Vector2[] _velocityBuffer;
 
-        private readonly float[,] w = new float[ParticleCount,ParticleCount];
+        private float[,] w;
 
         private void Collision(float elapsedSeconds)
         {
             const int cellRadius = (int) (D*GridMultiplier);
             const float w0 = 0.0005f;
-            const float eta = 0.0005f;
+            const float η = 0.0005f;
             var h = new float[ParticleCount];
             for (var i = 0; i < ParticleCount; ++i)
             {
@@ -91,7 +100,7 @@ namespace Ballz.GameSession.World
                     w[i, j] += (1 - n.Length())/D;
                     wi += w[i, j];
                 }
-                h[i] = Math.Max(0, (wi - w0)*eta);
+                h[i] = Math.Max(0, (wi - w0)*η);
             }
             for (var i = 0; i < ParticleCount; ++i)
             {
@@ -119,23 +128,27 @@ namespace Ballz.GameSession.World
             const float µ = 0.5f;
             const float l = 0.5f;
             const int cellRadius = (int)(GridMultiplier * l);
-            for (var i = 0; i < ParticleCount; ++i)
+            Parallel.For(0, ParticleCount, i =>
             {
-                var ix = (int)(Particles[i].X*GridMultiplier);
-                var iy = (int)(Particles[i].Y*GridMultiplier);
+                var ix = (int) (Particles[i].X*GridMultiplier);
+                var iy = (int) (Particles[i].Y*GridMultiplier);
 
                 var neighbors = new List<int>();
-                for (var dx = Math.Max(-cellRadius, -ix); dx < Math.Min(cellRadius, _width * GridMultiplier - ix - 1); ++dx)
-                    for (var dy = Math.Max(-cellRadius, -iy); dy < Math.Min(cellRadius, _height * GridMultiplier - iy - 1); ++dy)
+                for (var dx = Math.Max(-cellRadius, -ix);
+                    dx < Math.Min(cellRadius, _width*GridMultiplier - ix - 1);
+                    ++dx)
+                    for (var dy = Math.Max(-cellRadius, -iy);
+                        dy < Math.Min(cellRadius, _height*GridMultiplier - iy - 1);
+                        ++dy)
                         neighbors.AddRange(_grid[ix + dx, iy + dy]);
 
                 if (!neighbors.Any())
-                    continue;
+                    return;
 
                 var avg = neighbors.Select(ii => Velocities[ii]).Aggregate((ll, r) => ll + r);
                 avg /= neighbors.Count;
-                _velocityBuffer[i] = Velocities[i] + elapsedSeconds * µ * (avg - Velocities[i]);
-            }
+                _velocityBuffer[i] = Velocities[i] + elapsedSeconds*µ*(avg - Velocities[i]);
+            });
 
             var tmp = _velocityBuffer;
             _velocityBuffer = Velocities;
@@ -171,9 +184,10 @@ namespace Ballz.GameSession.World
                     n.Normalize();
                     _velocityBuffer[i] += elapsedSeconds * k * (dist-l) * n;
                 }
-                for (var j = 0; j < 8; ++j)
+                const int dir = 4;
+                for (var j = 0; j < dir; ++j)
                 {
-                    var wall = Particles[i] + Vector2.UnitX.Rotate((float) Math.PI*j/4)*l;
+                    var wall = Particles[i] + Vector2.UnitX.Rotate((float) (2f*Math.PI*j/dir))*l;
                     if (!_physics.IsEmpty(wall))
                     {
                         var res = _physics.Raycast(Particles[i], wall);
@@ -220,8 +234,11 @@ namespace Ballz.GameSession.World
             }
         }
 
+        private int seldomCtr = 0;
         public void Step(World worldState, float elapsedSeconds)
         {
+            if (++seldomCtr < 2)
+                return;
             //Collision(elapsedSeconds);
             Viscosity(elapsedSeconds);
             Avoidance(elapsedSeconds);
