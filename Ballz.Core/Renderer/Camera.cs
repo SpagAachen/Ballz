@@ -34,9 +34,8 @@ namespace Ballz
 
         private Vector2 TargetPosition{ get; set;}
 
-        private long lastTicks;
+        private double lastMillis;
         private float AspectRatio;
-        private float lastDiffTime;
 
         public Camera()
         {
@@ -45,7 +44,12 @@ namespace Ballz
             CurrentPosition = new Vector2 (20, 0);
             TargetPosition = CurrentPosition;
             AspectRatio = 1;
-            lastDiffTime = 0;
+            lastMillis = 0.0;
+        }
+
+        public Camera(float aspectratio) :this()
+        {
+            AspectRatio = aspectratio;
         }
 
         public void SetView( Matrix view)
@@ -71,24 +75,19 @@ namespace Ballz
 
         private void UpdateCurrentCameraPosition(GameTime t)
         {
-            float speed = 20.0f;
             Vector2 DiffPos = TargetPosition - CurrentPosition;
 
-            float DiffTime = ((float)(t.ElapsedGameTime.Ticks - lastTicks))/10000000.0f;
-            lastTicks = t.ElapsedGameTime.Ticks;
+            float speed = 5.0f + DiffPos.Length() * 2.0f;
 
-            if (DiffTime <= 0) {
-                DiffTime = lastDiffTime;
-            } else {
-                lastDiffTime = DiffTime;
-            }
+            double DiffTime = (t.TotalGameTime.TotalMilliseconds - lastMillis) / 1000.0;
+            lastMillis = t.TotalGameTime.TotalMilliseconds;
 
             Vector2 norm = DiffPos;
             norm.Normalize ();
 
             Vector2 delta = norm;
-            delta.X = delta.X * speed * DiffTime;
-            delta.Y = delta.Y * speed * DiffTime;
+            delta.X = delta.X * speed * (float)DiffTime;
+            delta.Y = delta.Y * speed * (float)DiffTime;
 
             if (delta.Length() > DiffPos.Length()) {
                 CurrentPosition = TargetPosition;

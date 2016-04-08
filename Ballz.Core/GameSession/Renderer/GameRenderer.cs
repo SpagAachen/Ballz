@@ -17,7 +17,6 @@ namespace Ballz.GameSession.Renderer
     public class GameRenderer : DrawableGameComponent
     {
         Model BallModel, GraveModel;
-        int lastid = 0;
         Dictionary<string,Texture2D> TeamTextures;
         Texture2D CrosshairTexture;
         Texture2D TerrainTexture;
@@ -40,6 +39,7 @@ namespace Ballz.GameSession.Renderer
             Game = game;
             WaterRenderer = new WaterRenderer(game);
             TeamTextures = new Dictionary<string, Texture2D>();
+            Game.Camera.SetAspectRatio(Game.GraphicsDevice.Viewport.AspectRatio);
         }
 
         public Vector2 WorldToScreen(Vector3 Position)
@@ -74,7 +74,6 @@ namespace Ballz.GameSession.Renderer
 
                 try
                 {
-                    Game.Camera.SetAspectRatio (Game.GraphicsDevice.Viewport.AspectRatio);
                     Game.Camera.SetTargetPosition((Vector2)Game.Match.ActivePlayer.ActiveBall?.Position, time);
                 }
                 catch(Exception) {
