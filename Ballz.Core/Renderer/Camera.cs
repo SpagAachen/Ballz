@@ -82,12 +82,7 @@ namespace Ballz
             double DiffTime = (t.TotalGameTime.TotalMilliseconds - lastMillis) / 1000.0;
             lastMillis = t.TotalGameTime.TotalMilliseconds;
 
-            Vector2 norm = DiffPos;
-            norm.Normalize ();
-
-            Vector2 delta = norm;
-            delta.X = delta.X * speed * (float)DiffTime;
-            delta.Y = delta.Y * speed * (float)DiffTime;
+            Vector2 delta = Vector2.Normalize(DiffPos) * speed * (float)DiffTime;
 
             if (delta.Length() > DiffPos.Length()) {
                 CurrentPosition = TargetPosition;
