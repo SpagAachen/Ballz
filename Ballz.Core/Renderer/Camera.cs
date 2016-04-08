@@ -30,10 +30,22 @@ namespace Ballz
 
         public Matrix Projection{ get; private set;}
 
+        private Vector2 CurrentPosition{ get; set;}
+
+        private Vector2 TargetPosition{ get; set;}
+
+        private long lastTicks;
+        private float AspectRatio;
+        private float lastDiffTime;
+
         public Camera()
         {
             View = new Matrix();
             Projection = new Matrix();
+            CurrentPosition = new Vector2 (20, 0);
+            TargetPosition = CurrentPosition;
+            AspectRatio = 1;
+            lastDiffTime = 0;
         }
 
         public void SetView( Matrix view)
@@ -41,9 +53,54 @@ namespace Ballz
             View = view;
         }
 
+        public void SetAspectRatio( float r)
+        {
+            AspectRatio = r;
+        }
+
         public void SetProjection(Matrix projection)
         {
             Projection = projection;
+        }
+
+        public void SetTargetPosition(Vector2 Position, GameTime t)
+        {
+            TargetPosition = Position;
+            UpdateCurrentCameraPosition (t);
+        }
+
+        private void UpdateCurrentCameraPosition(GameTime t)
+        {
+            float speed = 20.0f;
+            Vector2 DiffPos = TargetPosition - CurrentPosition;
+
+            float DiffTime = ((float)(t.ElapsedGameTime.Ticks - lastTicks))/10000000.0f;
+            lastTicks = t.ElapsedGameTime.Ticks;
+
+            if (DiffTime <= 0) {
+                DiffTime = lastDiffTime;
+            } else {
+                lastDiffTime = DiffTime;
+            }
+
+            Vector2 norm = DiffPos;
+            norm.Normalize ();
+
+            Vector2 delta = norm;
+            delta.X = delta.X * speed * DiffTime;
+            delta.Y = delta.Y * speed * DiffTime;
+
+            if (delta.Length() > DiffPos.Length()) {
+                CurrentPosition = TargetPosition;
+            } else {
+                CurrentPosition += delta;
+            }
+
+            if (float.IsNaN (CurrentPosition.X) || float.IsNaN (CurrentPosition.Y)) {
+                CurrentPosition = TargetPosition;
+            }
+
+            SetView(Matrix.CreateOrthographicOffCenter(CurrentPosition.X-20, 20+CurrentPosition.X, CurrentPosition.Y-20/AspectRatio, CurrentPosition.Y+20/AspectRatio, -20, 20));
         }
     }
 }

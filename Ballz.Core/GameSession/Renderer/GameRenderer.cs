@@ -17,6 +17,7 @@ namespace Ballz.GameSession.Renderer
     public class GameRenderer : DrawableGameComponent
     {
         Model BallModel, GraveModel;
+        int lastid = 0;
         Dictionary<string,Texture2D> TeamTextures;
         Texture2D CrosshairTexture;
         Texture2D TerrainTexture;
@@ -71,7 +72,17 @@ namespace Ballz.GameSession.Renderer
                 elTime = time.TotalGameTime;
                 Game.Camera.SetProjection(Matrix.Identity);
 
-                Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
+                try
+                {
+                    Game.Camera.SetAspectRatio (Game.GraphicsDevice.Viewport.AspectRatio);
+                    Game.Camera.SetTargetPosition((Vector2)Game.Match.ActivePlayer.ActiveBall?.Position, time);
+                }
+                catch(Exception) {
+                    Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
+                }
+
+
+                //Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(pos_x-20, 20+pos_x, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
 
                 BallEffect.View = Game.Camera.View;
                 BallEffect.Projection = Game.Camera.Projection;
