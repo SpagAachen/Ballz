@@ -82,16 +82,16 @@ namespace Ballz
             double DiffTime = (t.TotalGameTime.TotalMilliseconds - lastMillis) / 1000.0;
             lastMillis = t.TotalGameTime.TotalMilliseconds;
 
+			if (DiffPos.Length () == 0.0f) {
+				return;
+			}
+
             Vector2 delta = Vector2.Normalize(DiffPos) * speed * (float)DiffTime;
 
             if (delta.Length() > DiffPos.Length()) {
                 CurrentPosition = TargetPosition;
             } else {
                 CurrentPosition += delta;
-            }
-
-            if (float.IsNaN (CurrentPosition.X) || float.IsNaN (CurrentPosition.Y)) {
-                CurrentPosition = TargetPosition;
             }
 
             SetView(Matrix.CreateOrthographicOffCenter(CurrentPosition.X-20, 20+CurrentPosition.X, CurrentPosition.Y-20/AspectRatio, CurrentPosition.Y+20/AspectRatio, -20, 20));

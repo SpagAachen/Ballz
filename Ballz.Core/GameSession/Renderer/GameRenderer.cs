@@ -80,9 +80,6 @@ namespace Ballz.GameSession.Renderer
                     Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
                 }
 
-
-                //Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(pos_x-20, 20+pos_x, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
-
                 BallEffect.View = Game.Camera.View;
                 BallEffect.Projection = Game.Camera.Projection;
 
