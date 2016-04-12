@@ -11,7 +11,7 @@ namespace Ballz.GameSession.Renderer
 {
     public class WaterRenderer
     {
-        public static readonly bool NOWATER = true;
+        public static readonly bool NOWATER = false;
 
         public Ballz Game;
         BasicEffect ParticleEffect;
