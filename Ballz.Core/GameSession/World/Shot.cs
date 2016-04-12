@@ -22,7 +22,7 @@ namespace Ballz.GameSession.World
         /// Explosion radius of the shot impact.
         /// </summary>
         /// <remarks>
-        /// If this value is greater than zero, a sphere of the given size is substracted from the terrain.
+        /// If this value is greater than zero, a sphere of the given size is subtracted from the terrain.
         /// </remarks>
         public float ExplosionRadius;
 
