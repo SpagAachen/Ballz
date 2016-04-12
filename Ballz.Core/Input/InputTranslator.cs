@@ -73,12 +73,17 @@ namespace Ballz.Input
 
         void RawHandler(object sender, TextInputEventArgs eventArgs)
         {
-            OnInput(InputMessage.MessageType.RawInput, null, eventArgs.Character);
+            OnInput(InputMessage.MessageType.RawInput, false, eventArgs.Character);
         }
 
-        private void OnInput(InputMessage.MessageType inputMessage, bool? pressed = null, char? key = null, Player player = null)
+        private void OnInput(InputMessage.MessageType inputMessage, bool pressed = false, char key = char.MinValue, Player player = null)
         {
             Input?.Invoke(this, new InputMessage(inputMessage, pressed, key, player)); //todo: use object pooling and specify message better
+        }
+
+        public void InjectInputMessage(InputMessage message, Player player)
+        {
+            OnInput(message.Kind, message.Pressed, message.Key, player);
         }
 
         private void ProcessGamePadInput(int p)
@@ -90,56 +95,56 @@ namespace Ballz.Input
             if (currentState.IsConnected)
             {                                    
                 if (previousGamePadState[p - 1].DPad.Up == ButtonState.Released && currentState.DPad.Up == ButtonState.Pressed)
-                    OnInput(InputMessage.MessageType.ControlsUp, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsUp, true, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if (previousGamePadState[p - 1].DPad.Down == ButtonState.Released && currentState.DPad.Down == ButtonState.Pressed)
-                    OnInput(InputMessage.MessageType.ControlsDown, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsDown, true, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if (previousGamePadState[p - 1].DPad.Left == ButtonState.Released && currentState.DPad.Left == ButtonState.Pressed)
-                    OnInput(InputMessage.MessageType.ControlsLeft, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsLeft, true, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if (previousGamePadState[p - 1].DPad.Right == ButtonState.Released && currentState.DPad.Right == ButtonState.Pressed)
-                    OnInput(InputMessage.MessageType.ControlsRight, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsRight, true, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if (previousGamePadState[p - 1].IsButtonUp(Buttons.B) && currentState.IsButtonDown(Buttons.B))
-                    OnInput(InputMessage.MessageType.ControlsBack, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsBack, true, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if (previousGamePadState[p - 1].IsButtonUp(Buttons.A) && currentState.IsButtonDown(Buttons.A))
-                    OnInput(InputMessage.MessageType.ControlsAction, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsAction, true, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if (previousGamePadState[p - 1].IsButtonUp(Buttons.X) && currentState.IsButtonDown(Buttons.X))
-                    OnInput(InputMessage.MessageType.ControlsJump, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsJump, true, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
 
                 if(previousGamePadState[p - 1].ThumbSticks.Left.X <= 0.5 && currentState.ThumbSticks.Left.X > 0.5)
-                    OnInput(InputMessage.MessageType.ControlsRight, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsRight, true, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if(previousGamePadState[p - 1].ThumbSticks.Left.X >= -0.5 && currentState.ThumbSticks.Left.X < -0.5)
-                    OnInput(InputMessage.MessageType.ControlsLeft, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsLeft, true, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if(previousGamePadState[p - 1].ThumbSticks.Left.Y*sign <= 0.5 && currentState.ThumbSticks.Left.Y*sign > 0.5)
-                    OnInput(InputMessage.MessageType.ControlsDown, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsDown, true, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if(previousGamePadState[p - 1].ThumbSticks.Left.Y*sign >= -0.5 && currentState.ThumbSticks.Left.Y*sign < -0.5)
-                    OnInput(InputMessage.MessageType.ControlsUp, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsUp, true, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if(previousGamePadState[p-1].Buttons.LeftStick == ButtonState.Released && currentState.Buttons.LeftStick == ButtonState.Pressed)
-                    OnInput(InputMessage.MessageType.ControlsJump, true, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsJump, true, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
 
                 if(previousGamePadState[p - 1].ThumbSticks.Left.X > 0.5 && currentState.ThumbSticks.Left.X <= 0.5)
-                    OnInput(InputMessage.MessageType.ControlsRight, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsRight, false, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if(previousGamePadState[p - 1].ThumbSticks.Left.X < -0.5 && currentState.ThumbSticks.Left.X >= -0.5)
-                    OnInput(InputMessage.MessageType.ControlsLeft, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsLeft, false, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if(previousGamePadState[p - 1].ThumbSticks.Left.Y*sign > 0.5 && currentState.ThumbSticks.Left.Y*sign <= 0.5)
-                    OnInput(InputMessage.MessageType.ControlsDown, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsDown, false, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if(previousGamePadState[p - 1].ThumbSticks.Left.Y*sign < -0.5 && currentState.ThumbSticks.Left.Y*sign >= -0.5)
-                    OnInput(InputMessage.MessageType.ControlsUp, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsUp, false, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if(previousGamePadState[p-1].Buttons.LeftStick == ButtonState.Pressed && currentState.Buttons.LeftStick == ButtonState.Released)
-                    OnInput(InputMessage.MessageType.ControlsJump, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsJump, false, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 
                 if (previousGamePadState[p - 1].DPad.Up == ButtonState.Pressed && currentState.DPad.Up == ButtonState.Released)
-                    OnInput(InputMessage.MessageType.ControlsUp, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsUp, false, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if (previousGamePadState[p - 1].DPad.Down == ButtonState.Pressed && currentState.DPad.Down == ButtonState.Released)
-                    OnInput(InputMessage.MessageType.ControlsDown, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsDown, false, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if (previousGamePadState[p - 1].DPad.Left == ButtonState.Pressed && currentState.DPad.Left == ButtonState.Released)
-                    OnInput(InputMessage.MessageType.ControlsLeft, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsLeft, false, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if (previousGamePadState[p - 1].DPad.Right == ButtonState.Pressed && currentState.DPad.Right == ButtonState.Released)
-                    OnInput(InputMessage.MessageType.ControlsRight, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsRight, false, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if (previousGamePadState[p - 1].IsButtonDown(Buttons.B) && currentState.IsButtonUp(Buttons.B))
-                    OnInput(InputMessage.MessageType.ControlsBack, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsBack, false, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if (previousGamePadState[p - 1].IsButtonDown(Buttons.A) && currentState.IsButtonUp(Buttons.A))
-                    OnInput(InputMessage.MessageType.ControlsAction, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsAction, false, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
                 if (previousGamePadState[p - 1].IsButtonDown(Buttons.X) && currentState.IsButtonUp(Buttons.X))
-                    OnInput(InputMessage.MessageType.ControlsJump, false, null, Ballz.The().Match?.PlayerByNumber(p));
+                    OnInput(InputMessage.MessageType.ControlsJump, false, char.MinValue, Ballz.The().Match?.PlayerByNumber(p));
             }
 
             previousGamePadState[p - 1] = currentState;
@@ -245,50 +250,50 @@ namespace Ballz.Input
                         OnInput(InputMessage.MessageType.ControlsBack, pressed);
                         break;
                     case Keys.LeftControl:
-                        OnInput(InputMessage.MessageType.ControlsAction, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
+                        OnInput(InputMessage.MessageType.ControlsAction, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.Up:
-                        OnInput(InputMessage.MessageType.ControlsUp, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
+                        OnInput(InputMessage.MessageType.ControlsUp, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.Down:
-                        OnInput(InputMessage.MessageType.ControlsDown, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
+                        OnInput(InputMessage.MessageType.ControlsDown, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.Left:
-                        OnInput(InputMessage.MessageType.ControlsLeft, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
+                        OnInput(InputMessage.MessageType.ControlsLeft, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.Right:
-                        OnInput(InputMessage.MessageType.ControlsRight, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
+                        OnInput(InputMessage.MessageType.ControlsRight, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.Enter:
                     case Keys.RightControl:
-                        OnInput(InputMessage.MessageType.ControlsAction, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
+                        OnInput(InputMessage.MessageType.ControlsAction, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.Space:
-                        OnInput(InputMessage.MessageType.ControlsJump, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
+                        OnInput(InputMessage.MessageType.ControlsJump, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.PageUp:
-                        OnInput(InputMessage.MessageType.ControlsPreviousWeapon, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
+                        OnInput(InputMessage.MessageType.ControlsPreviousWeapon, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.PageDown:
-                        OnInput(InputMessage.MessageType.ControlsNextWeapon, pressed, null, Ballz.The().Match?.PlayerByNumber(1));
+                        OnInput(InputMessage.MessageType.ControlsNextWeapon, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
                         break;
                     case Keys.W:
-                        OnInput(InputMessage.MessageType.ControlsUp, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
+                        OnInput(InputMessage.MessageType.ControlsUp, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
                         break;
                     case Keys.S:
-                        OnInput(InputMessage.MessageType.ControlsDown, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
+                        OnInput(InputMessage.MessageType.ControlsDown, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
                         break;
                     case Keys.A:
-                        OnInput(InputMessage.MessageType.ControlsLeft, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
+                        OnInput(InputMessage.MessageType.ControlsLeft, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
                         break;
                     case Keys.D:
-                        OnInput(InputMessage.MessageType.ControlsRight, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
+                        OnInput(InputMessage.MessageType.ControlsRight, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
                         break;
                     case Keys.E:
-                        OnInput(InputMessage.MessageType.ControlsAction, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
+                        OnInput(InputMessage.MessageType.ControlsAction, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
                         break;
                     case Keys.Q:
-                        OnInput(InputMessage.MessageType.ControlsJump, pressed, null, Ballz.The().Match?.PlayerByNumber(2));
+                        OnInput(InputMessage.MessageType.ControlsJump, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
                         break;
                 }
             }

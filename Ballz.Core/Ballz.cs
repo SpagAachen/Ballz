@@ -30,6 +30,8 @@ namespace Ballz
 
         public LogicControl Logic { get; set; }
 
+        public InputTranslator Input { get; set; }
+
         public Network.Network Network { get; set; }
 
         public GameSession.Session Match { get; set; }
@@ -58,10 +60,10 @@ namespace Ballz
             // create the Game Components
             var menuRendering = new MenuRenderer(this, DefaultMenu());
             //var physics = new PhysicsControl(this);
-            var input = new InputTranslator(this);
+            Input = new InputTranslator(this);
             Network = new Network.Network(this);
 
-            Components.Add(input);
+            Components.Add(Input);
             //Components.Add(physics);
             Components.Add(Network);
             Components.Add(menuRendering);
@@ -71,14 +73,14 @@ namespace Ballz
             Logic = new LogicControl(this);
 
             Services.AddService(Logic);
-            Services.AddService(input);
+            Services.AddService(Input);
 
             Services.AddService(new SoundControl(this));
 
             //add eventhandlers to events
-            input.Input += Logic.HandleInputMessage;
+            Input.Input += Logic.HandleInputMessage;
             //input.Input += physics.HandleMessage;
-            input.Input += Network.HandleMessage;
+            Input.Input += Network.HandleMessage;
 
             //Logic.Message += physics.HandleMessage;
             Logic.Message += Network.HandleMessage;

@@ -64,6 +64,7 @@
             if (State == StateT.Server)
             {
                 server.StartNetworkGame(gameSettings);
+                GameState = GameStateT.InGame;
             }
         }
 

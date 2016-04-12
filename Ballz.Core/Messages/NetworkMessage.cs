@@ -20,7 +20,8 @@ namespace Ballz.Messages
             ServerStarted,
             NewClient,
             StartGame,
-            NumberOfPlayers
+            NumberOfPlayers,
+            YourPlayerId
         }
 
         public NetworkMessage()
@@ -46,5 +47,10 @@ namespace Ballz.Messages
         [JsonProperty("NetworkMessageData")]
         [JsonConverter(typeof(TypeInfoConverter))]
         public object Data { get; set; }
+
+        public override string ToString()
+        {
+            return $"{{NetworkMessage Kind:{Kind}, Data: {Data}}}";
+        }
     }
 }

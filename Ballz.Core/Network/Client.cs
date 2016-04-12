@@ -17,6 +17,9 @@
             ObjectSync.Sync.RegisterClass<Entity>(() => new Entity());
             ObjectSync.Sync.RegisterClass<Ball>(() => new Ball());
             ObjectSync.Sync.RegisterClass<Shot>(() => new Shot());
+            ObjectSync.Sync.RegisterClass<Message>(() => new Message());
+            ObjectSync.Sync.RegisterClass<NetworkMessage>(() => new NetworkMessage());
+            ObjectSync.Sync.RegisterClass<InputMessage>(() => new InputMessage());
         }
 
         private Network network = null;
@@ -39,20 +42,15 @@
         public void ConnectToServer(string host, int port)
         {
             connectionToServer = new Connection(host, port, 0);
+            connectionToServer.ObjectReceived += OnData;
         }
 
         public void Update(GameTime time)
         {
-            if (connectionToServer.DataAvailable())
-            {
-                var data = connectionToServer.ReceiveData();
-                OnData(data);
-            }
-
-            //TODO: Implement
+            connectionToServer.ReadUpdates();
         }
 
-        private void OnData(object data)
+        private void OnData(object sender, object data)
         {
             // Entities
             var entity = data as Entity;
@@ -107,6 +105,7 @@
                 case InputMessage.MessageType.ControlsDown:
                 case InputMessage.MessageType.ControlsLeft:
                 case InputMessage.MessageType.ControlsRight:
+                case InputMessage.MessageType.ControlsJump:
                     connectionToServer.Send(message);
                     break;
             }

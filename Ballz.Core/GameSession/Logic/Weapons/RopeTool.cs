@@ -20,7 +20,7 @@ namespace Ballz.GameSession.Logic.Weapons
         {
             base.HandleInput(input);
             
-            if(input.Pressed ?? false)
+            if(input.Pressed)
             {
                 switch(input.Kind)
                 {

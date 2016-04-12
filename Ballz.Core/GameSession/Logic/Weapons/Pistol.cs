@@ -34,7 +34,7 @@ namespace Ballz.GameSession.Logic.Weapons
 
         public override void HandleInput(InputMessage input)
         {
-            if((input.Pressed ?? false) && input.Kind == InputMessage.MessageType.ControlsAction)
+            if(input.Pressed && input.Kind == InputMessage.MessageType.ControlsAction)
             {
                 ++shotsFired;
                 var rayHit = Game.Match.Physics.Raycast(Ball.Position, Ball.Position + Ball.AimDirection * 1000f);

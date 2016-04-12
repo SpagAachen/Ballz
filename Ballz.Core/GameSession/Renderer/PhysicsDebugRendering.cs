@@ -125,7 +125,7 @@ namespace Ballz.GameSession.Renderer
             if (msg.Kind == Message.MessageType.InputMessage)
             {
                 InputMessage ipmsg = (InputMessage)msg;
-                if (ipmsg.Kind == InputMessage.MessageType.ControlsConsole && ipmsg.Pressed.HasValue && ipmsg.Pressed.Value)
+                if (ipmsg.Kind == InputMessage.MessageType.ControlsConsole && ipmsg.Pressed)
                 {
                     Enabled = !Enabled;
                     Visible = !Visible;

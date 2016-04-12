@@ -99,7 +99,7 @@ namespace Ballz.GameSession.Logic
             if (input?.Pressed != null)
             {
                 Weapon?.HandleInput(input);
-                KeyPressed[input.Kind] = input.Pressed.Value;
+                KeyPressed[input.Kind] = input.Pressed;
             }
         }   
     }
