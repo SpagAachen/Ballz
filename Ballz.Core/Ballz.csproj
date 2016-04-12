@@ -133,6 +133,7 @@
     <Compile Include="Renderer\Camera.cs" />
     <Compile Include="Sound\SoundControl.cs" />
     <Compile Include="Utils\PerformanceReporter.cs" />
+    <Compile Include="Renderer\Camera\CameraTrajectory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
@@ -226,5 +227,8 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Renderer\Camera\" />
   </ItemGroup>
 </Project>

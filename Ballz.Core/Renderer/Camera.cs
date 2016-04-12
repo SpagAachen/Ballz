@@ -30,13 +30,14 @@ namespace Ballz
 
         public Matrix Projection{ get; private set;}
 
-        private Vector2 CurrentPosition{ get; set;}
+		private Vector2 CurrentPosition; //
 
         private Vector2 TargetPosition{ get; set;}
 
+		private CameraTrajectory CurrentCameraTrajectory;
         private double lastMillis;
         private float AspectRatio;
-
+		private float Zoom;
         public Camera()
         {
             View = new Matrix();
@@ -45,7 +46,13 @@ namespace Ballz
             TargetPosition = CurrentPosition;
             AspectRatio = 1;
             lastMillis = 0.0;
+			Zoom = 1.0f;
         }
+
+		public void SetZoom(float zoom)
+		{
+			Zoom = zoom;
+		}
 
         public Camera(float aspectratio) :this()
         {
@@ -73,28 +80,58 @@ namespace Ballz
             UpdateCurrentCameraPosition (t);
         }
 
+		public void SwitchTarget(Vector2 targetPosition, GameTime t)
+		{
+			if (CurrentCameraTrajectory == null)
+			{
+				CurrentCameraTrajectory = new CameraTrajectory(CurrentPosition, targetPosition, t);
+			}
+		}
+
         private void UpdateCurrentCameraPosition(GameTime t)
         {
-            Vector2 DiffPos = TargetPosition - CurrentPosition;
+			if (CurrentCameraTrajectory == null) {
+				Vector2 DiffPos = TargetPosition - CurrentPosition;
 
-            float speed = 5.0f + DiffPos.Length() * 2.0f;
+				double DiffTime = (t.TotalGameTime.TotalMilliseconds - lastMillis) / 1000.0;
+				lastMillis = t.TotalGameTime.TotalMilliseconds;
 
-            double DiffTime = (t.TotalGameTime.TotalMilliseconds - lastMillis) / 1000.0;
-            lastMillis = t.TotalGameTime.TotalMilliseconds;
+				if (DiffPos.Length () == 0.0f) {
+					return;
+				}
 
-			if (DiffPos.Length () == 0.0f) {
-				return;
+				float speed = 3.0f + DiffPos.Length () * 1.0f;
+				Vector2 delta = Vector2.Normalize (DiffPos) * speed * (float)DiffTime;
+
+				if (delta.Length () > DiffPos.Length ()) {
+					CurrentPosition = TargetPosition;
+				} else {
+					CurrentPosition += delta;
+				}
+
+				float dynamicZoom = Zoom - DiffPos.Length () * 0.01f;
+				float x_size = 40.0f / dynamicZoom;
+				float y_size = 40.0f / dynamicZoom / AspectRatio;
+				SetView(Matrix.CreateOrthographicOffCenter(
+					CurrentPosition.X-x_size/2.0f, CurrentPosition.X+x_size/2.0f, 
+					CurrentPosition.Y-y_size/2.0f, CurrentPosition.Y+y_size/2.0f, 
+					-20, 20));
+			} else {
+				if (CurrentCameraTrajectory.IsValid () == false) {
+					CurrentCameraTrajectory = null;
+					return;
+				}
+				Vector3 p = CurrentCameraTrajectory.GetCurrentPoint (t);
+				CurrentPosition.X = p.X;
+				CurrentPosition.Y = p.Y;
+				float dynamicZoom = p.Z;
+				float x_size = 40.0f / dynamicZoom;
+				float y_size = 40.0f / dynamicZoom / AspectRatio;
+				SetView(Matrix.CreateOrthographicOffCenter(
+					p.X-x_size/2.0f, p.X+x_size/2.0f, 
+					p.Y-y_size/2.0f, p.Y+y_size/2.0f, 
+					-20, 20));
 			}
-
-            Vector2 delta = Vector2.Normalize(DiffPos) * speed * (float)DiffTime;
-
-            if (delta.Length() > DiffPos.Length()) {
-                CurrentPosition = TargetPosition;
-            } else {
-                CurrentPosition += delta;
-            }
-
-            SetView(Matrix.CreateOrthographicOffCenter(CurrentPosition.X-20, 20+CurrentPosition.X, CurrentPosition.Y-20/AspectRatio, CurrentPosition.Y+20/AspectRatio, -20, 20));
         }
     }
 }

@@ -28,6 +28,8 @@ namespace Ballz.GameSession.Renderer
         VertexPositionTexture[] quad;
         SpriteFont font;
 
+		Ball CurrentActiveBall = null;
+
         new Ballz Game;
 
         TimeSpan elTime;
@@ -74,6 +76,11 @@ namespace Ballz.GameSession.Renderer
 
                 try
                 {
+					if ( Game.Match.ActivePlayer.ActiveBall != CurrentActiveBall && Game.Match.ActivePlayer.ActiveBall != null)
+					{
+						CurrentActiveBall = Game.Match.ActivePlayer.ActiveBall;
+						Game.Camera.SwitchTarget(CurrentActiveBall.Position, time);
+					}
                     Game.Camera.SetTargetPosition((Vector2)Game.Match.ActivePlayer.ActiveBall?.Position, time);
                 }
                 catch(Exception) {
