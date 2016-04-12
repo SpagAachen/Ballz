@@ -28,6 +28,8 @@ namespace Ballz.GameSession.Renderer
         VertexPositionTexture[] quad;
         SpriteFont font;
 
+		Ball CurrentActiveBall = null;
+
         new Ballz Game;
 
         TimeSpan elTime;
@@ -39,6 +41,7 @@ namespace Ballz.GameSession.Renderer
             Game = game;
             WaterRenderer = new WaterRenderer(game);
             TeamTextures = new Dictionary<string, Texture2D>();
+            Game.Camera.SetAspectRatio(Game.GraphicsDevice.Viewport.AspectRatio);
         }
 
         public Vector2 WorldToScreen(Vector3 Position)
@@ -71,7 +74,18 @@ namespace Ballz.GameSession.Renderer
                 elTime = time.TotalGameTime;
                 Game.Camera.SetProjection(Matrix.Identity);
 
-                Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
+                try
+                {
+					if ( Game.Match.ActivePlayer.ActiveBall != CurrentActiveBall && Game.Match.ActivePlayer.ActiveBall != null)
+					{
+						CurrentActiveBall = Game.Match.ActivePlayer.ActiveBall;
+						Game.Camera.SwitchTarget(CurrentActiveBall.Position, time);
+					}
+                    Game.Camera.SetTargetPosition((Vector2)Game.Match.ActivePlayer.ActiveBall?.Position, time);
+                }
+                catch(Exception) {
+                    Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
+                }
 
                 BallEffect.View = Game.Camera.View;
                 BallEffect.Projection = Game.Camera.Projection;
