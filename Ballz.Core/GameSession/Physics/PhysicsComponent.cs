@@ -410,7 +410,7 @@ namespace Ballz.GameSession.Physics
 
                 foreach (var shot in shots)
                 {
-                    if (shot.IsInstantShot)
+                    if (shot.ShotType == Shot.ShotType_T.InstantHit)
                     {
                         Vector2 targetPos = Vector2.Zero;
                         Fixture targetFixture = null;
@@ -439,6 +439,10 @@ namespace Ballz.GameSession.Physics
                         }
 
                         worldState.Entities.Remove(shot);
+                    }
+                    else
+                    {
+                        shot.update(elapsedSeconds);
                     }
                 }
             }
