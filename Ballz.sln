@@ -13,9 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Linux", "Linux\Ballz.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ballz.Windows", "Windows\Ballz.Windows.csproj", "{C52CAF6E-5C09-4D37-92A2-1112351606FF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ObjectSynch", "ObjectSynch", "{A521C540-1A97-48B5-A6B9-DA101A8D3152}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ObjectSync", "ObjectSync", "{A521C540-1A97-48B5-A6B9-DA101A8D3152}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectSync", "ObjectSynch\ObjectSync\ObjectSync.csproj", "{B186DF64-93E8-441E-8F43-85A8F9E4DD0B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectSync", "ObjectSync\ObjectSync\ObjectSync.csproj", "{B186DF64-93E8-441E-8F43-85A8F9E4DD0B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
