@@ -109,6 +109,8 @@ namespace Ballz.GameSession.World
 
         public override void OnEntityCollision(Entity other)
         {
+            if (Ballz.The().Match.IsRemoteControlled)
+                return;
             //TODO: Player damage
 
             onAnyCollision();
@@ -116,6 +118,9 @@ namespace Ballz.GameSession.World
 
         public override void OnTerrainCollision(Terrain terrain, Vector2 position)
         {
+            if (Ballz.The().Match.IsRemoteControlled)
+                return;
+
             float impact = 0.04f * Velocity.Length() * BulletHoleRadius;
             if (impact > 0.2)
             {

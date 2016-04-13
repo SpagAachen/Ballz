@@ -23,12 +23,15 @@
             ObjectSync.Sync.RegisterClass<Message>(() => new Message());
             ObjectSync.Sync.RegisterClass<NetworkMessage>(() => new NetworkMessage());
             ObjectSync.Sync.RegisterClass<InputMessage>(() => new InputMessage());
+            ObjectSync.Sync.RegisterClass<Terrain.TerrainModification>(() => new Terrain.TerrainModification());
         }
 
         private static int nextId = 1;
         TcpListener listener;
         private readonly Network network;
         private readonly List<Connection> connections = new List<Connection>();
+
+        public double TicksPerSecond = 30;
 
         public Server(Network net)
         {
@@ -46,6 +49,19 @@
             Broadcast(new NetworkMessage(NetworkMessage.MessageType.StartGame, gameSettings));
             // Start our game session
             Ballz.The().Logic.StartGame(gameSettings);
+
+            Ballz.The().Match.World.StaticGeometry.TerrainModified += OnTerrainModified;
+            Ballz.The().Match.World.EntityRemoved += OnEntityRemoved;
+        }
+
+        private void OnEntityRemoved(object sender, Entity e)
+        {
+            Broadcast(new NetworkMessage(NetworkMessage.MessageType.EntityRemoved, e));
+        }
+
+        private void OnTerrainModified(object sender, Terrain.TerrainModification modification)
+        {
+            Broadcast(modification);
         }
 
         private void CreateTeams(GameSettings gameSettings)
@@ -128,7 +144,7 @@
             if (network.GameState == Network.GameStateT.InGame && Ballz.The().Match.State == SessionState.Running)
             {
                 var now = DateTime.Now;
-                if ((now - LastUpdate).TotalSeconds > 0.1)
+                if ((now - LastUpdate).TotalSeconds > 1.0 / TicksPerSecond)
                 {
                     foreach (var e in Ballz.The().Match.World.Entities)
                     {

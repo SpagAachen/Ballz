@@ -21,7 +21,9 @@ namespace Ballz.Messages
             NewClient,
             StartGame,
             NumberOfPlayers,
-            YourPlayerId
+            YourPlayerId,
+            EntityAdded,
+            EntityRemoved
         }
 
         public NetworkMessage()

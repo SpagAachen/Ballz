@@ -49,6 +49,11 @@ namespace Ballz.GameSession
 
         public GameSession.Logic.GameSettings GameSettings { get; set; }
 
+        /// <summary>
+        /// True iff this session is running on a multiplayer client.
+        /// </summary>
+        public bool IsRemoteControlled { get; set; } = false;
+
         public Session(Ballz _game, World.World world, GameSession.Logic.GameSettings settings)
         {
             World = world;

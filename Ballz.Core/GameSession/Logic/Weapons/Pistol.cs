@@ -34,6 +34,9 @@ namespace Ballz.GameSession.Logic.Weapons
 
         public override void HandleInput(InputMessage input)
         {
+            if (Game.Match.IsRemoteControlled)
+                return;
+
             if(input.Pressed && input.Kind == InputMessage.MessageType.ControlsAction)
             {
                 ++shotsFired;

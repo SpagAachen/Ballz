@@ -19,6 +19,9 @@ namespace Ballz.GameSession.Logic.Weapons
 
         public override bool Update(float elapsedSeconds, Dictionary<InputMessage.MessageType, bool> KeysPressed)
         {
+            if (Game.Match.IsRemoteControlled)
+                return false;
+
             Ball.IsCharging = KeysPressed[InputMessage.MessageType.ControlsAction];
             Ball.IsAiming = true;
             if (!Ball.IsCharging && Ball.ShootCharge > 0)
@@ -35,7 +38,7 @@ namespace Ballz.GameSession.Logic.Weapons
                     Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.101f),
                     Velocity = Ball.AimDirection * Ball.ShootCharge * 25f,
                 };
-                Game.Match.World.Entities.Add(newShot);
+                Game.Match.World.AddEntity(newShot);
 
                 Ball.PhysicsBody.ApplyForce(-10000 * Ball.ShootCharge * newShot.Recoil * Ball.AimDirection);
 

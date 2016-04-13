@@ -21,6 +21,7 @@
             ObjectSync.Sync.RegisterClass<Message>(() => new Message());
             ObjectSync.Sync.RegisterClass<NetworkMessage>(() => new NetworkMessage());
             ObjectSync.Sync.RegisterClass<InputMessage>(() => new InputMessage());
+            ObjectSync.Sync.RegisterClass<Terrain.TerrainModification>(() => new Terrain.TerrainModification());
         }
 
         private Network network = null;
@@ -80,11 +81,24 @@
                     case NetworkMessage.MessageType.YourPlayerId:
                         connectionToServer.ClientPlayerId = (int)netMsg.Data;
                         break;
+                    case NetworkMessage.MessageType.EntityRemoved:
+                        var e = netMsg.Data as Entity;
+                        var localEntity = Ballz.The().Match.World.EntityById(e.ID);
+                        Ballz.The().Match.World.RemoveEntity(localEntity);
+                        localEntity.Dispose();
+                        break;
                     default:
                         Console.WriteLine("Unknown netMsg received: " + netMsg.Kind.ToString());
                         break;
                 }
 
+                return;
+            }
+
+            var terrainModification = data as Terrain.TerrainModification;
+            if(terrainModification != null)
+            {
+                Ballz.The().Match.World.StaticGeometry.ApplyModification(terrainModification);
                 return;
             }
 
@@ -114,6 +128,7 @@
             var localPlayer = Ballz.The().Match.PlayerById(connectionToServer.ClientPlayerId);
             localPlayer.IsLocal = true;
             Ballz.The().Match.LocalPlayers = new List<Player>() { localPlayer };
+            Ballz.The().Match.IsRemoteControlled = true;
         }
 
         public void HandleInputMessage(InputMessage message)

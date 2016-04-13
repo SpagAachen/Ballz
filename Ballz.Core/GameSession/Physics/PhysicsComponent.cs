@@ -340,8 +340,11 @@ namespace Ballz.GameSession.Physics
                                 Entity entity = worldState.EntityById(entityId);
 
                                 // Mutual collision
-                                entity.OnEntityCollision(shot);
-                                shot.OnEntityCollision(entity);
+                                if(entity != null)
+                                {
+                                    entity.OnEntityCollision(shot);
+                                    shot.OnEntityCollision(entity);
+                                }
                             }
 
                             return true;

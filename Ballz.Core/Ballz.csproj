@@ -212,7 +212,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ObjectSynch\ObjectSync\ObjectSync.csproj">
+    <ProjectReference Include="..\ObjectSync\ObjectSync\ObjectSync.csproj">
       <Project>{B186DF64-93E8-441E-8F43-85A8F9E4DD0B}</Project>
       <Name>ObjectSync</Name>
     </ProjectReference>
@@ -228,7 +228,5 @@
       <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Renderer\Camera\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>
