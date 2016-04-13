@@ -76,6 +76,9 @@
                         Debug.Assert(netMsg.Data != null, "Received invalid game-settings");
                         ParseGameSettings((GameSettings)netMsg.Data);
                         break;
+                    case NetworkMessage.MessageType.YourPlayerId:
+                        connectionToServer.ClientPlayerId = (int)netMsg.Data;
+                        break;
                     default:
                         Console.WriteLine("Unknown netMsg received: " + netMsg.Kind.ToString());
                         break;
@@ -93,6 +96,9 @@
         private void ParseGameSettings(GameSettings settings)
         {
             Ballz.The().Logic.StartGame(settings);
+            var localPlayer = Ballz.The().Match.PlayerById(connectionToServer.ClientPlayerId);
+            localPlayer.IsLocal = true;
+            Ballz.The().Match.LocalPlayers = new List<Player>() { localPlayer };
         }
 
         public void HandleInputMessage(InputMessage message)
@@ -106,6 +112,8 @@
                 case InputMessage.MessageType.ControlsLeft:
                 case InputMessage.MessageType.ControlsRight:
                 case InputMessage.MessageType.ControlsJump:
+                case InputMessage.MessageType.ControlsNextWeapon:
+                case InputMessage.MessageType.ControlsPreviousWeapon:
                     connectionToServer.Send(message);
                     break;
             }

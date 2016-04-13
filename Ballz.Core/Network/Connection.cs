@@ -23,7 +23,7 @@ namespace Ballz.Network
         NetworkStream connectionStream;
         StreamSync streamSync;
 
-        public int RemotePlayerId = 1;
+        public int ClientPlayerId = 1;
 
         byte[] readBuffer;
         int readDataLength = -1;

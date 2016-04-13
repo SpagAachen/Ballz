@@ -33,6 +33,8 @@ namespace Ballz.GameSession
 
         public List<Player> Players { get; set; } = new List<Player>();
 
+        public List<Player> LocalPlayers { get; set; } = new List<Player>();
+
         public Player Winner { get; set; } = null;
 
         public SessionState State { get; set; } = SessionState.Starting;
@@ -88,13 +90,19 @@ namespace Ballz.GameSession
             Input.Input += SessionLogic.HandleMessage;
             Input.Input += DebugRenderer.HandleMessage;
             State = SessionState.Running;
+            LocalPlayers = Players.Where(p => p.IsLocal).ToList();
         }
 
         public Player PlayerByNumber(int number)
         {
-            if (Players.Count < number)
+            if (LocalPlayers.Count < number)
                 return null;
-            return Players[number - 1];
+            return LocalPlayers[number - 1];
+        }
+
+        public Player PlayerById(int id)
+        {
+            return Players.FirstOrDefault(p => p.Id == id);
         }
 
         #region IDisposable Support

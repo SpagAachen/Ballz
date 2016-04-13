@@ -53,9 +53,21 @@
         {
             Debug.Assert(gameSettings.Teams.Count == 0);
             var counter = 0;
-            for (var index = 0; index < NumberOfClients() + 1 /* +1 for ourself */; index++)
+
             {
-                var player = new Player { Name = "Player" + counter };
+                var player = new Player { Name = "Player" + counter + "H", IsLocal = true };
+                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1, player = player };
+                gameSettings.Teams.Add(team);
+                ++counter;
+            }
+            
+            foreach(var client in connections)
+            {
+                var player = new Player { Name = "Player" + counter + "C" };
+
+                client.ClientPlayerId = player.Id;
+                client.Send(new NetworkMessage(NetworkMessage.MessageType.YourPlayerId, client.ClientPlayerId));
+
                 var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1, player = player };
                 gameSettings.Teams.Add(team);
                 ++counter;
@@ -135,9 +147,10 @@
 			// Input Message
 			if (Ballz.The().Match != null && data.GetType() == typeof(InputMessage))
 			{
-                var playerId = (sender as Connection).RemotePlayerId;
-                var player = Ballz.The().Match.Players.First(); //PlayerByNumber(playerId);
-                Ballz.The().Input.InjectInputMessage((InputMessage)data, player);
+                var playerId = (sender as Connection).ClientPlayerId;
+                var player = Ballz.The().Match.PlayerById(playerId);
+                if(player != null)
+                    Ballz.The().Input.InjectInputMessage((InputMessage)data, player);
             }
         }
 
