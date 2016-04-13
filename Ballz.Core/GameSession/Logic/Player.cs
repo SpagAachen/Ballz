@@ -15,7 +15,7 @@ namespace Ballz.GameSession.Logic
         public int Id { get; set; } = IdCounter++;
 
         [Newtonsoft.Json.JsonIgnore]
-        public bool IsLocal { get; set; } = false;
+        public bool IsLocal { get; set; } = true;
 
         public string Name { get; set; }
 

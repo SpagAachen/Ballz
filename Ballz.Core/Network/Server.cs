@@ -62,7 +62,7 @@
             
             foreach(var client in connections)
             {
-                var player = new Player { Name = "Player" + counter + "C" };
+                var player = new Player { Name = "Player" + counter + "C", IsLocal = false };
 
                 client.ClientPlayerId = player.Id;
                 client.Send(new NetworkMessage(NetworkMessage.MessageType.YourPlayerId, client.ClientPlayerId));
