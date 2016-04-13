@@ -72,7 +72,7 @@ namespace Ballz.GameSession.World
                     return;
 
                 //TODO(ks) more elaborate damage model
-                Health -= shot.HealthImpactAtDirectHit * Math.Min(1, impact / 20);
+                Health -= shot.HealthDecreaseFromProjectileHit * Math.Min(1, impact / 20);
                 if (Health < 0)
                     Health = 0;
 

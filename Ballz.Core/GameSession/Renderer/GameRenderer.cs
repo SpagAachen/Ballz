@@ -28,14 +28,20 @@ namespace Ballz.GameSession.Renderer
         VertexPositionTexture[] quad;
         SpriteFont font;
 
+		Ball CurrentActiveBall = null;
+
         new Ballz Game;
 
-        TimeSpan lastModification;
+        TimeSpan elTime;
+
+        WaterRenderer WaterRenderer;
 
         public GameRenderer(Ballz game) : base(game)
         {
             Game = game;
+            WaterRenderer = new WaterRenderer(game);
             TeamTextures = new Dictionary<string, Texture2D>();
+            Game.Camera.SetAspectRatio(Game.GraphicsDevice.Viewport.AspectRatio);
         }
 
         public Vector2 WorldToScreen(Vector3 Position)
@@ -62,13 +68,24 @@ namespace Ballz.GameSession.Renderer
         {
             using (new PerformanceReporter(Game))
             {
+                WaterRenderer.PrepareDrawWater(Game.Match.World);
                 //GraphicsDevice.SetRenderTarget(WorldRenderTarget);
                 GraphicsDevice.Clear(Color.CornflowerBlue);
-                if (lastModification == null)
-                    lastModification = time.TotalGameTime;
+                elTime = time.TotalGameTime;
                 Game.Camera.SetProjection(Matrix.Identity);
 
-                Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
+                try
+                {
+					if ( Game.Match.ActivePlayer.ActiveBall != CurrentActiveBall && Game.Match.ActivePlayer.ActiveBall != null)
+					{
+						CurrentActiveBall = Game.Match.ActivePlayer.ActiveBall;
+						Game.Camera.SwitchTarget(CurrentActiveBall.Position, time);
+					}
+                    Game.Camera.SetTargetPosition((Vector2)Game.Match.ActivePlayer.ActiveBall?.Position, time);
+                }
+                catch(Exception) {
+                    Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
+                }
 
                 BallEffect.View = Game.Camera.View;
                 BallEffect.Projection = Game.Camera.Projection;
@@ -137,7 +154,10 @@ namespace Ballz.GameSession.Renderer
 
                 spriteBatch.End();
 
+                WaterRenderer.DrawWater(worldState);
+
                 GraphicsDevice.SetRenderTarget(null);
+                
                 PostProcess();
 
                 DrawMessageOverlay();
@@ -231,8 +251,13 @@ namespace Ballz.GameSession.Renderer
 
             if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer == ball.Player && ball.Player.ActiveBall == ball)
             {
-                screenPos -= new Vector2(0, 50);
-                spriteBatch.Draw(Game.Content.Load<Texture2D>("Textures/RedArrow"), screenPos, color: Color.White, origin: new Vector2(29, 38));
+                // Show turn-indicator for a couple of seconds only
+                var timeLeft = Game.Match.TurnTimeLeft;
+                if (Session.SecondsPerTurn - timeLeft < 4)
+                {
+                    screenPos -= new Vector2(0, 30 + (float)(15 * Math.Sin(5 * elTime.TotalSeconds)));
+                    spriteBatch.Draw(Game.Content.Load<Texture2D>("Textures/RedArrow"), screenPos, color: Color.White, origin: new Vector2(29, 38));
+                }
             }
         }
 
@@ -444,7 +469,8 @@ namespace Ballz.GameSession.Renderer
                 color[0] = Color.White;
                 WhiteTexture.SetData(color);
             }
-
+            
+            WaterRenderer.LoadContent();
             quad = new VertexPositionTexture[]
             {
                 new VertexPositionTexture(new Vector3(0, 0, 0.5f), new Vector2(0, 1)),
@@ -456,7 +482,6 @@ namespace Ballz.GameSession.Renderer
             };
 
             WorldRenderTarget = new RenderTarget2D(GraphicsDevice, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-
             base.LoadContent();
         }
 

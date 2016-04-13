@@ -67,6 +67,7 @@ namespace Ballz.Network
         {
             streamSync.WriteUpdate(obj);
             connectionStream.Flush();
+
         }
 
         public void ReadUpdates()

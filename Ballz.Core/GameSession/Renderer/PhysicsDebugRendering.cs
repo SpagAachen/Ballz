@@ -17,12 +17,18 @@ namespace Ballz.GameSession.Renderer
         new Ballz Game;
         BasicEffect LineEffect;
         VertexPositionColor[] sphereVertices;
+        VertexPositionTexture[] quad;
         List<VertexPositionColor[]> terrainVertices = new List<VertexPositionColor[]>();
         private int terrainRevision = -1;
+        private SpriteBatch spriteBatch;
+        private Texture2D whiteTexture;
+
+        WaterRenderer WaterRenderer;
 
         public DebugRenderer(Ballz _game) : base(_game)
         {
             Game = _game;
+            WaterRenderer = new WaterRenderer(_game);
         }
 
         public override void Draw(GameTime gameTime)
@@ -47,6 +53,7 @@ namespace Ballz.GameSession.Renderer
             }
 
             DrawTerrain();
+            WaterRenderer.DrawWaterDebug(debugWorld);
 
             base.Draw(gameTime);
         }
@@ -78,6 +85,15 @@ namespace Ballz.GameSession.Renderer
             sphereVertices[17].Position = Vector3.Zero;
 
             Matrix terrainWorld = Matrix.CreateScale(0.03f);
+
+            spriteBatch = new SpriteBatch(Game.GraphicsDevice);
+            whiteTexture = new Texture2D(Game.GraphicsDevice,1,1,false,SurfaceFormat.Color);
+            whiteTexture.SetData(new Color[1]
+            {
+                Color.White
+            });
+
+            WaterRenderer.LoadContent();
 
             base.LoadContent();
         }
@@ -205,5 +221,22 @@ namespace Ballz.GameSession.Renderer
                 GraphicsDevice.DrawUserPrimitives(PrimitiveType.LineStrip, lineVertices, 0, lineVertices.Length - 1);
             }
         }
+        
+        public Vector2 WorldToScreen(Vector3 Position)
+        {
+            var screenSpace = Vector4.Transform(Position, (Game.Camera.Projection * Game.Camera.View));
+            screenSpace /= screenSpace.W;
+            return new Vector2
+            {
+                X = (0.5f + 0.5f * screenSpace.X) * Game.GraphicsDevice.Viewport.Width,
+                Y = (1 - (0.5f + 0.5f * screenSpace.Y)) * Game.GraphicsDevice.Viewport.Height,
+            };
+        }
+
+        public Vector2 WorldToScreen(Vector2 Position)
+        {
+            return WorldToScreen(new Vector3(Position, 0));
+        }
+
     }
 }

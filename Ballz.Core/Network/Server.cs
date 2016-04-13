@@ -30,7 +30,6 @@
         private readonly Network network;
         private readonly List<Connection> connections = new List<Connection>();
 
-
         public Server(Network net)
         {
             network = net;
@@ -125,9 +124,9 @@
             {
                 c.ReadUpdates();
             }
-            
-            if(network.GameState == Network.GameStateT.InGame && Ballz.The().Match.State == SessionState.Running)
-			{
+
+            if (network.GameState == Network.GameStateT.InGame && Ballz.The().Match.State == SessionState.Running)
+            {
                 var now = DateTime.Now;
                 if ((now - LastUpdate).TotalSeconds > 0.1)
                 {
@@ -137,10 +136,10 @@
                     }
                     LastUpdate = DateTime.Now;
                 }
-			}
-            //TODO: Implement
-        }
 
+            }
+        }
+            
         private void OnData(object sender, object data)
         {
 
@@ -152,6 +151,7 @@
                 if(player != null)
                     Ballz.The().Input.InjectInputMessage((InputMessage)data, player);
             }
+
         }
 
         public void Broadcast(object data)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Ballz.GameSession.Physics;
 using System.Linq;
 
 namespace Ballz.GameSession.World
@@ -12,12 +13,10 @@ namespace Ballz.GameSession.World
     {
         public TimeSpan GameTime { get; protected set; } = new TimeSpan(0, 0, 0);
 
-        private List<Entity> EntityList = new List<Entity>();
-
-        public IEnumerable<Entity> Entities
+        public List<Entity> Entities
         {
-            get { return EntityList; }
-        }
+            get;
+        } = new List<Entity>();
 
         public List<Rope> Ropes { get; private set; } = new List<Rope>();
 
@@ -26,6 +25,8 @@ namespace Ballz.GameSession.World
             get;
             set;
         }
+
+        public Water Water { get; }
         
         public Entity EntityById(int id)
         {
@@ -38,17 +39,18 @@ namespace Ballz.GameSession.World
         public void AddEntity(Entity e)
         {
             e.ID = EntityIdCounter++;
-            EntityList.Add(e);
+            Entities.Add(e);
         }
 
         public void RemoveEntity(Entity e)
         {
-            EntityList.Remove(e);
+            Entities.Remove(e);
         }
 
         public World(Terrain newTerrain)
         {
             StaticGeometry = newTerrain;
+            Water = new Water(50,25);
         }
     }
 }

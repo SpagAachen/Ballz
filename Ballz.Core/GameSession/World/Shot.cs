@@ -16,54 +16,114 @@ namespace Ballz.GameSession.World
     {
         public Shot()
         {
+            // The extents of the projectile
             Radius = 0.1f;
             IsStatic = false;
+
+            if (ExplosionDelay < 0)
+            {
+                // Explosion countdown starts on release
+                explosionCountdown = Math.Abs(ExplosionDelay);
+            }
         }
 
-        /// <summary>
-        /// Explosion radius of the shot impact.
-        /// </summary>
-        /// <remarks>
-        /// If this value is greater than zero, a sphere of the given size is substracted from the terrain.
-        /// </remarks>
+        // Radius[m] of the hole that is created when the projectile collides with terrain
+        [Synced]
+        public float BulletHoleRadius;
+        // Time [s] between hit and explosion (if negative then countdown starts after release)
+        [Synced]
+        public float ExplosionDelay;
+        // Radius [m] of the explosion impact (if non-positive then no explosion)
         [Synced]
         public float ExplosionRadius;
 
-        /// <summary>
-        /// The health impact if the shot directly hits a different Ball.
-        /// </summary>
-        /// <remarks>
-        /// If a ball is not hit directly, the damage is linearly interpolated based on the ExplosionRadius and the distance to the ball.
-        /// </remarks>
+        // Player health decrease [HP] when hit by projectile
         [Synced]
-        public float HealthImpactAtDirectHit;
+        public float HealthDecreaseFromProjectileHit;
+        // Player health decrease [HP] when in explosion radius on detonation
+        [Synced]
+        public float HealthDecreaseFromExplosionImpact;
 
-        /// <summary>
-        /// If this value is true, the shot velocity is ignored and the projectile will hit its target instantly.
-        /// </summary>
+        // How much is the player forced into the opposite aim direction?
         [Synced]
-        public bool IsInstantShot { get; set; }
-        
-        public bool DisposeOnCollision { get; set; } = true;
+        public float Recoil = 0.0f;
+
+        // Detonation when countdown reaches zero (if negative then inactive)
+        private float explosionCountdown = -1.0f;
+
+        public enum ShotType_T
+        {
+            Normal,         // simulated by physics ("flies" through the air)
+            InstantHit,     // instantly reaches the first collision in aim direction
+            Droppable       // is dropped at the current position of the ball (e.g. mine)
+        }
+
+        // Determines how the shot is simulated
+        [Synced]
+        public ShotType_T ShotType { get; set; }
+
+
+        public void update (float elapsedSeconds)
+        {
+            if (explosionCountdown > 0)
+            {
+                explosionCountdown -= elapsedSeconds;
+
+                if (explosionCountdown <= 0.0f)
+                {
+                    Explode();
+                }
+            }
+        }
+
+        public void Explode()
+        {
+            if (ExplosionRadius <= 0.0f)
+                return;
+            
+            System.Console.WriteLine("Explosion " + " with radius " + ExplosionRadius + " and " + HealthDecreaseFromExplosionImpact + " damage.");
+            Ballz.The().Match.World.StaticGeometry.SubtractCircle(Position.X, Position.Y, ExplosionRadius);
+
+            // TODO: damage to all players within explosion radius
+            // TODO: force on players within explosion radius (dir = playerpos - Position.X/Y)
+
+            // Remove projectile
+            Dispose();
+        }
+
+        public bool DisposeOnCollision { get{ return ExplosionDelay == 0.0f;} }
+
+        private void onAnyCollision()
+        {
+            // Should the explosion countdown start on collision and has not yet started?
+            if (ExplosionDelay > 0.0f && explosionCountdown < 0.0f)
+            {
+                explosionCountdown = ExplosionDelay;
+            }
+                
+
+            // Die?
+            if(DisposeOnCollision)
+                Explode();
+        }
 
         public override void OnEntityCollision(Entity other)
         {
-            // Die?
-            if(DisposeOnCollision)
-                Dispose();
+            //TODO: Player damage
+
+            onAnyCollision();
         }
 
         public override void OnTerrainCollision(Terrain terrain, Vector2 position)
         {
-            float impact = Velocity.Length() * ExplosionRadius;
-            if (impact > 5)
+            float impact = 0.04f * Velocity.Length() * BulletHoleRadius;
+            if (impact > 0.2)
             {
                 // Destroy terrain and die
-                terrain.SubtractCircle(position.X, position.Y, 0.04f * impact);
+                terrain.SubtractCircle(position.X, position.Y, impact);
             }
 
-            if(DisposeOnCollision)
-                Dispose();
+            onAnyCollision();
         }
     }
 }

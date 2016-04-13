@@ -85,6 +85,9 @@ namespace Ballz.GameSession
 
         public void Start()
         {
+            Physics.UpdateTerrainBody(World.StaticGeometry);
+            World.Water.Initialize(World, Physics);
+
             Input.Input += Physics.HandleMessage;
             Input.Input += GameRenderer.HandleMessage;
             Input.Input += SessionLogic.HandleMessage;

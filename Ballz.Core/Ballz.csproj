@@ -68,10 +68,12 @@
     <Compile Include="GameSession\Logic\Weapons\RopeTool.cs" />
     <Compile Include="GameSession\Logic\Weapons\WeaponControl.cs" />
     <Compile Include="GameSession\Renderer\PhysicsDebugRendering.cs" />
+    <Compile Include="GameSession\Renderer\WaterRenderer.cs" />
     <Compile Include="GameSession\Session.cs" />
     <Compile Include="GameSession\World\Material.cs" />
     <Compile Include="GameSession\World\Rope.cs" />
     <Compile Include="GameSession\World\Shot.cs" />
+    <Compile Include="GameSession\World\Water.cs" />
     <Compile Include="Input\InputTranslator.cs" />
     <Compile Include="Logic\LogicControl.cs" />
     <Compile Include="GameSession\Network\NetworkComponent.cs" />
@@ -98,6 +100,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="Utils\BufferedArray.cs" />
+    <Compile Include="Utils\MathExtensions.cs" />
     <Compile Include="SessionFactory\Ballerburg.cs" />
     <Compile Include="SessionFactory\SessionFactory.cs" />
     <Compile Include="SessionFactory\Worms.cs" />
@@ -107,6 +111,12 @@
     <Compile Include="Utils\VectorExtensions.cs" />
     <None Include="app.config" />
     <None Include="Content.mgcb" />
+    <None Include="Content\Effects\VectorField.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Content\Effects\Water.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Content\Worlds\TestWorld.png" />
     <None Include="Content\Textures\Balls.jpg" />
     <Compile Include="Messages\MenuMessage.cs" />
@@ -123,11 +133,14 @@
     <Compile Include="Renderer\Camera.cs" />
     <Compile Include="Sound\SoundControl.cs" />
     <Compile Include="Utils\PerformanceReporter.cs" />
+    <Compile Include="Renderer\Camera\CameraTrajectory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Effects\VectorField.fx" />
+    <Content Include="Content\Effects\Water.fx" />
     <Content Include="Content\Effects\CelShading.fx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -135,6 +148,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\Fonts\Menufont.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Textures\Arrow.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\Textures\Balls.xnb">
@@ -211,5 +227,8 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Renderer\Camera\" />
   </ItemGroup>
 </Project>

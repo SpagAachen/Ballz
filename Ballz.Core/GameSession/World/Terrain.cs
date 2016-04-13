@@ -14,6 +14,8 @@ namespace Ballz.GameSession.World
     /// </summary>
     public class Terrain
     {
+        public static readonly bool decimateOutlines = true;
+        
         public class TerrainShape
         {
             /// <summary>
@@ -37,6 +39,8 @@ namespace Ballz.GameSession.World
             /// </summary>
             public bool[,] TerrainBitmap = null;
         }
+
+        public bool[,] WaterSpawnBitmap = null;
 
         /// <summary>
         /// The revision number of the <see cref="PublicShape"/> triangles and outline.
@@ -74,8 +78,8 @@ namespace Ballz.GameSession.World
         private float[,] terrainSmoothmapCopy = null;
 
         // Terrain size
-        private int width = -1;
-        private int height = -1;
+        public int width { get; } = -1;
+        public int height { get; } = -1;
 
         // Internal members to avoid reallocation
         private Border[,] bordersH = null;
@@ -93,6 +97,7 @@ namespace Ballz.GameSession.World
             PublicShape.TerrainBitmap = new bool[width, height];
             terrainSmoothmap = new float[width, height];
             terrainSmoothmapCopy = new float[width, height];
+            WaterSpawnBitmap = new bool[width, height];
 
             Color[] pixels = new Color[width * height];
             terrainData.GetData<Color>(pixels);
@@ -109,6 +114,10 @@ namespace Ballz.GameSession.World
                         PublicShape.TerrainBitmap[x, height - y - 1] = true;
                         terrainSmoothmap[x, height - y - 1] = 1.0f;
                     }
+                    if (curPixel == Color.Blue)
+                    {
+                        WaterSpawnBitmap[x, height - y - 1] = true;
+                    }
                 }
             }
 
@@ -119,6 +128,16 @@ namespace Ballz.GameSession.World
             allEdges = new List<Edge>();
 
             Update();
+        }
+
+        public bool IsWaterSpawn(float x, float y)
+        {
+            x /= Scale;
+            y /= Scale;
+            if (x < 0 || x >= width || y < 0 || y >= height)
+                return false;
+            else
+                return WaterSpawnBitmap[(int)x, (int)y];
         }
         
         private float Distance(float x1, float y1, float x2, float y2)
@@ -226,7 +245,60 @@ namespace Ballz.GameSession.World
                 this.BX = bx; this.BY = by;
             }
         }
-        
+
+        private float area(Vector2 a, Vector2 b, Vector2 c)
+        {
+            var ab = b - a;
+            var ac = c - a;
+
+            var cross = ab.X * ac.Y - ab.Y * ac.X;
+
+            return 0.5f * Math.Abs(cross);
+        }
+
+        private void DecimateOutline(List<Vector2> outline)
+        {
+            // Simple version
+            /*
+            const int rem = 10;
+            for (int i = outline.Count - 2; i > 0; --i)
+            {
+                if(i % rem > 0)
+                    outline.RemoveAt(i);
+            }
+            */
+
+            // At around 0.1 and lower, the physics outline cannot be distinguished from the rendering
+            // At around 0.7 and larger, the decimation has quite a visible effect
+            const float thresh = 0.5f;
+            const int maxiters = 3; // Will not take more than 3 runs anyway  
+            bool changed;
+            for(int k = 0; k < maxiters; ++k)
+            {
+                changed = false;
+                for (int i = outline.Count - 1; i > 2; --i)
+                {
+                    Vector2 a = outline[i-0];
+                    Vector2 b = outline[i-1];
+                    Vector2 c = outline[i-2];
+
+                    float A = area(a, b, c);
+                    if (A < thresh)
+                    {
+                        outline.RemoveAt(i-1);
+                        changed = true;
+                    }
+                }
+
+                // Early out
+                if (!changed)
+                {
+                    //Console.WriteLine("Early out after " + k + " iters.");
+                    break;
+                }
+            }
+        }
+
         private void ExtractOutline(Edge edge)
         {
             var o1 = ExtractOutlineInternal(edge);
@@ -240,6 +312,13 @@ namespace Ballz.GameSession.World
                 o1.Reverse();
                 o1.AddRange(o2);
             }
+
+
+            //int countbefore = o1.Count;
+            if(decimateOutlines)
+                DecimateOutline(o1);
+
+            //Console.WriteLine("Removed " + (float)(countbefore - o1.Count) / (float)(countbefore) * 100.0f + " %");
 
             WorkingShape.Outlines.Add(o1);
         }
