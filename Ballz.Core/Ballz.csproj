@@ -106,6 +106,7 @@
     <Compile Include="SessionFactory\SessionFactory.cs" />
     <Compile Include="SessionFactory\Worms.cs" />
     <Compile Include="Utils\EnumberableHelper.cs" />
+    <Compile Include="Utils\RandomExtensions.cs" />
     <Compile Include="Utils\TextureHelper.cs" />
     <Compile Include="Utils\TypeInfoConverter.cs" />
     <Compile Include="Utils\VectorExtensions.cs" />

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Ballz.Utils;
+
 namespace Ballz.SessionFactory
 {
     static class TeamNames
@@ -63,9 +65,13 @@ namespace Ballz.SessionFactory
             },
         };
 
+        static Random random = new Random();
+
         public static string[] GetBallNames(string Country, int count)
         {
-            return BallNamesByCountry[Country].Take(count).ToArray();
+            var randomizedNames = BallNamesByCountry[Country].ToArray();
+            random.Shuffle(randomizedNames);
+            return randomizedNames.Take(count).ToArray();
         }
     }
 }
