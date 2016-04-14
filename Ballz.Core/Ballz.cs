@@ -243,25 +243,23 @@ namespace Ballz
                 {
                     // Player 1
                     {
-                        var player1 = new Player { Name = "Player1", TeamName = "Murica" };
                         var team1 = new Team
                                         {
                                             ControlledByAI = false,
-                                            Name = "Team1",
-                                            NumberOfBallz = 2,
-                                            player = player1
+                                            Name = "Germoney",
+                                            Country = "Germoney",
+                                            NumberOfBallz = 2
                                         };
                         currGameSettings.Teams.Add(team1);
                     }
                     // Player 2
                     {
-                        var player2 = new Player { Name = "Player2", TeamName = "Germoney" };
                         var team2 = new Team
                                         {
                                             ControlledByAI = false,
-                                            Name = "Team2",
-                                            NumberOfBallz = 2,
-                                            player = player2
+                                            Name = "Murica",
+                                            Country = "Murica",
+                                            NumberOfBallz = 2
                                         };
                         currGameSettings.Teams.Add(team2);
                     }

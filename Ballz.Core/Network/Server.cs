@@ -70,20 +70,18 @@
             var counter = 0;
 
             {
-                var player = new Player { Name = "Player" + counter + "H", IsLocal = true };
-                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1, player = player };
+                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1 };
                 gameSettings.Teams.Add(team);
                 ++counter;
             }
             
             foreach(var client in connections)
             {
-                var player = new Player { Name = "Player" + counter + "C", IsLocal = false };
+                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1 };
 
-                client.ClientPlayerId = player.Id;
+                client.ClientPlayerId = team.Id;
                 client.Send(new NetworkMessage(NetworkMessage.MessageType.YourPlayerId, client.ClientPlayerId));
 
-                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1, player = player };
                 gameSettings.Teams.Add(team);
                 ++counter;
             }

@@ -121,9 +121,6 @@
 
         private void ParseGameSettings(GameSettings settings)
         {
-            foreach (var t in settings.Teams)
-                t.player.IsLocal = false;
-
             Ballz.The().Logic.StartGame(settings);
             var localPlayer = Ballz.The().Match.PlayerById(connectionToServer.ClientPlayerId);
             localPlayer.IsLocal = true;

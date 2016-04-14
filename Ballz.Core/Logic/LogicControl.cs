@@ -30,7 +30,7 @@ namespace Ballz.Logic
             state = GameState.MenuState;
         }
 
-        public void StartGame(GameSession.Logic.GameSettings settings)
+        public void StartGame(GameSession.Logic.GameSettings settings, bool remoteControlled = false, int localPlayerId = -1)
         {
             // Go back to main menu so it will show when the user enters the menu later
             MenuGoBack();
@@ -41,7 +41,7 @@ namespace Ballz.Logic
             if (Game.Match != null)
                 Game.Match.Dispose();
 
-            Game.Match = settings.GameMode.StartSession(Game, settings);
+            Game.Match = settings.GameMode.StartSession(Game, settings, remoteControlled, localPlayerId);
             Game.Match.Start();
             RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }

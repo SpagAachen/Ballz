@@ -17,6 +17,8 @@ namespace Ballz.GameSession.World
             Radius = 0.8f;
         }
 
+        public string Name { get; set; } = "Nobody";
+
         /// <summary>
         /// The health value of the ball. Typical value ranges are 0-100.
         /// </summary>

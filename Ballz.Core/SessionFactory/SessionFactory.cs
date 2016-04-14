@@ -19,15 +19,15 @@ namespace Ballz.SessionFactory
         }
 
         // StartSession must _not_ modify GameSettings
-        public Session StartSession(Ballz game, GameSession.Logic.GameSettings settings)
+        public Session StartSession(Ballz game, GameSession.Logic.GameSettings settings, bool remoteControlled, int localPlayerId)
         {
             if (!IsInitialized) InitializeSession(game, settings);
-            return ImplStartSession(game, settings);
+            return ImplStartSession(game, settings, remoteControlled, localPlayerId);
         }
 
         protected abstract void ImplInitializeSession(Ballz game, GameSession.Logic.GameSettings settings);
 
-        protected abstract Session ImplStartSession(Ballz game, GameSession.Logic.GameSettings settings);
+        protected abstract Session ImplStartSession(Ballz game, GameSession.Logic.GameSettings settings, bool remoteControlled, int localPlayerId);
 
         public abstract string Name { get; }
 
@@ -40,8 +40,7 @@ namespace Ballz.SessionFactory
             new Worms("TestWorld2", true),
             new Worms("RopeWorld"),
             new Worms("Mining"),
-            new Worms("Mining", true),
-            new Ballerburg()
+            new Worms("Mining", true)
         };
     }
 }

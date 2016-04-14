@@ -243,11 +243,13 @@ namespace Ballz.GameSession.Renderer
                 GraveModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
             }
             
-            var screenPos = WorldToScreen(ball.Position + new Vector2(0, 2f));
+            var screenPos = WorldToScreen(ball.Position + new Vector2(0, 2.5f));
 
-            DrawText(ball.Player.Name, screenPos, 0.5f, Color.LawnGreen, 1, true, true);
-            screenPos += new Vector2(0, 20);
             DrawText(ball.Health.ToString("0"), screenPos, 0.5f, Color.White, 1, true, true);
+            screenPos += new Vector2(0, 20);
+            DrawText(ball.Name, screenPos, 0.5f, Color.LawnGreen, 1, true, true);
+            screenPos += new Vector2(0, 20);
+            DrawText(ball.Player.Name, screenPos, 0.3f, Color.LawnGreen, 1, true, true);
 
             if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer == ball.Player && ball.Player.ActiveBall == ball)
             {
