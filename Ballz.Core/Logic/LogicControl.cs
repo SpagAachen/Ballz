@@ -21,12 +21,14 @@ namespace Ballz.Logic
         public LogicControl(Ballz game)
         {
             Game = game;
+            state = GameState.Unknown;
+        }
 
-            Composite menu = Game.MainMenu;// = DefaultMenu();
-            //push the root menuToPrepare
+        public void SetMainMenu(Composite menu)
+        {
+            activeMenu.Clear();
             activeMenu.Push(menu); //TODO: uncast
             RegisterMenuEvents(menu);
-
             state = GameState.MenuState;
         }
 
@@ -54,6 +56,9 @@ namespace Ballz.Logic
 
         private void RegisterMenuEvents(Item menu)
         {
+            if (menu == null)
+                return;
+
             menu.BindSelectHandler<Composite>(c =>
             {
                 activeMenu.Push(c);
@@ -238,6 +243,7 @@ namespace Ballz.Logic
 
         private enum GameState
         {
+            Unknown,
             MenuState,
             SimulationState
         }

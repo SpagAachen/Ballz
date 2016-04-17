@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,8 @@ namespace Ballz.Menu
     {
         private readonly List<Item> members = new List<Item>();
         private int index; 
+
+        public Texture2D BackgroundTexture { get; set; }
 
         public Composite(string name, bool selectable = false) : base(name, selectable)
         {

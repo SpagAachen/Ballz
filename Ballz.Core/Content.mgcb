@@ -13,12 +13,6 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin Content/Fonts/Menufont.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:TextureFormat=Color
-/build:Content/Fonts/Menufont.spritefont
-
 #begin Content/Textures/Balls.jpg
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -113,4 +107,10 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:Content/Effects/CelShading.fx
+
+#begin Content/Fonts/MenuFont.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=Compressed
+/build:Content/Fonts/MenuFont.spritefont
 

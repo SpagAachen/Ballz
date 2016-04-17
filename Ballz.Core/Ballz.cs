@@ -38,11 +38,15 @@ namespace Ballz
 
         public Settings.ProgrammSettings GameSettings { get; set; }
 
+        MenuRenderer MenuRenderer;
+
         public Label NetworkLobbyConnectedClients { get; set; } = new Label("test", true);
 
         public Composite MainMenu { get; set; }
 
         public Camera Camera { get; set; }
+
+        Texture2D Logo;
 
         private Ballz()
         {
@@ -58,7 +62,7 @@ namespace Ballz
             
             Camera = new Camera();
             // create the Game Components
-            var menuRendering = new MenuRenderer(this, DefaultMenu());
+            MenuRenderer = new MenuRenderer(this);
             //var physics = new PhysicsControl(this);
             Input = new InputTranslator(this);
             Network = new Network.Network(this);
@@ -66,10 +70,9 @@ namespace Ballz
             Components.Add(Input);
             //Components.Add(physics);
             Components.Add(Network);
-            Components.Add(menuRendering);
+            Components.Add(MenuRenderer);
             Components.Add(new PerformanceRenderer(this));
-
-            MainMenu = DefaultMenu();
+            
             Logic = new LogicControl(this);
 
             Services.AddService(Logic);
@@ -85,7 +88,7 @@ namespace Ballz
             //Logic.Message += physics.HandleMessage;
             Logic.Message += Network.HandleMessage;
             //Logic.Message += gameRendering.HandleMessage;
-            Logic.Message += menuRendering.HandleMessage;
+            Logic.Message += MenuRenderer.HandleMessage;
 
             Network.Message += Logic.HandleNetworkMessage;
         }
@@ -284,6 +287,7 @@ namespace Ballz
                 }
             }
 
+            mainMenu.BackgroundTexture = Logo;
             mainMenu.AddItem(startGame);
             mainMenu.AddItem(optionsMenu);
             mainMenu.AddItem(networkMenu);
@@ -333,7 +337,10 @@ namespace Ballz
         {
             Content.RootDirectory = "Content";
 
-            //TODO: use this.Content to load your game content here
+            Logo = Content.Load<Texture2D>("Textures/Logo");
+            MainMenu = DefaultMenu();
+            MenuRenderer.Menu = MainMenu;
+            Logic.SetMainMenu(MainMenu);
         }
 
         /// <summary>

@@ -1,3 +1,6 @@
 [submodule "ObjectSync"]
   path = ObjectSync
   url = https://github.com/SpagAachen/ObjectSync.git
+[submodule "Ballz.Content"]
+	path = Ballz.Content
+	url = https://github.com/SpagAachen/Ballz.Content.git

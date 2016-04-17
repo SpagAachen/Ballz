@@ -6,32 +6,16 @@ using System;
 
 namespace Ballz.Renderer
 {
-    public class MenuRenderer : DrawableGameComponent
+    public class MenuRenderer : BaseRenderer
     {
-        private Item menu;
+        public Item Menu { get; set; }
         private Item parentMenu;
-        private SpriteFont menuFont;
-        private SpriteBatch spriteBatch;
-        private Texture2D textureSplashScreen;
 
-        public MenuRenderer(Game game, Item defaultMenu) : base(game)
+        public MenuRenderer(Ballz game, Item defaultMenu = null) : base(game)
         {
-            menu = defaultMenu;
+            Menu = defaultMenu;
         }
-
-        protected override void LoadContent()
-        {
-            spriteBatch = new SpriteBatch(Game.GraphicsDevice);
-
-            // Load a texture for the background.
-            textureSplashScreen = Game.Content.Load<Texture2D>("Textures/Balls");
-
-            // Load fonts for the menu.
-            menuFont = Game.Content.Load<SpriteFont>("Fonts/Menufont");
-
-            base.LoadContent();
-        }
-
+        
         protected override void UnloadContent()
         {
             base.UnloadContent();
@@ -42,8 +26,8 @@ namespace Ballz.Renderer
             if (message.Kind == Message.MessageType.MenuMessage)
             {
                 var msg = (MenuMessage)message;
-                parentMenu = menu;
-                menu = msg.Value;
+                parentMenu = Menu;
+                Menu = msg.Value;
             }
 
             if (message.Kind == Message.MessageType.LogicMessage)
@@ -61,28 +45,15 @@ namespace Ballz.Renderer
 
         public override void Draw(GameTime gameTime)
         {
-            spriteBatch.Begin();
+            DrawSky();
 
-            var bounds = Game.Window.ClientBounds;
-
-            // Draw a background screen.
-            var time = gameTime.TotalGameTime.TotalSeconds;
-            var foo = bounds.Height * 0.1;
-            var s = (int)(foo * Math.Sin(3 * time));
-            var c = (int)(foo * Math.Cos(3 * time));
-
-            bounds.X -= s;
-            bounds.Width += 2 * s;
-            bounds.Y -= c;
-            bounds.Height += 2 * c;
-
-            spriteBatch.Draw(textureSplashScreen, bounds, Color.White);
-
-            if (menu != null)
+            SpriteBatch.Begin();
+            
+            if (Menu != null)
             {
-                if (menu.Items.Count > 0)
+                if (Menu.Items.Count > 0)
                 {
-                    RenderMenu(menu, false);
+                    RenderMenu(Menu, false);
                 }
                 else
                 {
@@ -90,21 +61,33 @@ namespace Ballz.Renderer
                 }
             }
 
-            spriteBatch.End();
+            SpriteBatch.End();
             base.Draw(gameTime);
         }
 
+        const float TitleFontSize = 1f;
+        const float ItemFontSize = 0.5f;
+
         private void RenderMenu(Item menu, bool showUnderscore)
         {
+            var background = (menu as Composite)?.BackgroundTexture;
+
+            if (background != null)
+                SpriteBatch.Draw(background, new Rectangle((GraphicsDevice.Viewport.Width - background.Width) / 2, (GraphicsDevice.Viewport.Height - background.Height) / 2, background.Width, background.Height), Color.White);
+
+            // Make y margin the same as the x offset
+            var topOffset = 40f;
+            var leftOffset = 40f;
             // Draw the MenuTitle.
-            spriteBatch.DrawString(
-                menuFont,
+            DrawText(
                 menu.DisplayName,
-                new Vector2(Game.Window.ClientBounds.Width / 2f - menuFont.MeasureString(menu.DisplayName).X / 2, 0),
-                Color.Black);
+                new Vector2(leftOffset, topOffset),
+                TitleFontSize,
+                Color.Black                
+                );
 
             // Draw subMenu Items.
-            var itemOffset = menuFont.MeasureString(menu.DisplayName).Y + 30;
+            topOffset += Font.MeasureString(menu.DisplayName).Y * TitleFontSize + 30;
             string renderString;
             foreach (var item in menu.Items)
             {
@@ -115,15 +98,15 @@ namespace Ballz.Renderer
                     else
                         renderString = item.DisplayName;
                     renderString = CheckLetters(renderString);
-                    spriteBatch.DrawString(
-                    menuFont,
-                    renderString,
-                    new Vector2(
-                        Game.Window.ClientBounds.Width / 8f,
-                        itemOffset),
-                    (menu.SelectedItem != null && menu.SelectedItem == item) ? Color.Red : Color.Black);
 
-                    itemOffset += menuFont.MeasureString(renderString).Y + 30;
+                    DrawText(
+                        renderString,
+                        new Vector2(leftOffset, topOffset),
+                        ItemFontSize,
+                        (menu.SelectedItem != null && menu.SelectedItem == item) ? Color.Red : Color.Black
+                        );
+
+                    topOffset += Font.MeasureString(renderString).Y * ItemFontSize + 30;
                 }
             }
         }
@@ -134,7 +117,7 @@ namespace Ballz.Renderer
             string checkedString = toCheck;
             foreach (char letter in letters)
             {
-                if (!menuFont.Characters.Contains(letter))
+                if (!Font.Characters.Contains(letter))
                     checkedString = checkedString.Replace(letter, '?');
             }
 
