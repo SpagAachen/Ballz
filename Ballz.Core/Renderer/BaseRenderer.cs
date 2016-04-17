@@ -146,7 +146,7 @@ namespace Ballz.Renderer
                 );
             SpriteBatch.Draw(
                 CloudTexture,
-                new Rectangle(0, GraphicsDevice.Viewport.Height - CloudTexture.Height - 128, GraphicsDevice.Viewport.Width, CloudTexture.Height),
+                new Rectangle(0, GraphicsDevice.Viewport.Height - CloudTexture.Height - 80, GraphicsDevice.Viewport.Width, CloudTexture.Height),
                 new Rectangle((int)(cloudPosition * 2), 0, GraphicsDevice.Viewport.Width, CloudTexture.Height),
                 Color.White
                 );

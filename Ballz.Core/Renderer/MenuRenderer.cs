@@ -32,13 +32,21 @@ namespace Ballz.Renderer
         private Item parentMenu;
 
         float FadeTimer = 0f;
-        float FadeAnimationLength = 1f;
+        float FadeAnimationLength = 0.75f;
+
+        Texture2D Underline;
 
         public MenuRenderer(Ballz game, Item defaultMenu = null) : base(game)
         {
             Menu = defaultMenu;
         }
-        
+
+        protected override void LoadContent()
+        {
+            Underline = Game.Content.Load<Texture2D>("Textures/Underline");
+            base.LoadContent();
+        }
+
         protected override void UnloadContent()
         {
             base.UnloadContent();
@@ -71,7 +79,7 @@ namespace Ballz.Renderer
             DrawSky();
 
             FadeTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            var fadeProgress = Min(2, FadeTimer / (FadeAnimationLength / 2));
+            var fadeProgress = Min(1.5f, FadeTimer / (FadeAnimationLength / 1.5f));
 
             SpriteBatch.Begin();
 
@@ -82,15 +90,15 @@ namespace Ballz.Renderer
             else
                 OldMenu = null;
 
-            if (fadeProgress > 1f && Menu != null)
+            if (fadeProgress > 0.5f && Menu != null)
             {
                 if (Menu.Items.Count > 0)
                 {
-                    RenderMenu(Menu, false, fadeProgress - 1f);
+                    RenderMenu(Menu, false, fadeProgress - 0.5f);
                 }
                 else
                 {
-                    RenderMenu(parentMenu, true, fadeProgress - 1f);
+                    RenderMenu(parentMenu, true, fadeProgress - 0.5f);
                 }
             }
 
@@ -129,10 +137,18 @@ namespace Ballz.Renderer
                 menu.DisplayName,
                 new Vector2(leftOffset, menuTopOffset),
                 TitleFontSize,
-                new Color(Color.Black, fadeProgress)
+                new Color(Color.Black, Sqrt(fadeProgress))
                 );
 
+            menuTopOffset += Font.MeasureString(menu.DisplayName).Y * TitleFontSize;
+            SpriteBatch.Draw(
+                    Underline,
+                    new Vector2(leftOffset - 20, menuTopOffset),
+                    new Color(Color.White, fadeProgress)
+                    );
+
             // Draw subMenu Items.
+
             topOffset += Font.MeasureString(menu.DisplayName).Y * TitleFontSize + 30;
             string renderString;
             foreach (var item in menu.Items)
@@ -150,7 +166,7 @@ namespace Ballz.Renderer
                         renderString,
                         new Vector2(leftOffset, topOffset),
                         ItemFontSize,
-                        new Color((menu.SelectedItem != null && menu.SelectedItem == item) ? Color.Red : Color.Black, fadeProgress)
+                        new Color((menu.SelectedItem != null && menu.SelectedItem == item) ? Color.Red : Color.Black, Sqrt(fadeProgress))
                         );
 
                     topOffset += Font.MeasureString(renderString).Y * ItemFontSize + 30;

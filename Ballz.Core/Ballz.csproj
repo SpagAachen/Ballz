@@ -1,8 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <Import Condition="'$(OS)' != 'Windows_NT'" Project="../Linux/Ballz.Linux.csproj" />
   <Import Condition="'$(OS)' == 'Windows_NT'" Project="../Windows/Ballz.Windows.csproj" />
+  
   <PropertyGroup>
+  
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">Windows</Platform>
     <ProjectGuid>{0F30A63C-8123-40A8-8C5B-431941CDD4A4}</ProjectGuid>
@@ -150,6 +153,7 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
+  
   <Target Name="BeforeBuild">
     <PropertyGroup>
     	<ContentDestinationDirectory>$(OutputPath)\Content</ContentDestinationDirectory>
@@ -162,5 +166,6 @@
           SourceFiles="@(ContentFilesToCopy)"
     			DestinationFiles="@(ContentFilesToCopy->'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
+  
   <ItemGroup />
 </Project>
