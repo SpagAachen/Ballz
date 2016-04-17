@@ -149,7 +149,7 @@ namespace Ballz.Renderer
 
             // Draw subMenu Items.
 
-            topOffset += Font.MeasureString(menu.DisplayName).Y * TitleFontSize + 30;
+            topOffset += Font.MeasureString(menu.DisplayName).Y * TitleFontSize + 50;
             string renderString;
             foreach (var item in menu.Items)
             {
@@ -166,7 +166,8 @@ namespace Ballz.Renderer
                         renderString,
                         new Vector2(leftOffset, topOffset),
                         ItemFontSize,
-                        new Color((menu.SelectedItem != null && menu.SelectedItem == item) ? Color.Red : Color.Black, Sqrt(fadeProgress))
+                        new Color((menu.SelectedItem != null && menu.SelectedItem == item) ? Color.Red : Color.Black, Sqrt(fadeProgress)),
+                        1
                         );
 
                     topOffset += Font.MeasureString(renderString).Y * ItemFontSize + 30;

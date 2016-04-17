@@ -81,37 +81,7 @@ namespace Ballz.Renderer
         {
             return WorldToScreen(new Vector3(Position, 0));
         }
-
-
-        public void DrawMessageOverlay()
-        {
-            SpriteBatch.Begin();
-            if (Game.Match.State == GameSession.Logic.SessionState.Finished)
-            {
-                string msg = "";
-
-                if (Game.Match.Winner != null)
-                    msg = Game.Match.Winner.Name + " won the match!";
-                else
-                    msg = "Draw!";
-
-                SpriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), new Color(Color.Black, 0.5f));
-
-                var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width / 2, Game.GraphicsDevice.Viewport.Height / 2);
-                DrawText(msg, screenPos, 1f, Color.Red, centerHorizontal: true);
-            }
-            else if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer != null)
-            {
-                var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width - 250, Game.GraphicsDevice.Viewport.Height - 100);
-
-                var msg = "Turn: " + Game.Match.ActivePlayer.Name + " / " + (int)Game.Match.TurnTimeLeft;
-
-                DrawText(msg, screenPos, 1f, Color.Black, centerHorizontal: true);
-            }
-
-            SpriteBatch.End();
-        }
-
+        
         public void DrawText(string text, Vector2 position, float size, Color color, int shadowOffset = 2, bool centerVertical = false, bool centerHorizontal = false)
         {
             if (centerVertical || centerHorizontal)

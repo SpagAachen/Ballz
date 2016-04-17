@@ -190,7 +190,7 @@ namespace Ballz
             optionsMenu.AddItem(apply);
 
             // multiplayer menu
-            var networkMenu = new Composite("Multiplayer", true);
+            var multiplayerMenu = new Composite("Multiplayer", true);
             // - connect to server
             var networkConnectToMenu = new Composite("Connect to", true);
             var networkHostInput = new InputBox("Host Name: ", true);
@@ -224,9 +224,9 @@ namespace Ballz
             //TODO: abort button - close server etc.
 
             // - add items
-            networkMenu.AddItem(networkConnectToMenu);
-            networkMenu.AddItem(networkServerMenu);
-            networkMenu.AddItem(new Back());
+            multiplayerMenu.AddItem(networkConnectToMenu);
+            multiplayerMenu.AddItem(networkServerMenu);
+            multiplayerMenu.AddItem(new Back());
 
             // main menu
             var mainMenu = new Composite("Main Menu");
@@ -238,7 +238,7 @@ namespace Ballz
             };
             mainMenu.AddItem(continueLabel);
 
-            var startGame = new Composite("Start New Game", true);
+            var singlePlayerMenu = new Composite("Singleplayer", true);
             {
                 var currGameSettings = new GameSettings();
                 // hard-coded game settings
@@ -283,14 +283,14 @@ namespace Ballz
                             currGameSettings.GameMode = factory;
                             Logic.StartGame(currGameSettings);
                         };
-                    startGame.AddItem(factoryLabel);
+                    singlePlayerMenu.AddItem(factoryLabel);
                 }
             }
 
             mainMenu.BackgroundTexture = Logo;
-            mainMenu.AddItem(startGame);
+            mainMenu.AddItem(singlePlayerMenu);
+            mainMenu.AddItem(multiplayerMenu);
             mainMenu.AddItem(optionsMenu);
-            mainMenu.AddItem(networkMenu);
 
             mainMenu.SelectNext();
             continueLabel.Visible = false;
