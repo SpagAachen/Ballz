@@ -22,7 +22,6 @@ namespace Ballz.SessionFactory
                     "Friedrich",
                     "Hans",
                     "Dieter",
-                    "Jürgen",
                     "Martin",
                     "Ulrich",
                     "Wolfgang",
