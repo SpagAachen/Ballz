@@ -126,7 +126,7 @@ namespace Ballz.Renderer
             if (shadowOffset > 0)
             {
                 position += new Vector2(shadowOffset);
-                SpriteBatch.DrawString(Font, text, position, new Color(Color.Black, 0.5f), 0, Vector2.Zero, size, SpriteEffects.None, 0);
+                SpriteBatch.DrawString(Font, text, position, new Color(Color.Black, (color.A/255f) * 0.5f), 0, Vector2.Zero, size, SpriteEffects.None, 0);
                 position -= new Vector2(shadowOffset);
             }
 

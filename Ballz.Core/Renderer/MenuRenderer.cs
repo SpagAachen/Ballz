@@ -4,12 +4,35 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
+using static MathFloat.MathF;
+
 namespace Ballz.Renderer
 {
     public class MenuRenderer : BaseRenderer
     {
-        public Item Menu { get; set; }
+        Item _Menu;
+        Item OldMenu;
+        public Item Menu
+        {
+            get
+            {
+                return _Menu;
+            }
+            set
+            {
+                if (_Menu != value)
+                {
+                    OldMenu = _Menu;
+                    FadeTimer = 0f;
+                    _Menu = value;
+                }
+            }
+        }
+
         private Item parentMenu;
+
+        float FadeTimer = 0f;
+        float FadeAnimationLength = 1f;
 
         public MenuRenderer(Ballz game, Item defaultMenu = null) : base(game)
         {
@@ -47,17 +70,27 @@ namespace Ballz.Renderer
         {
             DrawSky();
 
+            FadeTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            var fadeProgress = Min(2, FadeTimer / (FadeAnimationLength / 2));
+
             SpriteBatch.Begin();
-            
-            if (Menu != null)
+
+            if (fadeProgress <= 1f && OldMenu != null && OldMenu.Items.Count > 0)
+            {
+                RenderMenu(OldMenu, false, 1f - fadeProgress);
+            }
+            else
+                OldMenu = null;
+
+            if (fadeProgress > 1f && Menu != null)
             {
                 if (Menu.Items.Count > 0)
                 {
-                    RenderMenu(Menu, false);
+                    RenderMenu(Menu, false, fadeProgress - 1f);
                 }
                 else
                 {
-                    RenderMenu(parentMenu, true);
+                    RenderMenu(parentMenu, true, fadeProgress - 1f);
                 }
             }
 
@@ -68,22 +101,35 @@ namespace Ballz.Renderer
         const float TitleFontSize = 1f;
         const float ItemFontSize = 0.5f;
 
-        private void RenderMenu(Item menu, bool showUnderscore)
+        float EaseOut(float t)
+        {
+            t = 1 - t;
+            return 1 - (t * t * (3 * t - 2));
+        }
+
+        private void RenderMenu(Item menu, bool showUnderscore, float fadeProgress)
         {
             var background = (menu as Composite)?.BackgroundTexture;
 
             if (background != null)
-                SpriteBatch.Draw(background, new Rectangle((GraphicsDevice.Viewport.Width - background.Width) / 2, (GraphicsDevice.Viewport.Height - background.Height) / 2, background.Width, background.Height), Color.White);
+                SpriteBatch.Draw(
+                    background,
+                    new Rectangle((GraphicsDevice.Viewport.Width - background.Width) / 2, (GraphicsDevice.Viewport.Height - background.Height) / 2, background.Width, background.Height),
+                    new Color(Color.White, fadeProgress)
+                    );
 
             // Make y margin the same as the x offset
             var topOffset = 40f;
             var leftOffset = 40f;
+
+            var menuTopOffset = topOffset - (1 - EaseOut(fadeProgress)) * 150f;
+
             // Draw the MenuTitle.
             DrawText(
                 menu.DisplayName,
-                new Vector2(leftOffset, topOffset),
+                new Vector2(leftOffset, menuTopOffset),
                 TitleFontSize,
-                Color.Black                
+                new Color(Color.Black, fadeProgress)
                 );
 
             // Draw subMenu Items.
@@ -91,6 +137,7 @@ namespace Ballz.Renderer
             string renderString;
             foreach (var item in menu.Items)
             {
+                leftOffset -= (1 - EaseOut(fadeProgress)) * 150f;
                 if (item.Visible)
                 {
                     if (showUnderscore && item == menu.SelectedItem && item is InputBox)
@@ -103,7 +150,7 @@ namespace Ballz.Renderer
                         renderString,
                         new Vector2(leftOffset, topOffset),
                         ItemFontSize,
-                        (menu.SelectedItem != null && menu.SelectedItem == item) ? Color.Red : Color.Black
+                        new Color((menu.SelectedItem != null && menu.SelectedItem == item) ? Color.Red : Color.Black, fadeProgress)
                         );
 
                     topOffset += Font.MeasureString(renderString).Y * ItemFontSize + 30;
