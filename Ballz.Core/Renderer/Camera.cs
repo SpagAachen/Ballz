@@ -26,9 +26,9 @@ namespace Ballz
     //TODO: implement the camera properly
     public class Camera
     {
-        public Matrix View{ get; private set;}
+        public Matrix View{ get; set;}
 
-        public Matrix Projection{ get; private set;}
+        public Matrix Projection{ get; set;}
 
         public Vector2 BottomLeftBoundary { get; set; }
         public Vector2 TopRightBoundary { get; set; }

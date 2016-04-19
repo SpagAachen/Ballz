@@ -84,6 +84,7 @@ namespace Ballz.GameSession.World
             System.Console.WriteLine("Explosion " + " with radius " + ExplosionRadius + " and " + HealthDecreaseFromExplosionImpact + " damage.");
             Ballz.The().Match.World.StaticGeometry.SubtractCircle(Position.X, Position.Y, ExplosionRadius);
 
+            Ballz.The().Match.World.GraphicsEvents.Add(new CameraShakeEffect { Intensity = 2f, Duration = 0.2f, Start = Ballz.The().Match.GameTime });
             Ballz.The().Match.World.GraphicsEvents.Add(GenericGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, Position, 0));
 
             // TODO: damage to all players within explosion radius

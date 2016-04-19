@@ -107,7 +107,7 @@ namespace Ballz.Renderer
         }
 
         const float TitleFontSize = 1f;
-        const float ItemFontSize = 0.5f;
+        const float ItemFontSize = 0.75f;
 
         float EaseOut(float t)
         {

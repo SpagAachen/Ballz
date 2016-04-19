@@ -26,6 +26,7 @@ namespace Ballz.GameSession.Renderer
         Effect CelShading;
         RenderTarget2D WorldRenderTarget;
 
+        Random random = new Random();
 
 		Ball CurrentActiveBall = null;
 
@@ -47,13 +48,14 @@ namespace Ballz.GameSession.Renderer
             using (new PerformanceReporter(Game))
             {
                 base.Draw(time);
+                var worldState = Game.Match.World;
                 WaterRenderer.PrepareDrawWater(Game.Match.World);
                 //GraphicsDevice.SetRenderTarget(WorldRenderTarget);
 
                 Game.Camera.UseBoundary = true;
                 Game.Camera.BottomLeftBoundary = new Vector2(-100f, 0f);
                 Game.Camera.TopRightBoundary = new Vector2(100f, 100f);
-
+                
                 try
                 {
 					if ( Game.Match.ActivePlayer.ActiveBall != CurrentActiveBall && Game.Match.ActivePlayer.ActiveBall != null)
@@ -67,12 +69,21 @@ namespace Ballz.GameSession.Renderer
                     Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
                 }
 
+                var shakeEffect = worldState.GraphicsEvents.FirstOrDefault(e => e is CameraShakeEffect) as CameraShakeEffect;
+                if(shakeEffect != null)
+                {
+                    var intensity = (1 - shakeEffect.GetProgress(Game.Match.GameTime)) * shakeEffect.Intensity;
+                    var offSetX = (float)(random.NextDouble() * 0.02 - 0.01) * intensity;
+                    var offSetY = (float)(random.NextDouble() * 0.02 - 0.01) * intensity;
+                    var view = Game.Camera.View;
+                    view.Translation += new Vector3(offSetX, offSetY, 0);
+                    Game.Camera.View = view;
+                }
+
                 DrawSky();
 
                 BallEffect.View = Game.Camera.View;
                 BallEffect.Projection = Game.Camera.Projection;
-
-                var worldState = Game.Match.World;
 
                 var tris = worldState.StaticGeometry.GetTriangles();
                 VertexPositionColorTexture[] vpc = new VertexPositionColorTexture[tris.Count * 3];
@@ -257,11 +268,11 @@ namespace Ballz.GameSession.Renderer
             
             var screenPos = WorldToScreen(ball.Position + new Vector2(0, 2.5f));
 
-            DrawText(ball.Health.ToString("0"), screenPos, 0.33f, Color.White, 1, true, true);
-            screenPos += new Vector2(0, 20) * resolutionFactor;
-            DrawText(ball.Name, screenPos, 0.33f, Color.LawnGreen, 1, true, true);
-            screenPos += new Vector2(0, 20) * resolutionFactor;
-            DrawText(ball.Player.Name, screenPos, 0.2f, Color.LawnGreen, 1, true, true);
+            DrawText(ball.Health.ToString("0"), screenPos, 0.5f, Color.White, 1, true, true);
+            screenPos += new Vector2(0, 25) * resolutionFactor;
+            DrawText(ball.Name, screenPos, 0.5f, Color.LawnGreen, 1, true, true);
+            screenPos += new Vector2(0, 25) * resolutionFactor;
+            DrawText(ball.Player.Name, screenPos, 0.33f, Color.LawnGreen, 1, true, true);
 
             if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer == ball.Player && ball.Player.ActiveBall == ball)
             {
