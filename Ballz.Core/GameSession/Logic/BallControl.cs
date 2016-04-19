@@ -68,7 +68,24 @@ namespace Ballz.GameSession.Logic
 
             return ballMadeAction;
         }
-        
+
+        /// <summary>
+        /// Called when the turn of this ball is over
+        /// </summary>
+        public virtual void OnTurnEnd()
+        {
+            Match.Physics.RemoveRope(Ball.AttachedRope);
+            Ball.AttachedRope = null;
+            Match.World.Ropes.Remove(Ball.AttachedRope);
+        }
+
+        /// <summary>
+        /// Called when the turn of this ball is started
+        /// </summary>
+        public virtual void OnTurnStart()
+        {
+        }
+
         const float PauseBetweenJumps = 0.2f;
         protected float JumpCoolDown = 0f;
 
@@ -99,7 +116,7 @@ namespace Ballz.GameSession.Logic
             if (input?.Pressed != null)
             {
                 Weapon?.HandleInput(input);
-                KeyPressed[input.Kind] = input.Pressed.Value;
+                KeyPressed[input.Kind] = input.Pressed;
             }
         }   
     }

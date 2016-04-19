@@ -16,17 +16,21 @@ namespace Ballz.GameSession.Logic
     [Serializable]
     public class Team
     {
+        static int IdCounter = 0;
+        public int Id { get; set; } = IdCounter++;
+
         public string Name { get; set; } = "Unnamed";
 
-        public int NumberOfBallz { get; set; } = 0;
+        public string Country = "Germoney";
 
-        public Player player { get; set; }
-
+        public int NumberOfBallz { get; set; } = 1;
+        
         public bool ControlledByAI { get; set; } = false;
     }
 
     [Serializable]
-    [JsonConverter(typeof(GameSettingsSerializer))]    public class GameSettings
+    [JsonConverter(typeof(GameSettingsSerializer))]
+    public class GameSettings
     {
         public string MapName { get; set; } = "Invalid";
 

@@ -11,13 +11,27 @@
     using global::Ballz.GameSession.Logic;
 
     using Microsoft.Xna.Framework.Graphics;
-
+    using GameSession.World;
+    using System.Linq;
     class Server
     {
+        static Server()
+        {
+            ObjectSync.Sync.RegisterClass<Entity>(() => new Entity());
+            ObjectSync.Sync.RegisterClass<Ball>(() => new Ball());
+            ObjectSync.Sync.RegisterClass<Shot>(() => new Shot());
+            ObjectSync.Sync.RegisterClass<Message>(() => new Message());
+            ObjectSync.Sync.RegisterClass<NetworkMessage>(() => new NetworkMessage());
+            ObjectSync.Sync.RegisterClass<InputMessage>(() => new InputMessage());
+            ObjectSync.Sync.RegisterClass<Terrain.TerrainModification>(() => new Terrain.TerrainModification());
+        }
+
         private static int nextId = 1;
         TcpListener listener;
         private readonly Network network;
         private readonly List<Connection> connections = new List<Connection>();
+
+        public double TicksPerSecond = 30;
 
         public Server(Network net)
         {
@@ -35,16 +49,39 @@
             Broadcast(new NetworkMessage(NetworkMessage.MessageType.StartGame, gameSettings));
             // Start our game session
             Ballz.The().Logic.StartGame(gameSettings);
+
+            Ballz.The().Match.World.StaticGeometry.TerrainModified += OnTerrainModified;
+            Ballz.The().Match.World.EntityRemoved += OnEntityRemoved;
+        }
+
+        private void OnEntityRemoved(object sender, Entity e)
+        {
+            Broadcast(new NetworkMessage(NetworkMessage.MessageType.EntityRemoved, e));
+        }
+
+        private void OnTerrainModified(object sender, Terrain.TerrainModification modification)
+        {
+            Broadcast(modification);
         }
 
         private void CreateTeams(GameSettings gameSettings)
         {
             Debug.Assert(gameSettings.Teams.Count == 0);
             var counter = 0;
-            for (var index = 0; index < NumberOfClients() + 1 /* +1 for ourself */; index++)
+
             {
-                var player = new Player { Name = "Player" + counter };
-                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1, player = player };
+                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1 };
+                gameSettings.Teams.Add(team);
+                ++counter;
+            }
+            
+            foreach(var client in connections)
+            {
+                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1 };
+
+                client.ClientPlayerId = team.Id;
+                client.Send(new NetworkMessage(NetworkMessage.MessageType.YourPlayerId, client.ClientPlayerId));
+
                 gameSettings.Teams.Add(team);
                 ++counter;
             }
@@ -73,6 +110,8 @@
             }
         }
 
+        DateTime LastUpdate = DateTime.Now;
+
         public void Update(GameTime time)
         {
             // new clients
@@ -82,7 +121,9 @@
                 {
                     // add new player in lobby
                     var client = listener.AcceptTcpClient();
-                    connections.Add(new Connection(client, nextId++));
+                    var connection = new Connection(client, nextId++);
+                    connection.ObjectReceived += OnData;
+                    connections.Add(connection);
                     network.RaiseMessageEvent(NetworkMessage.MessageType.NewClient);
                     // update lobby list
                     this.UpdateLobbyList();
@@ -95,41 +136,41 @@
             // receive data
             foreach (var c in connections)
             {
-                if (c.DataAvailable())
-                {
-                    var data = c.ReceiveData();
-                    this.OnData(data, c.Id);
-                }
+                c.ReadUpdates();
             }
 
-			// Update Client data
-            if (Ballz.The().Network.GameState == Network.GameStateT.InGame)
-			{
-                SendEntityDataToClients();
-                //TODO: world updates
-                //TODO: more?
-			}
-            //TODO: Implement
-        }
+            if (network.GameState == Network.GameStateT.InGame && Ballz.The().Match.State == SessionState.Running)
+            {
+                var now = DateTime.Now;
+                if ((now - LastUpdate).TotalSeconds > 1.0 / TicksPerSecond)
+                {
+                    foreach (var e in Ballz.The().Match.World.Entities)
+                    {
+                        Broadcast(e);
+                    }
+                    LastUpdate = DateTime.Now;
+                }
 
-        private void SendEntityDataToClients()
-        {
-            var entities = Ballz.The().World.Entities;
-            Broadcast(new NetworkMessage(NetworkMessage.MessageType.Entities, entities));
+            }
         }
-
-        private void OnData(object data, int sender)
+            
+        private void OnData(object sender, object data)
         {
-			//Console.WriteLine("Received data from " + sender + ": " + data.ToString()); // Debug
+
 			// Input Message
-			if (data.GetType() == typeof(InputMessage))
+			if (Ballz.The().Match != null && data.GetType() == typeof(InputMessage))
 			{
-				//TODO: implement
-			}
+                var playerId = (sender as Connection).ClientPlayerId;
+                var player = Ballz.The().Match.PlayerById(playerId);
+                if(player != null)
+                    Ballz.The().Input.InjectInputMessage((InputMessage)data, player);
+            }
+
         }
 
         public void Broadcast(object data)
         {
+            //Console.WriteLine($"Broadcasting {data}");
             foreach (var c in connections)
             {
                 c.Send(data);

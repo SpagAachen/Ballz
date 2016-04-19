@@ -13,12 +13,19 @@ namespace Ballz.GameSession.World
     {
         public TimeSpan GameTime { get; protected set; } = new TimeSpan(0, 0, 0);
 
-        public List<Entity> Entities
+        public event EventHandler<Entity> EntityAdded;
+        public event EventHandler<Entity> EntityRemoved;
+
+        List<Entity> EntityList = new List<Entity>();
+
+        public IEnumerable<Entity> Entities
         {
-            get;
+            get { return EntityList; }
         }
 
         public List<Rope> Ropes { get; private set; } = new List<Rope>();
+
+        public List<GraphicsEvent> GraphicsEvents = new List<GraphicsEvent>();
 
         public Terrain StaticGeometry
         {
@@ -35,9 +42,22 @@ namespace Ballz.GameSession.World
                     select e).FirstOrDefault();
         }
 
-        public World(List<Entity> newEntitites, Terrain newTerrain)
+        private int EntityIdCounter = 0;
+        public void AddEntity(Entity e)
         {
-            Entities = newEntitites;
+            e.ID = EntityIdCounter++;
+            EntityAdded?.Invoke(this, e);
+            EntityList.Add(e);
+        }
+
+        public void RemoveEntity(Entity e)
+        {
+            EntityRemoved?.Invoke(this, e);
+            EntityList.Remove(e);
+        }
+
+        public World(Terrain newTerrain)
+        {
             StaticGeometry = newTerrain;
             Water = new Water(50,25);
         }

@@ -34,13 +34,17 @@ namespace Ballz.GameSession.Logic.Weapons
 
         public override void HandleInput(InputMessage input)
         {
-            if((input.Pressed ?? false) && input.Kind == InputMessage.MessageType.ControlsAction)
+            if (Game.Match.IsRemoteControlled)
+                return;
+
+            if(input.Pressed && input.Kind == InputMessage.MessageType.ControlsAction)
             {
                 ++shotsFired;
+
                 var rayHit = Game.Match.Physics.Raycast(Ball.Position, Ball.Position + Ball.AimDirection * 1000f);
                 if(rayHit.HasHit)
                 {
-                    Game.World.StaticGeometry.SubtractCircle(rayHit.Position.X, rayHit.Position.Y, ExplosionRadius);
+                    Game.Match.World.StaticGeometry.SubtractCircle(rayHit.Position.X, rayHit.Position.Y, ExplosionRadius);
                     if(rayHit.Entity != null)
                     {
                         if(rayHit.Entity is Ball)

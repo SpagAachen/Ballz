@@ -13,7 +13,7 @@ namespace Ballz.GameSession
 {
     public class Session: IDisposable
     {
-        public List<Entity> Entities { get; set; } = new List<Entity>();
+        public World.World World;
 
         public Terrain Terrain { get; set; }
 
@@ -33,7 +33,11 @@ namespace Ballz.GameSession
 
         public List<Player> Players { get; set; } = new List<Player>();
 
+        public List<Player> LocalPlayers { get; set; } = new List<Player>();
+
         public Player Winner { get; set; } = null;
+
+        public float GameTime { get; set; } = 0;
 
         public SessionState State { get; set; } = SessionState.Starting;
 
@@ -47,8 +51,14 @@ namespace Ballz.GameSession
 
         public GameSession.Logic.GameSettings GameSettings { get; set; }
 
-        public Session(Ballz _game, GameSession.Logic.GameSettings settings)
+        /// <summary>
+        /// True iff this session is running on a multiplayer client.
+        /// </summary>
+        public bool IsRemoteControlled { get; set; } = false;
+
+        public Session(Ballz _game, World.World world, GameSession.Logic.GameSettings settings)
         {
+            World = world;
             GameSettings = settings;
 
             Physics = new Physics.PhysicsControl(_game);
@@ -82,22 +92,27 @@ namespace Ballz.GameSession
 
         public void Start()
         {
-            Physics.UpdateTerrainBody(Game.World.StaticGeometry);
-            Game.World.Water.Initialize(Game.World, Physics);
+            Physics.UpdateTerrainBody(World.StaticGeometry);
+            World.Water.Initialize(World, Physics);
 
             Input.Input += Physics.HandleMessage;
             Input.Input += GameRenderer.HandleMessage;
             Input.Input += SessionLogic.HandleMessage;
             Input.Input += DebugRenderer.HandleMessage;
             State = SessionState.Running;
-
+            LocalPlayers = Players.Where(p => p.IsLocal).ToList();
         }
 
         public Player PlayerByNumber(int number)
         {
-            if (Players.Count < number)
+            if (LocalPlayers.Count < number)
                 return null;
-            return Players[number - 1];
+            return LocalPlayers[number - 1];
+        }
+
+        public Player PlayerById(int id)
+        {
+            return Players.FirstOrDefault(p => p.Id == id);
         }
 
         #region IDisposable Support

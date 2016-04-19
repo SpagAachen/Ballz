@@ -1,5 +1,6 @@
 ﻿using Ballz.GameSession.Logic;
 using Microsoft.Xna.Framework;
+using ObjectSync;
 using System;
 
 namespace Ballz.GameSession.World
@@ -16,28 +17,51 @@ namespace Ballz.GameSession.World
             Radius = 0.8f;
         }
 
+        public string Name { get; set; } = "Nobody";
+
         /// <summary>
         /// The health value of the ball. Typical value ranges are 0-100.
         /// </summary>
+        [Synced]
         public double Health { get; set; } = 100;
 
+        [Synced]
         public bool IsAlive { get { return Health > 0; } }
 
+        [Synced]
         public bool IsAiming { get; set; } = false;
 
+        [Synced]
         public bool IsCharging { get; set; } = false;
 
         /// <summary>
         /// Indicates the "charging level" that is used to control the initial velocity of certain projectiles.
         /// </summary>
+        [Synced]
         public float ShootCharge { get; set; } = 0f;
 
-        public Player Player { get; set; }
+        [Newtonsoft.Json.JsonIgnore]
+        Player _player;
 
+        [Newtonsoft.Json.JsonIgnore]
+        public Player Player {
+            get
+            {
+                return _player;
+            }
+            set
+            {
+                _player = value;
+            }
+        }
+
+        [Synced]
         public Vector2 AimDirection { get; set; } = Vector2.UnitX;
 
+        [Synced]
         public string HoldingWeapon;
 
+        [Newtonsoft.Json.JsonIgnore]
         public Rope AttachedRope = null;
 
         public override void OnEntityCollision(Entity other)
@@ -50,7 +74,7 @@ namespace Ballz.GameSession.World
                     return;
 
                 //TODO(ks) more elaborate damage model
-                Health -= shot.HealthImpactAtDirectHit * Math.Min(1, impact / 20);
+                Health -= shot.HealthDecreaseFromProjectileHit * Math.Min(1, impact / 20);
                 if (Health < 0)
                     Health = 0;
 

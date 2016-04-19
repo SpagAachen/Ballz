@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Ballz.GameSession.World;
 using Ballz.Messages;
-using Ballz.Sound;
 
 namespace Ballz.GameSession.Logic
 {
@@ -24,21 +23,6 @@ namespace Ballz.GameSession.Logic
         public abstract string Name { get; }
 
         public abstract string Icon { get; }
-
-        public void FireProjectile()
-        {
-            Game.Services.GetService<SoundControl>().PlaySound(SoundControl.ShotSound);
-            Game.World.Entities.Add(new Shot
-            {
-                ExplosionRadius = 1.0f,
-                HealthImpactAtDirectHit = 25,
-                IsInstantShot = false,
-                Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.101f),
-                Velocity = Ball.AimDirection * Ball.ShootCharge * 30f,
-            });
-
-            Ball.ShootCharge = 0f;
-        }
 
         /// <summary>
         /// Updates the weapon state and performs weapon actions.

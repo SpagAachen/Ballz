@@ -55,11 +55,6 @@ namespace Ballz.GameSession.Physics
         public override void Initialize()
         {
             PhysicsWorld = new FarseerPhysics.Dynamics.World(new Vector2(0f, -9.82f));
-
-            // Add a ground plate for physics testing
-            var ground = new Body(PhysicsWorld);
-            ground.BodyType = BodyType.Static;
-            ground.CreateFixture(new EdgeShape(new Vector2(-10, 0), new Vector2(20, 0)));
         }
 
         /// <summary>
@@ -123,7 +118,7 @@ namespace Ballz.GameSession.Physics
         public void RemoveEntity(Entity e, World.World worldState)
         {
             e.Dispose();
-            worldState.Entities.Remove(e);
+            worldState.RemoveEntity(e);
             if(e.PhysicsBody != null)
             {
                 EntityIdByPhysicsBody.Remove(e.PhysicsBody);
@@ -290,7 +285,7 @@ namespace Ballz.GameSession.Physics
             var entities = worldState.Entities.ToArray();
             foreach (var e in entities)
             {
-                if(e.Disposed || e.Position.LengthSquared() > 100 * 100)
+                if(e.Disposed || e.Position.LengthSquared() > 100 * 100 || e.Position.Y < -10)
                 {
                     RemoveEntity(e, worldState);
                     continue;
@@ -340,8 +335,11 @@ namespace Ballz.GameSession.Physics
                                 Entity entity = worldState.EntityById(entityId);
 
                                 // Mutual collision
-                                entity.OnEntityCollision(shot);
-                                shot.OnEntityCollision(entity);
+                                if(entity != null)
+                                {
+                                    entity.OnEntityCollision(shot);
+                                    shot.OnEntityCollision(entity);
+                                }
                             }
 
                             return true;
@@ -396,7 +394,7 @@ namespace Ballz.GameSession.Physics
                 if (Game.Match.State != Logic.SessionState.Running)
                     return;
 
-                var worldState = Game.World;
+                var worldState = Game.Match.World;
                 float elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
 
                 PreparePhysicsEngine(worldState);
@@ -410,7 +408,7 @@ namespace Ballz.GameSession.Physics
 
                 foreach (var shot in shots)
                 {
-                    if (shot.IsInstantShot)
+                    if (shot.ShotType == Shot.ShotType_T.InstantHit)
                     {
                         Vector2 targetPos = Vector2.Zero;
                         Fixture targetFixture = null;
@@ -438,7 +436,11 @@ namespace Ballz.GameSession.Physics
                             shot.OnEntityCollision(entity);
                         }
 
-                        worldState.Entities.Remove(shot);
+                        worldState.RemoveEntity(shot);
+                    }
+                    else
+                    {
+                        shot.update(elapsedSeconds);
                     }
                 }
             }
@@ -465,7 +467,7 @@ namespace Ballz.GameSession.Physics
                 Entity hitEntity = null;
                 if (EntityIdByPhysicsBody.ContainsKey(fixture.Body))
                 {
-                    hitEntity = Game.World.EntityById(EntityIdByPhysicsBody[fixture.Body]);
+                    hitEntity = Game.Match.World.EntityById(EntityIdByPhysicsBody[fixture.Body]);
                 }
 
                 if (fraction < closestFraction)

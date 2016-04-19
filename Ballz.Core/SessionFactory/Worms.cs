@@ -95,37 +95,51 @@ namespace Ballz.SessionFactory
             }
         }
 
-        protected override Session ImplStartSession(Ballz game, GameSettings settings)
+        protected override Session ImplStartSession(Ballz game, GameSettings settings, bool remoteControlled, int localPlayerId)
         {
-            var session = new Session(game, settings)
+            var session = new Session(game, new World(new Terrain(settings.MapTexture)), settings)
                               {
                                   UsePlayerTurns = this.UsePlayerTurns,
                                   Terrain = new Terrain(settings.MapTexture)
                               };
 
             FindSpawnPoints(settings.MapTexture, session.Terrain.Scale);
+
             var spawnPoints = SelectSpawnpoints(settings.Teams.Select(t=>t.NumberOfBallz).Sum());
+            
 
             // Create players and Ballz
             var currBallCreating = 0;
             foreach (var team in settings.Teams)
             {
-                session.Players.Add(team.player);
-                // Create ballz
-                for (var i = 0; i < team.NumberOfBallz; ++i)
+                var player = new Player
+                {
+                    Id = team.Id,
+                    Name = team.Name,
+                    TeamName = team.Country,
+                    IsLocal = !remoteControlled || localPlayerId == team.Id
+                };
+                
+                session.Players.Add(player);
+
+                var ballCount = UsePlayerTurns ? team.NumberOfBallz : 1;
+                var ballNames = TeamNames.GetBallNames(team.Country, ballCount);
+
+                for (var i = 0; i < ballCount; ++i)
                 {
                     var playerBall = new Ball
                     {
+                        Name = ballNames[i],
                         Position = spawnPoints[currBallCreating],
                         Velocity = new Vector2(0, 0),
                         IsAiming = true,
-                        Player = team.player,
+                        Player = player,
                         HoldingWeapon = "Bazooka",
                         IsStatic = false
                     };
-                    team.player.OwnedBalls.Add(playerBall);
+                    player.OwnedBalls.Add(playerBall);
                     ++currBallCreating;
-                    session.Entities.Add(playerBall);
+                    session.World.AddEntity(playerBall);
 
                     BallControl controller;
 
@@ -138,12 +152,9 @@ namespace Ballz.SessionFactory
 
                 }
 
-                team.player.ActiveBall = team.player.OwnedBalls.FirstOrDefault();
-                session.SessionLogic.ActiveControllers[team.player] = session.SessionLogic.BallControllers[team.player.ActiveBall];
+                player.ActiveBall = player.OwnedBalls.FirstOrDefault();
+                session.SessionLogic.ActiveControllers[player] = session.SessionLogic.BallControllers[player.ActiveBall];
             }
-
-            var snpsht = new World(session.Entities, session.Terrain);
-            session.Game.World = snpsht;
 
             return session;
         }

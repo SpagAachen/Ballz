@@ -7,9 +7,12 @@ using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using ObjectSync;
 
 namespace Ballz.Network
 {
+
     /// <summary>
     /// Provides an abstraction of the protocol layer. Use it to establish a network connection with another game instance.
     /// </summary>
@@ -18,29 +21,19 @@ namespace Ballz.Network
         public readonly int Id;
         private readonly TcpClient tcpClient;
         NetworkStream connectionStream;
+        StreamSync streamSync;
+
+        public int ClientPlayerId = 1;
 
         byte[] readBuffer;
         int readDataLength = -1;
         int readDataLengthMissing = -1;
         bool unfinishedObject = false;
 
-        public List<Type> MessageTypes = new List<Type>();
+        bool IsConnected { get { return tcpClient.Connected; } }
 
-        public int GetMessageTypeId(Type type)
-        {
-            var res = MessageTypes.IndexOf(type);
-            Debug.Assert(res >= 0, "Unknown type!");
-            return res;
-        }
-
-        public Type GetTypeByMessageTypeId(int id)
-        {
-            Debug.Assert(id >= 0, "Invalid id!");
-            return MessageTypes[id];
-        }
-
-        Task<object> receiveTask;
-
+        public event EventHandler<object> ObjectReceived;
+        
         /// <summary>
         /// Initializes a new instance of the Connection class and connects to the specified port on the specified host.
         /// </summary>
@@ -62,41 +55,8 @@ namespace Ballz.Network
             Id = id;
             tcpClient = connection;
             connectionStream = tcpClient.GetStream();
-
-            MessageTypes.Add(typeof(List<Entity>));
-            MessageTypes.Add(typeof(InputMessage));
-            MessageTypes.Add(typeof(NetworkMessage));
-
-            BeginReceive();
-        }
-
-        protected void BeginReceive()
-        {
-            if (receiveTask != null)
-                throw new InvalidOperationException("Already receiving");
-
-            receiveTask = new Task<object>(() =>
-            {
-                byte[] msgLengthBuf = new byte[4];
-                connectionStream.Read(msgLengthBuf, 0, 4);
-                int msgLength = BitConverter.ToInt32(msgLengthBuf, 0);
-                Console.WriteLine("Received " + msgLength + "bytes");
-
-                byte[] msgTypeBuf = new byte[4];
-                connectionStream.Read(msgTypeBuf, 0, 4);
-                int msgType = BitConverter.ToInt32(msgTypeBuf, 0);
-
-                if (msgType < 0) return null;
-
-                byte[] data = new byte[msgLength];
-
-                connectionStream.Read(data, 0, msgLength);
-
-                var json = UTF8Encoding.UTF8.GetString(data);
-                var type = GetTypeByMessageTypeId(msgType);
-                return JsonConvert.DeserializeObject(json, type);
-            });
-            receiveTask.Start();
+            streamSync = new StreamSync(connectionStream);
+            streamSync.BeginReceive();
         }
 
         /// <summary>
@@ -105,60 +65,24 @@ namespace Ballz.Network
         /// <param name="obj">The object to send</param>
         public void Send(object obj)
         {
-            //try
-            //{
-                var netStr = tcpClient.GetStream();
-                // serialize object and get size of it
-                var json = JsonConvert.SerializeObject(obj);
-                var data = UTF8Encoding.UTF8.GetBytes(json);
-                // write size of object into tcp stream
-                var userDataLen = BitConverter.GetBytes(data.Length);
-                netStr.Write(userDataLen, 0, 4);
+            streamSync.WriteUpdate(obj);
+            connectionStream.Flush();
 
-                var typeId = GetMessageTypeId(obj.GetType());
-
-                netStr.Write(BitConverter.GetBytes(typeId), 0, 4);
-
-                netStr.Write(data, 0, data.Length);
-                Console.WriteLine("Serialized " + data.Length + "bytes");
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine("Network: Warning: Failed to send some data: " + e.ToString());
-            //}
         }
 
-        /// <summary>
-        /// Returns true iff data is ready to read.
-        /// </summary>
-        /// <returns></returns>
-        public bool DataAvailable()
+        public void ReadUpdates()
         {
-            return receiveTask.IsCompleted;
-        }
+            streamSync.ApplyReceivedUpdates((obj) => {
+                /*var entity = obj as Entity;
+                if(entity != null)
+                {
+                    return Ballz.The().Match.World.EntityById(entity.ID);
+                }*/
 
-        public object ReceiveData()
-        {
-            object result = null;
-            if (receiveTask == null)
+                ObjectReceived?.Invoke(this, obj);
 
-                throw new InvalidOperationException("No receiving is in progress");
-            try
-            {
-                receiveTask.Wait();
-                result = receiveTask.Result;
-            }
-            catch (Exception e)
-            {
-                System.Console.Out.WriteLine("Network: Warning: Failed to receive data. Error: " + e.ToString());
-            }
-            finally
-            {
-                receiveTask = null;
-            }
-
-            BeginReceive();
-            return result;
+                return null;
+            });
         }
     }
 }

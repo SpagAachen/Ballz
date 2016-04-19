@@ -37,10 +37,14 @@ namespace Ballz.GameSession.Logic
         {
             if (Session.UsePlayerTurns)
             {
+                ActiveControllers[Session.ActivePlayer]?.OnTurnEnd();
+
                 var player = Session.Players[(Session.Players.IndexOf(Session.ActivePlayer) + 1) % Session.Players.Count];
                 Session.ActivePlayer = player;
+                
                 player.ActiveBall = ChooseNextBall(player);
                 ActiveControllers[player] = BallControllers[player.ActiveBall];
+                ActiveControllers[player]?.OnTurnStart();
                 Session.TurnTimeLeft = Session.SecondsPerTurn;
             }
         }
@@ -53,6 +57,14 @@ namespace Ballz.GameSession.Logic
         public override void Update(GameTime time)
         {
             var elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
+
+            Session.GameTime += elapsedSeconds;
+
+            // Remove finished graphics events
+            var graphicsEffects = Session.World.GraphicsEvents.Where(e => e.End < Session.GameTime).ToArray();
+            foreach (var e in graphicsEffects)
+                Session.World.GraphicsEvents.Remove(e);
+
             if (Session.UsePlayerTurns)
             {
                 if (Session.ActivePlayer == null)
@@ -67,7 +79,7 @@ namespace Ballz.GameSession.Logic
                 }
             }
 
-            var worldState = Game.World;
+            var worldState = Session.World;
 
             if (Game.Match.State == SessionState.Running)
             {

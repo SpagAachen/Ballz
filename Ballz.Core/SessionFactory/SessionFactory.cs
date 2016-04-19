@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Ballz.GameSession;
+using Ballz.Menu;
+using Ballz.GameSession.Logic;
 
 namespace Ballz.SessionFactory
 {
@@ -12,22 +14,27 @@ namespace Ballz.SessionFactory
     {
         // Must be called before StartSession
         // Can modify GameSettings! E.g., sets the map texture and mapName
-        public void InitializeSession(Ballz game, GameSession.Logic.GameSettings settings)
+        public void InitializeSession(Ballz game, GameSettings settings)
         {
             ImplInitializeSession(game, settings);
             IsInitialized = true;
         }
 
-        // StartSession must _not_ modify GameSettings
-        public Session StartSession(Ballz game, GameSession.Logic.GameSettings settings)
+        public void CreateGameSettingsMenu(Composite menu)
         {
-            if (!IsInitialized) InitializeSession(game, settings);
-            return ImplStartSession(game, settings);
+            
         }
 
-        protected abstract void ImplInitializeSession(Ballz game, GameSession.Logic.GameSettings settings);
+        // StartSession must _not_ modify GameSettings
+        public Session StartSession(Ballz game, GameSettings settings, bool remoteControlled, int localPlayerId)
+        {
+            if (!IsInitialized) InitializeSession(game, settings);
+            return ImplStartSession(game, settings, remoteControlled, localPlayerId);
+        }
 
-        protected abstract Session ImplStartSession(Ballz game, GameSession.Logic.GameSettings settings);
+        protected abstract void ImplInitializeSession(Ballz game, GameSettings settings);
+
+        protected abstract Session ImplStartSession(Ballz game, GameSettings settings, bool remoteControlled, int localPlayerId);
 
         public abstract string Name { get; }
 
@@ -40,8 +47,7 @@ namespace Ballz.SessionFactory
             new Worms("TestWorld2", true),
             new Worms("RopeWorld"),
             new Worms("Mining"),
-            new Worms("Mining", true),
-            new Ballerburg()
+            new Worms("Mining", true)
         };
     }
 }

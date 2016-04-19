@@ -40,6 +40,16 @@ namespace Ballz.GameSession.World
             public bool[,] TerrainBitmap = null;
         }
 
+        public class TerrainModification
+        {
+            public float X;
+            public float Y;
+            public float Radius;
+            public bool Subtract;
+        }
+
+        public event EventHandler<TerrainModification> TerrainModified;
+
         public bool[,] WaterSpawnBitmap = null;
 
         /// <summary>
@@ -151,26 +161,13 @@ namespace Ballz.GameSession.World
             y /= Scale;
             radius /= Scale;
 
-            // Compute bounding box
-            int tlx = (int)Math.Floor(x - radius);
-            int tly = (int)Math.Floor(y - radius);
-            int brx = (int)Math.Ceiling(x + radius);
-            int bry = (int)Math.Ceiling(y + radius);
-
-            // Iterate over bounding box part of bitmap
-            for (int j = Math.Max(0, tly); j < Math.Min(height, bry); ++j)
+            ApplyModification(new TerrainModification
             {
-                for (int i = Math.Max(0, tlx); i < Math.Min(width, brx); ++i)
-                {
-                    if (Distance(i, j, x, y) > radius)
-                        continue;
-
-                    // Subtract dirt (if any)
-                    PublicShape.TerrainBitmap[i, j] = false;
-                }
-            }
-
-            WorkingRevision++;
+                X = x,
+                Y = y,
+                Radius = radius,
+                Subtract = true
+            });
         }
 
         public void AddCircle(float x, float y, float radius)
@@ -179,22 +176,35 @@ namespace Ballz.GameSession.World
             y /= Scale;
             radius /= Scale;
 
+            ApplyModification(new TerrainModification
+            {
+                X = x,
+                Y = y,
+                Radius = radius,
+                Subtract = false
+            });
+        }
+
+        public void ApplyModification(TerrainModification mod)
+        {
+            TerrainModified?.Invoke(this, mod);
+
             // Compute bounding box
-            int tlx = (int)Math.Floor(x - radius);
-            int tly = (int)Math.Floor(y - radius);
-            int brx = (int)Math.Ceiling(x + radius);
-            int bry = (int)Math.Ceiling(y + radius);
-            
+            int tlx = (int)Math.Floor(mod.X - mod.Radius);
+            int tly = (int)Math.Floor(mod.Y - mod.Radius);
+            int brx = (int)Math.Ceiling(mod.X + mod.Radius);
+            int bry = (int)Math.Ceiling(mod.Y + mod.Radius);
+
             // Iterate over bounding box part of bitmap
             for (int j = Math.Max(0, tly); j < Math.Min(height, bry); ++j)
             {
                 for (int i = Math.Max(0, tlx); i < Math.Min(width, brx); ++i)
                 {
-                    if (Distance(i, j, x, y) > radius)
+                    if (Distance(i, j, mod.X, mod.Y) > mod.Radius)
                         continue;
 
-                    // Add dirt
-                    PublicShape.TerrainBitmap[i, j] = true;
+                    // Add or remove dirt
+                    PublicShape.TerrainBitmap[i, j] = !mod.Subtract;
                 }
             }
 

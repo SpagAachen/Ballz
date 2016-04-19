@@ -20,7 +20,7 @@ namespace Ballz.GameSession.Logic.Weapons
         {
             base.HandleInput(input);
             
-            if(input.Pressed ?? false)
+            if(input.Pressed)
             {
                 switch(input.Kind)
                 {
@@ -30,7 +30,7 @@ namespace Ballz.GameSession.Logic.Weapons
                         {
                             Game.Match.Physics.RemoveRope(Ball.AttachedRope);
                             Ball.AttachedRope = null;
-                            Game.World.Ropes.Remove(Ball.AttachedRope);
+                            Game.Match.World.Ropes.Remove(Ball.AttachedRope);
                         }
                         else
                         {
@@ -45,7 +45,7 @@ namespace Ballz.GameSession.Logic.Weapons
 
                                 Ball.AttachedRope = rope;
                                 Game.Match.Physics.AddRope(rope);
-                                Game.World.Ropes.Add(rope);
+                                Game.Match.World.Ropes.Add(rope);
                             }
                         }
 

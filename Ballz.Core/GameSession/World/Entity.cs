@@ -1,39 +1,43 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using ObjectSync;
 
 namespace Ballz.GameSession.World
 {
     /// <summary>
     ///     Entity is the Base class for all types of Entities in our Game.
     /// </summary>
+    [Serializable]
     public class Entity : IDisposable
     {
-        private static int InstanceCounter = 1;
-
         public int ID
         {
             get;
             set;
-        }
+        } = -1;
 
+        [Synced]
         public Vector2 Position
         {
             get;
             set;
         }
 
+        [Synced]
         public Vector2 Velocity
         {
             get;
             set;
         }
 
+        [Synced]
         public float Rotation
         {
             get;
             set;
         }
 
+        [Synced]
         public Vector2 Direction
         {
             get
@@ -42,21 +46,46 @@ namespace Ballz.GameSession.World
             }
         }
 
+        [Newtonsoft.Json.JsonIgnore]
+        PhysicsMaterial _material;
+
+        [Newtonsoft.Json.JsonIgnore]
         public PhysicsMaterial Material
         {
-            get;
-            set;
+            get
+            {
+                return _material;
+            }
+            set
+            {
+                _material = value;
+            }
         }
 
+        [Synced]
         public float Radius { get; set; } = 0.5f;
 
+        [Synced]
         public bool IsStatic { get; set; } = false;
 
-        public FarseerPhysics.Dynamics.Body PhysicsBody { get; set; }
+        [Newtonsoft.Json.JsonIgnore]
+        FarseerPhysics.Dynamics.Body _physicsBody;
+
+        [Newtonsoft.Json.JsonIgnore]
+        public FarseerPhysics.Dynamics.Body PhysicsBody
+        {
+            get
+            {
+                return _physicsBody;
+            }
+            set
+            {
+                _physicsBody = value;
+            }
+        }
 
         public Entity()
         {
-            ID = InstanceCounter++;
         }
 
         public virtual object Clone()

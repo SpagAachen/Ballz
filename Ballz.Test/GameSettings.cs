@@ -29,14 +29,12 @@ namespace Ballz.Test
                                         Name = "Test1",
                                         ControlledByAI = false,
                                         NumberOfBallz = 1,
-                                        player = player1
                                     },
                                 new Team
                                     {
                                         Name = "Test2",
                                         ControlledByAI = true,
                                         NumberOfBallz = 2,
-                                        player = player2
                                     }
                             };
             // create settings object
@@ -69,18 +67,12 @@ namespace Ballz.Test
                 Assert.AreEqual(team1.ControlledByAI, false);
                 Assert.AreEqual(team1.Name, "Test1");
                 Assert.AreEqual(team1.NumberOfBallz, 1);
-                Assert.AreEqual(team1.player.Id, 0);
-                Assert.AreEqual(team1.player.Name, "Player1");
-                Assert.AreEqual(team1.player.TeamName, "Team1");
             }
             { 
                 var team2 = settings.Teams.ElementAt(1);
                 Assert.AreEqual(team2.ControlledByAI, true);
                 Assert.AreEqual(team2.Name, "Test2");
                 Assert.AreEqual(team2.NumberOfBallz, 2);
-                Assert.AreEqual(team2.player.Id, 1);
-                Assert.AreEqual(team2.player.Name, "Player2");
-                Assert.AreEqual(team2.player.TeamName, "Team2");
             }
         }
 

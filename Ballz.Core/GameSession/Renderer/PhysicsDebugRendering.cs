@@ -19,7 +19,6 @@ namespace Ballz.GameSession.Renderer
         VertexPositionColor[] sphereVertices;
         VertexPositionTexture[] quad;
         List<VertexPositionColor[]> terrainVertices = new List<VertexPositionColor[]>();
-        private World.World debugWorld;
         private int terrainRevision = -1;
         private SpriteBatch spriteBatch;
         private Texture2D whiteTexture;
@@ -34,7 +33,12 @@ namespace Ballz.GameSession.Renderer
 
         public override void Draw(GameTime gameTime)
         {
-            debugWorld = Game.World;
+            //DrawSphere(Vector2.Zero, new Vector2(0.0f,1.0f));
+            var debugWorld = Game.Match?.World;
+
+            if (debugWorld == null)
+                return;
+
             foreach (Entity ball in debugWorld.Entities)
             {
                 if (ball.Disposed)
@@ -56,7 +60,6 @@ namespace Ballz.GameSession.Renderer
 
         public override void Initialize()
         {
-            debugWorld = Game.World;
             base.Initialize();
         }
 
@@ -102,9 +105,14 @@ namespace Ballz.GameSession.Renderer
 
         private void UpdateTerrain()
         {
-            if(terrainRevision != Game.World.StaticGeometry.Revision)
+            var debugWorld = Game.Match?.World;
+
+            if (debugWorld == null)
+                return;
+
+            if (terrainRevision != Game.Match.World.StaticGeometry.Revision)
             {
-                List<List<Vector2>> outline = Game.World.StaticGeometry.GetOutline();
+                List<List<Vector2>> outline = Game.Match.World.StaticGeometry.GetOutline();
                 terrainVertices.Clear();
                 foreach (List<Vector2> lineStrip in outline)
                 {
@@ -112,19 +120,18 @@ namespace Ballz.GameSession.Renderer
                     for (int i = 0; i < lineStrip.Count; i++)
                     {
                         lineVertices[i].Color = Color.GreenYellow;
-                        lineVertices[i].Position = new Vector3(lineStrip[i],0) * Game.World.StaticGeometry.Scale;
+                        lineVertices[i].Position = new Vector3(lineStrip[i],0) * Game.Match.World.StaticGeometry.Scale;
                     }
 
                     terrainVertices.Add(lineVertices);
                 }
 
-                terrainRevision = Game.World.StaticGeometry.Revision;
+                terrainRevision = Game.Match.World.StaticGeometry.Revision;
             }
         }
 
         public override void Update(GameTime gameTime)
         {
-            debugWorld = Game.World;
             UpdateTerrain();
             base.Update(gameTime);
         }
@@ -134,11 +141,10 @@ namespace Ballz.GameSession.Renderer
             if (msg.Kind == Message.MessageType.InputMessage)
             {
                 InputMessage ipmsg = (InputMessage)msg;
-                if (ipmsg.Kind == InputMessage.MessageType.ControlsConsole && ipmsg.Pressed.HasValue && ipmsg.Pressed.Value)
+                if (ipmsg.Kind == InputMessage.MessageType.ControlsConsole && ipmsg.Pressed)
                 {
                     Enabled = !Enabled;
                     Visible = !Visible;
-                    debugWorld = Game.World;
                 }
             }
         }

@@ -13,6 +13,17 @@
 
     class Client
     {
+        static Client()
+        {
+            ObjectSync.Sync.RegisterClass<Entity>(() => new Entity());
+            ObjectSync.Sync.RegisterClass<Ball>(() => new Ball());
+            ObjectSync.Sync.RegisterClass<Shot>(() => new Shot());
+            ObjectSync.Sync.RegisterClass<Message>(() => new Message());
+            ObjectSync.Sync.RegisterClass<NetworkMessage>(() => new NetworkMessage());
+            ObjectSync.Sync.RegisterClass<InputMessage>(() => new InputMessage());
+            ObjectSync.Sync.RegisterClass<Terrain.TerrainModification>(() => new Terrain.TerrainModification());
+        }
+
         private Network network = null;
 
         public int NumberOfPlayers { get; private set; } = -1;
@@ -33,33 +44,25 @@
         public void ConnectToServer(string host, int port)
         {
             connectionToServer = new Connection(host, port, 0);
+            connectionToServer.ObjectReceived += OnData;
         }
 
         public void Update(GameTime time)
         {
-            if (connectionToServer.DataAvailable())
-            {
-                var data = connectionToServer.ReceiveData();
-                OnData(data);
-            }
-
-            //TODO: Implement
+            connectionToServer.ReadUpdates();
         }
 
-        private void OnData(object data)
+        private void OnData(object sender, object data)
         {
             // Entities
-            var entities = data as IEnumerable<Entity>;
-            if (entities != null)
+            var entity = data as Entity;
+            if (entity != null)
             {
-                foreach (var e in entities)
-                {
-                    var ourE = Ballz.The().World.EntityById(e.ID);
-                    ourE.Position = e.Position;
-                    ourE.Velocity = e.Velocity;
-                    ourE.Rotation = e.Rotation;
-                }
-
+                var localEntity = Ballz.The().Match.World.EntityById(entity.ID);
+                if (localEntity != null)
+                    ObjectSync.Sync.SyncState(entity, localEntity);
+                else
+                    Ballz.The().Match.World.AddEntity(entity);
                 return;
             }
             // network message
@@ -75,14 +78,27 @@
                         Debug.Assert(netMsg.Data != null, "Received invalid game-settings");
                         ParseGameSettings((GameSettings)netMsg.Data);
                         break;
-                    case NetworkMessage.MessageType.Entities:
-                        ParseEntities((List<Entity>)netMsg.Data);
+                    case NetworkMessage.MessageType.YourPlayerId:
+                        connectionToServer.ClientPlayerId = (int)netMsg.Data;
+                        break;
+                    case NetworkMessage.MessageType.EntityRemoved:
+                        var e = netMsg.Data as Entity;
+                        var localEntity = Ballz.The().Match.World.EntityById(e.ID);
+                        Ballz.The().Match.World.RemoveEntity(localEntity);
+                        localEntity.Dispose();
                         break;
                     default:
                         Console.WriteLine("Unknown netMsg received: " + netMsg.Kind.ToString());
                         break;
                 }
 
+                return;
+            }
+
+            var terrainModification = data as Terrain.TerrainModification;
+            if(terrainModification != null)
+            {
+                Ballz.The().Match.World.StaticGeometry.ApplyModification(terrainModification);
                 return;
             }
 
@@ -98,7 +114,7 @@
             foreach(var e in entities)
             {
                 var rId = e.ID;
-                var localEntity = Ballz.The().World.EntityById(rId);
+                var localEntity = Ballz.The().Match.World.EntityById(rId);
                 Sync.SyncState(e, localEntity);
             }
         }
@@ -106,6 +122,10 @@
         private void ParseGameSettings(GameSettings settings)
         {
             Ballz.The().Logic.StartGame(settings);
+            var localPlayer = Ballz.The().Match.PlayerById(connectionToServer.ClientPlayerId);
+            localPlayer.IsLocal = true;
+            Ballz.The().Match.LocalPlayers = new List<Player>() { localPlayer };
+            Ballz.The().Match.IsRemoteControlled = true;
         }
 
         public void HandleInputMessage(InputMessage message)
@@ -118,6 +138,9 @@
                 case InputMessage.MessageType.ControlsDown:
                 case InputMessage.MessageType.ControlsLeft:
                 case InputMessage.MessageType.ControlsRight:
+                case InputMessage.MessageType.ControlsJump:
+                case InputMessage.MessageType.ControlsNextWeapon:
+                case InputMessage.MessageType.ControlsPreviousWeapon:
                     connectionToServer.Send(message);
                     break;
             }

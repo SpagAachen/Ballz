@@ -14,6 +14,9 @@ namespace Ballz.GameSession.Logic
 
         public int Id { get; set; } = IdCounter++;
 
+        [Newtonsoft.Json.JsonIgnore]
+        public bool IsLocal { get; set; } = true;
+
         public string Name { get; set; }
 
         //TODO(MS): This is somehow redundant to GameSession.Logic.GameSettings.Teams

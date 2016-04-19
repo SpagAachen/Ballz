@@ -21,16 +21,18 @@ namespace Ballz.Logic
         public LogicControl(Ballz game)
         {
             Game = game;
+            state = GameState.Unknown;
+        }
 
-            Composite menu = Game.MainMenu;// = DefaultMenu();
-            //push the root menuToPrepare
+        public void SetMainMenu(Composite menu)
+        {
+            activeMenu.Clear();
             activeMenu.Push(menu); //TODO: uncast
             RegisterMenuEvents(menu);
-
             state = GameState.MenuState;
         }
 
-        public void StartGame(GameSession.Logic.GameSettings settings)
+        public void StartGame(GameSession.Logic.GameSettings settings, bool remoteControlled = false, int localPlayerId = -1)
         {
             // Go back to main menu so it will show when the user enters the menu later
             MenuGoBack();
@@ -41,7 +43,7 @@ namespace Ballz.Logic
             if (Game.Match != null)
                 Game.Match.Dispose();
 
-            Game.Match = settings.GameMode.StartSession(Game, settings);
+            Game.Match = settings.GameMode.StartSession(Game, settings, remoteControlled, localPlayerId);
             Game.Match.Start();
             RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }
@@ -54,6 +56,9 @@ namespace Ballz.Logic
 
         private void RegisterMenuEvents(Item menu)
         {
+            if (menu == null)
+                return;
+
             menu.BindSelectHandler<Composite>(c =>
             {
                 activeMenu.Push(c);
@@ -108,7 +113,7 @@ namespace Ballz.Logic
             if (message.Kind != Messages.Message.MessageType.InputMessage)
                 return;
 
-            if (((InputMessage)message).Kind == InputMessage.MessageType.ControlsConsole && ((InputMessage)message).Pressed.Value)
+            if (((InputMessage)message).Kind == InputMessage.MessageType.ControlsConsole && ((InputMessage)message).Pressed)
                 RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.PerformanceMessage));
 
             switch (state)
@@ -128,7 +133,7 @@ namespace Ballz.Logic
 
         private void GameLogic(InputMessage msg)
         {
-            if (msg.Pressed.Value)
+            if (msg.Pressed)
             {
                 switch (msg.Kind)
                 {
@@ -159,7 +164,7 @@ namespace Ballz.Logic
         private void MenuLogic(InputMessage msg)
         {
             Composite top = activeMenu.Peek();
-            if (msg.Kind == InputMessage.MessageType.RawInput || msg.Kind == InputMessage.MessageType.RawBack || msg.Pressed.Value)
+            if (msg.Kind == InputMessage.MessageType.RawInput || msg.Kind == InputMessage.MessageType.RawBack || msg.Pressed)
             {
                 switch (msg.Kind)
                 {
@@ -205,7 +210,7 @@ namespace Ballz.Logic
                         break;
                     case InputMessage.MessageType.RawInput:
                         if (msg.Key != null)
-                            (top.SelectedItem as IRawInputConsumer)?.HandleRawKey(msg.Key.Value);
+                            (top.SelectedItem as IRawInputConsumer)?.HandleRawKey(msg.Key);
                         break;
                     case InputMessage.MessageType.RawBack:
                         (top.SelectedItem as IRawInputConsumer)?.HandleBackspace();
@@ -238,6 +243,7 @@ namespace Ballz.Logic
 
         private enum GameState
         {
+            Unknown,
             MenuState,
             SimulationState
         }

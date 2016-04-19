@@ -20,11 +20,18 @@ namespace Ballz.Messages
             NetworkMessage
         }
 
+        public Message() { }
+
         public Message(MessageType type)
         {
             Kind = type;
         }
         
         public MessageType Kind { get; private set; }
+
+        public override string ToString()
+        {
+            return $"{{Message Kind:{Kind} }}";
+        }
     }
 }

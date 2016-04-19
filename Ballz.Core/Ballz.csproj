@@ -70,6 +70,7 @@
     <Compile Include="GameSession\Renderer\PhysicsDebugRendering.cs" />
     <Compile Include="GameSession\Renderer\WaterRenderer.cs" />
     <Compile Include="GameSession\Session.cs" />
+    <Compile Include="GameSession\World\GraphicsEvent.cs" />
     <Compile Include="GameSession\World\Material.cs" />
     <Compile Include="GameSession\World\Rope.cs" />
     <Compile Include="GameSession\World\Shot.cs" />
@@ -100,25 +101,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="Renderer\BaseRenderer.cs" />
+    <Compile Include="SessionFactory\TeamNames.cs" />
     <Compile Include="Utils\BufferedArray.cs" />
     <Compile Include="Utils\MathExtensions.cs" />
-    <Compile Include="SessionFactory\Ballerburg.cs" />
     <Compile Include="SessionFactory\SessionFactory.cs" />
     <Compile Include="SessionFactory\Worms.cs" />
     <Compile Include="Utils\EnumberableHelper.cs" />
+    <Compile Include="Utils\RandomExtensions.cs" />
     <Compile Include="Utils\TextureHelper.cs" />
     <Compile Include="Utils\TypeInfoConverter.cs" />
     <Compile Include="Utils\VectorExtensions.cs" />
     <None Include="app.config" />
-    <None Include="Content.mgcb" />
-    <None Include="Content\Effects\VectorField.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Content\Effects\Water.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Content\Worlds\TestWorld.png" />
-    <None Include="Content\Textures\Balls.jpg" />
     <Compile Include="Messages\MenuMessage.cs" />
     <Compile Include="Messages\InputMessage.cs" />
     <Compile Include="Menu\Item.cs" />
@@ -133,85 +127,13 @@
     <Compile Include="Renderer\Camera.cs" />
     <Compile Include="Sound\SoundControl.cs" />
     <Compile Include="Utils\PerformanceReporter.cs" />
+    <Compile Include="Renderer\Camera\CameraTrajectory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\Effects\VectorField.fx" />
-    <Content Include="Content\Effects\Water.fx" />
-    <Content Include="Content\Effects\CelShading.fx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Fonts\Menufont.spritefont">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Fonts\Menufont.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Textures\Arrow.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Textures\Balls.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Textures\Bazooka.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Textures\Crosshair.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Textures\Dirt.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Textures\HandGun.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Textures\RedArrow.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Textures\Rope.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Textures\RopeTool.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Worlds\Mining.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Worlds\RopeWorld.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Worlds\TestWorld.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Worlds\TestWorld2.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Sounds\pew.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Sounds\pew.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Models\RIP.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Models\Ball.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Textures\RIP.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Textures\Teams\Germoney.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\Textures\Teams\Murica.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ObjectSynch\ObjectSync\ObjectSync.csproj">
+    <ProjectReference Include="..\ObjectSync\ObjectSync\ObjectSync.csproj">
       <Project>{B186DF64-93E8-441E-8F43-85A8F9E4DD0B}</Project>
       <Name>ObjectSync</Name>
     </ProjectReference>
@@ -223,8 +145,20 @@
     <Reference Include="MathFloat, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\MathFloat.1.0.0.0\lib\net20\MathFloat.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
   </ItemGroup>
+  <Target Name="BeforeBuild">
+    <PropertyGroup>
+      <ContentDestinationDirectory>$(OutputPath)\Content</ContentDestinationDirectory>
+      <ContentSourceDirectory>..\Ballz.Content</ContentSourceDirectory>
+    </PropertyGroup>
+    <CreateItem Include="$(ContentSourceDirectory)\**\*.*">
+      <Output TaskParameter="Include" ItemName="ContentFilesToCopy" />
+    </CreateItem>
+    <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy->'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+  <ItemGroup />
 </Project>

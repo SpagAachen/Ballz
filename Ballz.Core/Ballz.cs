@@ -22,7 +22,7 @@ namespace Ballz
     public class Ballz : Game
     {
         //SpriteBatch spriteBatch;
-        private static Ballz _instance;
+        static Ballz _instance;
 
         public List<string> Teamnames{ get; private set;}
 
@@ -30,7 +30,7 @@ namespace Ballz
 
         public LogicControl Logic { get; set; }
 
-        public World World { get; set; }
+        public InputTranslator Input { get; set; }
 
         public Network.Network Network { get; set; }
 
@@ -38,11 +38,15 @@ namespace Ballz
 
         public Settings.ProgrammSettings GameSettings { get; set; }
 
+        MenuRenderer MenuRenderer;
+
         public Label NetworkLobbyConnectedClients { get; set; } = new Label("test", true);
 
         public Composite MainMenu { get; set; }
 
         public Camera Camera { get; set; }
+
+        Texture2D Logo;
 
         private Ballz()
         {
@@ -58,34 +62,33 @@ namespace Ballz
             
             Camera = new Camera();
             // create the Game Components
-            var menuRendering = new MenuRenderer(this, DefaultMenu());
+            MenuRenderer = new MenuRenderer(this);
             //var physics = new PhysicsControl(this);
-            var input = new InputTranslator(this);
+            Input = new InputTranslator(this);
             Network = new Network.Network(this);
 
-            Components.Add(input);
+            Components.Add(Input);
             //Components.Add(physics);
             Components.Add(Network);
-            Components.Add(menuRendering);
+            Components.Add(MenuRenderer);
             Components.Add(new PerformanceRenderer(this));
-
-            MainMenu = DefaultMenu();
+            
             Logic = new LogicControl(this);
 
             Services.AddService(Logic);
-            Services.AddService(input);
+            Services.AddService(Input);
 
             Services.AddService(new SoundControl(this));
 
             //add eventhandlers to events
-            input.Input += Logic.HandleInputMessage;
+            Input.Input += Logic.HandleInputMessage;
             //input.Input += physics.HandleMessage;
-            input.Input += Network.HandleMessage;
+            Input.Input += Network.HandleMessage;
 
             //Logic.Message += physics.HandleMessage;
             Logic.Message += Network.HandleMessage;
             //Logic.Message += gameRendering.HandleMessage;
-            Logic.Message += menuRendering.HandleMessage;
+            Logic.Message += MenuRenderer.HandleMessage;
 
             Network.Message += Logic.HandleNetworkMessage;
         }
@@ -187,7 +190,7 @@ namespace Ballz
             optionsMenu.AddItem(apply);
 
             // multiplayer menu
-            var networkMenu = new Composite("Multiplayer", true);
+            var multiplayerMenu = new Composite("Multiplayer", true);
             // - connect to server
             var networkConnectToMenu = new Composite("Connect to", true);
             var networkHostInput = new InputBox("Host Name: ", true);
@@ -221,9 +224,9 @@ namespace Ballz
             //TODO: abort button - close server etc.
 
             // - add items
-            networkMenu.AddItem(networkConnectToMenu);
-            networkMenu.AddItem(networkServerMenu);
-            networkMenu.AddItem(new Back());
+            multiplayerMenu.AddItem(networkConnectToMenu);
+            multiplayerMenu.AddItem(networkServerMenu);
+            multiplayerMenu.AddItem(new Back());
 
             // main menu
             var mainMenu = new Composite("Main Menu");
@@ -235,7 +238,7 @@ namespace Ballz
             };
             mainMenu.AddItem(continueLabel);
 
-            var startGame = new Composite("Start New Game", true);
+            var singlePlayerMenu = new Composite("Singleplayer", true);
             {
                 var currGameSettings = new GameSettings();
                 // hard-coded game settings
@@ -243,25 +246,23 @@ namespace Ballz
                 {
                     // Player 1
                     {
-                        var player1 = new Player { Name = "Player1", TeamName = "Murica" };
                         var team1 = new Team
                                         {
                                             ControlledByAI = false,
-                                            Name = "Team1",
-                                            NumberOfBallz = 2,
-                                            player = player1
+                                            Name = "Germoney",
+                                            Country = "Germoney",
+                                            NumberOfBallz = 2
                                         };
                         currGameSettings.Teams.Add(team1);
                     }
                     // Player 2
                     {
-                        var player2 = new Player { Name = "Player2", TeamName = "Germoney" };
                         var team2 = new Team
                                         {
                                             ControlledByAI = false,
-                                            Name = "Team2",
-                                            NumberOfBallz = 2,
-                                            player = player2
+                                            Name = "Murica",
+                                            Country = "Murica",
+                                            NumberOfBallz = 2
                                         };
                         currGameSettings.Teams.Add(team2);
                     }
@@ -282,13 +283,14 @@ namespace Ballz
                             currGameSettings.GameMode = factory;
                             Logic.StartGame(currGameSettings);
                         };
-                    startGame.AddItem(factoryLabel);
+                    singlePlayerMenu.AddItem(factoryLabel);
                 }
             }
 
-            mainMenu.AddItem(startGame);
+            mainMenu.BackgroundTexture = Logo;
+            mainMenu.AddItem(singlePlayerMenu);
+            mainMenu.AddItem(multiplayerMenu);
             mainMenu.AddItem(optionsMenu);
-            mainMenu.AddItem(networkMenu);
 
             mainMenu.SelectNext();
             continueLabel.Visible = false;
@@ -335,7 +337,10 @@ namespace Ballz
         {
             Content.RootDirectory = "Content";
 
-            //TODO: use this.Content to load your game content here
+            Logo = Content.Load<Texture2D>("Textures/Logo");
+            MainMenu = DefaultMenu();
+            MenuRenderer.Menu = MainMenu;
+            Logic.SetMainMenu(MainMenu);
         }
 
         /// <summary>
