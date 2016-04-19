@@ -50,6 +50,10 @@ namespace Ballz.GameSession.Renderer
                 WaterRenderer.PrepareDrawWater(Game.Match.World);
                 //GraphicsDevice.SetRenderTarget(WorldRenderTarget);
 
+                Game.Camera.UseBoundary = true;
+                Game.Camera.BottomLeftBoundary = new Vector2(-100f, 0f);
+                Game.Camera.TopRightBoundary = new Vector2(100f, 100f);
+
                 try
                 {
 					if ( Game.Match.ActivePlayer.ActiveBall != CurrentActiveBall && Game.Match.ActivePlayer.ActiveBall != null)

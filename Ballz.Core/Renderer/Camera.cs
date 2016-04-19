@@ -30,8 +30,12 @@ namespace Ballz
 
         public Matrix Projection{ get; private set;}
 
-		private Vector2 CurrentPosition; //
+        public Vector2 BottomLeftBoundary { get; set; }
+        public Vector2 TopRightBoundary { get; set; }
+        public bool UseBoundary { get; set; } = false;
 
+		private Vector2 CurrentPosition;
+        
         private Vector2 TargetPosition{ get; set;}
 
 		private CameraTrajectory CurrentCameraTrajectory;
@@ -88,6 +92,37 @@ namespace Ballz
 			}
 		}
 
+        void ClampToBoundary(ref float top, ref float right, ref float bottom, ref float left)
+        {
+            if (UseBoundary)
+            {
+                if (left < BottomLeftBoundary.X)
+                {
+                    var clampOffset = BottomLeftBoundary.X - left;
+                    left += clampOffset;
+                    right += clampOffset;
+                }
+                if (bottom < BottomLeftBoundary.Y)
+                {
+                    var clampOffset = BottomLeftBoundary.Y - bottom;
+                    bottom += clampOffset;
+                    top += clampOffset;
+                }
+                if (right > TopRightBoundary.X)
+                {
+                    var clampOffset = right - BottomLeftBoundary.X;
+                    right += clampOffset;
+                    left += clampOffset;
+                }
+                if (top > TopRightBoundary.Y)
+                {
+                    var clampOffset = top - BottomLeftBoundary.Y;
+                    top += clampOffset;
+                    bottom += clampOffset;
+                }
+            }
+        }
+
         private void UpdateCurrentCameraPosition(GameTime t)
         {
 			if (CurrentCameraTrajectory == null) {
@@ -112,9 +147,17 @@ namespace Ballz
 				float dynamicZoom = Zoom - DiffPos.Length () * 0.01f;
 				float x_size = 40.0f / dynamicZoom;
 				float y_size = 40.0f / dynamicZoom / AspectRatio;
-				SetView(Matrix.CreateOrthographicOffCenter(
-					CurrentPosition.X-x_size/2.0f, CurrentPosition.X+x_size/2.0f, 
-					CurrentPosition.Y-y_size/2.0f, CurrentPosition.Y+y_size/2.0f, 
+
+                var left = CurrentPosition.X - x_size / 2.0f;
+                var right = CurrentPosition.X + x_size / 2.0f;
+                var bottom = CurrentPosition.Y - y_size / 2.0f;
+                var top = CurrentPosition.Y + y_size / 2.0f;
+
+                ClampToBoundary(ref top, ref right, ref bottom, ref left);
+
+                SetView(Matrix.CreateOrthographicOffCenter(
+					left, right, 
+					bottom, top, 
 					-20, 20));
 			} else {
 				if (CurrentCameraTrajectory.IsValid () == false) {
@@ -127,9 +170,18 @@ namespace Ballz
 				float dynamicZoom = p.Z;
 				float x_size = 40.0f / dynamicZoom;
 				float y_size = 40.0f / dynamicZoom / AspectRatio;
-				SetView(Matrix.CreateOrthographicOffCenter(
-					p.X-x_size/2.0f, p.X+x_size/2.0f, 
-					p.Y-y_size/2.0f, p.Y+y_size/2.0f, 
+
+                var left = p.X - x_size / 2.0f;
+                var right = p.X + x_size / 2.0f;
+                var bottom = p.Y - y_size / 2.0f;
+                var top = p.Y + y_size / 2.0f;
+
+                ClampToBoundary(ref top, ref right, ref bottom, ref left);
+
+                // Clamp view frustum to boundary
+                SetView(Matrix.CreateOrthographicOffCenter(
+					left, right, 
+					bottom, top, 
 					-20, 20));
 			}
         }
