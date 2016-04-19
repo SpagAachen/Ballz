@@ -37,10 +37,14 @@ namespace Ballz.GameSession.Logic
         {
             if (Session.UsePlayerTurns)
             {
+                ActiveControllers[Session.ActivePlayer]?.OnTurnEnd();
+
                 var player = Session.Players[(Session.Players.IndexOf(Session.ActivePlayer) + 1) % Session.Players.Count];
                 Session.ActivePlayer = player;
+                
                 player.ActiveBall = ChooseNextBall(player);
                 ActiveControllers[player] = BallControllers[player.ActiveBall];
+                ActiveControllers[player]?.OnTurnStart();
                 Session.TurnTimeLeft = Session.SecondsPerTurn;
             }
         }
