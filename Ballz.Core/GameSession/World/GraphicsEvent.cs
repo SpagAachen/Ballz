@@ -25,13 +25,17 @@ namespace Ballz.GameSession.World
         public Vector2 PositionMid { get; set; }
         public Vector2 PositionEnd { get; set; }
 
-        public float RotationStart { get; set; }
-        public float RotationMid { get; set; }
-        public float RotationEnd { get; set; }
+        public float RotationStart { get; set; } = 0;
+        public float RotationMid { get; set; } = 0;
+        public float RotationEnd { get; set; } = 0;
 
-        public float OpacityStart { get; set; }
-        public float OpacityMid { get; set; }
-        public float OpacityEnd { get; set; }
+        public float OpacityStart { get; set; } = 1;
+        public float OpacityMid { get; set; } = 1;
+        public float OpacityEnd { get; set; } = 1;
+
+        public float ScaleStart { get; set; } = 1;
+        public float ScaleMid { get; set; } = 1;
+        public float ScaleEnd { get; set; } = 1;
 
         public Vector2 Position(float gameTime)
         {
@@ -48,6 +52,11 @@ namespace Ballz.GameSession.World
             return OpacityStart;
         }
 
+        public float Scale(float gameTime)
+        {
+            return ScaleStart;
+        }
+
         public override float Duration
         {
             get; set;
@@ -55,7 +64,7 @@ namespace Ballz.GameSession.World
 
         public string SpriteName { get; set; }
 
-        public static GenericGraphicsEffect CreateExplosion(float gameTime, Vector2 position, float rotation)
+        public static GenericGraphicsEffect CreateExplosion(float gameTime, Vector2 position, float rotation, float scale = 1)
         {
             return new GenericGraphicsEffect
             {
@@ -63,6 +72,7 @@ namespace Ballz.GameSession.World
                 Duration = 0.2f,
                 PositionStart = position,
                 RotationStart = rotation,
+                ScaleStart = scale,
                 SpriteName = "Explosion"
             };
         }
@@ -79,5 +89,5 @@ namespace Ballz.GameSession.World
             };
         }
     }
-    
+
 }

@@ -283,9 +283,13 @@ namespace Ballz.GameSession.Renderer
                 var progress = genericEvent.GetProgress(Game.Match.GameTime);
                 var texture = Game.Content.Load<Texture2D>("Textures/"+genericEvent.SpriteName);
                 var pos = WorldToScreen(genericEvent.Position(Game.Match.GameTime));
+                var rotation = genericEvent.Rotation(Game.Match.GameTime);
+                var scale = genericEvent.Scale(Game.Match.GameTime);
                 SpriteBatch.Draw(
                     texture,
                     position: pos,
+                    rotation: rotation,
+                    scale: new Vector2(scale, scale),
                     origin: new Vector2(texture.Width / 2, texture.Height / 2)
                     );
             }
