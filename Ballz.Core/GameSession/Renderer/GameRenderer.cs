@@ -268,11 +268,11 @@ namespace Ballz.GameSession.Renderer
             
             var screenPos = WorldToScreen(ball.Position + new Vector2(0, 2.5f));
 
-            DrawText(ball.Health.ToString("0"), screenPos, 0.33f, Color.White, 1, true, true);
-            screenPos += new Vector2(0, 20) * resolutionFactor;
-            DrawText(ball.Name, screenPos, 0.33f, Color.LawnGreen, 1, true, true);
-            screenPos += new Vector2(0, 20) * resolutionFactor;
-            DrawText(ball.Player.Name, screenPos, 0.2f, Color.LawnGreen, 1, true, true);
+            DrawText(ball.Health.ToString("0"), screenPos, 0.5f, Color.White, 1, true, true);
+            screenPos += new Vector2(0, 25) * resolutionFactor;
+            DrawText(ball.Name, screenPos, 0.5f, Color.LawnGreen, 1, true, true);
+            screenPos += new Vector2(0, 25) * resolutionFactor;
+            DrawText(ball.Player.Name, screenPos, 0.33f, Color.LawnGreen, 1, true, true);
 
             if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer == ball.Player && ball.Player.ActiveBall == ball)
             {
