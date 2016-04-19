@@ -9,9 +9,9 @@ namespace Ballz.GameSession.World
 {
     public abstract class GraphicsEvent
     {
-        public float Start { get; protected set; }
+        public float Start { get; set; }
         public float End { get { return Start + Duration; } }
-        public abstract float Duration { get; set; }
+        public virtual float Duration { get; set; }
 
         public float GetProgress(float gameTime)
         {
@@ -56,12 +56,7 @@ namespace Ballz.GameSession.World
         {
             return ScaleStart;
         }
-
-        public override float Duration
-        {
-            get; set;
-        } = 1f;
-
+        
         public string SpriteName { get; set; }
 
         public static GenericGraphicsEffect CreateExplosion(float gameTime, Vector2 position, float rotation, float scale = 1)
@@ -90,4 +85,8 @@ namespace Ballz.GameSession.World
         }
     }
 
+    public class CameraShakeEffect: GraphicsEvent
+    {
+        public float Intensity { get; set; }
+    }
 }
