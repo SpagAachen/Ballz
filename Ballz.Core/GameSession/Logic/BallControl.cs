@@ -74,9 +74,12 @@ namespace Ballz.GameSession.Logic
         /// </summary>
         public virtual void OnTurnEnd()
         {
-            Match.Physics.RemoveRope(Ball.AttachedRope);
-            Ball.AttachedRope = null;
-            Match.World.Ropes.Remove(Ball.AttachedRope);
+            if(Ball.AttachedRope != null)
+            {
+                Match.Physics.RemoveRope(Ball.AttachedRope);
+                Ball.AttachedRope = null;
+                Match.World.Ropes.Remove(Ball.AttachedRope);
+            }
         }
 
         /// <summary>

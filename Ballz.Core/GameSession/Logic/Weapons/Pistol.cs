@@ -1,10 +1,12 @@
 ﻿using Ballz.GameSession.World;
 using Ballz.Messages;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Ballz.Utils;
 
 namespace Ballz.GameSession.Logic.Weapons
 {
@@ -41,11 +43,19 @@ namespace Ballz.GameSession.Logic.Weapons
             {
                 ++shotsFired;
 
+                var muzzle = GenericGraphicsEffect.CreateMuzzle(
+                    Game.Match.GameTime,
+                    Ball.Position + 2f * Ball.AimDirection,
+                    Ball.AimDirection.RotationFromDirection()
+                    );
+                Game.Match.World.GraphicsEvents.Add(muzzle);
+
                 var rayHit = Game.Match.Physics.Raycast(Ball.Position, Ball.Position + Ball.AimDirection * 1000f);
                 if(rayHit.HasHit)
                 {
                     Game.Match.World.StaticGeometry.SubtractCircle(rayHit.Position.X, rayHit.Position.Y, ExplosionRadius);
-                    if(rayHit.Entity != null)
+                    Ballz.The().Match.World.GraphicsEvents.Add(GenericGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, rayHit.Position, 0, 0.2f));
+                    if (rayHit.Entity != null)
                     {
                         if(rayHit.Entity is Ball)
                         {

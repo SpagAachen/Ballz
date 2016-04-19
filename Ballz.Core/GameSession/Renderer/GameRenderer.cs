@@ -166,7 +166,7 @@ namespace Ballz.GameSession.Renderer
             }
             else if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer != null)
             {
-                var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width - 250, Game.GraphicsDevice.Viewport.Height - 100);
+                var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width - (250 * resolutionFactor), Game.GraphicsDevice.Viewport.Height - (100 * resolutionFactor));
 
                 var msg = "Turn: " + Game.Match.ActivePlayer.Name + " / " + (int)Game.Match.TurnTimeLeft;
 
@@ -258,9 +258,9 @@ namespace Ballz.GameSession.Renderer
             var screenPos = WorldToScreen(ball.Position + new Vector2(0, 2.5f));
 
             DrawText(ball.Health.ToString("0"), screenPos, 0.33f, Color.White, 1, true, true);
-            screenPos += new Vector2(0, 20);
+            screenPos += new Vector2(0, 20) * resolutionFactor;
             DrawText(ball.Name, screenPos, 0.33f, Color.LawnGreen, 1, true, true);
-            screenPos += new Vector2(0, 20);
+            screenPos += new Vector2(0, 20) * resolutionFactor;
             DrawText(ball.Player.Name, screenPos, 0.2f, Color.LawnGreen, 1, true, true);
 
             if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer == ball.Player && ball.Player.ActiveBall == ball)
@@ -269,7 +269,7 @@ namespace Ballz.GameSession.Renderer
                 var timeLeft = Game.Match.TurnTimeLeft;
                 if (Session.SecondsPerTurn - timeLeft < 4)
                 {
-                    screenPos -= new Vector2(0, 30 + (float)(15 * Math.Sin(5 * ElapsedTime.TotalSeconds)));
+                    screenPos -= new Vector2(0, resolutionFactor *(30 + (float)(15 * Math.Sin(5 * ElapsedTime.TotalSeconds))));
                     SpriteBatch.Draw(Game.Content.Load<Texture2D>("Textures/RedArrow"), screenPos, color: Color.White, origin: new Vector2(29, 38));
                 }
             }
@@ -283,9 +283,13 @@ namespace Ballz.GameSession.Renderer
                 var progress = genericEvent.GetProgress(Game.Match.GameTime);
                 var texture = Game.Content.Load<Texture2D>("Textures/"+genericEvent.SpriteName);
                 var pos = WorldToScreen(genericEvent.Position(Game.Match.GameTime));
+                var rotation = genericEvent.Rotation(Game.Match.GameTime);
+                var scale = genericEvent.Scale(Game.Match.GameTime);
                 SpriteBatch.Draw(
                     texture,
                     position: pos,
+                    rotation: rotation,
+                    scale: new Vector2(scale, scale),
                     origin: new Vector2(texture.Width / 2, texture.Height / 2)
                     );
             }
