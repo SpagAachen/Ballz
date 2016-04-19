@@ -57,6 +57,14 @@ namespace Ballz.GameSession.Logic
         public override void Update(GameTime time)
         {
             var elapsedSeconds = (float)time.ElapsedGameTime.TotalSeconds;
+
+            Session.GameTime += elapsedSeconds;
+
+            // Remove finished graphics events
+            var graphicsEffects = Session.World.GraphicsEvents.Where(e => e.End < Session.GameTime).ToArray();
+            foreach (var e in graphicsEffects)
+                Session.World.GraphicsEvents.Remove(e);
+
             if (Session.UsePlayerTurns)
             {
                 if (Session.ActivePlayer == null)

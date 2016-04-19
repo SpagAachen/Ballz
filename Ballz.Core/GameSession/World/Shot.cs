@@ -84,6 +84,8 @@ namespace Ballz.GameSession.World
             System.Console.WriteLine("Explosion " + " with radius " + ExplosionRadius + " and " + HealthDecreaseFromExplosionImpact + " damage.");
             Ballz.The().Match.World.StaticGeometry.SubtractCircle(Position.X, Position.Y, ExplosionRadius);
 
+            Ballz.The().Match.World.GraphicsEvents.Add(GenericGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, Position, 0));
+
             // TODO: damage to all players within explosion radius
             // TODO: force on players within explosion radius (dir = playerpos - Position.X/Y)
 
@@ -91,7 +93,7 @@ namespace Ballz.GameSession.World
             Dispose();
         }
 
-        public bool DisposeOnCollision { get{ return ExplosionDelay == 0.0f;} }
+        public bool DisposeOnCollision { get { return ExplosionDelay == 0.0f; } }
 
         private void onAnyCollision()
         {

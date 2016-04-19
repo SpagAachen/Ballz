@@ -25,6 +25,8 @@ namespace Ballz.GameSession.World
 
         public List<Rope> Ropes { get; private set; } = new List<Rope>();
 
+        public List<GraphicsEvent> GraphicsEvents = new List<GraphicsEvent>();
+
         public Terrain StaticGeometry
         {
             get;

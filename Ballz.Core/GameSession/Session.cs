@@ -37,6 +37,8 @@ namespace Ballz.GameSession
 
         public Player Winner { get; set; } = null;
 
+        public float GameTime { get; set; } = 0;
+
         public SessionState State { get; set; } = SessionState.Starting;
 
         public bool UsePlayerTurns { get; set; } = false;

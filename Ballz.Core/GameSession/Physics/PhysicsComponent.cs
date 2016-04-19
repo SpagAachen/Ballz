@@ -55,11 +55,6 @@ namespace Ballz.GameSession.Physics
         public override void Initialize()
         {
             PhysicsWorld = new FarseerPhysics.Dynamics.World(new Vector2(0f, -9.82f));
-
-            // Add a ground plate for physics testing
-            var ground = new Body(PhysicsWorld);
-            ground.BodyType = BodyType.Static;
-            ground.CreateFixture(new EdgeShape(new Vector2(-10, 0), new Vector2(20, 0)));
         }
 
         /// <summary>
@@ -290,7 +285,7 @@ namespace Ballz.GameSession.Physics
             var entities = worldState.Entities.ToArray();
             foreach (var e in entities)
             {
-                if(e.Disposed || e.Position.LengthSquared() > 100 * 100)
+                if(e.Disposed || e.Position.LengthSquared() > 100 * 100 || e.Position.Y < -10)
                 {
                     RemoveEntity(e, worldState);
                     continue;

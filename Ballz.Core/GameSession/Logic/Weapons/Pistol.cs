@@ -40,6 +40,7 @@ namespace Ballz.GameSession.Logic.Weapons
             if(input.Pressed && input.Kind == InputMessage.MessageType.ControlsAction)
             {
                 ++shotsFired;
+
                 var rayHit = Game.Match.Physics.Raycast(Ball.Position, Ball.Position + Ball.AimDirection * 1000f);
                 if(rayHit.HasHit)
                 {

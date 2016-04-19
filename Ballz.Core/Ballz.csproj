@@ -1,11 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
   <Import Condition="'$(OS)' != 'Windows_NT'" Project="../Linux/Ballz.Linux.csproj" />
   <Import Condition="'$(OS)' == 'Windows_NT'" Project="../Windows/Ballz.Windows.csproj" />
-  
   <PropertyGroup>
-  
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">Windows</Platform>
     <ProjectGuid>{0F30A63C-8123-40A8-8C5B-431941CDD4A4}</ProjectGuid>
@@ -73,6 +70,7 @@
     <Compile Include="GameSession\Renderer\PhysicsDebugRendering.cs" />
     <Compile Include="GameSession\Renderer\WaterRenderer.cs" />
     <Compile Include="GameSession\Session.cs" />
+    <Compile Include="GameSession\World\GraphicsEvent.cs" />
     <Compile Include="GameSession\World\Material.cs" />
     <Compile Include="GameSession\World\Rope.cs" />
     <Compile Include="GameSession\World\Shot.cs" />
@@ -115,7 +113,6 @@
     <Compile Include="Utils\TypeInfoConverter.cs" />
     <Compile Include="Utils\VectorExtensions.cs" />
     <None Include="app.config" />
-    
     <Compile Include="Messages\MenuMessage.cs" />
     <Compile Include="Messages\InputMessage.cs" />
     <Compile Include="Menu\Item.cs" />
@@ -153,19 +150,15 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
-  
   <Target Name="BeforeBuild">
     <PropertyGroup>
-    	<ContentDestinationDirectory>$(OutputPath)\Content</ContentDestinationDirectory>
-    	<ContentSourceDirectory>..\Ballz.Content</ContentSourceDirectory>
+      <ContentDestinationDirectory>$(OutputPath)\Content</ContentDestinationDirectory>
+      <ContentSourceDirectory>..\Ballz.Content</ContentSourceDirectory>
     </PropertyGroup>
     <CreateItem Include="$(ContentSourceDirectory)\**\*.*">
-    		<Output TaskParameter="Include" ItemName="ContentFilesToCopy" />
-    	</CreateItem>
-    <Copy SkipUnchangedFiles="true"
-          SourceFiles="@(ContentFilesToCopy)"
-    			DestinationFiles="@(ContentFilesToCopy->'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+      <Output TaskParameter="Include" ItemName="ContentFilesToCopy" />
+    </CreateItem>
+    <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy->'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
-  
   <ItemGroup />
 </Project>

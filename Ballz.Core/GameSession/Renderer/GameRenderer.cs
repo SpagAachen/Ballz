@@ -130,6 +130,11 @@ namespace Ballz.GameSession.Renderer
                         DrawShot(shot);
                 }
 
+                foreach(var graphicsEvent in worldState.GraphicsEvents)
+                {
+                    DrawGraphicsEvent(graphicsEvent);
+                }
+
                 SpriteBatch.End();
 
                 WaterRenderer.DrawWater(worldState);
@@ -267,6 +272,22 @@ namespace Ballz.GameSession.Renderer
                     screenPos -= new Vector2(0, 30 + (float)(15 * Math.Sin(5 * ElapsedTime.TotalSeconds)));
                     SpriteBatch.Draw(Game.Content.Load<Texture2D>("Textures/RedArrow"), screenPos, color: Color.White, origin: new Vector2(29, 38));
                 }
+            }
+        }
+
+        public void DrawGraphicsEvent(GraphicsEvent graphicsEvent)
+        {
+            var genericEvent = graphicsEvent as GenericGraphicsEffect;
+            if(genericEvent != null)
+            {
+                var progress = genericEvent.GetProgress(Game.Match.GameTime);
+                var texture = Game.Content.Load<Texture2D>("Textures/"+genericEvent.SpriteName);
+                var pos = WorldToScreen(genericEvent.Position(Game.Match.GameTime));
+                SpriteBatch.Draw(
+                    texture,
+                    position: pos,
+                    origin: new Vector2(texture.Width / 2, texture.Height / 2)
+                    );
             }
         }
 
