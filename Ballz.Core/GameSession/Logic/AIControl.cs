@@ -20,6 +20,7 @@ namespace Ballz.GameSession.Logic
         private WeaponControl ctrl;
 
         float ShootCooldown;
+        private float curCharge = 0.01f;
         const float PauseBetweenShots = 2.0f;
 
         public override bool Update(float elapsedSeconds, World.World worldState)
@@ -46,10 +47,9 @@ namespace Ballz.GameSession.Logic
                     {
                         Ball.IsAiming = true;
                         Ball.IsCharging = true;
-
-                        var charg = 0.7f;
+                        
                         var g = 9.81f; // gravity
-                        var v = charg * 25f; // velocity
+                        var v = curCharge * 25f; // velocity
                         var x = CurrentTarget.Position.X - Ball.Position.X; // target x
                         var y = CurrentTarget.Position.Y - Ball.Position.Y; // target y
                         var s = (v * v * v * v) - g * (g * (x * x) + 2 * y * (v * v)); //substitution
@@ -57,12 +57,13 @@ namespace Ballz.GameSession.Logic
                         {
                             Ball.IsCharging = false;
                             Ball.IsAiming = false;
+                            curCharge += 0.01f;
                         }
                         var o = Math.Atan2(((v * v) + Math.Sqrt(s)), (g * x)); // launch angle
 
                         Ball.AimDirection = Vector2.UnitX.Rotate((float) o);
 
-                        if (Ball.ShootCharge > charg)
+                        if (Ball.ShootCharge > curCharge)
                         {
                             Shot newShot = new Shot
                             {
@@ -73,7 +74,7 @@ namespace Ballz.GameSession.Logic
                                 ExplosionDelay = 0.0f,
                                 Recoil = 1.0f,
                                 Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.101f),
-                                Velocity = Ball.AimDirection * Ball.ShootCharge * 25f,
+                                Velocity = Ball.AimDirection * curCharge * 25f, //Slightly less
                             };
                             Game.Match.World.AddEntity(newShot);
 
@@ -81,6 +82,7 @@ namespace Ballz.GameSession.Logic
 
                             Ball.ShootCharge = 0f;
                             ShootCooldown = PauseBetweenShots;
+                            return true;
                         }
                     }
                     else

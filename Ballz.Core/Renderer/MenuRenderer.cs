@@ -127,7 +127,7 @@ namespace Ballz.Renderer
                     );
 
             // Make y margin the same as the x offset
-            var topOffset = 40f * resolutionFactor;
+            var topOffset = 40f * 1;
             var leftOffset = 40f;
 
             var menuTopOffset = topOffset - (1 - EaseOut(fadeProgress)) * 150f;
@@ -170,7 +170,7 @@ namespace Ballz.Renderer
                         1
                         );
 
-                    topOffset += Font.MeasureString(renderString).Y * ItemFontSize*resolutionFactor + 30 * resolutionFactor;
+                    topOffset += Font.MeasureString(renderString).Y * ItemFontSize*1 + 30 *1;
                 }
             }
         }
