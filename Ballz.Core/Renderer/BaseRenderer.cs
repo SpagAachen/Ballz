@@ -41,7 +41,7 @@ namespace Ballz.Renderer
         protected override void LoadContent()
         {
             SpriteBatch = new SpriteBatch(Game.GraphicsDevice);
-            Font = Game.Content.Load<SpriteFont>("Fonts/Menufont");
+            Font = Game.Content.Load<SpriteFont>("Fonts/MenuFont");
 
             SkyTexture = Game.Content.Load<Texture2D>("Textures/Sky");
             CloudTexture = Game.Content.Load<Texture2D>("Textures/Clouds");
