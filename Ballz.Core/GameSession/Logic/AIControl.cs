@@ -69,7 +69,7 @@ namespace Ballz.GameSession.Logic
 
                         if (!Ball.IsAiming)
                         {
-                            Ball.HoldingWeapon = "Handgun";
+                            Ball.HoldingWeapon = "HandGun";
                             Ball.AimDirection = Vector2.Normalize(CurrentTarget.Position - Ball.Position);
                             var muzzle = GenericGraphicsEffect.CreateMuzzle(
                                 Game.Match.GameTime,
