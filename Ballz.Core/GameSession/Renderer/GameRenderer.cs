@@ -218,8 +218,7 @@ namespace Ballz.GameSession.Renderer
             if(ball.Player.TeamName != null)
                 BallEffect.Texture = TeamTextures[ball.Player.TeamName];
 
-            Vector2 nV = ball.Direction;
-            Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * 50 * nV.X / 360.0)) * Matrix.CreateTranslation(new Vector3(ball.Position, 0));
+            Matrix world = Matrix.CreateRotationY((float)(2 * Math.PI * ball.ViewRotation * 50f / 360f)) * Matrix.CreateTranslation(new Vector3(ball.Position, 0));
             BallEffect.World = world;
             GraveEffect.World = world * Matrix.CreateScale(0.3f);
 

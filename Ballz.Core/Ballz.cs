@@ -24,7 +24,7 @@ namespace Ballz
         //SpriteBatch spriteBatch;
         static Ballz _instance;
 
-        public List<string> Teamnames{ get; private set;}
+        public List<string> Teamnames{ get; private set; }
 
         public GraphicsDeviceManager Graphics { get; set; }
 

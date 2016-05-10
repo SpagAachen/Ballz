@@ -29,6 +29,14 @@ namespace Ballz.GameSession.Logic
         List<WeaponControl> AvailableWeapons = new List<WeaponControl>();
         int SelectedWeaponIndex = 0;
 
+        const float WalkingSpeedSlow = 0.1f;
+        const float SlowWalkTime = 0.1f;
+        const float WalkingSpeedNormal = 2f;
+
+        float WalkingTime = 0;
+
+        const float ViewRotationSpeed = 3f;
+
         public override bool Update(float elapsedSeconds, World.World worldState)
         {
             bool ballMadeAction = base.Update(elapsedSeconds, worldState);
@@ -37,15 +45,31 @@ namespace Ballz.GameSession.Logic
             {
                 if (KeyPressed[InputMessage.MessageType.ControlsLeft])
                 {
-                    Ball.Velocity = new Vector2(Min(-2f, Ball.Velocity.X), Ball.Velocity.Y);
+                    var speed = WalkingTime < SlowWalkTime ? WalkingSpeedSlow : WalkingSpeedNormal;
+                    Ball.Velocity = new Vector2(Min(-speed, Ball.Velocity.X), Ball.Velocity.Y);
                     Ball.AimDirection = new Vector2(-Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
+                    WalkingTime += elapsedSeconds;
+                }
+                else if (KeyPressed[InputMessage.MessageType.ControlsRight])
+                {
+                    var speed = WalkingTime < SlowWalkTime ? WalkingSpeedSlow : WalkingSpeedNormal;
+                    Ball.Velocity = new Vector2(Max(speed, Ball.Velocity.X), Ball.Velocity.Y);
+                    Ball.AimDirection = new Vector2(Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
+                    WalkingTime += elapsedSeconds;
+                }
+                else
+                {
+                    WalkingTime = 0;
                 }
 
-                if (KeyPressed[InputMessage.MessageType.ControlsRight])
-                {
-                    Ball.Velocity = new Vector2(Max(2f, Ball.Velocity.X), Ball.Velocity.Y);
-                    Ball.AimDirection = new Vector2(Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
-                }
+                if (Ball.Velocity.X > 0.01 && Ball.ViewRotation < 0.99)
+                    Ball.ViewRotation += ViewRotationSpeed * elapsedSeconds;
+                else if (Ball.Velocity.X < -0.01 && Ball.ViewRotation > -0.99)
+                    Ball.ViewRotation -= ViewRotationSpeed * elapsedSeconds;
+                else if (Abs(Ball.Velocity.X) < 0.01 && Abs(Ball.ViewRotation) > 0.01)
+                    Ball.ViewRotation -= Math.Sign(Ball.ViewRotation) * ViewRotationSpeed * elapsedSeconds;
+
+                Ball.ViewRotation = Max(-1, Min(Ball.ViewRotation, 1));
 
                 // Up/Down keys rotate the aim vector
                 if (KeyPressed[InputMessage.MessageType.ControlsUp])

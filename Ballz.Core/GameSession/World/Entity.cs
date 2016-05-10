@@ -38,12 +38,10 @@ namespace Ballz.GameSession.World
         }
 
         [Synced]
-        public Vector2 Direction
+        public float ViewRotation
         {
-            get
-            {
-                return new Vector2((float)Math.Sin(Rotation), (float)Math.Cos(Rotation));
-            }
+            get;
+            set;
         }
 
         [Newtonsoft.Json.JsonIgnore]

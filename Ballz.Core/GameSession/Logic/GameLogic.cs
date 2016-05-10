@@ -114,12 +114,6 @@ namespace Ballz.GameSession.Logic
                 {
                     if (controller.Ball.Disposed || !controller.Ball.IsAlive)
                     {
-                        /*if (controller.Ball.Player.ActiveBall == controller.Ball)
-                        {
-                            controller.Ball.Player.ActiveBall = ChooseNextBall(controller.Ball.Player);
-                            ActiveControllers[controller.Ball.Player] = BallControllers[controller.Ball.Player.ActiveBall];
-                        }*/
-
                         controller.Ball.Player.OwnedBalls.Remove(controller.Ball);
 
                         if (controller.Ball.Player == Session.ActivePlayer)
