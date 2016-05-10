@@ -55,17 +55,21 @@ namespace Ballz.GameSession.Renderer
                 Game.Camera.UseBoundary = true;
                 Game.Camera.BottomLeftBoundary = new Vector2(-100f, 0f);
                 Game.Camera.TopRightBoundary = new Vector2(100f, 100f);
-                
-                try
+
+                if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer?.ActiveBall != null)
                 {
-					if ( Game.Match.ActivePlayer.ActiveBall != CurrentActiveBall && Game.Match.ActivePlayer.ActiveBall != null)
-					{
-						CurrentActiveBall = Game.Match.ActivePlayer.ActiveBall;
-						Game.Camera.SwitchTarget(CurrentActiveBall.Position, time);
-					}
-                    Game.Camera.SetTargetPosition((Vector2)Game.Match.ActivePlayer.ActiveBall?.Position, time);
+                    if (CurrentActiveBall == null)
+                        CurrentActiveBall = Game.Match.ActivePlayer?.ActiveBall;
+
+                    if (CurrentActiveBall != null && Game.Match.TurnState == TurnState.Running && Game.Match.ActivePlayer?.ActiveBall != CurrentActiveBall && Game.Match.ActivePlayer?.ActiveBall != null)
+                    {
+                        CurrentActiveBall = Game.Match.ActivePlayer.ActiveBall;
+                        Game.Camera.SwitchTarget(CurrentActiveBall.Position, time);
+                    }
+                    Game.Camera.SetTargetPosition((Vector2)Game.Match.ActivePlayer.ActiveBall.Position, time);
                 }
-                catch(Exception) {
+                else
+                {
                     Game.Camera.SetView(Matrix.CreateOrthographicOffCenter(0, 40, 0, 40 / Game.GraphicsDevice.Viewport.AspectRatio, -20, 20));
                 }
 
