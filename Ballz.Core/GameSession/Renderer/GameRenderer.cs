@@ -94,7 +94,7 @@ namespace Ballz.GameSession.Renderer
 
                 int i = 0;
 
-                float TerrainTextureScale = 0.02f;
+                float TerrainTextureScale = 0.015f;
 
                 foreach (var t in tris)
                 {
