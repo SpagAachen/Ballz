@@ -45,7 +45,10 @@ namespace Ballz
 			float b = distance/2.0f;
 			float c = 0.7f;
 			float a = -0.3f / (distance*distance/4.0f);
-			float zoom = -a* (traveledDistance - b)*(traveledDistance - b) + c;
+			float zoom = -a * (traveledDistance - b)*(traveledDistance - b) + c;
+
+            // I have no idea what is happening above, so let me just reduce the zoom by 80% and leave it alone.
+            zoom = 0.8f + zoom * 0.2f;
 			return new Vector3 ((StartPoint + (speed * timeTraveled)), zoom);
 		}
 	}
