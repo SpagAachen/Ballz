@@ -9,14 +9,6 @@ using Microsoft.Xna.Framework;
 
 namespace Ballz.GameSession.Logic
 {
-    public enum SessionState
-    {
-        Starting,
-        Running,
-        Finished,
-        Paused,
-    }
-
     public class GameLogic: GameComponent
     {
         new Ballz Game;
@@ -33,19 +25,28 @@ namespace Ballz.GameSession.Logic
             Session = session;
         }
         
-        public void NextTurn()
+        public void StartNextTurn()
         {
             if (Session.UsePlayerTurns)
             {
-                ActiveControllers[Session.ActivePlayer]?.OnTurnEnd();
-
                 var player = Session.Players[(Session.Players.IndexOf(Session.ActivePlayer) + 1) % Session.Players.Count];
                 Session.ActivePlayer = player;
                 
                 player.ActiveBall = ChooseNextBall(player);
                 ActiveControllers[player] = BallControllers[player.ActiveBall];
                 ActiveControllers[player]?.OnTurnStart();
-                Session.TurnTimeLeft = Session.SecondsPerTurn;
+                Session.TurnTime = 0;
+                Session.TurnState = TurnState.Running;
+            }
+        }
+
+        public void EndTurn()
+        {
+            if (Session.UsePlayerTurns)
+            {
+                ActiveControllers[Session.ActivePlayer]?.OnTurnEnd();
+                Session.TurnTime = 0;
+                Session.TurnState = TurnState.WaitingForEnd;
             }
         }
 
@@ -72,10 +73,20 @@ namespace Ballz.GameSession.Logic
                     Session.ActivePlayer = Session.Players[0];
                 }
 
-                Session.TurnTimeLeft -= elapsedSeconds;
-                if (Session.TurnTimeLeft < 0f)
+                Session.TurnTime += elapsedSeconds;
+                if (Session.TurnTime > Session.SecondsPerTurn && Session.TurnState == TurnState.Running)
                 {
-                    NextTurn();
+                    EndTurn();
+                }
+
+                // End the turn if the turn is over and MinSecondsBetweenTurns have passed.
+                // Wait for all entities to stand still, but at most MaxSecondsBetweenTurns.
+                if (Session.TurnState == TurnState.WaitingForEnd
+                    && (Session.TurnTime > Session.MaxSecondsBetweenTurns
+                        || (Session.TurnTime > Session.MinSecondsBetweenTurns && !Session.World.IsSomethingMoving ))
+                    )
+                {
+                    StartNextTurn();
                 }
             }
 
@@ -87,48 +98,51 @@ namespace Ballz.GameSession.Logic
                 var currentControllers = ActiveControllers.Values.ToArray();
                 foreach (var controller in currentControllers)
                 {
-                    if(controller.Ball.Player == Session.ActivePlayer || !Session.UsePlayerTurns)
+                    if(controller != null && (controller.Ball.Player == Session.ActivePlayer || !Session.UsePlayerTurns))
                     {
                         var playerMadeAction = controller.Update(elapsedSeconds, worldState);
                         if (playerMadeAction)
-                            NextTurn();
+                            EndTurn();
                     }
                 }
                 
                 // Check for dead balls
-                int alivePlayers = 0;
+                List<Player> alivePlayers = new List<Player>();
                 Player winner = null;
                 var ballControllers = BallControllers.Values.ToArray();
                 foreach (var controller in ballControllers)
                 {
                     if (controller.Ball.Disposed || !controller.Ball.IsAlive)
                     {
-                        ActiveControllers.Remove(controller.Ball.Player);
-                        BallControllers.Remove(controller.Ball);
-
-                        if (controller.Ball.Player.ActiveBall == controller.Ball)
+                        /*if (controller.Ball.Player.ActiveBall == controller.Ball)
                         {
                             controller.Ball.Player.ActiveBall = ChooseNextBall(controller.Ball.Player);
-                        }
-
-                        if(controller.Ball.Player == Session.ActivePlayer)
-                        {
-                            NextTurn();
-                        }
+                            ActiveControllers[controller.Ball.Player] = BallControllers[controller.Ball.Player.ActiveBall];
+                        }*/
 
                         controller.Ball.Player.OwnedBalls.Remove(controller.Ball);
+
+                        if (controller.Ball.Player == Session.ActivePlayer)
+                        {
+                            StartNextTurn();
+                        }
+
+                        ActiveControllers.Remove(controller.Ball.Player);
+                        BallControllers.Remove(controller.Ball);
                     }
                     else if (controller.Ball.IsAlive)
                     {
-                        alivePlayers++;
+                        if (!alivePlayers.Contains(controller.Ball.Player))
+                            alivePlayers.Add(controller.Ball.Player);
                         winner = controller.Ball.Player;
                     }
                 }
 
-                if (alivePlayers < 2)
+                if (alivePlayers.Count < 2)
                 {
                     Game.Match.State = SessionState.Finished;
-                    Game.Match.Winner = winner;
+                    if(alivePlayers.Count == 1)
+                        Game.Match.Winner = winner;
                 }
             }
         }
@@ -143,12 +157,12 @@ namespace Ballz.GameSession.Logic
                 // When using turn mode in hot-seat, direct all input messages to the active player
                 if (Session.UsePlayerTurns && Session.ActivePlayer != null && ActiveControllers.ContainsKey(Session.ActivePlayer))
                 {
-                    ActiveControllers[Session.ActivePlayer].HandleMessage(sender, msg);
+                    ActiveControllers[Session.ActivePlayer]?.HandleMessage(sender, msg);
                 }
                 // Otherwise, redirect input messages to the player given by msg.Player
                 else if(msg.Player != null && ActiveControllers.ContainsKey(msg.Player) && ActiveControllers.ContainsKey(msg.Player))
                 {
-                    ActiveControllers[msg.Player].HandleMessage(sender, msg);
+                    ActiveControllers[msg.Player]?.HandleMessage(sender, msg);
                 }
             }
 

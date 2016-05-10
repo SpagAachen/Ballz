@@ -13,6 +13,7 @@
     using Microsoft.Xna.Framework.Graphics;
     using GameSession.World;
     using System.Linq;
+    using GameSession;
     class Server
     {
         static Server()

@@ -11,6 +11,30 @@ using System.Threading.Tasks;
 
 namespace Ballz.GameSession
 {
+    public enum SessionState
+    {
+        Starting,
+        Running,
+        Finished,
+        Paused,
+    }
+
+    public enum TurnState
+    {
+        /// <summary>
+        /// A player is currently executing a turn. The turn has not yet ended.
+        /// </summary>
+        Running,
+        /// <summary>
+        /// The player has finished the turn. The game is waiting for everything to settle down, then the next turn will commence.
+        /// </summary>
+        WaitingForEnd,
+        /// <summary>
+        /// The game is either not in turn mode or not in a state where players can perform any actions.
+        /// </summary>
+        Inactive
+    }
+
     public class Session: IDisposable
     {
         public World.World World;
@@ -41,13 +65,20 @@ namespace Ballz.GameSession
 
         public SessionState State { get; set; } = SessionState.Starting;
 
+        public TurnState TurnState { get; set; } = TurnState.Inactive;
+
         public bool UsePlayerTurns { get; set; } = false;
 
         public Player ActivePlayer { get; set; }
 
-        public const float SecondsPerTurn = 60f;
+        public float SecondsPerTurn { get; set; } = 60f;
+        public float MinSecondsBetweenTurns { get; set; } = 2f;
+        public float MaxSecondsBetweenTurns { get; set; } = 30f;
 
-        public float TurnTimeLeft { get; set; } = SecondsPerTurn;
+        /// <summary>
+        /// Seconds since the last turn state change
+        /// </summary>
+        public float TurnTime { get; set; } = 0;
 
         public GameSession.Logic.GameSettings GameSettings { get; set; }
 
@@ -100,6 +131,9 @@ namespace Ballz.GameSession
             Input.Input += SessionLogic.HandleMessage;
             Input.Input += DebugRenderer.HandleMessage;
             State = SessionState.Running;
+            if (UsePlayerTurns)
+                TurnState = TurnState.Running;
+
             LocalPlayers = Players.Where(p => p.IsLocal).ToList();
         }
 

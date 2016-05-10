@@ -161,7 +161,7 @@ namespace Ballz.GameSession.Renderer
         public void DrawMessageOverlay()
         {
             SpriteBatch.Begin();
-            if (Game.Match.State == GameSession.Logic.SessionState.Finished)
+            if (Game.Match.State == SessionState.Finished)
             {
                 string msg = "";
 
@@ -178,8 +178,17 @@ namespace Ballz.GameSession.Renderer
             else if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer != null)
             {
                 var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width - (250 * resolutionFactor), Game.GraphicsDevice.Viewport.Height - 100);
+                string msg;
 
-                var msg = "Turn: " + Game.Match.ActivePlayer.Name + " / " + (int)Game.Match.TurnTimeLeft;
+                if (Game.Match.TurnState == TurnState.Running)
+                {
+                    var timeLeft = (int)(Game.Match.SecondsPerTurn - Game.Match.TurnTime);
+                    msg = "Turn: " + Game.Match.ActivePlayer.Name + " / " + timeLeft;
+                }
+                else
+                {
+                    msg = "Waiting for turn end";
+                }
 
                 DrawText(msg, screenPos, 0.5f, Color.Red, centerHorizontal: true);
             }
@@ -274,11 +283,10 @@ namespace Ballz.GameSession.Renderer
             screenPos += new Vector2(0, 25) * resolutionFactor;
             DrawText(ball.Player.Name, screenPos, 0.33f, Color.LawnGreen, 1, true, true);
 
-            if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer == ball.Player && ball.Player.ActiveBall == ball)
+            if (Game.Match.UsePlayerTurns && Game.Match.TurnState == TurnState.Running && Game.Match.ActivePlayer == ball.Player && ball.Player.ActiveBall == ball)
             {
                 // Show turn-indicator for a couple of seconds only
-                var timeLeft = Game.Match.TurnTimeLeft;
-                if (Session.SecondsPerTurn - timeLeft < 4)
+                if (Game.Match.TurnTime < 4)
                 {
                     screenPos -= new Vector2(0, resolutionFactor *(30 + (float)(15 * Math.Sin(5 * ElapsedTime.TotalSeconds))));
                     SpriteBatch.Draw(Game.Content.Load<Texture2D>("Textures/RedArrow"), screenPos, color: Color.White, origin: new Vector2(29, 38));

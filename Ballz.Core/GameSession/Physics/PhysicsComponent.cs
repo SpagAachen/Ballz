@@ -281,6 +281,8 @@ namespace Ballz.GameSession.Physics
 
             TerrainRevision = worldState.StaticGeometry.Revision;
 
+            worldState.IsSomethingMoving = false;
+
             // Add Bodies for new entities
             var entities = worldState.Entities.ToArray();
             foreach (var e in entities)
@@ -353,6 +355,11 @@ namespace Ballz.GameSession.Physics
                     // Apparently, the physics engine likes applying an impulse better than overwriting the velocity.
                     // So, apply an impulse that changes the old velocity to the new one.
                     body.ApplyLinearImpulse(body.Mass * (e.Velocity - body.LinearVelocity));
+
+                if(body.LinearVelocity.LengthSquared() > 0.0001 || body.AngularVelocity > 0.001)
+                {
+                    worldState.IsSomethingMoving = true;
+                }
             }
         }
 
@@ -391,7 +398,7 @@ namespace Ballz.GameSession.Physics
         {
             using (new PerformanceReporter(Game))
             {
-                if (Game.Match.State != Logic.SessionState.Running)
+                if (Game.Match.State != SessionState.Running)
                     return;
 
                 var worldState = Game.Match.World;

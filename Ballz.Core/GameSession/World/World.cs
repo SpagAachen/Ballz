@@ -27,6 +27,8 @@ namespace Ballz.GameSession.World
 
         public List<GraphicsEvent> GraphicsEvents = new List<GraphicsEvent>();
 
+        public bool IsSomethingMoving = true;
+
         public Terrain StaticGeometry
         {
             get;
