@@ -17,6 +17,7 @@ namespace Ballz.GameSession.Logic
         public UserControl(Ballz game, Session match, Ball ball):
             base(game, match, ball)
         {
+            AvailableWeapons.Add(new Weapons.Potato(ball, game));
             AvailableWeapons.Add(new Weapons.RopeTool(ball, game));
             AvailableWeapons.Add(new Weapons.Bazooka(ball, game));
             AvailableWeapons.Add(new Weapons.Pistol(ball, game));

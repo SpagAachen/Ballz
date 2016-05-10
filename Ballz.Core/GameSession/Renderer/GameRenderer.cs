@@ -340,9 +340,28 @@ namespace Ballz.GameSession.Renderer
 
         public void DrawShot(Shot shot)
         {
-            BallEffect.DiffuseColor = Vector3.Zero;
+            /*BallEffect.DiffuseColor = Vector3.Zero;
             Matrix world = Matrix.CreateScale(0.1f) * Matrix.CreateTranslation(new Vector3(shot.Position, 0));
-            BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);
+            BallModel.Draw(world, Game.Camera.View, Game.Camera.Projection);*/
+
+            var effects =  SpriteEffects.None;
+            var weaponRotation = shot.Velocity.RotationFromDirection();
+            /*
+            if (ball.AimDirection.X < 0)
+            {
+                effects = SpriteEffects.FlipHorizontally;
+                weaponRotation += (float)Math.PI;
+            }*/
+
+            var weaponPosScreen = WorldToScreen(shot.Position);
+            var weaponTexture = Game.Content.Load<Texture2D>("Textures/" + shot.ProjectileTexture);
+            var weaponTextureScale = 64f / weaponTexture.Width;
+
+            // Draw weapon
+            SpriteBatch.Draw(weaponTexture, position: weaponPosScreen, color: Color.White, 
+                rotation: weaponRotation, scale: new Vector2(weaponTextureScale, weaponTextureScale), 
+                origin: new Vector2(weaponTexture.Width / 2f, weaponTexture.Height / 2f), effects: effects);
+
         }
 
         const float RopeWidth = Rope.Diameter;

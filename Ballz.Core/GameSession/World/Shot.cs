@@ -27,6 +27,9 @@ namespace Ballz.GameSession.World
             }
         }
 
+        // Projectile Texture
+        public string ProjectileTexture = "Bullet";
+
         // Radius[m] of the hole that is created when the projectile collides with terrain
         [Synced]
         public float BulletHoleRadius;
