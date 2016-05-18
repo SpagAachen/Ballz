@@ -28,7 +28,12 @@ namespace Ballz.Sound
     public class SoundControl
     {
         private Ballz Game;
-        public static string ShotSound = "Sounds/pew";
+        public static string ShotSound    = "Sounds/pew";
+        public static string PistolSound  = "Sounds/peng05";
+        public static string BazookaSound = "Sounds/rocket";
+        public static string SelectSound  = "Sounds/drop01";
+        public static string AcceptSound  = "Sounds/accept";
+        public static string DeclineSound = "Sounds/decline";
         private Dictionary<string,SoundEffect> loadedSounds;
 
         public SoundControl(Ballz game)

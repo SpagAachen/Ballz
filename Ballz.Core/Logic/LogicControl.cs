@@ -4,6 +4,7 @@ using System.Linq;
 using Ballz.Input;
 using Ballz.Menu;
 using Ballz.Messages;
+using Ballz.Sound;
 
 namespace Ballz.Logic
 {
@@ -170,8 +171,10 @@ namespace Ballz.Logic
                 {
                     case InputMessage.MessageType.ControlsAction:
                         top.SelectedItem?.Activate();
+                        Ballz.The().Services.GetService<SoundControl>().PlaySound(SoundControl.AcceptSound);
                         break;
                     case InputMessage.MessageType.ControlsBack:
+                        Ballz.The().Services.GetService<SoundControl>().PlaySound(SoundControl.DeclineSound);
                         if (activeMenu.Count == 1) // exit if we are in main menuToPrepare
                             Ballz.The().Exit();     //TODO: this is rather ugly find a nice way to terminate the programm like sending a termination message
                         else
@@ -189,6 +192,7 @@ namespace Ballz.Logic
                     case InputMessage.MessageType.ControlsUp:
                         if (top.SelectedItem != null)
                         {
+                            Ballz.The().Services.GetService<SoundControl>().PlaySound(SoundControl.SelectSound);
                             top.SelectPrevious();
                             RaiseMessageEvent(new MenuMessage(top));
                         }
@@ -197,6 +201,7 @@ namespace Ballz.Logic
                     case InputMessage.MessageType.ControlsDown:
                         if (top.SelectedItem != null)
                         {
+                            Ballz.The().Services.GetService<SoundControl>().PlaySound(SoundControl.SelectSound);
                             top.SelectNext();
                             RaiseMessageEvent(new MenuMessage(top));
                         }

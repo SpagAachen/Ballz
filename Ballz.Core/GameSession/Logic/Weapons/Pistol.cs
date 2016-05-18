@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Ballz.Utils;
+using Ballz.Sound;
 
 namespace Ballz.GameSession.Logic.Weapons
 {
@@ -42,6 +43,7 @@ namespace Ballz.GameSession.Logic.Weapons
             if(input.Pressed && input.Kind == InputMessage.MessageType.ControlsAction)
             {
                 ++shotsFired;
+                Game.Services.GetService<SoundControl>().PlaySound(SoundControl.PistolSound);
 
                 var muzzle = GenericGraphicsEffect.CreateMuzzle(
                     Game.Match.GameTime,

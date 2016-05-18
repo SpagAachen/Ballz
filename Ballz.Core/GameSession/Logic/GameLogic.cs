@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Ballz.GameSession.World;
 using Ballz.Messages;
 using Microsoft.Xna.Framework;
+using Ballz.Sound;
 
 namespace Ballz.GameSession.Logic
 {
@@ -171,6 +172,7 @@ namespace Ballz.GameSession.Logic
                         Game.Match.State = SessionState.Running;
                     else
                     {
+                        Ballz.The().Services.GetService<SoundControl>().PlaySound(SoundControl.DeclineSound);
                         Game.Match.State = SessionState.Paused;
                     }
                 }

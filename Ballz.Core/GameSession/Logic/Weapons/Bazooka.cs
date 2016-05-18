@@ -26,7 +26,7 @@ namespace Ballz.GameSession.Logic.Weapons
             Ball.IsAiming = true;
             if (!Ball.IsCharging && Ball.ShootCharge > 0)
             {
-                Game.Services.GetService<SoundControl>().PlaySound(SoundControl.ShotSound);
+                Game.Services.GetService<SoundControl>().PlaySound(SoundControl.BazookaSound);
                 Shot newShot = new Shot
                 {
                     ExplosionRadius = 3.0f,
