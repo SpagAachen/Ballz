@@ -170,6 +170,8 @@ namespace Ballz
 
         private Composite DefaultMenu()
         {
+            // Music!
+            Ballz.The().Services.GetService<SoundControl>().StartMusic(SoundControl.MenuMusic);
             // options menu
             var optionsMenu = new Composite("Options", true);
             //optionsMenu.AddItem(new Label("Not Implemented", false));

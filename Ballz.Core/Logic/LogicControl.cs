@@ -51,6 +51,7 @@ namespace Ballz.Logic
 
         public void ContinueGame()
         {
+            
             state = GameState.SimulationState;
             RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }
@@ -93,6 +94,10 @@ namespace Ballz.Logic
         protected virtual void RaiseMessageEvent(Message msg)
         {
             Message?.Invoke(this, msg);
+            if(state == GameState.MenuState)
+                Ballz.The().Services.GetService<SoundControl>().StartMusic(SoundControl.MenuMusic);
+            else
+                Ballz.The().Services.GetService<SoundControl>().StopMusic(SoundControl.MenuMusic);
         }
 
         public void HandleNetworkMessage(object sender, Message message)

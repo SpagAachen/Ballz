@@ -34,7 +34,11 @@ namespace Ballz.Sound
         public static string SelectSound  = "Sounds/drop01";
         public static string AcceptSound  = "Sounds/accept";
         public static string DeclineSound = "Sounds/decline";
+        public static string MenuMusic    = "Sounds/badkitty";
         private Dictionary<string,SoundEffect> loadedSounds;
+
+        // Currently, we can only play one music at a time.
+        private SoundEffectInstance music;
 
         public SoundControl(Ballz game)
         {
@@ -52,6 +56,32 @@ namespace Ballz.Sound
             {
                 SoundEffectInstance soundInstance = sndEffect.CreateInstance();
                 soundInstance.Play();
+            }
+        }
+
+        public void StartMusic(string name)
+        {
+            //load sound if it is not already loaded
+            if(!loadedSounds.ContainsKey(name))
+                loadedSounds.Add(name,Game.Content.Load<SoundEffect>(name));
+            SoundEffect sndEffect;
+            if(loadedSounds.TryGetValue(name, out sndEffect))
+            {
+                // My work here is done
+                if (music != null && music.State == SoundState.Playing)
+                    return;
+                
+                music = sndEffect.CreateInstance();
+                music.IsLooped = true;
+                music.Play();
+            }
+        }
+
+        public void StopMusic(string name)
+        {
+            if(music != null)
+            {
+                music.Stop();
             }
         }
     }
