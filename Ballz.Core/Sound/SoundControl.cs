@@ -36,6 +36,7 @@ namespace Ballz.Sound
         public static string AcceptSound  = "Sounds/accept";
         public static string DeclineSound = "Sounds/decline";
         public static string MenuMusic    = "Sounds/badkitty";
+        public static string DrownSound   = "Sounds/gurgel";
         private Dictionary<string,SoundEffect> loadedSounds;
 
         // Currently, we can only play one music at a time.
@@ -43,6 +44,7 @@ namespace Ballz.Sound
 
         public SoundControl(Ballz game)
         {
+
             Game = game;
             loadedSounds = new Dictionary<string, SoundEffect>();
             WinnerSounds.Add("Germoney","Sounds/germoney");

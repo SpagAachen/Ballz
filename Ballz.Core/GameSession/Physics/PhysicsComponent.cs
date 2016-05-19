@@ -288,7 +288,9 @@ namespace Ballz.GameSession.Physics
             foreach (var e in entities)
             {
                 if(e.Disposed || e.Position.LengthSquared() > 100 * 100 || e.Position.Y < -10)
-                {
+                {                    
+                    if (e.Position.Y < -10 && e as Ball != null) // the player drowned
+                        Game.Services.GetService<Sound.SoundControl>().PlaySound(Sound.SoundControl.DrownSound);
                     RemoveEntity(e, worldState);
                     continue;
                 }
