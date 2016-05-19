@@ -115,11 +115,14 @@ namespace Ballz.GameSession.Logic
         
         public virtual void HandleMessage(object sender, Message message)
         {
-            InputMessage input = message as InputMessage;
-            if (input?.Pressed != null)
+            if (Game.Match.State == GameSession.SessionState.Running)
             {
-                Weapon?.HandleInput(input);
-                KeyPressed[input.Kind] = input.Pressed;
+                InputMessage input = message as InputMessage;
+                if (input?.Pressed != null)
+                {
+                    Weapon?.HandleInput(input);
+                    KeyPressed[input.Kind] = input.Pressed;
+                }
             }
         }   
     }

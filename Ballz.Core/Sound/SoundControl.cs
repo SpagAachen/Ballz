@@ -28,6 +28,7 @@ namespace Ballz.Sound
     public class SoundControl
     {
         private Ballz Game;
+        public static Dictionary<string, string> WinnerSounds = new Dictionary<string, string>();
         public static string ShotSound    = "Sounds/pew";
         public static string PistolSound  = "Sounds/peng05";
         public static string BazookaSound = "Sounds/rocket";
@@ -44,6 +45,8 @@ namespace Ballz.Sound
         {
             Game = game;
             loadedSounds = new Dictionary<string, SoundEffect>();
+            WinnerSounds.Add("Germoney","Sounds/germoney");
+            WinnerSounds.Add("Murica", "Sounds/freedom_fuckyeah");
         }
 
         public void PlaySound(string name)

@@ -133,11 +133,16 @@ namespace Ballz.GameSession.Logic
                     }
                 }
 
+                //TODO: find proper game finished condition, this one is not always correct
                 if (alivePlayers.Count < 2)
                 {
                     Game.Match.State = SessionState.Finished;
-                    if(alivePlayers.Count == 1)
+                    //TODO: find proper condition to determine the winner, this one is not always correct
+                    if (alivePlayers.Count == 1)
+                    {
                         Game.Match.Winner = winner;
+                        Game.Services.GetService<Sound.SoundControl>().PlaySound(Sound.SoundControl.WinnerSounds[winner.TeamName]);
+                    }
                 }
             }
         }
