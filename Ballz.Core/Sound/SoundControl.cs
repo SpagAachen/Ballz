@@ -28,6 +28,7 @@ namespace Ballz.Sound
     public class SoundControl
     {
         private Ballz Game;
+        private static float currentVolume;
         public static Dictionary<string, string> WinnerSounds = new Dictionary<string, string>();
         public static string ShotSound    = "Sounds/pew";
         public static string PistolSound  = "Sounds/peng05";
@@ -75,7 +76,12 @@ namespace Ballz.Sound
             {
                 // My work here is done
                 if (music != null && music.State == SoundState.Playing)
+                {                    
+                    currentVolume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
+                    if (music.Volume != currentVolume)
+                        music.Volume = currentVolume;
                     return;
+                }
                 
                 music = sndEffect.CreateInstance();
                 music.IsLooped = true;
