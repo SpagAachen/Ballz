@@ -86,6 +86,16 @@ namespace Ballz.GameSession.Renderer
 
                 DrawSky();
 
+                //////////////////////////////////////////////////////////////////////////////////////////////
+                // Draw Water
+                //////////////////////////////////////////////////////////////////////////////////////////////
+
+                WaterRenderer.DrawWater(worldState);
+
+                //////////////////////////////////////////////////////////////////////////////////
+                // Draw the Terrain
+                //////////////////////////////////////////////////////////////////////////////////
+
                 BallEffect.View = Game.Camera.View;
                 BallEffect.Projection = Game.Camera.Projection;
 
@@ -123,6 +133,10 @@ namespace Ballz.GameSession.Renderer
 
                 GraphicsDevice.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vpc, 0, tris.Count);
 
+                ///////////////////////////////////////////////////////////////////////////////////
+                // Draw Ballz and shots
+                ///////////////////////////////////////////////////////////////////////////////////
+
                 var blending = new BlendState
                 {
                     AlphaSourceBlend = Blend.SourceAlpha,
@@ -150,9 +164,7 @@ namespace Ballz.GameSession.Renderer
                     DrawGraphicsEvent(graphicsEvent);
                 }
 
-                SpriteBatch.End();
-
-                WaterRenderer.DrawWater(worldState);
+                SpriteBatch.End();              
 
                 GraphicsDevice.SetRenderTarget(null);
                 
