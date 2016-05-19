@@ -60,6 +60,7 @@ namespace Ballz.Sound
             if(loadedSounds.TryGetValue(name, out sndEffect))
             {
                 SoundEffectInstance soundInstance = sndEffect.CreateInstance();
+                soundInstance.Volume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
                 soundInstance.Play();
             }
         }
@@ -78,6 +79,7 @@ namespace Ballz.Sound
                 
                 music = sndEffect.CreateInstance();
                 music.IsLooped = true;
+                music.Volume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
                 music.Play();
             }
         }

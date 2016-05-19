@@ -177,6 +177,7 @@ namespace Ballz
             //optionsMenu.AddItem(new Label("Not Implemented", false));
             optionsMenu.AddItem(new CheckBox("FullScreen: ", GameSettings.Fullscreen));
             optionsMenu.AddItem(new Choice<Settings.Resolution>("Resolution: ", GameSettings.ScreenResolution, GetResolutions()));
+            optionsMenu.AddItem(new SpinBox("MasterVolume: ", GameSettings.MasterVolume, 0, 100));
             Label apply = new Label("Apply", true);
             apply.OnSelect += () =>
             {
