@@ -21,6 +21,11 @@ namespace Ballz.GameSession.Logic
 
         public WeaponControl Weapon { get; set; }
 
+        public List<WeaponControl> AvailableWeapons { get; set; } = new List<WeaponControl>();
+        public int SelectedWeaponIndex { get; set; } = 0;
+
+        public bool CanSwitchWeapons { get; set; } = true;
+
         protected Dictionary<InputMessage.MessageType, bool> KeyPressed = new Dictionary<InputMessage.MessageType, bool>();
 
         public BallControl(Ballz game, Session match, Ball ball)
@@ -53,7 +58,11 @@ namespace Ballz.GameSession.Logic
             }
             else
             {
-                ballMadeAction = Weapon?.Update(elapsedSeconds, KeyPressed) ?? false;
+                bool weaponSwitchAllowed = true;
+                Weapon?.Update(elapsedSeconds, KeyPressed, out ballMadeAction, out weaponSwitchAllowed);
+
+                CanSwitchWeapons &= weaponSwitchAllowed;
+
                 if (Ball.IsCharging)
                 {
                     Ball.ShootCharge += elapsedSeconds * 0.7f;
@@ -74,12 +83,15 @@ namespace Ballz.GameSession.Logic
         /// </summary>
         public virtual void OnTurnEnd()
         {
-            if(Ball.AttachedRope != null)
+            AvailableWeapons.ForEach(w => w.OnTurnEnd());
+            if (Ball.AttachedRope != null)
             {
                 Match.Physics.RemoveRope(Ball.AttachedRope);
                 Ball.AttachedRope = null;
                 Match.World.Ropes.Remove(Ball.AttachedRope);
             }
+
+            CanSwitchWeapons = true;
         }
 
         /// <summary>
@@ -87,6 +99,7 @@ namespace Ballz.GameSession.Logic
         /// </summary>
         public virtual void OnTurnStart()
         {
+            AvailableWeapons.ForEach(w => w.OnTurnStart());
         }
 
         const float PauseBetweenJumps = 0.2f;

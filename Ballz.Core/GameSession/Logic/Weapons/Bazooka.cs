@@ -17,12 +17,16 @@ namespace Ballz.GameSession.Logic.Weapons
 
         public override string Name { get; } = "Bazooka";
 
-        public override bool Update(float elapsedSeconds, Dictionary<InputMessage.MessageType, bool> KeysPressed)
+        public override void Update(float elapsedSeconds, Dictionary<InputMessage.MessageType, bool> KeysPressed, out bool turnEndindActionHappened, out bool canSwitchWeapon)
         {
+            base.Update(elapsedSeconds, KeysPressed, out turnEndindActionHappened, out canSwitchWeapon);
+
             if (Game.Match.IsRemoteControlled)
-                return false;
+                return;
 
             Ball.IsCharging = KeysPressed[InputMessage.MessageType.ControlsAction];
+            canSwitchWeapon = Ball.ShootCharge == 0;
+
             Ball.IsAiming = true;
             if (!Ball.IsCharging && Ball.ShootCharge > 0)
             {
@@ -31,7 +35,7 @@ namespace Ballz.GameSession.Logic.Weapons
                 {
                     ExplosionRadius = 3.0f,
                     HealthDecreaseFromExplosionImpact = 25,
-                    HealthDecreaseFromProjectileHit = 10,
+                    HealthDecreaseFromProjectileHit = 100,
                     ShotType = Shot.ShotType_T.Normal,
                     ExplosionDelay = 0.0f,
                     Recoil = 1.0f,
@@ -39,14 +43,13 @@ namespace Ballz.GameSession.Logic.Weapons
                     Velocity = Ball.AimDirection * Ball.ShootCharge * 25f,
                 };
                 Game.Match.World.AddEntity(newShot);
+                turnEndindActionHappened = true;
+                canSwitchWeapon = false;
 
                 Ball.PhysicsBody.ApplyForce(-10000 * Ball.ShootCharge * newShot.Recoil * Ball.AimDirection);
 
                 Ball.ShootCharge = 0f;
-                return true;
             }
-            else
-                return false;
         }
     }
 }

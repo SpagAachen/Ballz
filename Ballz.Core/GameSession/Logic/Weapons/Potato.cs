@@ -33,40 +33,42 @@ namespace Ballz.GameSession.Logic.Weapons
         }
         */
 
-        public override bool Update(float elapsedSeconds, Dictionary<InputMessage.MessageType, bool> KeysPressed)
+        public override void Update(float elapsedSeconds, Dictionary<InputMessage.MessageType, bool> KeysPressed, out bool turnEndindActionHappened, out bool canSwitchWeapon)
         {
+            base.Update(elapsedSeconds, KeysPressed, out turnEndindActionHappened, out canSwitchWeapon);
+
             if (Game.Match.IsRemoteControlled)
-                return false;
+                return;
 
             Ball.IsCharging = KeysPressed[InputMessage.MessageType.ControlsAction];
             Ball.IsAiming = true;
+
+            canSwitchWeapon = Ball.ShootCharge == 0;
+
             if (!Ball.IsCharging && Ball.ShootCharge > 0)
             {
-                
                 float damage = 100.0f / (1f + 99.0f * (float)random.NextDouble());
                 Game.Services.GetService<SoundControl>().PlaySound(SoundControl.ShotSound);
                 Shot newShot = new Shot
-                    {
-                        ProjectileTexture = "PotatoBullet",
-                        BulletHoleRadius = damage / 10.0f,
-                        ExplosionRadius = damage / 10.0f,
-                        HealthDecreaseFromExplosionImpact = damage,
-                        HealthDecreaseFromProjectileHit = damage,
-                        ShotType = Shot.ShotType_T.Normal,
-                        ExplosionDelay = 0.0f,
-                        Recoil = 0.0f,
-                        Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.101f),
-                        Velocity = Ball.AimDirection * Ball.ShootCharge * 25f,
-                    };
+                {
+                    ProjectileTexture = "PotatoBullet",
+                    BulletHoleRadius = damage / 10.0f,
+                    ExplosionRadius = damage / 10.0f,
+                    HealthDecreaseFromExplosionImpact = damage,
+                    HealthDecreaseFromProjectileHit = damage,
+                    ShotType = Shot.ShotType_T.Normal,
+                    ExplosionDelay = 0.0f,
+                    Recoil = 0.0f,
+                    Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.101f),
+                    Velocity = Ball.AimDirection * Ball.ShootCharge * 25f,
+                };
                 Game.Match.World.AddEntity(newShot);
 
                 Ball.PhysicsBody.ApplyForce(-10000 * Ball.ShootCharge * newShot.Recoil * Ball.AimDirection);
 
                 Ball.ShootCharge = 0f;
-                return true;
+                turnEndindActionHappened = true;
             }
-            else
-                return false;
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Ballz.GameSession.Logic.Weapons
     {
         const float ExplosionRadius = 0.3f;
         const float Damage = 25f;
-        int shotsFired = 0;
+        int ShotsFired = 0;
 
         public Pistol(Ball ball, Ballz game) : base(ball, game) { }
 
@@ -35,6 +35,12 @@ namespace Ballz.GameSession.Logic.Weapons
             }
         }
 
+        public override void OnTurnEnd()
+        {
+            base.OnTurnEnd();
+            ShotsFired = 0;
+        }
+
         public override void HandleInput(InputMessage input)
         {
             if (Game.Match.IsRemoteControlled)
@@ -42,7 +48,7 @@ namespace Ballz.GameSession.Logic.Weapons
 
             if(input.Pressed && input.Kind == InputMessage.MessageType.ControlsAction)
             {
-                ++shotsFired;
+                ++ShotsFired;
                 Game.Services.GetService<SoundControl>().PlaySound(SoundControl.PistolSound);
 
                 var muzzle = GenericGraphicsEffect.CreateMuzzle(
@@ -72,15 +78,15 @@ namespace Ballz.GameSession.Logic.Weapons
             base.HandleInput(input);
         }
 
-        public override bool Update(float elapsedSeconds, Dictionary<InputMessage.MessageType, bool> KeysPressed)
+        public override void Update(float elapsedSeconds, Dictionary<InputMessage.MessageType, bool> KeysPressed, out bool turnEndindActionHappened, out bool canSwitchWeapon)
         {
-            //reset the shotsFired counter after 2 shots and end the current turn.
-            if (shotsFired > 0 && (shotsFired % 2) == 0)
-            {
-                shotsFired = 0;
-                return true;
-            }
-            return base.Update(elapsedSeconds, KeysPressed);
+            base.Update(elapsedSeconds, KeysPressed, out turnEndindActionHappened, out canSwitchWeapon);
+
+            // Weapon switching is only allowed if the pistol has not been used yet
+            canSwitchWeapon = ShotsFired == 0;
+
+            // Turn ends after two shots
+            turnEndindActionHappened = ShotsFired >= 2;
         }
     }
     }

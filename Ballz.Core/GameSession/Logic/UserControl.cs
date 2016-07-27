@@ -27,9 +27,6 @@ namespace Ballz.GameSession.Logic
 
         InputMessage.MessageType? controlInput = null;
 
-        List<WeaponControl> AvailableWeapons = new List<WeaponControl>();
-        int SelectedWeaponIndex = 0;
-
         const float WalkingSpeedSlow = 0.1f;
         const float SlowWalkTime = 0.1f;
         const float WalkingSpeedNormal = 2f;
@@ -96,20 +93,26 @@ namespace Ballz.GameSession.Logic
                         TryJump();
                         break;
                     case InputMessage.MessageType.ControlsNextWeapon:
-                        SelectedWeaponIndex = (SelectedWeaponIndex+1) % AvailableWeapons.Count;
-                        Weapon = AvailableWeapons[SelectedWeaponIndex];
-                        Ball.HoldingWeapon = AvailableWeapons[SelectedWeaponIndex].Icon;
-                        Ball.IsCharging = false;
-                        Ball.ShootCharge = 0f;
+                        if (CanSwitchWeapons)
+                        {
+                            SelectedWeaponIndex = (SelectedWeaponIndex + 1) % AvailableWeapons.Count;
+                            Weapon = AvailableWeapons[SelectedWeaponIndex];
+                            Ball.HoldingWeapon = AvailableWeapons[SelectedWeaponIndex].Icon;
+                            Ball.IsCharging = false;
+                            Ball.ShootCharge = 0f;
+                        }
                         break;
                     case InputMessage.MessageType.ControlsPreviousWeapon:
-                        SelectedWeaponIndex = SelectedWeaponIndex-1;
-                        if (SelectedWeaponIndex < 0)
-                            SelectedWeaponIndex += AvailableWeapons.Count;
-                        Weapon = AvailableWeapons[SelectedWeaponIndex];
-                        Ball.HoldingWeapon = AvailableWeapons[SelectedWeaponIndex].Icon;
-                        Ball.IsCharging = false;
-                        Ball.ShootCharge = 0f;
+                        if (CanSwitchWeapons)
+                        {
+                            SelectedWeaponIndex = SelectedWeaponIndex - 1;
+                            if (SelectedWeaponIndex < 0)
+                                SelectedWeaponIndex += AvailableWeapons.Count;
+                            Weapon = AvailableWeapons[SelectedWeaponIndex];
+                            Ball.HoldingWeapon = AvailableWeapons[SelectedWeaponIndex].Icon;
+                            Ball.IsCharging = false;
+                            Ball.ShootCharge = 0f;
+                        }
                         break;
                     default:
                         break;

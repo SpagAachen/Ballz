@@ -24,11 +24,18 @@ namespace Ballz.GameSession.Logic
 
         public abstract string Icon { get; }
 
+        public virtual void OnTurnEnd() { }
+        public virtual void OnTurnStart() { }
+
         /// <summary>
         /// Updates the weapon state and performs weapon actions.
         /// </summary>
         /// <returns>Returns true if the ball has made an action that finishes a player turn.</returns>
-        public virtual bool Update(float elapsedSeconds, Dictionary<InputMessage.MessageType, bool> KeysPressed) { return false; }
+        public virtual void Update(float elapsedSeconds, Dictionary<InputMessage.MessageType, bool> keysPressed, out bool turnEndindActionHappened, out bool canSwitchWeapon)
+        {
+            turnEndindActionHappened = false;
+            canSwitchWeapon = true;
+        }
 
         public virtual void HandleInput(InputMessage input) { }
     }
