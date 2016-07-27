@@ -51,6 +51,10 @@ namespace Ballz.GameSession.World
         [Synced]
         public float Recoil = 0.0f;
 
+        // How much does the projectile bounce?
+        [Synced]
+        public float Restitution = 0.1f;
+
         // Detonation when countdown reaches zero (if negative then inactive)
         private float explosionCountdown = -1.0f;
 

@@ -18,6 +18,7 @@ namespace Ballz.GameSession.Logic
             base(game, match, ball)
         {
             AvailableWeapons.Add(new Weapons.Potato(ball, game));
+            AvailableWeapons.Add(new Weapons.Grenade(ball, game));
             AvailableWeapons.Add(new Weapons.RopeTool(ball, game));
             AvailableWeapons.Add(new Weapons.Bazooka(ball, game));
             AvailableWeapons.Add(new Weapons.Pistol(ball, game));

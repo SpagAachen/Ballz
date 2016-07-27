@@ -316,6 +316,7 @@ namespace Ballz.GameSession.Physics
                     if (e is Shot)
                     {
                         var shot = e as Shot;
+                        body.Restitution = shot.Restitution;
                         body.OnCollision += (a, b, contact) =>
                         {
                             Vector2 normal;

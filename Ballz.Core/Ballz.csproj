@@ -131,6 +131,7 @@
     <Compile Include="Utils\PerformanceReporter.cs" />
     <Compile Include="Renderer\Camera\CameraTrajectory.cs" />
     <Compile Include="GameSession\Logic\Weapons\Potato.cs" />
+    <Compile Include="GameSession\Logic\Weapons\Grenade.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
@@ -160,7 +161,7 @@
     <CreateItem Include="$(ContentSourceDirectory)\**\*.*">
       <Output TaskParameter="Include" ItemName="ContentFilesToCopy" />
     </CreateItem>
-    <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy->'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy-&gt;'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
   <ItemGroup />
 </Project>
