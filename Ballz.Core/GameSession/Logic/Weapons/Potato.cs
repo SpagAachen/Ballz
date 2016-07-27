@@ -35,7 +35,7 @@ namespace Ballz.GameSession.Logic.Weapons
 
         protected override Shot CreateShot()
         {
-            float damage = 100.0f / (1f + 99.0f * (float)random.NextDouble());
+            float damage = 100.0f * (float)random.NextDouble(); //100.0f / (1f + 99.0f * (float)random.NextDouble());
             return new Shot
             {
                 ProjectileTexture = "PotatoBullet",
