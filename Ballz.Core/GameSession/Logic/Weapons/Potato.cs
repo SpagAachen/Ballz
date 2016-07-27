@@ -39,8 +39,8 @@ namespace Ballz.GameSession.Logic.Weapons
             return new Shot
             {
                 ProjectileTexture = "PotatoBullet",
-                BulletHoleRadius = damage / 10.0f,
-                ExplosionRadius = damage / 10.0f,
+                BulletHoleRadius = (float)Math.Sqrt(damage),
+                ExplosionRadius = (float)Math.Sqrt(damage),
                 HealthDecreaseFromExplosionImpact = damage,
                 HealthDecreaseFromProjectileHit = damage,
                 ShotType = Shot.ShotType_T.Normal,
