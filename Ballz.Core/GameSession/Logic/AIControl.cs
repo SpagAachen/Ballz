@@ -16,13 +16,13 @@ namespace Ballz.GameSession.Logic
             bazoo = new Bazooka(ball, game);
         }
 
-        Ball CurrentTarget;
+        Ball _currentTarget;
 
         private WeaponControl bazoo;
         private WeaponControl pistol;
 
-        float ShootCooldown;
-        const float PauseBetweenShots = 2.0f;
+        float _shootCooldown;
+        private const float PauseBetweenShots = 2.0f;
 
         public override bool Update(float elapsedSeconds, World.World worldState)
         {
@@ -30,38 +30,42 @@ namespace Ballz.GameSession.Logic
 
             if (Ball.IsAlive)
             {
-                ShootCooldown -= elapsedSeconds;
+                _shootCooldown -= elapsedSeconds;
 
-                if (ShootCooldown <= 0f)
+                if (_shootCooldown <= 0f)
                 {
-                    if (CurrentTarget == null || CurrentTarget.Disposed || CurrentTarget.Health <= 0)
+                    if (_currentTarget == null || _currentTarget.Disposed || _currentTarget.Health <= 0)
                     {
-                        CurrentTarget = (Ball)worldState.Entities
+                        _currentTarget = (Ball)worldState.Entities
                             .FirstOrDefault(e => e is Ball
                                 && ((Ball)e).Player != Ball.Player
                                 && ((Ball)e).Health > 0);
+                        _currentTarget =
+                            (Ball)
+                                worldState.Entities.Aggregate(
+                                    (curMin, x) => ((Ball)x).Player != Ball.Player && (curMin == null || (Ball.Position - x.Position).LengthSquared() < (Ball.Position - curMin.Position).LengthSquared()) ? x : curMin);
                     }
 
-                    if (CurrentTarget != null)
+                    if (_currentTarget != null)
                     {
                         Ball.IsAiming = false;
                         Ball.IsCharging = false;
-                        float curCharge = 0.01f;
+                        var curCharge = 0.01f;
                         float o = 0;
                         while (curCharge < 0.5f)
                         {
                             var g = 9.81f; // gravity
                             var v = curCharge * 25f; // velocity
-                            var x = CurrentTarget.Position.X - Ball.Position.X; // target x
-                            var y = CurrentTarget.Position.Y - Ball.Position.Y; // target y
-                            var s = (v * v * v * v) - g * (g * (x * x) + 2 * y * (v * v)); //substitution
+                            var x = _currentTarget.Position.X - Ball.Position.X; // target x
+                            var y = _currentTarget.Position.Y - Ball.Position.Y; // target y
+                            var s = v * v * v * v - g * (g * (x * x) + 2 * y * (v * v)); //substitution
 
                             if (s < 0)
                             {
                                 curCharge += 0.01f;
                                 continue;
                             }
-                            o = (float)Math.Atan2(((v * v) + Math.Sqrt(s)), (g * x)); // launch angle
+                            o = (float)Math.Atan2(v * v + Math.Sqrt(s), g * x); // launch angle
                             Ball.IsAiming = true;
                             Ball.IsCharging = true;
                             break;
@@ -70,7 +74,7 @@ namespace Ballz.GameSession.Logic
                         if (!Ball.IsAiming)
                         {
                             Ball.HoldingWeapon = "HandGun";
-                            Ball.AimDirection = Vector2.Normalize(CurrentTarget.Position - Ball.Position);
+                            Ball.AimDirection = Vector2.Normalize(_currentTarget.Position - Ball.Position);
                             var muzzle = GenericGraphicsEffect.CreateMuzzle(
                                 Game.Match.GameTime,
                                 Ball.Position + 2f * Ball.AimDirection,
@@ -81,21 +85,15 @@ namespace Ballz.GameSession.Logic
                             var rayHit = Game.Match.Physics.Raycast(Ball.Position, Ball.Position + Ball.AimDirection * 1000f);
                             if (rayHit.HasHit)
                             {
-                                const float ExplosionRadius = 0.3f;
-                                const float Damage = 25f;
-                                Game.Match.World.StaticGeometry.SubtractCircle(rayHit.Position.X, rayHit.Position.Y, ExplosionRadius);
+                                const float explosionRadius = 0.3f;
+                                const float damage = 25f;
+                                Game.Match.World.StaticGeometry.SubtractCircle(rayHit.Position.X, rayHit.Position.Y, explosionRadius);
                                 Ballz.The().Match.World.GraphicsEvents.Add(GenericGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, rayHit.Position, 0, 0.2f));
-                                if (rayHit.Entity != null)
-                                {
-                                    if (rayHit.Entity is Ball)
-                                    {
-                                        Ball theBall = rayHit.Entity as Ball;
-                                        if (theBall.Health > 0)
-                                            theBall.Health -= Damage;
-                                    }
-                                }
+                                var theBall = rayHit.Entity as Ball;
+                                if (theBall?.Health > 0)
+                                    theBall.Health -= damage;
                             }
-                            ShootCooldown = PauseBetweenShots;
+                            _shootCooldown = PauseBetweenShots;
                             return true;
                         }
                         Ball.HoldingWeapon = "Bazooka";
@@ -120,7 +118,7 @@ namespace Ballz.GameSession.Logic
                             Ball.PhysicsBody.ApplyForce(-10000 * Ball.ShootCharge * newShot.Recoil * Ball.AimDirection);
 
                             Ball.ShootCharge = 0f;
-                            ShootCooldown = PauseBetweenShots;
+                            _shootCooldown = PauseBetweenShots;
                             return true;
                         }
                     }
