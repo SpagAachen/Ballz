@@ -506,7 +506,7 @@ namespace Ballz.GameSession.Physics
             bool hasTerrain = false;
             if (terrainPosX > 0 && terrainPosX < Terrain.width && terrainPosY > 0 && terrainPosY < Terrain.height)
             {
-                hasTerrain = Terrain.PublicShape.TerrainBitmap[terrainPosX, terrainPosY];
+                hasTerrain = Terrain.PublicShape.TerrainBitmap[terrainPosX, terrainPosY] > 0;
             }
             
             return fixture == null && !hasTerrain;

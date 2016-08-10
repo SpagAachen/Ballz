@@ -15,6 +15,18 @@ namespace Ballz.GameSession.World
     public class Terrain
     {
         public static readonly bool decimateOutlines = true;
+
+        public enum TerrainType
+        {
+            Air = 0,
+            Earth = 1,
+            Stone = 2,
+            Sand = 3,
+            Water = 4,
+            VegetationSeed = 5,
+            SpawnPoint = 6,
+            //...
+        }
         
         public class TerrainShape
         {
@@ -37,7 +49,9 @@ namespace Ballz.GameSession.World
             /// <summary>
             /// A bitmap of the terrain shape. True means earth, False means air.
             /// </summary>
-            public bool[,] TerrainBitmap = null;
+            //public bool[,] TerrainBitmap = null;
+
+            public TerrainType[,] TerrainBitmap = null;
         }
 
         public class TerrainModification
@@ -104,7 +118,7 @@ namespace Ballz.GameSession.World
             width = terrainData.Width;
             height = terrainData.Height;
 
-            PublicShape.TerrainBitmap = new bool[width, height];
+            PublicShape.TerrainBitmap = new TerrainType[width, height];
             terrainSmoothmap = new float[width, height];
             terrainSmoothmapCopy = new float[width, height];
             WaterSpawnBitmap = new bool[width, height];
@@ -119,14 +133,31 @@ namespace Ballz.GameSession.World
                     Color curPixel = pixels[y * width + x];
 
                     // Note that we flip the y coord here
-                    if (curPixel == Color.White)
+                    if (curPixel == new Color(127, 64, 0))
                     {
-                        PublicShape.TerrainBitmap[x, height - y - 1] = true;
+                        PublicShape.TerrainBitmap[x, height - y - 1] = TerrainType.Earth;
                         terrainSmoothmap[x, height - y - 1] = 1.0f;
                     }
-                    if (curPixel == Color.Blue)
+                    else if (curPixel == new Color(127, 127, 127))
+                    {
+                        PublicShape.TerrainBitmap[x, height - y - 1] = TerrainType.Stone;
+                    }
+                    else if (curPixel == Color.Yellow)
+                    {
+                        PublicShape.TerrainBitmap[x, height - y - 1] = TerrainType.Sand;
+                    }
+                    else if (curPixel == Color.Blue)
                     {
                         WaterSpawnBitmap[x, height - y - 1] = true;
+                        PublicShape.TerrainBitmap[x, height - y - 1] = TerrainType.Water;
+                    }
+                    else if (curPixel == Color.Lime)
+                    {
+                        PublicShape.TerrainBitmap[x, height - y - 1] = TerrainType.VegetationSeed;
+                    }
+                    else if (curPixel == Color.Red)
+                    {
+                        PublicShape.TerrainBitmap[x, height - y - 1] = TerrainType.SpawnPoint;
                     }
                 }
             }
@@ -203,8 +234,15 @@ namespace Ballz.GameSession.World
                     if (Distance(i, j, mod.X, mod.Y) > mod.Radius)
                         continue;
 
-                    // Add or remove dirt
-                    PublicShape.TerrainBitmap[i, j] = !mod.Subtract;
+                    TerrainType cur = PublicShape.TerrainBitmap[i, j];
+
+                    if (cur == TerrainType.Earth || cur == TerrainType.Sand)
+                    {
+                        if (mod.Subtract)
+                            PublicShape.TerrainBitmap[i, j] = TerrainType.Air;
+                        else
+                            PublicShape.TerrainBitmap[i, j] = TerrainType.Earth;
+                    }
                 }
             }
 
@@ -447,7 +485,8 @@ namespace Ballz.GameSession.World
                         {
                             float val = gauss[i + halfGauss];
 
-                            sum += (WorkingShape.TerrainBitmap[index, y] ? 1.0f : 0.0f) * val;
+                            var cur = WorkingShape.TerrainBitmap[index, y];
+                            sum += ((cur == TerrainType.Earth || cur == TerrainType.Sand || cur == TerrainType.Stone )? 1.0f : 0.0f) * val;
                             weight += val;
                         }
                     }
@@ -762,7 +801,7 @@ namespace Ballz.GameSession.World
             {
                 WorkingShape = new TerrainShape
                 {
-                    TerrainBitmap = PublicShape.TerrainBitmap.Clone() as bool[,]
+                        TerrainBitmap = PublicShape.TerrainBitmap.Clone() as TerrainType[,]
                 };
             }
 

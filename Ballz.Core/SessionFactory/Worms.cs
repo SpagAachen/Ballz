@@ -16,7 +16,7 @@ namespace Ballz.SessionFactory
     public class Worms : SessionFactory
     {
 
-        public Worms(string mapName = "TestWorld2", bool usePlayerTurns = false)
+        public Worms(string mapName = "Beach", bool usePlayerTurns = false)
         {
             MapName = mapName;
             UsePlayerTurns = usePlayerTurns;

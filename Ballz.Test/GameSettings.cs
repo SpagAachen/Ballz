@@ -41,7 +41,7 @@ namespace Ballz.Test
             var settings = new GameSettings
                                {
                                    GameMode = SessionFactory.SessionFactory.AvailableFactories.ElementAt(0),
-                                   MapName = "TestWorld2",
+                                   MapName = "Beach",
                                    MapTexture = null,
                                    Teams = teams
                                };
@@ -59,7 +59,7 @@ namespace Ballz.Test
             var gameMode = SessionFactory.SessionFactory.AvailableFactories.ElementAt(0);
 
             Assert.AreEqual(settings.GameMode, gameMode);
-            Assert.AreEqual(settings.MapName, "TestWorld2");
+            Assert.AreEqual(settings.MapName, "Beach");
             Assert.AreEqual(settings.Teams.Count, 2);
 
             {
