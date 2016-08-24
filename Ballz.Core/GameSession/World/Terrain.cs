@@ -168,6 +168,9 @@ namespace Ballz.GameSession.World
             fullCells = new List<List<IntVector2>>(height);
             allEdges = new List<Edge>();
 
+            // Let sand fall down
+            UpdateTerrain(0, 0, width);
+
             Update();
         }
 
@@ -245,6 +248,9 @@ namespace Ballz.GameSession.World
                     }
                 }
             }
+
+            // Let sand "fall down" etc.
+            UpdateTerrain(tly, tlx, brx);
 
             WorkingRevision++;
         }
@@ -774,8 +780,53 @@ namespace Ballz.GameSession.World
             }
         }
 
-        private void ExtractTrianglesAndOutline()
+        // Let sand fall down etc
+        private void UpdateTerrain(int minY, int minX, int maxX)
         {
+            minY = Math.Max(0, minY);
+            
+            // For every column check whether there is air below sand so that the latter moves downwards
+            for (int x = minX; x < maxX; ++x)
+            {
+                int lowestAirPosition = height;
+                for (int y = minY; y < height; ++y)
+                {
+                    TerrainType cur = PublicShape.TerrainBitmap[x, y];
+
+                    //PublicShape.TerrainBitmap[x, y] = TerrainType.Air;
+
+                    if (cur == TerrainType.Air)
+                    {
+                        if (lowestAirPosition == height)
+                        {
+                            lowestAirPosition = y;
+                        }
+                    }
+                    else if (cur == TerrainType.Sand)
+                    {
+                        if (lowestAirPosition < height)
+                        {
+                            // Fill lowest air with sand
+                            PublicShape.TerrainBitmap[x, lowestAirPosition] = TerrainType.Sand;
+
+                            ++lowestAirPosition;
+
+                            // This position is now air
+                            PublicShape.TerrainBitmap[x, y] = TerrainType.Air;
+                        }
+                    }
+                    else
+                    {
+                        // Reset
+                        lowestAirPosition = height;
+                    }
+                }
+            }
+         
+        }
+
+        private void ExtractTrianglesAndOutline()
+        {   
             // Smooth the terrain bitmap
             SmoothTerrain(new float[] { 1, 1, 1, 1, 1 });
             //smoothTerrain(new float[]{1,1,1}); // Use this one if performance is an issue
