@@ -30,6 +30,7 @@ namespace Ballz.Settings
         public Setting<bool> Fullscreen = new Setting<bool>();
         public Setting<Resolution> ScreenResolution = new Setting<Resolution>();
         public Setting<int> MasterVolume = new Setting<int>();
+        public Setting<string> PlayerName = new Setting<string>();
 
         public ProgrammSettings()
         {
