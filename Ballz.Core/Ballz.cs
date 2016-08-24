@@ -178,6 +178,10 @@ namespace Ballz
             optionsMenu.AddItem(new CheckBox("FullScreen: ", GameSettings.Fullscreen));
             optionsMenu.AddItem(new Choice<Settings.Resolution>("Resolution: ", GameSettings.ScreenResolution, GetResolutions()));
             optionsMenu.AddItem(new SpinBox("MasterVolume: ", GameSettings.MasterVolume, 0, 100));
+            InputBox ipb = new InputBox("PlayerName: ", true);
+            ipb.Setting = GameSettings.PlayerName;
+            ipb.internalValue = false;
+            optionsMenu.AddItem(ipb);
             Label apply = new Label("Apply", true);
             apply.OnSelect += () =>
             {

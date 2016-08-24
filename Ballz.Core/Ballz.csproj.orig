@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Condition="'$(OS)' != 'Windows_NT'" Project="../Linux/Ballz.Linux.csproj" />
+  <Import Condition="'$(OS)' == 'Windows_NT'" Project="../Windows/Ballz.Windows.csproj" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{0F30A63C-8123-40A8-8C5B-431941CDD4A4}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Ballz</RootNamespace>
+    <AssemblyName>Ballz</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Ballz.Program</StartupObject>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="GameSession\Logic\BallControl.cs" />
+    <Compile Include="GameSession\Logic\GameLogic.cs" />
+    <Compile Include="GameSession\Logic\Player.cs" />
+    <Compile Include="GameSession\Renderer\PhysicsDebugRendering.cs" />
+    <Compile Include="GameSession\Session.cs" />
+    <Compile Include="GameSession\World\Material.cs" />
+    <Compile Include="GameSession\World\Shot.cs" />
+    <Compile Include="Input\InputTranslator.cs" />
+    <Compile Include="Logic\LogicControl.cs" />
+    <Compile Include="GameSession\Network\NetworkComponent.cs" />
+    <Compile Include="GameSession\Physics\PhysicsComponent.cs" />
+    <Compile Include="GameSession\World\Entity.cs" />
+    <Compile Include="Menu\Back.cs" />
+    <Compile Include="Menu\InputBox.cs" />
+    <Compile Include="Menu\Leaf.cs" />
+    <Compile Include="Menu\Label.cs" />
+    <Compile Include="Menu\Composite.cs" />
+    <Compile Include="Menu\IRawInputConsumer.cs" />
+    <Compile Include="Messages\NetworkMessage.cs" />
+    <Compile Include="Messages\Message.cs" />
+    <Compile Include="GameSession\World\Ball.cs" />
+    <Compile Include="GameSession\World\Terrain.cs" />
+    <Compile Include="GameSession\World\World.cs" />
+    <Compile Include="GameSession\Renderer\GameRenderer.cs" />
+    <Compile Include="Network\Client.cs" />
+    <Compile Include="Network\Connection.cs" />
+    <Compile Include="Network\Network.cs" />
+    <Compile Include="Network\Server.cs" />
+    <Compile Include="Renderer\MenuRenderer.cs" />
+    <Compile Include="Ballz.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Utils\VectorExtensions.cs" />
+    <None Include="app.config" />
+    <None Include="Content.mgcb" />
+    <None Include="Content\Ball.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Content\Worlds\TestWorld.png" />
+    <None Include="Content\Textures\Balls.jpg" />
+    <Compile Include="Messages\MenuMessage.cs" />
+    <Compile Include="Messages\InputMessage.cs" />
+    <Compile Include="Menu\Item.cs" />
+    <Compile Include="Renderer\PerformanceRenderer.cs" />
+    <Compile Include="Messages\LogicMessage.cs" />
+    <Compile Include="Menu\CheckBox.cs" />
+    <Compile Include="Settings\Programmsettings.cs" />
+    <Compile Include="Settings\SettingTypes.cs" />
+    <Compile Include="Menu\Choice.cs" />
+    <Compile Include="Menu\IChooseable.cs" />
+    <None Include="packages.config" />
+    <Compile Include="Renderer\Camera.cs" />
+    <Compile Include="Sound\SoundControl.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Fonts\Menufont.spritefont">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Fonts\Menufont.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Textures\Balls.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Textures\Crosshair.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Textures\Dirt.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Textures\Germoney.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Worlds\TestWorld.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+<<<<<<< HEAD
+    <Content Include="Content\Worlds\TestWorld2.png">
+=======
+    <Content Include="Content\Sounds\pew.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Sounds\pew.xnb">
+>>>>>>> df91701... Added soundeffect service fixed player fires on startup of match added shooting sound
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Sound\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="FarseerPhysics MonoGame, Version=3.5.0.40766, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\FarseerPhysics.MonoGame.Unofficial.3.5.0\lib\FarseerPhysics MonoGame.dll</HintPath>
+    </Reference>
+    <Reference Include="MathFloat, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MathFloat.1.0.0.0\lib\net20\MathFloat.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+</Project>
