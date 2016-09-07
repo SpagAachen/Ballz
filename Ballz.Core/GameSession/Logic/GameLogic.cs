@@ -30,7 +30,18 @@ namespace Ballz.GameSession.Logic
         {
             if (Session.UsePlayerTurns)
             {
-                var player = Session.Players[(Session.Players.IndexOf(Session.ActivePlayer) + 1) % Session.Players.Count];
+                var activePlayerIndex = Session.Players.IndexOf(Session.ActivePlayer);
+
+                // Get the first player that still has at least one ball.
+                // Search for the next player in the order of the turn system
+                var player = Enumerable.Range(0, Session.Players.Count)
+                    .OrderBy(i => i > activePlayerIndex ? i - Session.Players.Count : i)
+                    .Select(i => Session.Players[i])
+                    .FirstOrDefault(p => p.OwnedBalls.Count > 0);
+
+                if (player == null)
+                    return;
+                
                 Session.ActivePlayer = player;
                 
                 player.ActiveBall = ChooseNextBall(player);
@@ -53,7 +64,10 @@ namespace Ballz.GameSession.Logic
 
         public Ball ChooseNextBall(Player player)
         {
-            return player.OwnedBalls[(player.OwnedBalls.IndexOf(player.ActiveBall) + 1) % player.OwnedBalls.Count];
+            if (player.OwnedBalls.Count == null)
+                return null;
+            else
+                return player.OwnedBalls[(player.OwnedBalls.IndexOf(player.ActiveBall) + 1) % player.OwnedBalls.Count];
         }
 
         public override void Update(GameTime time)
