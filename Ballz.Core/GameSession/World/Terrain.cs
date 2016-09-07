@@ -229,10 +229,17 @@ namespace Ballz.GameSession.World
             int brx = (int)Math.Ceiling(mod.X + mod.Radius);
             int bry = (int)Math.Ceiling(mod.Y + mod.Radius);
 
+            // Clamp to world boundaries
+            tlx = Math.Min(Math.Max(0, tlx), width - 1);
+            tly = Math.Min(Math.Max(0, tly), height - 1);
+            brx = Math.Min(Math.Max(0, brx), width - 1);
+            bry = Math.Min(Math.Max(0, bry), height - 1);
+
+
             // Iterate over bounding box part of bitmap
-            for (int j = Math.Max(0, tly); j < Math.Min(height, bry); ++j)
+            for (int j = tly; j < bry; ++j)
             {
-                for (int i = Math.Max(0, tlx); i < Math.Min(width, brx); ++i)
+                for (int i = tlx; i < brx; ++i)
                 {
                     if (Distance(i, j, mod.X, mod.Y) > mod.Radius)
                         continue;
