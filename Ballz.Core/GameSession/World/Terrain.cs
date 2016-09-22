@@ -81,6 +81,8 @@ namespace Ballz.GameSession.World
         /// </summary>
         public float Scale = 0.082f;
 
+        public Vector2 gravityPoint = new Vector2(0, float.MinValue);//0.082f * new Vector2(224, 250-66);
+
         /// <summary>
         /// The most recent terrain shape. Will be updated by the background worker once <see cref="WorkingShape"/> is finished.
         /// </summary>
