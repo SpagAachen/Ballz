@@ -904,6 +904,38 @@ namespace Ballz.GameSession.World
                 return PublicShape.Outlines;
             }
         }
+
+        Texture2D textureCache;
+
+        public Texture2D TerrainTypesToTexture()
+        {
+            Update();
+
+            if (textureCache != null)
+                return textureCache;
+
+            textureCache = new Texture2D(Ballz.The().GraphicsDevice, width, height);
+            IEnumerable <TerrainType> typeData;
+            lock (PublicShape)
+            {
+                typeData = PublicShape.TerrainBitmap.Cast<TerrainType>();
+            }
+
+            var colorData = typeData.Select((TerrainType t) => { switch (t) {
+                    case TerrainType.Earth:
+                        return new Color(1, 0, 0);
+                    case TerrainType.Sand:
+                        return new Color(2, 0, 0);
+                    case TerrainType.Stone:
+                        return new Color(3, 0, 0);
+                    default:
+                        return new Color(0, 0, 0);
+                }
+            });
+            textureCache.SetData(colorData.ToArray());
+
+            return textureCache;
+        }
         
         public struct IntVector2
         {

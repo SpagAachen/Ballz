@@ -20,10 +20,12 @@ namespace Ballz.GameSession.Renderer
         Model BallModel, GraveModel;
         Dictionary<string,Texture2D> TeamTextures;
         Texture2D CrosshairTexture;
-        Texture2D TerrainTexture;
-        
-        BasicEffect BallEffect, TerrainEffect, GraveEffect, RopeEffect;
-        Effect CelShading;
+        Texture2D EarthTexture;
+        Texture2D SandTexture;
+        Texture2D StoneTexture;
+
+        BasicEffect BallEffect, GraveEffect, RopeEffect;
+        Effect CelShading, TerrainEffect;
         RenderTarget2D WorldRenderTarget;
 
         Random random = new Random();
@@ -106,30 +108,31 @@ namespace Ballz.GameSession.Renderer
 
                 float TerrainTextureScale = 0.015f;
 
+                var terrainSize = new Vector2(worldState.StaticGeometry.width, worldState.StaticGeometry.height);
+
                 foreach (var t in tris)
                 {
                     vpc[i + 0].Color = Color.Maroon;
                     vpc[i + 0].Position = new Vector3(t.A.X, t.A.Y, -1);
-                    vpc[i + 0].TextureCoordinate = new Vector2(t.A.X, t.A.Y) * TerrainTextureScale;
+                    vpc[i + 0].TextureCoordinate = new Vector2(t.A.X, t.A.Y) / terrainSize;
                     vpc[i + 1].Color = Color.Maroon;
                     vpc[i + 1].Position = new Vector3(t.B.X, t.B.Y, -1);
-                    vpc[i + 1].TextureCoordinate = new Vector2(t.B.X, t.B.Y) * TerrainTextureScale;
+                    vpc[i + 1].TextureCoordinate = new Vector2(t.B.X, t.B.Y) / terrainSize;
                     vpc[i + 2].Color = Color.Maroon;
                     vpc[i + 2].Position = new Vector3(t.C.X, t.C.Y, -1);
-                    vpc[i + 2].TextureCoordinate = new Vector2(t.C.X, t.C.Y) * TerrainTextureScale;
+                    vpc[i + 2].TextureCoordinate = new Vector2(t.C.X, t.C.Y) / terrainSize;
                     i += 3;
                 }
 
                 Matrix terrainWorld = Matrix.CreateScale(worldState.StaticGeometry.Scale);
-                TerrainEffect.World = terrainWorld;
-                TerrainEffect.View = Game.Camera.View;
-                TerrainEffect.Projection = Game.Camera.Projection;
                 TerrainEffect.CurrentTechnique.Passes[0].Apply();
-                GraphicsDevice.SamplerStates[0] = new SamplerState
-                {
-                    AddressU = TextureAddressMode.Wrap,
-                    AddressV = TextureAddressMode.Wrap
-                };
+                
+                TerrainEffect.Parameters["ModelViewProjection"].SetValue(terrainWorld * Game.Camera.View * Game.Camera.Projection);
+                TerrainEffect.Parameters["TerrainTypesTexture"].SetValue(worldState.StaticGeometry.TerrainTypesToTexture());
+                TerrainEffect.Parameters["EarthTexture"].SetValue(EarthTexture);
+                TerrainEffect.Parameters["SandTexture"].SetValue(SandTexture);
+                TerrainEffect.Parameters["StoneTexture"].SetValue(StoneTexture);
+                TerrainEffect.Parameters["TextureScale"].SetValue(TerrainTextureScale);
 
                 GraphicsDevice.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vpc, 0, tris.Count);
 
@@ -472,12 +475,11 @@ namespace Ballz.GameSession.Renderer
             BallModel = Game.Content.Load<Model>("Models/Ball");
             BallModel.Meshes[0].MeshParts[0].Effect = BallEffect;
 
-            TerrainTexture = Game.Content.Load<Texture2D>("Textures/Dirt");
+            EarthTexture = Game.Content.Load<Texture2D>("Textures/Dirt");
+            SandTexture = Game.Content.Load<Texture2D>("Textures/Sand");
+            StoneTexture = Game.Content.Load<Texture2D>("Textures/Stone");
 
-            TerrainEffect = new BasicEffect(Game.GraphicsDevice);
-            TerrainEffect.LightingEnabled = false;
-            TerrainEffect.Texture = TerrainTexture;
-            TerrainEffect.TextureEnabled = true;
+            TerrainEffect = Game.Content.Load<Effect>("Effects/Terrain");
 
             RopeEffect = new BasicEffect(Game.GraphicsDevice);
             RopeEffect.LightingEnabled = false;

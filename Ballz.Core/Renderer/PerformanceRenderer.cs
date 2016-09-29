@@ -39,9 +39,9 @@ namespace Ballz
         private float allocatedMemory;
 
         private Vector2 fpsPosition = new Vector2(20,20);
-        private Vector2 frametimePosition = new Vector2(20,40);
-        private Vector2 memoryPosition = new Vector2(20,60);
-        private Vector2 spacing = new Vector2(0,20);
+        private Vector2 frametimePosition = new Vector2(20,60);
+        private Vector2 memoryPosition = new Vector2(20,100);
+        private Vector2 spacing = new Vector2(0,40);
         private Vector2 positioning;
 
         public PerformanceRenderer(Ballz game) : base(game)
