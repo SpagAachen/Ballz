@@ -915,25 +915,41 @@ namespace Ballz.GameSession.World
                 return textureCache;
 
             textureCache = new Texture2D(Ballz.The().GraphicsDevice, width, height);
-            IEnumerable <TerrainType> typeData;
+            var typeWeights = new Color[width*height];
+            TerrainType[,] types;
             lock (PublicShape)
             {
-                typeData = PublicShape.TerrainBitmap.Cast<TerrainType>();
+                types = PublicShape.TerrainBitmap.Clone() as TerrainType[,];
             }
 
-            var colorData = typeData.Select((TerrainType t) => { switch (t) {
-                    case TerrainType.Earth:
-                        return new Color(255, 0, 0);
-                    case TerrainType.Sand:
-                        return new Color(0, 255, 0);
-                    case TerrainType.Stone:
-                        return new Color(0, 0, 255);
-                    default:
-                        return new Color(0, 0, 0);
-                }
-            });
-            textureCache.SetData(colorData.ToArray());
+            for(int x = 0; x < width; x++)
+            {
+                for(int y = 0; y < height; y++)
+                {
+                    int i = x + y * width;
+                    var t = types[x, y];
+                    Color c;
+                    switch (t)
+                    {
+                        case TerrainType.Earth:
+                            c = new Color(255, 0, 0);
+                            break;
+                        case TerrainType.Sand:
+                            c = new Color(0, 255, 0);
+                            break;
+                        case TerrainType.Stone:
+                            c = new Color(0, 0, 255);
+                            break;
+                        default:
+                            c = new Color(0, 0, 0);
+                            break;
+                    }
 
+                    typeWeights[i] = c;
+                }
+            }
+
+            textureCache.SetData(typeWeights);
             return textureCache;
         }
         
