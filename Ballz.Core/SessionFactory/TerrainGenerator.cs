@@ -44,6 +44,8 @@ namespace Ballz.SessionFactory
                     if (weightedNoise(2f, height,x,y) > 0)
                         types[y, x] = Terrain.TerrainType.Earth;
                     else if (weightedNoise(2f, height, x, y) > -0.1)
+                        types[y, x] = Terrain.TerrainType.Sand;
+                    else if (weightedNoise(2f, height, x, y) > -0.2)
                         types[y, x] = Terrain.TerrainType.Water;
 
             for (var x = 0; x < width; ++x)
