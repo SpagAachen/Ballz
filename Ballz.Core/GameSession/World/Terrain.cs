@@ -923,11 +923,11 @@ namespace Ballz.GameSession.World
 
             var colorData = typeData.Select((TerrainType t) => { switch (t) {
                     case TerrainType.Earth:
-                        return new Color(1, 0, 0);
+                        return new Color(255, 0, 0);
                     case TerrainType.Sand:
-                        return new Color(2, 0, 0);
+                        return new Color(0, 255, 0);
                     case TerrainType.Stone:
-                        return new Color(3, 0, 0);
+                        return new Color(0, 0, 255);
                     default:
                         return new Color(0, 0, 0);
                 }
