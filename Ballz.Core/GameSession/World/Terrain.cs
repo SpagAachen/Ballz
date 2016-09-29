@@ -81,6 +81,8 @@ namespace Ballz.GameSession.World
         /// </summary>
         public float Scale = 0.082f;
 
+        public Vector2 gravityPoint = new Vector2(0, float.MinValue);//0.082f * new Vector2(224, 250-66);
+
         /// <summary>
         /// The most recent terrain shape. Will be updated by the background worker once <see cref="WorkingShape"/> is finished.
         /// </summary>
@@ -901,6 +903,38 @@ namespace Ballz.GameSession.World
             {
                 return PublicShape.Outlines;
             }
+        }
+
+        Texture2D textureCache;
+
+        public Texture2D TerrainTypesToTexture()
+        {
+            Update();
+
+            if (textureCache != null)
+                return textureCache;
+
+            textureCache = new Texture2D(Ballz.The().GraphicsDevice, width, height);
+            IEnumerable <TerrainType> typeData;
+            lock (PublicShape)
+            {
+                typeData = PublicShape.TerrainBitmap.Cast<TerrainType>();
+            }
+
+            var colorData = typeData.Select((TerrainType t) => { switch (t) {
+                    case TerrainType.Earth:
+                        return new Color(255, 0, 0);
+                    case TerrainType.Sand:
+                        return new Color(0, 255, 0);
+                    case TerrainType.Stone:
+                        return new Color(0, 0, 255);
+                    default:
+                        return new Color(0, 0, 0);
+                }
+            });
+            textureCache.SetData(colorData.ToArray());
+
+            return textureCache;
         }
         
         public struct IntVector2

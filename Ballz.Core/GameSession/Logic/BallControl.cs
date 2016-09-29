@@ -111,17 +111,32 @@ namespace Ballz.GameSession.Logic
             {
                 // Send raycasts to the bottom. If it hits anything, perform the actual jump.
 
-                for(float angle = -60f; angle < 60f; angle += 5f)
+                float closestDist = float.MaxValue;
+                Vector2 bestPos = Vector2.Zero;
+
+                for(float angle = -175f; angle < 180f; angle += 5f)
                 {
                     var rayDirection = new Vector2(0, -(Ball.Radius + 0.05f));
                     rayDirection = rayDirection.Rotate(angle * (float)Math.PI / 180f);
                     var rayHit = Match.Physics.Raycast(Ball.Position, Ball.Position + rayDirection);
                     if (rayHit.HasHit)
                     {
-                        Ball.Velocity = new Vector2(Ball.Velocity.X, 5f);
-                        JumpCoolDown = PauseBetweenJumps;
-                        break;
+                        Vector2 pos = rayHit.Position;
+                        float dist = Vector2.Distance(pos, Ball.Position);
+
+                        if (dist < closestDist)
+                        {
+                            closestDist = dist;
+                            bestPos = pos;
+                        }
                     }
+                }
+
+                if (closestDist < float.MaxValue)
+                {
+                    Ball.Velocity = new Vector2(Ball.Velocity.X, 0) - 5f * Vector2.Normalize(bestPos - Ball.Position);
+                    JumpCoolDown = PauseBetweenJumps;
+
                 }
             }
         }

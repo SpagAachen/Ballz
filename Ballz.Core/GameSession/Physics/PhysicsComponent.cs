@@ -31,11 +31,12 @@ namespace Ballz.GameSession.Physics
         /// </summary>
         FarseerPhysics.Dynamics.World PhysicsWorld;
 
-        public PhysicsControl(Ballz game) : base(game)
+        public PhysicsControl(Ballz game)
+            : base(game)
         {
             Game = game;
         }
-        
+
         Dictionary<Body, int> EntityIdByPhysicsBody = new Dictionary<Body, int>();
 
         Dictionary<Body, Rope> RopesByPhysicsBody = new Dictionary<Body, Rope>();
@@ -54,7 +55,7 @@ namespace Ballz.GameSession.Physics
 
         public override void Initialize()
         {
-            PhysicsWorld = new FarseerPhysics.Dynamics.World(new Vector2(0f, -9.82f));
+            PhysicsWorld = new FarseerPhysics.Dynamics.World(new Vector2(0f, 0 * -9.82f));
         }
 
         /// <summary>
@@ -119,7 +120,7 @@ namespace Ballz.GameSession.Physics
         {
             e.Dispose();
             worldState.RemoveEntity(e);
-            if(e.PhysicsBody != null)
+            if (e.PhysicsBody != null)
             {
                 EntityIdByPhysicsBody.Remove(e.PhysicsBody);
                 RemoveBody(e.PhysicsBody);
@@ -142,11 +143,11 @@ namespace Ballz.GameSession.Physics
 
             rope.PhysicsSegments.Clear();
 
-            for (int i = 0; i<segmentCount; i++)
+            for (int i = 0; i < segmentCount; i++)
             {
                 var ropeSegmentLength = i > 0 ? Rope.SegmentLength : Rope.Diameter;
                 var ropeSegmentVector = ropeSegmentDir * ropeSegmentLength;
-                var segmentStart  = rope.AttachedPosition + ropeSegmentVector * i;
+                var segmentStart = rope.AttachedPosition + ropeSegmentVector * i;
                 var segmentCenter = rope.AttachedPosition + ropeSegmentVector * (i + 0.5f);
 
                 var boxWidth = Rope.Diameter;
@@ -160,13 +161,13 @@ namespace Ballz.GameSession.Physics
                 segment.AngularDamping = 1.1f;
                 segment.LinearDamping = 1.1f;
                 segment.CollisionCategories = Category.Cat3;
-                segment.SetTransform(segmentCenter, -ropeRotation -  0.5f * (float)Math.PI);
+                segment.SetTransform(segmentCenter, -ropeRotation - 0.5f * (float)Math.PI);
 
                 rope.PhysicsSegments.Add(segment);
 
                 if (i > 0)
                 {
-                    var segmentJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, rope.PhysicsSegments[i - 1], segment, new Vector2(0, i == 1 ? Rope.Diameter/2 : Rope.SegmentLength/2), new Vector2(0, -Rope.SegmentLength/2));
+                    var segmentJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, rope.PhysicsSegments[i - 1], segment, new Vector2(0, i == 1 ? Rope.Diameter / 2 : Rope.SegmentLength / 2), new Vector2(0, -Rope.SegmentLength / 2));
                     segmentJoint.CollideConnected = false;
                     rope.PhysicsSegmentJoints.Add(segmentJoint);
                 }
@@ -174,9 +175,9 @@ namespace Ballz.GameSession.Physics
                 {
                     segment.BodyType = BodyType.Static;
                 }
-             }
+            }
             //var ballAnchor = rope.AttachedEntity.Position + new Vector2(0, rope.AttachedEntity.Radius + 1f);
-            var ballJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, rope.PhysicsSegments.Last(), rope.AttachedEntity.PhysicsBody, new Vector2(0, Rope.SegmentLength/2), Vector2.Zero);
+            var ballJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, rope.PhysicsSegments.Last(), rope.AttachedEntity.PhysicsBody, new Vector2(0, Rope.SegmentLength / 2), Vector2.Zero);
             ballJoint.CollideConnected = false;
             rope.PhysicsEntityJoint = ballJoint;
             
@@ -216,7 +217,7 @@ namespace Ballz.GameSession.Physics
             }
 
             // Only allow shortening rope if all joints are restful
-            for(int i = 0; i < rope.PhysicsSegmentJoints.Count; ++i)
+            for (int i = 0; i < rope.PhysicsSegmentJoints.Count; ++i)
             {
                 var joint = rope.PhysicsSegmentJoints[i];
                 if (Vector2.Distance(joint.WorldAnchorA, joint.WorldAnchorB) > 0.1f * Rope.SegmentLength)
@@ -261,7 +262,7 @@ namespace Ballz.GameSession.Physics
 
             rope.PhysicsSegments.Add(newSegment);
 
-            var segmentJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, lastSegment, newSegment, new Vector2(0, Rope.SegmentLength/2), new Vector2(0, -Rope.SegmentLength/2) );
+            var segmentJoint = JointFactory.CreateRevoluteJoint(PhysicsWorld, lastSegment, newSegment, new Vector2(0, Rope.SegmentLength / 2), new Vector2(0, -Rope.SegmentLength / 2));
             segmentJoint.CollideConnected = false;
             rope.PhysicsSegmentJoints.Add(segmentJoint);
 
@@ -287,7 +288,7 @@ namespace Ballz.GameSession.Physics
             var entities = worldState.Entities.ToArray();
             foreach (var e in entities)
             {
-                if(e.Disposed || e.Position.LengthSquared() > 100 * 100 || e.Position.Y < -10)
+                if (e.Disposed || e.Position.LengthSquared() > 100 * 100 || e.Position.Y < -10)
                 {                    
                     if (e.Position.Y < -10 && e as Ball != null) // the player drowned
                         Game.Services.GetService<Sound.SoundControl>().PlaySound(Sound.SoundControl.DrownSound);
@@ -340,7 +341,7 @@ namespace Ballz.GameSession.Physics
                                 Entity entity = worldState.EntityById(entityId);
 
                                 // Mutual collision
-                                if(entity != null)
+                                if (entity != null)
                                 {
                                     entity.OnEntityCollision(shot);
                                     shot.OnEntityCollision(entity);
@@ -359,7 +360,7 @@ namespace Ballz.GameSession.Physics
                     // So, apply an impulse that changes the old velocity to the new one.
                     body.ApplyLinearImpulse(body.Mass * (e.Velocity - body.LinearVelocity));
 
-                if(body.LinearVelocity.LengthSquared() > 0.0001 || body.AngularVelocity > 0.001)
+                if (body.LinearVelocity.LengthSquared() > 0.0001 || body.AngularVelocity > 0.001)
                 {
                     worldState.IsSomethingMoving = true;
                 }
@@ -375,6 +376,8 @@ namespace Ballz.GameSession.Physics
             PhysicsWorld.Step(elapsedSeconds);
             worldState.Water.Step(worldState, elapsedSeconds);
 
+            Vector2 gravityPoint = worldState.StaticGeometry.gravityPoint;
+
             // Sync back the positions and velocities
             foreach (var e in worldState.Entities)
             {
@@ -382,6 +385,9 @@ namespace Ballz.GameSession.Physics
 
                 if (e.PhysicsBody == null || e.Disposed)
                     continue;
+
+                // Manually apply gravity
+                body.ApplyForce(9.81f * Vector2.Normalize(gravityPoint - body.Position) * body.Mass);
 
                 e.Position = body.Position;
                 e.Velocity = body.LinearVelocity;
@@ -412,8 +418,8 @@ namespace Ballz.GameSession.Physics
 
                 // Update shots
                 var shots = (from e in worldState.Entities
-                             where e is Shot
-                             select (e as Shot))
+                                         where e is Shot
+                                         select (e as Shot))
                              .ToArray();
 
                 foreach (var shot in shots)
@@ -473,31 +479,31 @@ namespace Ballz.GameSession.Physics
             RaycastResult closestHit = new RaycastResult();
 
             PhysicsWorld.RayCast((Fixture fixture, Vector2 position, Vector2 normal, float fraction) =>
-            {
-                Entity hitEntity = null;
-                if (EntityIdByPhysicsBody.ContainsKey(fixture.Body))
                 {
-                    hitEntity = Game.Match.World.EntityById(EntityIdByPhysicsBody[fixture.Body]);
-                }
-
-                if (fraction < closestFraction)
-                {
-                    closestFraction = fraction;
-                    closestHit = new RaycastResult
+                    Entity hitEntity = null;
+                    if (EntityIdByPhysicsBody.ContainsKey(fixture.Body))
                     {
-                        HasHit = true,
-                        Position = position,
-                        Normal = normal,
-                        Entity = hitEntity
-                    };
-                }
+                        hitEntity = Game.Match.World.EntityById(EntityIdByPhysicsBody[fixture.Body]);
+                    }
 
-                return fraction;
-            }, rayStart, rayEnd);
+                    if (fraction < closestFraction)
+                    {
+                        closestFraction = fraction;
+                        closestHit = new RaycastResult
+                        {
+                            HasHit = true,
+                            Position = position,
+                            Normal = normal,
+                            Entity = hitEntity
+                        };
+                    }
+
+                    return fraction;
+                }, rayStart, rayEnd);
 
             return closestHit;
         }
-        
+
         public bool IsEmpty(Vector2 Position)
         {
             var fixture = PhysicsWorld.TestPoint(Position);
@@ -507,8 +513,8 @@ namespace Ballz.GameSession.Physics
             if (terrainPosX > 0 && terrainPosX < Terrain.width && terrainPosY > 0 && terrainPosY < Terrain.height)
             {
                 hasTerrain = Terrain.PublicShape.TerrainBitmap[terrainPosX, terrainPosY] == Terrain.TerrainType.Earth
-                    || Terrain.PublicShape.TerrainBitmap[terrainPosX, terrainPosY] == Terrain.TerrainType.Stone
-                    || Terrain.PublicShape.TerrainBitmap[terrainPosX, terrainPosY] == Terrain.TerrainType.Sand;
+                || Terrain.PublicShape.TerrainBitmap[terrainPosX, terrainPosY] == Terrain.TerrainType.Stone
+                || Terrain.PublicShape.TerrainBitmap[terrainPosX, terrainPosY] == Terrain.TerrainType.Sand;
             }
             
             return fixture == null && !hasTerrain;
