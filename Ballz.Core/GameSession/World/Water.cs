@@ -26,7 +26,8 @@ namespace Ballz.GameSession.World
                 for (var y = 0; y < _height* GridMultiplier; ++y)
                     _grid[x,y] = new List<int>();
         }
-        Random rng = new Random();
+
+        readonly Random _rng = new Random();
 
         public void Initialize(World world, PhysicsControl physics)
         {
@@ -52,7 +53,7 @@ namespace Ballz.GameSession.World
             Velocities = velocities.ToArray();
             _velocityBuffer = Velocities.ToArray();
             ParticleCount = particles.Count;
-            w = new float[ParticleCount, ParticleCount];
+            _w = new float[ParticleCount, ParticleCount];
         }
 
         public int ParticleCount;
@@ -65,7 +66,7 @@ namespace Ballz.GameSession.World
 
         private Vector2[] _velocityBuffer;
 
-        private float[,] w;
+        private float[,] _w;
 
         private void Collision(float elapsedSeconds)
         {
@@ -97,8 +98,8 @@ namespace Ballz.GameSession.World
                         continue;
 
                     var n = Particles[j] - Particles[i];
-                    w[i, j] += (1 - n.Length())/D;
-                    wi += w[i, j];
+                    _w[i, j] += (1 - n.Length())/D;
+                    wi += _w[i, j];
                 }
                 h[i] = Math.Max(0, (wi - w0)*η);
             }
@@ -118,7 +119,7 @@ namespace Ballz.GameSession.World
                 
                 foreach (var j in neighbors)
                 {
-                    Velocities[i] += elapsedSeconds*0.5f*(h[i] + h[j])*w[i, j]*(Particles[i] - Particles[j]);
+                    Velocities[i] += elapsedSeconds*0.5f*(h[i] + h[j])*_w[i, j]*(Particles[i] - Particles[j]);
                 }
             }
         }
@@ -218,7 +219,7 @@ namespace Ballz.GameSession.World
                     var res = _physics.Raycast(Particles[i], newPos);
                     if (!res.HasHit)
                     {
-                        Velocities[i] = new Vector2((float) rng.NextDouble()*2 - 1, (float) rng.NextDouble()*2 - 1);
+                        Velocities[i] = new Vector2((float) _rng.NextDouble()*2 - 1, (float) _rng.NextDouble()*2 - 1);
                         var newPos2 = Particles[i] + Velocities[i] * elapsedSeconds;
                         var res2 = _physics.Raycast(Particles[i], newPos2);
                         if (!_physics.IsEmpty(newPos2) || res2.HasHit)

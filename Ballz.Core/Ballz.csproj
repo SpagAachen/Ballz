@@ -105,11 +105,13 @@
     <Compile Include="Program.cs" />
     <Compile Include="Renderer\BaseRenderer.cs" />
     <Compile Include="SessionFactory\TeamNames.cs" />
+    <Compile Include="SessionFactory\TerrainGenerator.cs" />
     <Compile Include="Utils\BufferedArray.cs" />
     <Compile Include="Utils\MathExtensions.cs" />
     <Compile Include="SessionFactory\SessionFactory.cs" />
     <Compile Include="SessionFactory\Worms.cs" />
     <Compile Include="Utils\EnumberableHelper.cs" />
+    <Compile Include="Utils\PerlinNoise.cs" />
     <Compile Include="Utils\RandomExtensions.cs" />
     <Compile Include="Utils\TextureHelper.cs" />
     <Compile Include="Utils\TypeInfoConverter.cs" />
@@ -161,7 +163,7 @@
     <CreateItem Include="$(ContentSourceDirectory)\**\*.*">
       <Output TaskParameter="Include" ItemName="ContentFilesToCopy" />
     </CreateItem>
-    <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy-&gt;'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy->'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
   <ItemGroup />
 </Project>

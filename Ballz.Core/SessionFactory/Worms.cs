@@ -22,6 +22,16 @@ namespace Ballz.SessionFactory
             UsePlayerTurns = usePlayerTurns;
         }
 
+        private int width;
+        private int height;
+        public Worms(int width, int height, bool usePlayerTurns = false)
+        {
+            this.width = width;
+            this.height = height;
+            MapName = "Generated";
+            UsePlayerTurns = usePlayerTurns;
+        }
+
         public string MapName;
         public bool UsePlayerTurns;
 
@@ -84,7 +94,7 @@ namespace Ballz.SessionFactory
         {
             if (settings.MapTexture == null)
             { // Multiplayer clients will already have a map
-                var mapTexture = game.Content.Load<Texture2D>("Worlds/" + MapName);
+                var mapTexture = MapName == "Generated" ? TerrainGenerator.GenerateTerrain(width,height): game.Content.Load<Texture2D>("Worlds/" + MapName);
                 settings.MapName = MapName;
                 settings.MapTexture = mapTexture;
             }
