@@ -869,6 +869,7 @@ namespace Ballz.GameSession.World
             var Task = new Task(() =>
             {
                 ExtractTrianglesAndOutline();
+                BuildTerrainTypeTexture();
 
                 lock (PublicShape)
                 {
@@ -907,34 +908,98 @@ namespace Ballz.GameSession.World
 
         Texture2D textureCache;
 
-        public Texture2D TerrainTypesToTexture()
+        public Texture2D GetTerrainTypeTexture()
         {
             Update();
 
-            if (textureCache != null)
-                return textureCache;
+            return textureCache;
+        }
 
+        public void BuildTerrainTypeTexture()
+        {
             textureCache = new Texture2D(Ballz.The().GraphicsDevice, width, height);
-            IEnumerable <TerrainType> typeData;
-            lock (PublicShape)
+            var typeWeights = new Color[width * height];
+            TerrainType[,] types = PublicShape.TerrainBitmap;
+
+            // Build type weights as color values
+            for (int x = 0; x < width; x++)
             {
-                typeData = PublicShape.TerrainBitmap.Cast<TerrainType>();
+                for (int y = 0; y < height; y++)
+                {
+                    int i = x + y * width;
+                    var t = types[x, y];
+                    Color c;
+                    switch (t)
+                    {
+                        case TerrainType.Earth:
+                            c = new Color(255, 0, 0);
+                            break;
+                        case TerrainType.Sand:
+                            c = new Color(0, 255, 0);
+                            break;
+                        case TerrainType.Stone:
+                            c = new Color(0, 0, 255);
+                            break;
+                        default:
+                            c = new Color(0, 0, 0);
+                            break;
+                    }
+
+                    typeWeights[i] = c;
+                }
             }
 
-            var colorData = typeData.Select((TerrainType t) => { switch (t) {
-                    case TerrainType.Earth:
-                        return new Color(255, 0, 0);
-                    case TerrainType.Sand:
-                        return new Color(0, 255, 0);
-                    case TerrainType.Stone:
-                        return new Color(0, 0, 255);
-                    default:
-                        return new Color(0, 0, 0);
-                }
-            });
-            textureCache.SetData(colorData.ToArray());
+            // Smooth everything with a 7 pixel gauss kernel (makes non-pixely material edges)
+            float[] gauss = new float[]
+            {
+                0.071303f,
+                0.131514f,
+                0.189879f,
+                0.214607f,
+                0.189879f,
+                0.131514f,
+                0.071303f
+            };
 
-            return textureCache;
+            // Gauss X step
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    int i = x + y * width;
+
+                    Vector3 c = Vector3.Zero;
+
+                    for (int d = -3; d <= 3; d++)
+                    {
+                        int ixy = Math.Min(Math.Max(x + d, 0), width - 1) + y * width;
+                        c += typeWeights[ixy].ToVector3() * gauss[d + 3];
+                    }
+
+                    typeWeights[i] = new Color(c);
+                }
+            }
+
+            // Gauss Y step
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    int i = x + y * width;
+
+                    Vector3 c = Vector3.Zero;
+
+                    for (int d = -3; d <= 3; d++)
+                    {
+                        int ixy = x + Math.Min(Math.Max(y + d, 0), height - 1) * width;
+                        c += typeWeights[ixy].ToVector3() * gauss[d + 3];
+                    }
+
+                    typeWeights[i] = new Color(c);
+                }
+            }
+
+            textureCache.SetData(typeWeights);
         }
         
         public struct IntVector2

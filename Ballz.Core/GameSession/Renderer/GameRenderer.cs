@@ -128,11 +128,12 @@ namespace Ballz.GameSession.Renderer
                 TerrainEffect.CurrentTechnique.Passes[0].Apply();
                 
                 TerrainEffect.Parameters["ModelViewProjection"].SetValue(terrainWorld * Game.Camera.View * Game.Camera.Projection);
-                TerrainEffect.Parameters["TerrainTypesTexture"].SetValue(worldState.StaticGeometry.TerrainTypesToTexture());
+                TerrainEffect.Parameters["TerrainTypesTexture"].SetValue(worldState.StaticGeometry.GetTerrainTypeTexture());
                 TerrainEffect.Parameters["EarthTexture"].SetValue(EarthTexture);
                 TerrainEffect.Parameters["SandTexture"].SetValue(SandTexture);
                 TerrainEffect.Parameters["StoneTexture"].SetValue(StoneTexture);
                 TerrainEffect.Parameters["TextureScale"].SetValue(TerrainTextureScale);
+                //TerrainEffect.Parameters["TerrainSize"].SetValue(terrainSize);
 
                 GraphicsDevice.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vpc, 0, tris.Count);
 
