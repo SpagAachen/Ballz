@@ -132,10 +132,10 @@
     <Compile Include="Renderer\Camera\CameraTrajectory.cs" />
     <Compile Include="GameSession\Logic\Weapons\Potato.cs" />
     <Compile Include="GameSession\Logic\Weapons\Grenade.cs" />
-    <None Include="OpenTK.dll.config">
+    <None Include="OpenTK.dll.config" Condition="'$(OS)' != 'Windows_NT'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Tao.Sdl.dll.config">
+    <None Include="Tao.Sdl.dll.config" Condition="'$(OS)' != 'Windows_NT'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
