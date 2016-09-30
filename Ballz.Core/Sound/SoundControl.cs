@@ -43,22 +43,52 @@ namespace Ballz.Sound
         // Currently, we can only play one music at a time.
         private SoundEffectInstance music;
 
+		bool SoundsEnabled = true;
+
         public SoundControl(Ballz game)
         {
-
+            // Disable sounds on Linux until we find a way to fix them.
+            if (System.Environment.OSVersion.Platform == PlatformID.Unix)
+                SoundsEnabled = false;
+            
             Game = game;
             loadedSounds = new Dictionary<string, SoundEffect>();
             WinnerSounds.Add("Germoney","Sounds/germoney");
             WinnerSounds.Add("Murica", "Sounds/freedom_fuckyeah");
         }
 
+		public SoundEffect GetSound(string name)
+		{
+			if (!SoundsEnabled)
+				return null;
+			
+			SoundEffect sound;
+			loadedSounds.TryGetValue(name, out sound);
+
+			if(sound == null)
+			{
+				try
+				{
+					sound = Game.Content.Load<SoundEffect>(name);
+				}
+				catch(Microsoft.Xna.Framework.Audio.NoAudioHardwareException e)
+				{
+					// If no audio hardware is installed, print a warning and don't try to load sounds again
+					Console.WriteLine("Audio error: " + e.Message);
+					SoundsEnabled = false;
+					return null;
+				}
+				loadedSounds.Add(name, sound);
+			}
+
+			return sound;
+		}
+
         public void PlaySound(string name)
         {
-            //load sound if it is not already loaded
-            if(!loadedSounds.ContainsKey(name))
-                loadedSounds.Add(name,Game.Content.Load<SoundEffect>(name));
-            SoundEffect sndEffect;
-            if(loadedSounds.TryGetValue(name, out sndEffect))
+			return;
+			var sndEffect = GetSound(name);
+			if(sndEffect != null)
             {
                 SoundEffectInstance soundInstance = sndEffect.CreateInstance();
                 soundInstance.Volume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
@@ -68,11 +98,8 @@ namespace Ballz.Sound
 
         public void StartMusic(string name)
         {
-            //load sound if it is not already loaded
-            if(!loadedSounds.ContainsKey(name))
-                loadedSounds.Add(name,Game.Content.Load<SoundEffect>(name));
-            SoundEffect sndEffect;
-            if(loadedSounds.TryGetValue(name, out sndEffect))
+			var sndEffect = GetSound(name);
+			if(sndEffect != null)
             {
                 // My work here is done
                 if (music != null && music.State == SoundState.Playing)
