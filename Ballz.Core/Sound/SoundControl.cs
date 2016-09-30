@@ -47,10 +47,7 @@ namespace Ballz.Sound
 
         public SoundControl(Ballz game)
         {
-            // Disable sounds on Linux until we find a way to fix them.
-            if (System.Environment.OSVersion.Platform == PlatformID.Unix)
-                SoundsEnabled = false;
-            
+           
             Game = game;
             loadedSounds = new Dictionary<string, SoundEffect>();
             WinnerSounds.Add("Germoney","Sounds/germoney");
@@ -86,7 +83,6 @@ namespace Ballz.Sound
 
         public void PlaySound(string name)
         {
-			return;
 			var sndEffect = GetSound(name);
 			if(sndEffect != null)
             {
