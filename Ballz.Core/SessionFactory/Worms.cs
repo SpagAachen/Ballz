@@ -92,17 +92,9 @@ namespace Ballz.SessionFactory
 
         protected override void ImplInitializeSession(Ballz game, GameSession.Logic.GameSettings settings)
         {
-            if (settings.MapTexture == null)
-            { // Multiplayer clients will already have a map
-                var mapTexture = MapName == "Generated" ? TerrainGenerator.GenerateTerrain(width,height): game.Content.Load<Texture2D>("Worlds/" + MapName);
-                settings.MapName = MapName;
-                settings.MapTexture = mapTexture;
-            }
-            else
-            {
-                Debug.Assert(settings.MapName != String.Empty);
-                MapName = settings.MapName;
-            }
+            var mapTexture = MapName == "Generated" ? TerrainGenerator.GenerateTerrain(width,height): game.Content.Load<Texture2D>("Worlds/" + MapName);
+            settings.MapName = MapName;
+            settings.MapTexture = mapTexture;
         }
 
         protected override Session ImplStartSession(Ballz game, GameSettings settings, bool remoteControlled, int localPlayerId)
