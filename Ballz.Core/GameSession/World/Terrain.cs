@@ -912,7 +912,6 @@ namespace Ballz.GameSession.World
             }
         }
 
-        Texture2D textureCache;
         static Color[] TypeWeightsBufferA;
         static Color[] TypeWeightsBufferB;
 
@@ -925,8 +924,7 @@ namespace Ballz.GameSession.World
 
         public void BuildTerrainTypeTexture()
         {
-            using (new PerformanceReporter(Ballz.The()))
-            {
+            
                 if (WorkingShape.TypeTexture == null)
                     WorkingShape.TypeTexture = new Texture2D(Ballz.The().GraphicsDevice, width, height);
 
@@ -966,16 +964,17 @@ namespace Ballz.GameSession.World
                     }
                 }
 
+            using (new PerformanceReporter(Ballz.The()))
+            {
+
                 // Smooth everything with a 7 pixel gauss kernel (makes non-pixely material edges)
                 float[] gauss = new float[]
                 {
-                    0.071303f,
-                    0.131514f,
-                    0.189879f,
-                    0.214607f,
-                    0.189879f,
-                    0.131514f,
-                    0.071303f
+                        0.06136f,
+                        0.24477f,
+                        0.38774f,
+                        0.24477f,
+                        0.06136f
                 };
                 
                 // Gauss X step
@@ -987,10 +986,10 @@ namespace Ballz.GameSession.World
 
                         Vector3 c = Vector3.Zero;
 
-                        for (int d = -3; d <= 3; d++)
+                        for (int d = -2; d <= 2; d++)
                         {
                             int ixy = Math.Min(Math.Max(x + d, 0), width - 1) + y * width;
-                            c += TypeWeightsBufferA[ixy].ToVector3() * gauss[d + 3];
+                            c += TypeWeightsBufferA[ixy].ToVector3() * gauss[d + 2];
                         }
 
                         TypeWeightsBufferB[i] = new Color(c);
@@ -1006,18 +1005,19 @@ namespace Ballz.GameSession.World
 
                         Vector3 c = Vector3.Zero;
 
-                        for (int d = -3; d <= 3; d++)
+                        for (int d = -2; d <= 2; d++)
                         {
                             int ixy = x + Math.Min(Math.Max(y + d, 0), height - 1) * width;
-                            c += TypeWeightsBufferB[ixy].ToVector3() * gauss[d + 3];
+                            c += TypeWeightsBufferB[ixy].ToVector3() * gauss[d + 2];
                         }
 
                         TypeWeightsBufferA[i] = new Color(c);
                     }
                 }
 
-                WorkingShape.TypeTexture.SetData(TypeWeightsBufferA);
+
             }
+            WorkingShape.TypeTexture.SetData(TypeWeightsBufferA);
         }
         
         public struct IntVector2
