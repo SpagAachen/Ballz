@@ -49,11 +49,11 @@ namespace Ballz.GameSession.Logic
                     var speed = WalkingTime < SlowWalkTime ? WalkingSpeedSlow : WalkingSpeedNormal;
                     //Ball.Velocity = new Vector2(Min(-speed, Ball.Velocity.X), Ball.Velocity.Y);
 
-                    Vector2 movement = KeyPressed[InputMessage.MessageType.ControlsRight] ? -leftDir : leftDir;
+                    Vector2 movement = speed * (KeyPressed[InputMessage.MessageType.ControlsRight] ? -leftDir : leftDir);
 
 
                     Vector2 proj = Vector2.Dot(Ball.Velocity, movement) * Vector2.Normalize(Ball.Velocity);
-                    Ball.Velocity = proj.LengthSquared() > (speed * movement).LengthSquared() ? Ball.Velocity : speed * movement;
+                    Ball.Velocity = proj.LengthSquared() > movement.LengthSquared() ? Ball.Velocity :  movement;
 
                     Ball.AimDirection = new Vector2(-Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
                     WalkingTime += elapsedSeconds;
