@@ -41,9 +41,8 @@ namespace Ballz.GameSession.Logic
                                 && ((Ball)e).Player != Ball.Player
                                 && ((Ball)e).Health > 0);
                         _currentTarget =
-                            (Ball)
                                 worldState.Entities.Aggregate(
-                                    (curMin, x) => ((Ball)x).Player != Ball.Player && (curMin == null || (Ball.Position - x.Position).LengthSquared() < (Ball.Position - curMin.Position).LengthSquared()) ? x : curMin);
+                                    (curMin, x) => (x as Ball)?.Player != Ball.Player && (curMin == null || (Ball.Position - x.Position).LengthSquared() < (Ball.Position - curMin.Position).LengthSquared()) ? x : curMin) as Ball;
                     }
 
                     if (_currentTarget != null)
