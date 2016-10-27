@@ -105,8 +105,9 @@ namespace Ballz.Renderer
         /// <param name="shadowOffset">Shadow offset.</param>
         /// <param name="centerVertical">If set to <c>true</c> center vertical.</param>
         /// <param name="centerHorizontal">If set to <c>true</c> center horizontal.</param>
-        public void DrawText(string text, Vector2 position, float size, Color color, int shadowOffset = 2, bool centerVertical = false, bool centerHorizontal = false)
+        public void DrawText(string _text, Vector2 position, float size, Color color, int shadowOffset = 2, bool centerVertical = false, bool centerHorizontal = false)
         {
+            string text = CheckLetters(_text);
             //scale the font with respect to the resolution 
             //the pt measure uses the width of the letter m so we only need the withd factor for scaling
             size *= resolutionFactor;
@@ -154,6 +155,19 @@ namespace Ballz.Renderer
                 Color.White
                 );
             SpriteBatch.End();
+        }
+
+        protected string CheckLetters(string toCheck)
+        {
+            char[] letters = toCheck.ToCharArray();
+            string checkedString = toCheck;
+            foreach (char letter in letters)
+            {
+                if (!Font.Characters.Contains(letter))
+                    checkedString = checkedString.Replace(letter, '?');
+            }
+
+            return checkedString;
         }
     }
 }
