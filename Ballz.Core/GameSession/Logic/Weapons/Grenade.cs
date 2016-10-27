@@ -52,7 +52,6 @@ namespace Ballz.GameSession.Logic.Weapons
                 Restitution = 0.3f
             };
         }
-        
     }
 }
 

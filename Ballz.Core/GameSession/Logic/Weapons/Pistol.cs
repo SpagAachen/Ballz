@@ -16,6 +16,7 @@ namespace Ballz.GameSession.Logic.Weapons
         const float ExplosionRadius = 0.3f;
         const float Damage = 25f;
         int ShotsFired = 0;
+        const int MaxShots = 2;
 
         public Pistol(Ball ball, Ballz game) : base(ball, game) { }
 
@@ -41,13 +42,8 @@ namespace Ballz.GameSession.Logic.Weapons
             ShotsFired = 0;
         }
 
-        public override void HandleInput(InputMessage input)
-        {
-            if (Game.Match.IsRemoteControlled)
-                return;
-
-            if(input.Pressed && input.Kind == InputMessage.MessageType.ControlsAction)
-            {
+        public override void FireShot(){
+            if(ShotsFired < MaxShots || !Game.Match.UsePlayerTurns){
                 ++ShotsFired;
                 Game.Services.GetService<SoundControl>().PlaySound(SoundControl.PistolSound);
 
@@ -74,6 +70,17 @@ namespace Ballz.GameSession.Logic.Weapons
                     }
                 }
             }
+        }
+
+        public override void HandleInput(InputMessage input)
+        {
+            if (Game.Match.IsRemoteControlled)
+                return;
+
+            if(input.Pressed && input.Kind == InputMessage.MessageType.ControlsAction)
+            {
+                FireShot();
+            }
 
             base.HandleInput(input);
         }
@@ -86,7 +93,7 @@ namespace Ballz.GameSession.Logic.Weapons
             canSwitchWeapon = (ShotsFired == 0) || !Game.Match.UsePlayerTurns;
 
             // Turn ends after two shots
-            turnEndindActionHappened = ShotsFired >= 2;
+            turnEndindActionHappened = ShotsFired >= MaxShots;
         }
     }
     }
