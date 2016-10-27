@@ -25,7 +25,7 @@ namespace Ballz.GameSession.Logic
         public int SelectedWeaponIndex { get; set; } = 0;
 
         public bool CanSwitchWeapons { get; set; } = true;
-
+		public bool ballMadeAction = false;
         protected Dictionary<InputMessage.MessageType, bool> KeyPressed = new Dictionary<InputMessage.MessageType, bool>();
 
         public BallControl(Ballz game, Session match, Ball ball)
@@ -49,7 +49,7 @@ namespace Ballz.GameSession.Logic
         /// <returns>Returns true if the ball has performed an action that finishes a player turn.</returns>
         public virtual bool Update(float elapsedSeconds, World.World worldState)
         {
-            bool ballMadeAction = false;
+            //bool ballMadeAction = false;
             if (!Ball.IsAlive)
             {
                 Ball.IsAiming = false;
@@ -58,11 +58,16 @@ namespace Ballz.GameSession.Logic
             }
             else
             {
-                bool weaponSwitchAllowed = true;
-                Weapon?.Update(elapsedSeconds, KeyPressed, out ballMadeAction, out weaponSwitchAllowed);
-
-                CanSwitchWeapons &= weaponSwitchAllowed;
-
+				bool weaponSwitchAllowed = true;
+				if (!(Game.Match.SessionLogic.Session.TurnState == TurnState.WaitingForEnd))
+					Weapon?.Update (elapsedSeconds, KeyPressed, out ballMadeAction, out weaponSwitchAllowed);
+				//if (Ballz.The ().Match.SessionLogic.Session.UsePlayerTurns && ballMadeAction)
+				else {
+					ballMadeAction = false;
+					weaponSwitchAllowed = false;
+				}
+				CanSwitchWeapons &= weaponSwitchAllowed;
+					
                 if (Ball.IsCharging)
                 {
                     Ball.ShootCharge += elapsedSeconds * 0.7f;
@@ -74,8 +79,7 @@ namespace Ballz.GameSession.Logic
 
                 JumpCoolDown -= elapsedSeconds;
             }
-
-            return ballMadeAction;
+			return ballMadeAction;
         }
 
         /// <summary>
@@ -99,6 +103,7 @@ namespace Ballz.GameSession.Logic
         {
             CanSwitchWeapons = true;
             AvailableWeapons.ForEach(w => w.OnTurnStart());
+			ballMadeAction = false;
         }
 
         const float PauseBetweenJumps = 0.1f;

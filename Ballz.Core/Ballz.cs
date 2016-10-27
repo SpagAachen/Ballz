@@ -184,7 +184,7 @@ namespace Ballz
             ipb.Setting = GameSettings.PlayerName;
             ipb.internalValue = false;
             optionsMenu.AddItem(ipb);
-			optionsMenu.AddItem (new CheckBox ("Friendly Fire: ", GameSettings.FriendlyFire));
+			optionsMenu.AddItem (new CheckBox ("Friendly Fire: ", GameSettings.FriendlyFire, false));
             Label apply = new Label("Apply", true);
             apply.OnSelect += () =>
             {
