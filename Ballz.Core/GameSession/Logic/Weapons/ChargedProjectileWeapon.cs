@@ -17,7 +17,6 @@ namespace Ballz.GameSession.Logic.Weapons
         {
             Game.Services.GetService<SoundControl>().PlaySound(SoundControl.BazookaSound);
             Shot newShot = CreateShot();
-
             Game.Match.World.AddEntity(newShot);
             Ball.PhysicsBody.ApplyForce(-10000 * Ball.ShootCharge * newShot.Recoil * Ball.AimDirection);
         }
@@ -56,6 +55,7 @@ namespace Ballz.GameSession.Logic.Weapons
 
                 FireProjectile();
                 Ball.ShootCharge = 0f;
+
             }
         }
     }

@@ -25,7 +25,7 @@ namespace Ballz.GameSession.Logic
         public abstract string Icon { get; }
 
         public virtual void OnTurnEnd() { }
-        public virtual void OnTurnStart() { }
+		public virtual void OnTurnStart() { }
 
         /// <summary>
         /// Updates the weapon state and performs weapon actions.
