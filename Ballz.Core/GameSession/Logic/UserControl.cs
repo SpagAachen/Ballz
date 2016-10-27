@@ -44,16 +44,17 @@ namespace Ballz.GameSession.Logic
             {
                 Vector2 upDir = Vector2.Normalize(Ball.Position - worldState.StaticGeometry.gravityPoint);
                 Vector2 leftDir = new Vector2(-upDir.Y, upDir.X);
-                if (KeyPressed[InputMessage.MessageType.ControlsLeft] || KeyPressed[InputMessage.MessageType.ControlsRight])
+                if (KeyPressed[InputMessage.MessageType.ControlsLeft])
                 {
                     var speed = WalkingTime < SlowWalkTime ? WalkingSpeedSlow : WalkingSpeedNormal;
-                    //Ball.Velocity = new Vector2(Min(-speed, Ball.Velocity.X), Ball.Velocity.Y);
+                    Ball.Velocity = new Vector2(Min(-speed, Ball.Velocity.X), Ball.Velocity.Y);
 
-                    Vector2 movement = KeyPressed[InputMessage.MessageType.ControlsRight] ? -leftDir : leftDir;
-
-
-                    Vector2 proj = Vector2.Dot(Ball.Velocity, movement) * Vector2.Normalize(Ball.Velocity);
-                    Ball.Velocity = proj.LengthSquared() > (speed * movement).LengthSquared() ? Ball.Velocity : speed * movement;
+                    WalkingTime += elapsedSeconds;
+                }
+                else if (KeyPressed[InputMessage.MessageType.ControlsRight])
+                {
+                    var speed = WalkingTime < SlowWalkTime ? WalkingSpeedSlow : WalkingSpeedNormal;
+                    Ball.Velocity = new Vector2(Max(speed, Ball.Velocity.X), Ball.Velocity.Y);
 
                     WalkingTime += elapsedSeconds;
                 }

@@ -140,7 +140,7 @@ namespace Ballz.GameSession.Logic
                 }
             }
         }
-        
+
         public virtual void HandleMessage(object sender, Message message)
         {
             if (Game.Match.State == GameSession.SessionState.Running)
