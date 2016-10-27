@@ -66,7 +66,7 @@ namespace Ballz.GameSession.World
 
         public override void OnEntityCollision(Entity other)
         {
-            var shot = other as Shot;
+/*            var shot = other as Shot;
             if (shot != null)
             {
                 float impact = shot.Velocity.Length() * shot.ExplosionRadius;
@@ -84,7 +84,7 @@ namespace Ballz.GameSession.World
             {
                 // Other balls, etc -> no-op
             }
-        }
+*/        }
 
         public override void OnTerrainCollision(Terrain terrain, Vector2 position)
         {

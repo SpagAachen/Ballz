@@ -95,6 +95,19 @@ namespace Ballz.GameSession.World
             Ballz.The().Match.World.GraphicsEvents.Add(GenericGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, Position, 0));
 
             // TODO: damage to all players within explosion radius
+			foreach (var p in Ballz.The().Match.Players) {
+				foreach (var b in p.OwnedBalls) {
+					if (Vector2.Distance(b.Position, this.Position) < ExplosionRadius) {
+						float impact = Velocity.Length() * ExplosionRadius;
+
+						b.Health -= this.HealthDecreaseFromProjectileHit * Math.Min(1, impact / 20);
+						if (b.Health < 0)
+							b.Health = 0;
+
+						b.PhysicsBody.ApplyLinearImpulse(10 * this.Velocity);
+					}
+				}
+			}
             // TODO: force on players within explosion radius (dir = playerpos - Position.X/Y)
 
             // Remove projectile
