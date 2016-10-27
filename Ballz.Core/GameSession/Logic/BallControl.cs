@@ -90,8 +90,6 @@ namespace Ballz.GameSession.Logic
                 Ball.AttachedRope = null;
                 Match.World.Ropes.Remove(Ball.AttachedRope);
             }
-
-            CanSwitchWeapons = true;
         }
 
         /// <summary>
@@ -99,6 +97,7 @@ namespace Ballz.GameSession.Logic
         /// </summary>
         public virtual void OnTurnStart()
         {
+            CanSwitchWeapons = true;
             AvailableWeapons.ForEach(w => w.OnTurnStart());
         }
 
