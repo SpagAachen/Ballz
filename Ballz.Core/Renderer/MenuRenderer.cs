@@ -76,6 +76,8 @@ namespace Ballz.Renderer
 
         public override void Draw(GameTime gameTime)
         {
+            base.Draw(gameTime);
+
             DrawSky();
 
             FadeTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -103,7 +105,11 @@ namespace Ballz.Renderer
             }
 
             SpriteBatch.End();
-            base.Draw(gameTime);
+
+            if (Ballz.The().MessageOverlay != null)
+            {
+                DrawMessageOverlay(Ballz.The().MessageOverlay);
+            }
         }
 
         const float TitleFontSize = 1f;
@@ -140,7 +146,7 @@ namespace Ballz.Renderer
                 new Color(Color.Black, Sqrt(fadeProgress))
                 );
 
-            menuTopOffset += Font.MeasureString(menu.DisplayName).Y * TitleFontSize;
+            menuTopOffset += Font.MeasureString(CheckLetters(menu.DisplayName)).Y * TitleFontSize;
             SpriteBatch.Draw(
                     Underline,
                     new Vector2(leftOffset - 20, menuTopOffset),
@@ -149,7 +155,7 @@ namespace Ballz.Renderer
 
             // Draw subMenu Items.
 
-            topOffset += Font.MeasureString(menu.DisplayName).Y * TitleFontSize + 50;
+            topOffset += Font.MeasureString(CheckLetters(menu.DisplayName)).Y * TitleFontSize + 50;
             string renderString;
             foreach (var item in menu.Items)
             {
@@ -173,19 +179,6 @@ namespace Ballz.Renderer
                     topOffset += Font.MeasureString(renderString).Y * ItemFontSize* resolutionFactor + 30 * resolutionFactor;
                 }
             }
-        }
-
-        private string CheckLetters(string toCheck)
-        {
-            char[] letters = toCheck.ToCharArray();
-            string checkedString = toCheck;
-            foreach (char letter in letters)
-            {
-                if (!Font.Characters.Contains(letter))
-                    checkedString = checkedString.Replace(letter, '?');
-            }
-
-            return checkedString;
-        }
+        }           
     }
 }

@@ -174,13 +174,17 @@ namespace Ballz.GameSession.Renderer
                 
                 PostProcess();
 
-                DrawMessageOverlay();
+                DrawStatusOverlay();
+
+                if (Ballz.The().MessageOverlay != null)
+                {
+                    DrawMessageOverlay(Ballz.The().MessageOverlay);
+                }
             }
         }
 
-        public void DrawMessageOverlay()
+        public void DrawStatusOverlay()
         {
-            SpriteBatch.Begin();
             if (Game.Match.State == SessionState.Finished)
             {
                 string msg = "";
@@ -190,10 +194,7 @@ namespace Ballz.GameSession.Renderer
                 else
                     msg = "Draw!";
 
-                SpriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), new Color(Color.Black, 0.5f));
-
-                var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width / 2, Game.GraphicsDevice.Viewport.Height / 2);
-                DrawText(msg, screenPos, 1f, Color.Red, centerHorizontal: true);
+                DrawMessageOverlay(msg);
             }
             else if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer != null)
             {
@@ -209,8 +210,7 @@ namespace Ballz.GameSession.Renderer
                 {
                     msg = "Waiting for turn end";
                 }
-
-                DrawText(msg, screenPos, 0.5f, Color.Red, centerHorizontal: true);
+                DrawMessageOverlay(msg);
             }
 
             SpriteBatch.End();

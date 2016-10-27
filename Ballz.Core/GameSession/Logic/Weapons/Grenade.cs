@@ -49,7 +49,8 @@ namespace Ballz.GameSession.Logic.Weapons
                 Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.3f),
                 Velocity = Ball.AimDirection * Ball.ShootCharge * 25f,
                 Radius = 0.3f,
-                Restitution = 0.3f
+                Restitution = 0.3f,
+				Team = Ball.Player.TeamName
             };
         }
     }

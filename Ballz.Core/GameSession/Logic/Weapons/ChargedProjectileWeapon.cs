@@ -17,7 +17,6 @@ namespace Ballz.GameSession.Logic.Weapons
         {
             Game.Services.GetService<SoundControl>().PlaySound(SoundControl.BazookaSound);
             Shot newShot = CreateShot();
-
             Game.Match.World.AddEntity(newShot);
             Ball.PhysicsBody.ApplyForce(-10000 * Ball.ShootCharge * newShot.Recoil * Ball.AimDirection);
         }
@@ -34,6 +33,7 @@ namespace Ballz.GameSession.Logic.Weapons
                 Recoil = 1.0f,
                 Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.101f),
                 Velocity = Ball.AimDirection * Ball.ShootCharge * 25f,
+				Team = Ball.Player.TeamName
             };
         }
 
@@ -55,6 +55,7 @@ namespace Ballz.GameSession.Logic.Weapons
 
                 FireProjectile();
                 Ball.ShootCharge = 0f;
+
             }
         }
     }

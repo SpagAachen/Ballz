@@ -48,6 +48,7 @@ namespace Ballz.GameSession.Logic.Weapons
                 Recoil = 0.0f,
                 Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.101f),
                 Velocity = Ball.AimDirection * Ball.ShootCharge * 25f,
+				Team = Ball.Player.TeamName
             };
         }
         
