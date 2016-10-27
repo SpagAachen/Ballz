@@ -76,9 +76,14 @@ namespace Ballz.Input
             OnInput(InputMessage.MessageType.RawInput, false, eventArgs.Character);
         }
 
-        private void OnInput(InputMessage.MessageType inputMessage, bool pressed = false, char key = char.MinValue, Player player = null)
+        private void OnInput(InputMessage.MessageType inputType, bool pressed = false, char key = char.MinValue, Player player = null)
         {
-            Input?.Invoke(this, new InputMessage(inputMessage, pressed, key, player)); //todo: use object pooling and specify message better
+            var inputMessage = new InputMessage(inputType, pressed, key, player);
+
+            if (Ballz.The().MessageOverlay != null)
+                Ballz.The().MessageOverlay.HandleInput(inputMessage);
+            else
+                Input?.Invoke(this, inputMessage); //todo: use object pooling and specify message better
         }
 
         public void InjectInputMessage(InputMessage message, Player player)

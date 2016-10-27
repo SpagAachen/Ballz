@@ -138,6 +138,7 @@
     <None Include="Tao.Sdl.dll.config" Condition="'$(OS)' != 'Windows_NT'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Compile Include="Menu\MessageOverlay.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />

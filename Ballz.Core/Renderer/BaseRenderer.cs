@@ -169,5 +169,34 @@ namespace Ballz.Renderer
 
             return checkedString;
         }
+
+        public void DrawMessageOverlay(string header, string longtext = null, string footer = null)
+        {
+            SpriteBatch.Begin();
+
+            SpriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), new Color(Color.Black, 0.75f));
+
+            var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width * 0.5f, Game.GraphicsDevice.Viewport.Height * 0.33f);
+            DrawText(header, screenPos, 1f, Color.Red, centerHorizontal: true);
+
+            if(!String.IsNullOrEmpty(longtext))
+            {
+                screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width * 0.5f, Game.GraphicsDevice.Viewport.Height * 0.5f);
+                DrawText(longtext, screenPos, 0.5f, Color.White, centerHorizontal: true);
+            }
+
+            if (!String.IsNullOrEmpty(footer))
+            {
+                screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width * 0.5f, Game.GraphicsDevice.Viewport.Height * 0.66f);
+                DrawText(footer, screenPos, 1f, Color.White, centerHorizontal: true);
+            }
+
+            SpriteBatch.End();
+        }
+
+        public void DrawMessageOverlay(MessageOverlay overlay)
+        {
+            DrawMessageOverlay(overlay.HeaderText, overlay.MessageText, overlay.FooterText);
+        }
     }
 }

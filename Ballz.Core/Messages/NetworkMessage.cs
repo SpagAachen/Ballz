@@ -17,6 +17,7 @@ namespace Ballz.Messages
             Disconnected,
             ConnectingToServer,
             ConnectedToServer,
+            ConnectionErrorOccured,
             ServerStarted,
             NewClient,
             StartGame,

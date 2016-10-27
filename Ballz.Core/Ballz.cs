@@ -44,6 +44,8 @@ namespace Ballz
 
         public Composite MainMenu { get; set; }
 
+        public MessageOverlay MessageOverlay  { get; set; }
+
         public Camera Camera { get; set; }
 
         Texture2D Logo;

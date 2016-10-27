@@ -76,6 +76,8 @@ namespace Ballz.Renderer
 
         public override void Draw(GameTime gameTime)
         {
+            base.Draw(gameTime);
+
             DrawSky();
 
             FadeTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -103,7 +105,11 @@ namespace Ballz.Renderer
             }
 
             SpriteBatch.End();
-            base.Draw(gameTime);
+
+            if (Ballz.The().MessageOverlay != null)
+            {
+                DrawMessageOverlay(Ballz.The().MessageOverlay);
+            }
         }
 
         const float TitleFontSize = 1f;
