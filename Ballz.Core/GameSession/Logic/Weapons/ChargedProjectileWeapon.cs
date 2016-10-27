@@ -45,13 +45,13 @@ namespace Ballz.GameSession.Logic.Weapons
                 return;
 
             Ball.IsCharging = KeysPressed[InputMessage.MessageType.ControlsAction];
-            canSwitchWeapon = Ball.ShootCharge == 0;
+            canSwitchWeapon = (Ball.ShootCharge == 0) || (!Game.Match.UsePlayerTurns);
 
             Ball.IsAiming = true;
             if (!Ball.IsCharging && Ball.ShootCharge > 0)
             {
                 turnEndindActionHappened = true;
-                canSwitchWeapon = false;
+                canSwitchWeapon = !Game.Match.UsePlayerTurns;
 
                 FireProjectile();
                 Ball.ShootCharge = 0f;

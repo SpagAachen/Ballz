@@ -69,7 +69,7 @@ namespace Ballz.GameSession.Logic.Weapons
                         {
                             Ball theBall = rayHit.Entity as Ball;
                             if (theBall.Health > 0)
-                                theBall.Health -= Damage;                            
+                                theBall.Health -= Damage;
                         }
                     }
                 }
@@ -83,7 +83,7 @@ namespace Ballz.GameSession.Logic.Weapons
             base.Update(elapsedSeconds, KeysPressed, out turnEndindActionHappened, out canSwitchWeapon);
 
             // Weapon switching is only allowed if the pistol has not been used yet
-            canSwitchWeapon = ShotsFired == 0;
+            canSwitchWeapon = (ShotsFired == 0) || !Game.Match.UsePlayerTurns;
 
             // Turn ends after two shots
             turnEndindActionHappened = ShotsFired >= 2;
