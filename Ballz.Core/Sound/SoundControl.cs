@@ -54,29 +54,32 @@ namespace Ballz.Sound
             WinnerSounds.Add("Murica", "Sounds/freedom_fuckyeah");
         }
 
+        private SoundEffect LoadSound(string name)
+        {
+            SoundEffect sound;
+            try
+            {
+                sound = Game.Content.Load<SoundEffect>(name);
+            }
+            catch (Microsoft.Xna.Framework.Audio.NoAudioHardwareException e)
+            {
+                // If no audio hardware is installed, print a warning and don't try to load sounds again
+                MessageOverlay.ShowAlert("Audio error", e.Message);
+                SoundsEnabled = false;
+                return null;
+            }
+            loadedSounds.Add(name, sound);
+            return sound;
+        }
+
 		public SoundEffect GetSound(string name)
 		{
 			if (!SoundsEnabled)
 				return null;
 			
 			SoundEffect sound;
-			loadedSounds.TryGetValue(name, out sound);
-
-			if(sound == null)
-			{
-				try
-				{
-					sound = Game.Content.Load<SoundEffect>(name);
-				}
-				catch(Microsoft.Xna.Framework.Audio.NoAudioHardwareException e)
-				{
-					// If no audio hardware is installed, print a warning and don't try to load sounds again
-                    MessageOverlay.ShowAlert("Audio error", e.Message);
-					SoundsEnabled = false;
-					return null;
-				}
-				loadedSounds.Add(name, sound);
-			}
+			if(!loadedSounds.TryGetValue(name, out sound))
+                sound = LoadSound(name);            
 
 			return sound;
 		}
@@ -92,6 +95,21 @@ namespace Ballz.Sound
             }
         }
 
+        private void UpdateMusicVolume()
+        {
+            currentVolume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
+            if (music.Volume != currentVolume)
+                music.Volume = currentVolume;
+        }
+
+        private void InitMusic(SoundEffect sndEffect)
+        {
+            music = sndEffect.CreateInstance();
+            music.IsLooped = true;
+            music.Volume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
+            music.Play();
+        }
+
         public void StartMusic(string name)
         {
 			var sndEffect = GetSound(name);
@@ -99,17 +117,12 @@ namespace Ballz.Sound
             {
                 // My work here is done
                 if (music != null && music.State == SoundState.Playing)
-                {                    
-                    currentVolume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
-                    if (music.Volume != currentVolume)
-                        music.Volume = currentVolume;
+                {
+                    UpdateMusicVolume();
                     return;
                 }
-                
-                music = sndEffect.CreateInstance();
-                music.IsLooped = true;
-                music.Volume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
-                music.Play();
+
+                InitMusic(sndEffect);
             }
         }
 
