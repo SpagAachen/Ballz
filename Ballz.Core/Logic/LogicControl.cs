@@ -288,7 +288,11 @@ namespace Ballz.Logic
         void CheckInputMode(InputTranslator translator)
         {
             if (rawInput)
+            {
                 translator.Mode = InputTranslator.InputMode.RAW;
+                ButtonRepeat.Stop();
+                ButtonDelay.Stop();
+            }
         }
 
         private enum GameState
