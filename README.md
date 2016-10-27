@@ -23,7 +23,7 @@ Make sure the git submodules are updated.
 
 ## Compiling the game:
 
-Apart from the requirements listed above you should not need anythin special to run the game. The build steps follow the usual procedure with .NET projects. In Visual Studio or MonoDevelop, you should be able to build and run everything without any further steps.
+Apart from the requirements listed above you should not need anything special to run the game. The build steps follow the usual procedure with .NET projects. In Visual Studio or MonoDevelop, you should be able to build and run everything without any further steps.
 
 On Linux, you can also build from the command line:
 ```
