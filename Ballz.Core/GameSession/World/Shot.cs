@@ -100,7 +100,7 @@ namespace Ballz.GameSession.World
 			foreach (var p in Ballz.The().Match.Players) {
 				foreach (var b in p.OwnedBalls) {
 					if (Vector2.Distance(b.Position, this.Position) < ExplosionRadius) {
-						if (!Ballz.The().GameSettings.FriendlyFire.Value && b.Player.TeamName == Ballz.The ().Match.ActivePlayer.TeamName )
+						if (!Ballz.The().GameSettings.FriendlyFire.Value && b.Player.TeamName == Team )
 							break;
 						float impact = Velocity.Length() * ExplosionRadius;
 
