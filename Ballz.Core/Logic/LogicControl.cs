@@ -49,6 +49,8 @@ namespace Ballz.Logic
 
         public void StartGame(GameSession.Logic.GameSettings settings, bool remoteControlled = false, int localPlayerId = -1)
         {
+            ButtonRepeat.Stop();
+            ButtonDelay.Stop();
             // Go back to main menu so it will show when the user enters the menu later
             MenuGoBack();
             // Select the "Continue" entry
@@ -65,7 +67,8 @@ namespace Ballz.Logic
 
         public void ContinueGame()
         {
-            
+            ButtonRepeat.Stop();
+            ButtonDelay.Stop();
             state = GameState.SimulationState;
             RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }
