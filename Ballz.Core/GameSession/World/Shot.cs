@@ -55,6 +55,8 @@ namespace Ballz.GameSession.World
         [Synced]
         public float Restitution = 0.1f;
 
+		[Synced]
+		public string Team;
         // Detonation when countdown reaches zero (if negative then inactive)
         private float explosionCountdown = -1.0f;
 
@@ -98,6 +100,8 @@ namespace Ballz.GameSession.World
 			foreach (var p in Ballz.The().Match.Players) {
 				foreach (var b in p.OwnedBalls) {
 					if (Vector2.Distance(b.Position, this.Position) < ExplosionRadius) {
+						if (!Ballz.The().GameSettings.FriendlyFire.Value && b.Player.TeamName == Ballz.The ().Match.ActivePlayer.TeamName )
+							break;
 						float impact = Velocity.Length() * ExplosionRadius;
 
 						b.Health -= this.HealthDecreaseFromProjectileHit * Math.Min(1, impact / 20);
