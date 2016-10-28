@@ -39,15 +39,8 @@ namespace Ballz.Renderer
             Game.Camera.SetProjection(Matrix.Identity);
         }
 
-        protected override void LoadContent()
+        protected void LoadTextures()
         {
-            SpriteBatch = new SpriteBatch(Game.GraphicsDevice);
-            Font = Game.Content.Load<SpriteFont>("Fonts/MenuFont");
-            MipFont = new SpriteFont [4];
-            MipFont[0] = Game.Content.Load<SpriteFont>("Fonts/MenuFont");
-            MipFont[1] = Game.Content.Load<SpriteFont>("Fonts/halfMenuFont");
-            MipFont[2] = Game.Content.Load<SpriteFont>("Fonts/quarterMenuFont");
-            MipFont[3] = Game.Content.Load<SpriteFont>("Fonts/eigthMenuFont");
             SkyTexture = Game.Content.Load<Texture2D>("Textures/Sky");
             CloudTexture = Game.Content.Load<Texture2D>("Textures/Clouds");
 
@@ -67,6 +60,23 @@ namespace Ballz.Renderer
                 color[0] = Color.White;
                 WhiteTexture.SetData(color);
             }
+        }
+
+        protected void LoadFonts()
+        {
+            Font = Game.Content.Load<SpriteFont>("Fonts/MenuFont");
+            MipFont = new SpriteFont[4];
+            MipFont[0] = Game.Content.Load<SpriteFont>("Fonts/MenuFont");
+            MipFont[1] = Game.Content.Load<SpriteFont>("Fonts/halfMenuFont");
+            MipFont[2] = Game.Content.Load<SpriteFont>("Fonts/quarterMenuFont");
+            MipFont[3] = Game.Content.Load<SpriteFont>("Fonts/eigthMenuFont");
+        }
+
+        protected override void LoadContent()
+        {
+            SpriteBatch = new SpriteBatch(Game.GraphicsDevice);
+            LoadFonts();
+            LoadTextures();
 
             base.LoadContent();
         }
@@ -128,10 +138,9 @@ namespace Ballz.Renderer
             }
 
             if (shadowOffset > 0)
-            {
-                position += new Vector2(shadowOffset);
-                SpriteBatch.DrawString(MipFont[mipLevel], text, position, new Color(Color.Black, (color.A/255f) * 0.5f), 0, Vector2.Zero, size, SpriteEffects.None, 0);
-                position -= new Vector2(shadowOffset);
+            {                
+                SpriteBatch.DrawString(MipFont[mipLevel], text, position + new Vector2(shadowOffset),
+                    new Color(Color.Black, (color.A/255f) * 0.5f), 0, Vector2.Zero, size, SpriteEffects.None, 0);                
             }
 
             SpriteBatch.DrawString(MipFont[mipLevel], text, position, color, 0, Vector2.Zero, size, SpriteEffects.None, 0);
