@@ -76,5 +76,23 @@ namespace Ballz.Menu
         {
             OnUnSelect?.Invoke();
         }
+
+        /// <summary>
+        /// Gets or sets the width (only used when backgroundColor or border is set).
+        /// </summary>
+        /// <value>The width.</value>
+        public int Width{ get; set;}
+
+        /// <summary>
+        /// Gets or sets the height (only used when backgroundColor or border is set).
+        /// </summary>
+        /// <value>The height.</value>
+        public int Height{ get; set;}
+
+        public int BorderWidth{ get; set;}      
+
+        public Microsoft.Xna.Framework.Color BackGroundColor{ get; set;}
+
+        public Microsoft.Xna.Framework.Color BorderColor{ get; set;}
     }
 }
