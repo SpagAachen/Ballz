@@ -76,6 +76,8 @@ namespace Ballz.GameSession.Logic
 
             Session.GameTime += elapsedSeconds;
 
+            Session.FocussedEntity = null;
+
             // Remove finished graphics events
             var graphicsEffects = Session.World.GraphicsEvents.Where(e => e.End < Session.GameTime).ToArray();
             foreach (var e in graphicsEffects)

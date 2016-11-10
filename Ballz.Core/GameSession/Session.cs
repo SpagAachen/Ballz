@@ -55,6 +55,8 @@ namespace Ballz.GameSession
 
         public Ballz Game { get; set; }
 
+        public Entity FocussedEntity { get; set; }
+
         public List<Player> Players { get; set; } = new List<Player>();
 
         public List<Player> LocalPlayers { get; set; } = new List<Player>();
