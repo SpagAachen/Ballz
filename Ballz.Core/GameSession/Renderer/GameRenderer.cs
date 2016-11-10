@@ -342,16 +342,16 @@ namespace Ballz.GameSession.Renderer
                 var rotation = textEffect.Rotation(Game.Match.GameTime);
                 var scale = textEffect.Scale(Game.Match.GameTime);
                 var opacity = textEffect.Opacity(Game.Match.GameTime);
-                SpriteBatch.DrawString(
-                    Font,
+
+                DrawText(
                     textEffect.Text,
                     pos,
-                    new Color(textEffect.TextColor, (int)((opacity*255) * textEffect.TextColor.A)),
-                    rotation,
-                    Vector2.Zero,
                     scale * textEffect.TextSize,
-                    SpriteEffects.None,
-                    0);
+                    new Color(textEffect.TextColor, (int)((opacity * 255) * textEffect.TextColor.A)),
+                    2,
+                    true,
+                    true
+                );
             }
         }
 
