@@ -55,8 +55,6 @@
             server = new Server(this);
             server.Listen(port);
             RaiseMessageEvent(NetworkMessage.MessageType.ServerStarted);
-            Console.WriteLine("Started server on port " + port);
-            //TODO: Implement
         }
 
         public void StartNetworkGame(GameSettings gameSettings)
@@ -83,13 +81,11 @@
             catch(Exception e)
             {
                 RaiseMessageEvent(NetworkMessage.MessageType.ConnectionErrorOccured);
-                Console.WriteLine("Unable to connect");
                 MessageOverlay.ShowAlert("Error while connecting", e.Message);
                 return false;
             }
 
             RaiseMessageEvent(NetworkMessage.MessageType.ConnectedToServer);
-            Console.WriteLine("Connected to server");
             return true;
         }
 
