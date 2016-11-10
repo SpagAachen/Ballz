@@ -47,7 +47,7 @@ namespace Ballz.GameSession.Logic.Weapons
                 ++ShotsFired;
                 Game.Services.GetService<SoundControl>().PlaySound(SoundControl.PistolSound);
 
-                var muzzle = GenericGraphicsEffect.CreateMuzzle(
+                var muzzle = SpriteGraphicsEffect.CreateMuzzle(
                     Game.Match.GameTime,
                     Ball.Position + 2f * Ball.AimDirection,
                     Ball.AimDirection.RotationFromDirection()
@@ -58,14 +58,14 @@ namespace Ballz.GameSession.Logic.Weapons
                 if(rayHit.HasHit)
                 {
                     Game.Match.World.StaticGeometry.SubtractCircle(rayHit.Position.X, rayHit.Position.Y, ExplosionRadius);
-                    Ballz.The().Match.World.GraphicsEvents.Add(GenericGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, rayHit.Position, 0, 0.2f));
+                    Ballz.The().Match.World.GraphicsEvents.Add(SpriteGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, rayHit.Position, 0, 0.2f));
                     if (rayHit.Entity != null)
                     {
                         if(rayHit.Entity is Ball)
                         {
                             Ball theBall = rayHit.Entity as Ball;
                             if (theBall.Health > 0)
-                                theBall.Health -= Damage;
+                                theBall.ChangeHealth(-Damage);
                         }
                     }
                 }

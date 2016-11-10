@@ -210,10 +210,12 @@ namespace Ballz.GameSession.Renderer
                 {
                     msg = "Waiting for turn end";
                 }
-                DrawMessageOverlay(msg);
+
+                SpriteBatch.Begin();
+                DrawText(msg, screenPos, 0.5f, Color.Red, centerHorizontal: true);
+                SpriteBatch.End();
             }
 
-            SpriteBatch.End();
         }
 
         public void PostProcess()
@@ -315,14 +317,14 @@ namespace Ballz.GameSession.Renderer
 
         public void DrawGraphicsEvent(GraphicsEvent graphicsEvent)
         {
-            var genericEvent = graphicsEvent as GenericGraphicsEffect;
-            if(genericEvent != null)
+            var spriteEffect = graphicsEvent as SpriteGraphicsEffect;
+            if(spriteEffect != null)
             {
-                var progress = genericEvent.GetProgress(Game.Match.GameTime);
-                var texture = Game.Content.Load<Texture2D>("Textures/"+genericEvent.SpriteName);
-                var pos = WorldToScreen(genericEvent.Position(Game.Match.GameTime));
-                var rotation = genericEvent.Rotation(Game.Match.GameTime);
-                var scale = genericEvent.Scale(Game.Match.GameTime);
+                var progress = spriteEffect.GetProgress(Game.Match.GameTime);
+                var texture = Game.Content.Load<Texture2D>("Textures/"+spriteEffect.SpriteName);
+                var pos = WorldToScreen(spriteEffect.Position(Game.Match.GameTime));
+                var rotation = spriteEffect.Rotation(Game.Match.GameTime);
+                var scale = spriteEffect.Scale(Game.Match.GameTime);
                 SpriteBatch.Draw(
                     texture,
                     position: pos,
@@ -330,6 +332,26 @@ namespace Ballz.GameSession.Renderer
                     scale: new Vector2(scale, scale),
                     origin: new Vector2(texture.Width / 2, texture.Height / 2)
                     );
+            }
+
+            var textEffect = graphicsEvent as TextEffect;
+            if (textEffect != null)
+            {
+                var progress = textEffect.GetProgress(Game.Match.GameTime);
+                var pos = WorldToScreen(textEffect.Position(Game.Match.GameTime));
+                var rotation = textEffect.Rotation(Game.Match.GameTime);
+                var scale = textEffect.Scale(Game.Match.GameTime);
+                var opacity = textEffect.Opacity(Game.Match.GameTime);
+                SpriteBatch.DrawString(
+                    Font,
+                    textEffect.Text,
+                    pos,
+                    new Color(textEffect.TextColor, (int)((opacity*255) * textEffect.TextColor.A)),
+                    rotation,
+                    Vector2.Zero,
+                    scale * textEffect.TextSize,
+                    SpriteEffects.None,
+                    0);
             }
         }
 

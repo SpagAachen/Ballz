@@ -20,8 +20,9 @@ namespace Ballz.GameSession.World
         }
     }
 
-    public class GenericGraphicsEffect : GraphicsEvent
+    public class GraphicsEffect: GraphicsEvent
     {
+        public bool UseMid { get; set; } = false;
         // Where is the only additional keyframe? \in 0..1
         private float _midFactor = 0.5f;
         public float   MidFactor     
@@ -34,7 +35,7 @@ namespace Ballz.GameSession.World
             {
                 if(value <= 0 || value >= 1)
                     throw new ArgumentOutOfRangeException();
-                
+
                 _midFactor = value;
             } 
         }
@@ -58,7 +59,10 @@ namespace Ballz.GameSession.World
         public Vector2 Position(float gameTime)
         {
             var progress = GetProgress(gameTime);
-            
+
+            if(!UseMid)
+                return Vector2.Lerp(PositionStart, PositionEnd, progress);
+
             if (progress < MidFactor)
                 return Vector2.Lerp(PositionStart, PositionMid, progress / MidFactor);
 
@@ -76,6 +80,9 @@ namespace Ballz.GameSession.World
         private float interpolateFloat(float valStart, float valMid, float valEnd, float gameTime)
         {
             var progress = GetProgress(gameTime);
+
+            if(!UseMid)
+                return Mix(valStart, valEnd, progress);
 
             if (progress < MidFactor)
                 return Mix(valStart, valMid, progress / MidFactor);
@@ -98,12 +105,15 @@ namespace Ballz.GameSession.World
         {
             return interpolateFloat(ScaleStart, ScaleMid, ScaleEnd, gameTime);
         }
-        
+    }
+
+    public class SpriteGraphicsEffect : GraphicsEffect
+    {
         public string SpriteName { get; set; }
 
-        public static GenericGraphicsEffect CreateExplosion(float gameTime, Vector2 position, float rotation, float scaleStart = 1, float scaleEnd = 1.5f)
+        public static SpriteGraphicsEffect CreateExplosion(float gameTime, Vector2 position, float rotation, float scaleStart = 1, float scaleEnd = 1.5f)
         {
-            return new GenericGraphicsEffect
+            return new SpriteGraphicsEffect
             {
                 Start = gameTime,
                 Duration = 0.2f,
@@ -119,9 +129,9 @@ namespace Ballz.GameSession.World
             };
         }
 
-        public static GenericGraphicsEffect CreateMuzzle(float gameTime, Vector2 position, float rotation)
+        public static SpriteGraphicsEffect CreateMuzzle(float gameTime, Vector2 position, float rotation)
         {
-            return new GenericGraphicsEffect
+            return new SpriteGraphicsEffect
             {
                 Start = gameTime,
                 Duration = 0.1f,
@@ -134,6 +144,13 @@ namespace Ballz.GameSession.World
                 SpriteName = "Muzzle"
             };
         }
+    }
+
+    public class TextEffect: GraphicsEffect
+    {
+        public string Text { get; set; } = "";
+        public float TextSize { get; set; } = 1.0f;
+        public Color TextColor { get; set; } = Color.Red;
     }
 
     public class CameraShakeEffect: GraphicsEvent
