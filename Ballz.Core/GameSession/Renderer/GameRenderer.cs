@@ -60,15 +60,17 @@ namespace Ballz.GameSession.Renderer
 
                 if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer?.ActiveBall != null)
                 {
-                    if (CurrentActiveBall == null)
-                        CurrentActiveBall = Game.Match.ActivePlayer?.ActiveBall;
+                    CurrentActiveBall = Game.Match.ActivePlayer?.ActiveBall;
 
                     if (CurrentActiveBall != null && Game.Match.TurnState == TurnState.Running && Game.Match.ActivePlayer?.ActiveBall != CurrentActiveBall && Game.Match.ActivePlayer?.ActiveBall != null)
                     {
                         CurrentActiveBall = Game.Match.ActivePlayer.ActiveBall;
                         Game.Camera.SwitchTarget(CurrentActiveBall.Position, time);
                     }
-                    Game.Camera.SetTargetPosition((Vector2)Game.Match.ActivePlayer.ActiveBall.Position, time);
+                    else if (Game.Match.FocussedEntity != null)
+                    {
+                        Game.Camera.SetTargetPosition((Vector2)Game.Match.FocussedEntity.Position, time);
+                    }
                 }
                 else
                 {
@@ -128,11 +130,12 @@ namespace Ballz.GameSession.Renderer
                 TerrainEffect.CurrentTechnique.Passes[0].Apply();
                 
                 TerrainEffect.Parameters["ModelViewProjection"].SetValue(terrainWorld * Game.Camera.View * Game.Camera.Projection);
-                TerrainEffect.Parameters["TerrainTypesTexture"].SetValue(worldState.StaticGeometry.TerrainTypesToTexture());
+                TerrainEffect.Parameters["TerrainTypesTexture"].SetValue(worldState.StaticGeometry.GetTerrainTypeTexture());
                 TerrainEffect.Parameters["EarthTexture"].SetValue(EarthTexture);
                 TerrainEffect.Parameters["SandTexture"].SetValue(SandTexture);
                 TerrainEffect.Parameters["StoneTexture"].SetValue(StoneTexture);
                 TerrainEffect.Parameters["TextureScale"].SetValue(TerrainTextureScale);
+                //TerrainEffect.Parameters["TerrainSize"].SetValue(terrainSize);
 
                 GraphicsDevice.DrawUserPrimitives<VertexPositionColorTexture>(PrimitiveType.TriangleList, vpc, 0, tris.Count);
 
@@ -173,13 +176,17 @@ namespace Ballz.GameSession.Renderer
                 
                 PostProcess();
 
-                DrawMessageOverlay();
+                DrawStatusOverlay();
+
+                if (Ballz.The().MessageOverlay != null)
+                {
+                    DrawMessageOverlay(Ballz.The().MessageOverlay);
+                }
             }
         }
 
-        public void DrawMessageOverlay()
+        public void DrawStatusOverlay()
         {
-            SpriteBatch.Begin();
             if (Game.Match.State == SessionState.Finished)
             {
                 string msg = "";
@@ -189,10 +196,7 @@ namespace Ballz.GameSession.Renderer
                 else
                     msg = "Draw!";
 
-                SpriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), new Color(Color.Black, 0.5f));
-
-                var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width / 2, Game.GraphicsDevice.Viewport.Height / 2);
-                DrawText(msg, screenPos, 1f, Color.Red, centerHorizontal: true);
+                DrawMessageOverlay(msg);
             }
             else if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer != null)
             {
@@ -209,10 +213,11 @@ namespace Ballz.GameSession.Renderer
                     msg = "Waiting for turn end";
                 }
 
+                SpriteBatch.Begin();
                 DrawText(msg, screenPos, 0.5f, Color.Red, centerHorizontal: true);
+                SpriteBatch.End();
             }
 
-            SpriteBatch.End();
         }
 
         public void PostProcess()
@@ -314,14 +319,14 @@ namespace Ballz.GameSession.Renderer
 
         public void DrawGraphicsEvent(GraphicsEvent graphicsEvent)
         {
-            var genericEvent = graphicsEvent as GenericGraphicsEffect;
-            if(genericEvent != null)
+            var spriteEffect = graphicsEvent as SpriteGraphicsEffect;
+            if(spriteEffect != null)
             {
-                var progress = genericEvent.GetProgress(Game.Match.GameTime);
-                var texture = Game.Content.Load<Texture2D>("Textures/"+genericEvent.SpriteName);
-                var pos = WorldToScreen(genericEvent.Position(Game.Match.GameTime));
-                var rotation = genericEvent.Rotation(Game.Match.GameTime);
-                var scale = genericEvent.Scale(Game.Match.GameTime);
+                var progress = spriteEffect.GetProgress(Game.Match.GameTime);
+                var texture = Game.Content.Load<Texture2D>("Textures/"+spriteEffect.SpriteName);
+                var pos = WorldToScreen(spriteEffect.Position(Game.Match.GameTime));
+                var rotation = spriteEffect.Rotation(Game.Match.GameTime);
+                var scale = spriteEffect.Scale(Game.Match.GameTime);
                 SpriteBatch.Draw(
                     texture,
                     position: pos,
@@ -329,6 +334,26 @@ namespace Ballz.GameSession.Renderer
                     scale: new Vector2(scale, scale),
                     origin: new Vector2(texture.Width / 2, texture.Height / 2)
                     );
+            }
+
+            var textEffect = graphicsEvent as TextEffect;
+            if (textEffect != null)
+            {
+                var progress = textEffect.GetProgress(Game.Match.GameTime);
+                var pos = WorldToScreen(textEffect.Position(Game.Match.GameTime));
+                var rotation = textEffect.Rotation(Game.Match.GameTime);
+                var scale = textEffect.Scale(Game.Match.GameTime);
+                var opacity = textEffect.Opacity(Game.Match.GameTime);
+
+                DrawText(
+                    textEffect.Text,
+                    pos,
+                    scale * textEffect.TextSize,
+                    new Color(textEffect.TextColor, (int)((opacity * 255) * textEffect.TextColor.A)),
+                    2,
+                    true,
+                    true
+                );
             }
         }
 

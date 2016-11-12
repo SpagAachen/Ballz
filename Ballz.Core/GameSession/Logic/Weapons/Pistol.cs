@@ -16,6 +16,7 @@ namespace Ballz.GameSession.Logic.Weapons
         const float ExplosionRadius = 0.3f;
         const float Damage = 25f;
         int ShotsFired = 0;
+        const int MaxShots = 2;
 
         public Pistol(Ball ball, Ballz game) : base(ball, game) { }
 
@@ -41,17 +42,12 @@ namespace Ballz.GameSession.Logic.Weapons
             ShotsFired = 0;
         }
 
-        public override void HandleInput(InputMessage input)
-        {
-            if (Game.Match.IsRemoteControlled)
-                return;
-
-            if(input.Pressed && input.Kind == InputMessage.MessageType.ControlsAction)
-            {
+        public override void FireShot(){
+            if(ShotsFired < MaxShots || !Game.Match.UsePlayerTurns){
                 ++ShotsFired;
                 Game.Services.GetService<SoundControl>().PlaySound(SoundControl.PistolSound);
 
-                var muzzle = GenericGraphicsEffect.CreateMuzzle(
+                var muzzle = SpriteGraphicsEffect.CreateMuzzle(
                     Game.Match.GameTime,
                     Ball.Position + 2f * Ball.AimDirection,
                     Ball.AimDirection.RotationFromDirection()
@@ -62,17 +58,28 @@ namespace Ballz.GameSession.Logic.Weapons
                 if(rayHit.HasHit)
                 {
                     Game.Match.World.StaticGeometry.SubtractCircle(rayHit.Position.X, rayHit.Position.Y, ExplosionRadius);
-                    Ballz.The().Match.World.GraphicsEvents.Add(GenericGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, rayHit.Position, 0, 0.2f));
+                    Ballz.The().Match.World.GraphicsEvents.Add(SpriteGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, rayHit.Position, 0, 0.2f));
                     if (rayHit.Entity != null)
                     {
                         if(rayHit.Entity is Ball)
                         {
                             Ball theBall = rayHit.Entity as Ball;
                             if (theBall.Health > 0)
-                                theBall.Health -= Damage;                            
+                                theBall.ChangeHealth(-Damage);
                         }
                     }
                 }
+            }
+        }
+
+        public override void HandleInput(InputMessage input)
+        {
+            if (Game.Match.IsRemoteControlled)
+                return;
+
+            if(input.Pressed && input.Kind == InputMessage.MessageType.ControlsAction)
+            {
+                FireShot();
             }
 
             base.HandleInput(input);
@@ -83,10 +90,10 @@ namespace Ballz.GameSession.Logic.Weapons
             base.Update(elapsedSeconds, KeysPressed, out turnEndindActionHappened, out canSwitchWeapon);
 
             // Weapon switching is only allowed if the pistol has not been used yet
-            canSwitchWeapon = ShotsFired == 0;
+            canSwitchWeapon = (ShotsFired == 0) || !Game.Match.UsePlayerTurns;
 
             // Turn ends after two shots
-            turnEndindActionHappened = ShotsFired >= 2;
+            turnEndindActionHappened = ShotsFired >= MaxShots;
         }
     }
     }

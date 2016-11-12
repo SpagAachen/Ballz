@@ -12,12 +12,14 @@ namespace Ballz.GameSession.Logic.Weapons
     public abstract class ChargedProjectileWeapon : WeaponControl
     {
         public ChargedProjectileWeapon(Ball ball, Ballz game) : base(ball, game) { }
+
+        public Shot ProjectileInAir = null;
         
         public virtual void FireProjectile()
         {
             Game.Services.GetService<SoundControl>().PlaySound(SoundControl.BazookaSound);
             Shot newShot = CreateShot();
-
+            ProjectileInAir = newShot;
             Game.Match.World.AddEntity(newShot);
             Ball.PhysicsBody.ApplyForce(-10000 * Ball.ShootCharge * newShot.Recoil * Ball.AimDirection);
         }
@@ -45,13 +47,13 @@ namespace Ballz.GameSession.Logic.Weapons
                 return;
 
             Ball.IsCharging = KeysPressed[InputMessage.MessageType.ControlsAction];
-            canSwitchWeapon = Ball.ShootCharge == 0;
+            canSwitchWeapon = (Ball.ShootCharge == 0) || (!Game.Match.UsePlayerTurns);
 
             Ball.IsAiming = true;
             if (!Ball.IsCharging && Ball.ShootCharge > 0)
             {
                 turnEndindActionHappened = true;
-                canSwitchWeapon = false;
+                canSwitchWeapon = !Game.Match.UsePlayerTurns;
 
                 FireProjectile();
                 Ball.ShootCharge = 0f;

@@ -54,35 +54,38 @@ namespace Ballz.Renderer
 
         public void HandleMessage(object sender, Message message)
         {
-            if (message.Kind == Message.MessageType.MenuMessage)
+            switch(message.Kind)
             {
-                var msg = (MenuMessage)message;
-                parentMenu = Menu;
-                Menu = msg.Value;
-            }
-
-            if (message.Kind == Message.MessageType.LogicMessage)
-            {
-                LogicMessage msg = (LogicMessage)message;
-                if (msg.Kind == LogicMessage.MessageType.GameMessage)
-                {
-                    Enabled = !Enabled;
-                    Visible = !Visible;
-                }
+                case Message.MessageType.MenuMessage:
+                    {
+                        var msg = (MenuMessage)message;
+                        parentMenu = Menu;
+                        Menu = msg.Value;
+                    }
+                    break;
+                case Message.MessageType.LogicMessage:
+                    {
+                        LogicMessage msg = (LogicMessage)message;
+                        if (msg.Kind == LogicMessage.MessageType.GameMessage)
+                        {
+                            Enabled = !Enabled;
+                            Visible = !Visible;
+                        }
+                    }
+                    break;
             }
 
             //TODO: handle Messages
         }
 
-        public override void Draw(GameTime gameTime)
+        private float ComputeFadeProgress(GameTime gameTime)
         {
-            DrawSky();
-
             FadeTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            var fadeProgress = Min(1.5f, FadeTimer / (FadeAnimationLength / 1.5f));
+            return Min(1.5f, FadeTimer / (FadeAnimationLength / 1.5f));
+        }
 
-            SpriteBatch.Begin();
-
+        private void RenderInterpolatedMenu(float fadeProgress)
+        {
             if (fadeProgress <= 1f && OldMenu != null && OldMenu.Items.Count > 0)
             {
                 RenderMenu(OldMenu, false, 1f - fadeProgress);
@@ -101,9 +104,26 @@ namespace Ballz.Renderer
                     RenderMenu(parentMenu, true, fadeProgress - 0.5f);
                 }
             }
+        }
+
+        public override void Draw(GameTime gameTime)
+        {
+            base.Draw(gameTime);
+
+            DrawSky();
+
+            var fadeProgress = ComputeFadeProgress(gameTime);
+
+            SpriteBatch.Begin();
+
+            RenderInterpolatedMenu(fadeProgress);
 
             SpriteBatch.End();
-            base.Draw(gameTime);
+
+            if (Ballz.The().MessageOverlay != null)
+            {
+                DrawMessageOverlay(Ballz.The().MessageOverlay);
+            }
         }
 
         const float TitleFontSize = 1f;
@@ -115,7 +135,7 @@ namespace Ballz.Renderer
             return 1 - (t * t * (3 * t - 2));
         }
 
-        private void RenderMenu(Item menu, bool showUnderscore, float fadeProgress)
+        private void RenderMenuBackground(Item menu, float fadeProgress)
         {
             var background = (menu as Composite)?.BackgroundTexture;
 
@@ -125,13 +145,11 @@ namespace Ballz.Renderer
                     new Rectangle((GraphicsDevice.Viewport.Width - background.Width) / 2, (GraphicsDevice.Viewport.Height - background.Height) / 2, background.Width, background.Height),
                     new Color(Color.White, fadeProgress)
                     );
+        }
 
-            // Make y margin the same as the x offset
-            var topOffset = 40f * resolutionFactor;
-            var leftOffset = 40f;
-
-            var menuTopOffset = topOffset - (1 - EaseOut(fadeProgress)) * 150f;
-
+        private void RenderMenuTitle(Item menu, float fadeProgress, float leftOffset, float topOffset)
+        {
+            float menuTopOffset = topOffset - (1 - EaseOut(fadeProgress)) * 150f;
             // Draw the MenuTitle.
             DrawText(
                 menu.DisplayName,
@@ -140,27 +158,63 @@ namespace Ballz.Renderer
                 new Color(Color.Black, Sqrt(fadeProgress))
                 );
 
-            menuTopOffset += Font.MeasureString(menu.DisplayName).Y * TitleFontSize;
+            menuTopOffset += StringHeight(menu.DisplayName) * TitleFontSize;
             SpriteBatch.Draw(
                     Underline,
                     new Vector2(leftOffset - 20, menuTopOffset),
                     new Color(Color.White, fadeProgress)
                     );
+        }
 
-            // Draw subMenu Items.
+        private string DecorateInputBox(Item menu, Item item, bool showUnderscore)
+        {
+            string renderString;
+            if (showUnderscore && item == menu.SelectedItem && item is InputBox)
+                renderString = item.DisplayName + "_";
+            else
+                renderString = item.DisplayName;
+            renderString = CheckLetters(renderString);
+            return renderString;
+        }
 
-            topOffset += Font.MeasureString(menu.DisplayName).Y * TitleFontSize + 50;
+        private void RenderMenuSubItems(Item menu,float leftOffset, float topOffset, bool showUnderscore, float fadeProgress)
+        {
             string renderString;
             foreach (var item in menu.Items)
             {
                 leftOffset -= (1 - EaseOut(fadeProgress)) * 150f;
                 if (item.Visible)
                 {
-                    if (showUnderscore && item == menu.SelectedItem && item is InputBox)
-                        renderString = item.DisplayName + "_";
-                    else
-                        renderString = item.DisplayName;
-                    renderString = CheckLetters(renderString);
+                    renderString = DecorateInputBox(menu, item, showUnderscore);
+
+                    //render background if necessary
+                        //compute width and height of box
+                        var width = item.Width == 0 ? Font.MeasureString(renderString).X * ItemFontSize* resolutionFactor : item.Width;
+                        var height = item.Height == 0 ? Font.MeasureString(renderString).Y * ItemFontSize* resolutionFactor : item.Height;
+                        var labelWidth = Font.MeasureString(item.Name).X * ItemFontSize * resolutionFactor;
+                        var labelHeight = Font.MeasureString(item.Name).Y * ItemFontSize * resolutionFactor;
+                    Rectangle rect = new Rectangle(new Point((int)(leftOffset+labelWidth-5),(int)topOffset), new Point((int)labelWidth, (int)height));
+                        SpriteBatch.Draw(WhiteTexture, rect, item.BackGroundColor);
+                        Rectangle topBorder = new Rectangle(new Point((int)(leftOffset+labelWidth-5),(int)topOffset), new Point((int)labelWidth, (int)item.BorderWidth));
+                    Rectangle bottomBorder = new Rectangle(new Point((int)(leftOffset+labelWidth-5),(int)(topOffset+labelHeight-item.BorderWidth)), new Point((int)labelWidth, (int)item.BorderWidth));
+                        Rectangle leftBorder = new Rectangle(new Point((int)(leftOffset+labelWidth-5),(int)topOffset), new Point((int)item.BorderWidth, (int)height));
+                        Rectangle rightBorder = new Rectangle(new Point((int)(leftOffset+2*labelWidth-5),(int)topOffset), new Point((int)item.BorderWidth, (int)height));
+                    SpriteBatch.Draw(WhiteTexture, topBorder, item.BorderColor);
+                    SpriteBatch.Draw(WhiteTexture, bottomBorder, item.BorderColor);
+                    SpriteBatch.Draw(WhiteTexture, leftBorder, item.BorderColor);
+                    SpriteBatch.Draw(WhiteTexture, rightBorder, item.BorderColor);
+
+                    if (item is InputBox)
+                    {
+                        int i = 0;
+                        //if string is too long remove characters until its not
+                        while (width > ( 2 * labelWidth - 5))
+                        {
+                            ++i;
+                            renderString = item.Name + renderString.Substring(item.Name.Length+i);
+                            width = Font.MeasureString(renderString).X * ItemFontSize * resolutionFactor;
+                        }
+                    }
 
                     DrawText(
                         renderString,
@@ -170,22 +224,35 @@ namespace Ballz.Renderer
                         1
                         );
 
-                    topOffset += Font.MeasureString(renderString).Y * ItemFontSize* resolutionFactor + 30 * resolutionFactor;
+                    topOffset += StringHeight(renderString)* ItemFontSize * resolutionFactor + 30 * resolutionFactor;
                 }
             }
         }
 
-        private string CheckLetters(string toCheck)
+        private void RenderMenu(Item menu, bool showUnderscore, float fadeProgress)
         {
-            char[] letters = toCheck.ToCharArray();
-            string checkedString = toCheck;
-            foreach (char letter in letters)
-            {
-                if (!Font.Characters.Contains(letter))
-                    checkedString = checkedString.Replace(letter, '?');
-            }
+            RenderMenuBackground(menu, fadeProgress);
 
-            return checkedString;
+            // Make y margin the same as the x offset
+            var topOffset = 40f * resolutionFactor;
+            var leftOffset = 40f;
+
+            // Draw the MenuTitle.
+            RenderMenuTitle(menu, fadeProgress, leftOffset, topOffset);
+            topOffset += StringHeight( menu.DisplayName) * TitleFontSize + 50;
+
+            // Draw subMenu Items.
+            RenderMenuSubItems(menu, leftOffset, topOffset, showUnderscore, fadeProgress);
+        }
+        
+        private float StringHeight(string text)
+        {
+            return Font.MeasureString(CheckLetters(text)).Y;
+        }
+
+        private float StringWidth( string text)
+        {
+            return Font.MeasureString(CheckLetters(text)).X;
         }
     }
 }

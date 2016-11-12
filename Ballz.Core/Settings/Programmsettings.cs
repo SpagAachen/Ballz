@@ -31,13 +31,14 @@ namespace Ballz.Settings
         public Setting<Resolution> ScreenResolution = new Setting<Resolution>();
         public Setting<int> MasterVolume = new Setting<int>();
         public Setting<string> PlayerName = new Setting<string>();
-
+		public Setting<bool> FriendlyFire = new Setting<bool>();
         public ProgrammSettings()
         {
             Fullscreen.Value = false;
             ScreenResolution.Value = new Resolution(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
                 GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
             MasterVolume.Value = 100;
+			FriendlyFire.Value = false;
         }
     }
 }

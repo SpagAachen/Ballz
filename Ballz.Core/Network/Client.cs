@@ -49,7 +49,7 @@
 
         public void Update(GameTime time)
         {
-            connectionToServer.ReadUpdates();
+            connectionToServer?.ReadUpdates();
         }
 
         private void OnData(object sender, object data)
@@ -141,7 +141,7 @@
                 case InputMessage.MessageType.ControlsJump:
                 case InputMessage.MessageType.ControlsNextWeapon:
                 case InputMessage.MessageType.ControlsPreviousWeapon:
-                    connectionToServer.Send(message);
+                    connectionToServer?.Send(message);
                     break;
             }
         }

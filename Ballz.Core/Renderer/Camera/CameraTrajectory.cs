@@ -6,7 +6,8 @@ namespace Ballz
 	public class CameraTrajectory
 	{
 		private bool valid;
-		private Vector2 StartPoint, EndPoint;
+        private Vector2 StartPoint { get; set; }
+        private Vector2 EndPoint { get; set; }
 		private TimeSpan StartTime;
 		private float _speed;
 

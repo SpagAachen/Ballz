@@ -55,6 +55,8 @@ namespace Ballz.GameSession.World
         [Synced]
         public float Restitution = 0.1f;
 
+		[Synced]
+		public string Team;
         // Detonation when countdown reaches zero (if negative then inactive)
         private float explosionCountdown = -1.0f;
 
@@ -88,13 +90,28 @@ namespace Ballz.GameSession.World
             if (ExplosionRadius <= 0.0f)
                 return;
             
-            System.Console.WriteLine("Explosion " + " with radius " + ExplosionRadius + " and " + HealthDecreaseFromExplosionImpact + " damage.");
             Ballz.The().Match.World.StaticGeometry.SubtractCircle(Position.X, Position.Y, ExplosionRadius);
 
             Ballz.The().Match.World.GraphicsEvents.Add(new CameraShakeEffect { Intensity = 2f, Duration = 0.2f, Start = Ballz.The().Match.GameTime });
-            Ballz.The().Match.World.GraphicsEvents.Add(GenericGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, Position, 0));
+            Ballz.The().Match.World.GraphicsEvents.Add(SpriteGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, Position, 0));
 
             // TODO: damage to all players within explosion radius
+			foreach (var p in Ballz.The().Match.Players) {
+				foreach (var b in p.OwnedBalls) {
+					if (Vector2.Distance(b.Position, this.Position) < ExplosionRadius) {
+						if (!Ballz.The().GameSettings.FriendlyFire.Value && b.Player.TeamName == Team )
+							break;
+						float impact = Velocity.Length() * ExplosionRadius;
+
+                        b.ChangeHealth(-HealthDecreaseFromProjectileHit * Math.Min(1, impact / 20));
+
+						if (b.Health < 0)
+							b.Health = 0;
+
+						b.PhysicsBody.ApplyLinearImpulse(10 * this.Velocity);
+					}
+				}
+			}
             // TODO: force on players within explosion radius (dir = playerpos - Position.X/Y)
 
             // Remove projectile

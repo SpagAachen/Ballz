@@ -1,7 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Condition="'$(OS)' != 'Windows_NT'" Project="../Linux/Ballz.Linux.csproj" />
-  <Import Condition="'$(OS)' == 'Windows_NT'" Project="../Windows/Ballz.Windows.csproj" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">Windows</Platform>
@@ -105,11 +103,13 @@
     <Compile Include="Program.cs" />
     <Compile Include="Renderer\BaseRenderer.cs" />
     <Compile Include="SessionFactory\TeamNames.cs" />
+    <Compile Include="SessionFactory\TerrainGenerator.cs" />
     <Compile Include="Utils\BufferedArray.cs" />
     <Compile Include="Utils\MathExtensions.cs" />
     <Compile Include="SessionFactory\SessionFactory.cs" />
     <Compile Include="SessionFactory\Worms.cs" />
     <Compile Include="Utils\EnumberableHelper.cs" />
+    <Compile Include="Utils\PerlinNoise.cs" />
     <Compile Include="Utils\RandomExtensions.cs" />
     <Compile Include="Utils\TextureHelper.cs" />
     <Compile Include="Utils\TypeInfoConverter.cs" />
@@ -132,6 +132,13 @@
     <Compile Include="Renderer\Camera\CameraTrajectory.cs" />
     <Compile Include="GameSession\Logic\Weapons\Potato.cs" />
     <Compile Include="GameSession\Logic\Weapons\Grenade.cs" />
+    <None Include="OpenTK.dll.config" Condition="'$(OS)' != 'Windows_NT'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Tao.Sdl.dll.config" Condition="'$(OS)' != 'Windows_NT'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Compile Include="Menu\MessageOverlay.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
@@ -149,9 +156,20 @@
     <Reference Include="MathFloat, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\MathFloat.1.0.0.0\lib\net20\MathFloat.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="MonoGame.Framework">
+      <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.5.1.1679\lib\net40\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="NVorbis">
+      <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.5.1.1679\lib\net40\NVorbis.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenTK">
+      <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.5.1.1679\lib\net40\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <Target Name="BeforeBuild">
     <PropertyGroup>
@@ -161,7 +179,7 @@
     <CreateItem Include="$(ContentSourceDirectory)\**\*.*">
       <Output TaskParameter="Include" ItemName="ContentFilesToCopy" />
     </CreateItem>
-    <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy-&gt;'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy->'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
   <ItemGroup />
 </Project>

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Ballz.Utils;
 
 namespace Ballz.GameSession.World
 {
@@ -52,6 +53,11 @@ namespace Ballz.GameSession.World
             //public bool[,] TerrainBitmap = null;
 
             public TerrainType[,] TerrainBitmap = null;
+
+            /// <summary>
+            /// Contains type information for the terrain material shader. See Terrain.BuildTerrainTypeTexture()
+            /// </summary>
+            public Texture2D TypeTexture = null;
         }
 
         public class TerrainModification
@@ -869,6 +875,7 @@ namespace Ballz.GameSession.World
             var Task = new Task(() =>
             {
                 ExtractTrianglesAndOutline();
+                BuildTerrainTypeTexture();
 
                 lock (PublicShape)
                 {
@@ -905,52 +912,112 @@ namespace Ballz.GameSession.World
             }
         }
 
-        Texture2D textureCache;
+        static Color[] TypeWeightsBufferA;
+        static Color[] TypeWeightsBufferB;
 
-        public Texture2D TerrainTypesToTexture()
+        public Texture2D GetTerrainTypeTexture()
         {
             Update();
 
-            if (textureCache != null)
-                return textureCache;
+            return PublicShape.TypeTexture;
+        }
+        
+        public void BuildTerrainTypeTexture()
+        {
+            
+                if (WorkingShape.TypeTexture == null)
+                    WorkingShape.TypeTexture = new Texture2D(Ballz.The().GraphicsDevice, width, height);
 
-            textureCache = new Texture2D(Ballz.The().GraphicsDevice, width, height);
-            var typeWeights = new Color[width*height];
-            TerrainType[,] types;
-            lock (PublicShape)
-            {
-                types = PublicShape.TerrainBitmap.Clone() as TerrainType[,];
-            }
+                var types = WorkingShape.TerrainBitmap;
 
-            for(int x = 0; x < width; x++)
-            {
-                for(int y = 0; y < height; y++)
+                // Blurring is done in two passes, first pass goes here, second one in typeWeights
+                if (TypeWeightsBufferA == null)
+                    TypeWeightsBufferA = new Color[width * height];
+                if (TypeWeightsBufferB == null)
+                    TypeWeightsBufferB = new Color[width * height];
+
+                // Build type weights as color values
+                for (int x = 0; x < width; x++)
                 {
-                    int i = x + y * width;
-                    var t = types[x, y];
-                    Color c;
-                    switch (t)
+                    for (int y = 0; y < height; y++)
                     {
-                        case TerrainType.Earth:
-                            c = new Color(255, 0, 0);
-                            break;
-                        case TerrainType.Sand:
-                            c = new Color(0, 255, 0);
-                            break;
-                        case TerrainType.Stone:
-                            c = new Color(0, 0, 255);
-                            break;
-                        default:
-                            c = new Color(0, 0, 0);
-                            break;
+                        int i = x + y * width;
+                        var t = types[x, y];
+                        Color c;
+                        switch (t)
+                        {
+                            case TerrainType.Earth:
+                                c = new Color(255, 0, 0);
+                                break;
+                            case TerrainType.Sand:
+                                c = new Color(0, 255, 0);
+                                break;
+                            case TerrainType.Stone:
+                                c = new Color(0, 0, 255);
+                                break;
+                            default:
+                                c = new Color(0, 0, 0);
+                                break;
+                        }
+
+                        TypeWeightsBufferA[i] = c;
                     }
-
-                    typeWeights[i] = c;
                 }
-            }
 
-            textureCache.SetData(typeWeights);
-            return textureCache;
+            using (new PerformanceReporter(Ballz.The()))
+            {
+
+                // Smooth everything with a 7 pixel gauss kernel (makes non-pixely material edges)
+                float[] gauss = new float[]
+                {
+                        0.06136f,
+                        0.24477f,
+                        0.38774f,
+                        0.24477f,
+                        0.06136f
+                };
+                
+                // Gauss X step
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        int i = x + y * width;
+
+                        Vector3 c = Vector3.Zero;
+
+                        for (int d = -2; d <= 2; d++)
+                        {
+                            int ixy = Math.Min(Math.Max(x + d, 0), width - 1) + y * width;
+                            c += TypeWeightsBufferA[ixy].ToVector3() * gauss[d + 2];
+                        }
+
+                        TypeWeightsBufferB[i] = new Color(c);
+                    }
+                }
+
+                // Gauss Y step
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        int i = x + y * width;
+
+                        Vector3 c = Vector3.Zero;
+
+                        for (int d = -2; d <= 2; d++)
+                        {
+                            int ixy = x + Math.Min(Math.Max(y + d, 0), height - 1) * width;
+                            c += TypeWeightsBufferB[ixy].ToVector3() * gauss[d + 2];
+                        }
+
+                        TypeWeightsBufferA[i] = new Color(c);
+                    }
+                }
+
+
+            }
+            WorkingShape.TypeTexture.SetData(TypeWeightsBufferA);
         }
         
         public struct IntVector2

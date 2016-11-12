@@ -26,7 +26,7 @@ namespace Ballz.GameSession.Logic
 
         public virtual void OnTurnEnd() { }
         public virtual void OnTurnStart() { }
-
+        public virtual void FireShot() { }
         /// <summary>
         /// Updates the weapon state and performs weapon actions.
         /// </summary>

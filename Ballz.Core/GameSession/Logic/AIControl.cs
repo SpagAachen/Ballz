@@ -41,9 +41,8 @@ namespace Ballz.GameSession.Logic
                                 && ((Ball)e).Player != Ball.Player
                                 && ((Ball)e).Health > 0);
                         _currentTarget =
-                            (Ball)
                                 worldState.Entities.Aggregate(
-                                    (curMin, x) => ((Ball)x).Player != Ball.Player && (curMin == null || (Ball.Position - x.Position).LengthSquared() < (Ball.Position - curMin.Position).LengthSquared()) ? x : curMin);
+                                    (curMin, x) => (x as Ball)?.Player != Ball.Player && (curMin == null || (Ball.Position - x.Position).LengthSquared() < (Ball.Position - curMin.Position).LengthSquared()) ? x : curMin) as Ball;
                     }
 
                     if (_currentTarget != null)
@@ -75,7 +74,7 @@ namespace Ballz.GameSession.Logic
                         {
                             Ball.HoldingWeapon = "HandGun";
                             Ball.AimDirection = Vector2.Normalize(_currentTarget.Position - Ball.Position);
-                            var muzzle = GenericGraphicsEffect.CreateMuzzle(
+                            var muzzle = SpriteGraphicsEffect.CreateMuzzle(
                                 Game.Match.GameTime,
                                 Ball.Position + 2f * Ball.AimDirection,
                                 Ball.AimDirection.RotationFromDirection()
@@ -88,10 +87,10 @@ namespace Ballz.GameSession.Logic
                                 const float explosionRadius = 0.3f;
                                 const float damage = 25f;
                                 Game.Match.World.StaticGeometry.SubtractCircle(rayHit.Position.X, rayHit.Position.Y, explosionRadius);
-                                Ballz.The().Match.World.GraphicsEvents.Add(GenericGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, rayHit.Position, 0, 0.2f));
+                                Ballz.The().Match.World.GraphicsEvents.Add(SpriteGraphicsEffect.CreateExplosion(Ballz.The().Match.GameTime, rayHit.Position, 0, 0.2f));
                                 var theBall = rayHit.Entity as Ball;
                                 if (theBall?.Health > 0)
-                                    theBall.Health -= damage;
+                                    theBall.ChangeHealth(-damage);
                             }
                             _shootCooldown = PauseBetweenShots;
                             return true;

@@ -43,22 +43,51 @@ namespace Ballz.Sound
         // Currently, we can only play one music at a time.
         private SoundEffectInstance music;
 
+		bool SoundsEnabled = true;
+
         public SoundControl(Ballz game)
         {
-
+           
             Game = game;
             loadedSounds = new Dictionary<string, SoundEffect>();
             WinnerSounds.Add("Germoney","Sounds/germoney");
             WinnerSounds.Add("Murica", "Sounds/freedom_fuckyeah");
         }
 
+        private SoundEffect LoadSound(string name)
+        {
+            SoundEffect sound;
+            try
+            {
+                sound = Game.Content.Load<SoundEffect>(name);
+            }
+            catch (Microsoft.Xna.Framework.Audio.NoAudioHardwareException e)
+            {
+                // If no audio hardware is installed, print a warning and don't try to load sounds again
+                MessageOverlay.ShowAlert("Audio error", e.Message);
+                SoundsEnabled = false;
+                return null;
+            }
+            loadedSounds.Add(name, sound);
+            return sound;
+        }
+
+		public SoundEffect GetSound(string name)
+		{
+			if (!SoundsEnabled)
+				return null;
+			
+			SoundEffect sound;
+			if(!loadedSounds.TryGetValue(name, out sound))
+                sound = LoadSound(name);            
+
+			return sound;
+		}
+
         public void PlaySound(string name)
         {
-            //load sound if it is not already loaded
-            if(!loadedSounds.ContainsKey(name))
-                loadedSounds.Add(name,Game.Content.Load<SoundEffect>(name));
-            SoundEffect sndEffect;
-            if(loadedSounds.TryGetValue(name, out sndEffect))
+			var sndEffect = GetSound(name);
+			if(sndEffect != null)
             {
                 SoundEffectInstance soundInstance = sndEffect.CreateInstance();
                 soundInstance.Volume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
@@ -66,27 +95,34 @@ namespace Ballz.Sound
             }
         }
 
+        private void UpdateMusicVolume()
+        {
+            currentVolume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
+            if (music.Volume != currentVolume)
+                music.Volume = currentVolume;
+        }
+
+        private void InitMusic(SoundEffect sndEffect)
+        {
+            music = sndEffect.CreateInstance();
+            music.IsLooped = true;
+            music.Volume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
+            music.Play();
+        }
+
         public void StartMusic(string name)
         {
-            //load sound if it is not already loaded
-            if(!loadedSounds.ContainsKey(name))
-                loadedSounds.Add(name,Game.Content.Load<SoundEffect>(name));
-            SoundEffect sndEffect;
-            if(loadedSounds.TryGetValue(name, out sndEffect))
+			var sndEffect = GetSound(name);
+			if(sndEffect != null)
             {
                 // My work here is done
                 if (music != null && music.State == SoundState.Playing)
-                {                    
-                    currentVolume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
-                    if (music.Volume != currentVolume)
-                        music.Volume = currentVolume;
+                {
+                    UpdateMusicVolume();
                     return;
                 }
-                
-                music = sndEffect.CreateInstance();
-                music.IsLooped = true;
-                music.Volume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
-                music.Play();
+
+                InitMusic(sndEffect);
             }
         }
 

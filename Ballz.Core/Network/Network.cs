@@ -68,17 +68,29 @@
             }
         }
 
-        public void ConnectToServer(string hostname, int port)
+        public bool ConnectToServer(string hostname, int port)
         {
             if (State != StateT.None)
                 Disconnect();
             State = StateT.Client;
             client = new Client(this);
             RaiseMessageEvent(NetworkMessage.MessageType.ConnectingToServer);
-            client.ConnectToServer(hostname, port); // blocking atm
+
+            try
+            {
+                client.ConnectToServer(hostname, port); // blocking atm
+            }
+            catch(Exception e)
+            {
+                RaiseMessageEvent(NetworkMessage.MessageType.ConnectionErrorOccured);
+                Console.WriteLine("Unable to connect");
+                MessageOverlay.ShowAlert("Error while connecting", e.Message);
+                return false;
+            }
+
             RaiseMessageEvent(NetworkMessage.MessageType.ConnectedToServer);
             Console.WriteLine("Connected to server");
-            //TODO: Implement
+            return true;
         }
 
         public void Disconnect()

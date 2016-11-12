@@ -66,7 +66,7 @@ namespace Ballz.GameSession.World
 
         public override void OnEntityCollision(Entity other)
         {
-            var shot = other as Shot;
+/*            var shot = other as Shot;
             if (shot != null)
             {
                 float impact = shot.Velocity.Length() * shot.ExplosionRadius;
@@ -84,6 +84,40 @@ namespace Ballz.GameSession.World
             {
                 // Other balls, etc -> no-op
             }
+*/        }
+
+        public void ChangeHealth(double healthDifference)
+        {
+            Health += healthDifference;
+
+            if (healthDifference < 0)
+            {
+                Ballz.The().Match.World.GraphicsEvents.Add(new TextEffect
+                    {
+                        Text =$"{(int)healthDifference}",
+                        TextSize = 0.5f,
+                        TextColor = Color.Red,
+                        Start = Ballz.The().Match.GameTime,
+                        Duration = 3f,
+                        PositionStart = Position + new Vector2(0, 1),
+                        PositionEnd = Position + new Vector2(0, 3),
+                        OpacityEnd = 0,
+                    });
+            }
+            else if (healthDifference > 0)
+            {
+                Ballz.The().Match.World.GraphicsEvents.Add(new TextEffect{
+                    Text = $"+{(int)healthDifference}",
+                    TextSize = 0.5f,
+                    TextColor = Color.Green,
+                    Start = Ballz.The().Match.GameTime,
+                    Duration = 3f,
+                    PositionStart = Position + new Vector2(0, 1),
+                    PositionEnd = Position + new Vector2(0, 3),
+                    OpacityEnd = 0,
+                });
+            }
+                
         }
 
         public override void OnTerrainCollision(Terrain terrain, Vector2 position)

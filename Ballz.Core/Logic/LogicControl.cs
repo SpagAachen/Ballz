@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Timers;
 using System.Collections.Generic;
 using System.Linq;
 using Ballz.Input;
@@ -18,11 +19,24 @@ namespace Ballz.Logic
         private GameState state;
         private bool rawInput;
         private Ballz Game;
+        private Timer ButtonRepeat, ButtonDelay;
+        private ElapsedEventHandler repeatHandler = null;
 
         public LogicControl(Ballz game)
         {
             Game = game;
             state = GameState.Unknown;
+            ButtonRepeat = new Timer(62.5);
+            ButtonRepeat.AutoReset = true;
+            repeatHandler = (s,e)=>{};
+            ButtonRepeat.Elapsed += repeatHandler;
+            ButtonDelay = new Timer(1000);
+            ButtonDelay.AutoReset = false;
+            ButtonDelay.Elapsed += (s, e) =>
+            {
+                ButtonRepeat.Stop();
+                ButtonRepeat.Start();
+            };
         }
 
         public void SetMainMenu(Composite menu)
@@ -35,6 +49,8 @@ namespace Ballz.Logic
 
         public void StartGame(GameSession.Logic.GameSettings settings, bool remoteControlled = false, int localPlayerId = -1)
         {
+            ButtonRepeat.Stop();
+            ButtonDelay.Stop();
             // Go back to main menu so it will show when the user enters the menu later
             MenuGoBack();
             // Select the "Continue" entry
@@ -51,7 +67,8 @@ namespace Ballz.Logic
 
         public void ContinueGame()
         {
-            
+            ButtonRepeat.Stop();
+            ButtonDelay.Stop();
             state = GameState.SimulationState;
             RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }
@@ -170,8 +187,15 @@ namespace Ballz.Logic
         private void MenuLogic(InputMessage msg)
         {
             Composite top = activeMenu.Peek();
+            //KeyPress Events
             if (msg.Kind == InputMessage.MessageType.RawInput || msg.Kind == InputMessage.MessageType.RawBack || msg.Pressed)
             {
+                ButtonDelay.Stop();
+                ButtonDelay.Start();
+                ButtonRepeat.Elapsed -= repeatHandler;
+                repeatHandler = (s, e) => this.MenuLogic(msg);
+                ButtonRepeat.Elapsed += repeatHandler;
+
                 switch (msg.Kind)
                 {
                     case InputMessage.MessageType.ControlsAction:
@@ -212,11 +236,11 @@ namespace Ballz.Logic
                         }
 
                         break;
-                    case InputMessage.MessageType.ControlsLeft:
+                    case InputMessage.MessageType.ControlsLeft:                                     
                         (top.SelectedItem as IChooseable)?.SelectPrevious();
                         break;
                     case InputMessage.MessageType.ControlsRight:
-                        (top.SelectedItem as IChooseable)?.SelectNext();
+                        (top.SelectedItem as IChooseable)?.SelectNext();                      
                         break;
                     case InputMessage.MessageType.RawInput:
                         if (msg.Key != null)
@@ -228,6 +252,22 @@ namespace Ballz.Logic
                     default:
                         //throw new ArgumentOutOfRangeException();
                         break;
+                }
+            }
+            else
+            {
+                //Key release events
+                if (!msg.Pressed)
+                {
+                    ButtonRepeat.Stop();
+                    ButtonDelay.Stop();
+                    switch(msg.Kind)
+                    {
+                        case InputMessage.MessageType.ControlsLeft:
+                            break;
+                        case InputMessage.MessageType.ControlsRight:
+                            break;
+                    }
                 }
             }
         }
@@ -248,7 +288,11 @@ namespace Ballz.Logic
         void CheckInputMode(InputTranslator translator)
         {
             if (rawInput)
+            {
                 translator.Mode = InputTranslator.InputMode.RAW;
+                ButtonRepeat.Stop();
+                ButtonDelay.Stop();
+            }
         }
 
         private enum GameState

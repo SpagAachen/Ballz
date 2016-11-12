@@ -39,15 +39,8 @@ namespace Ballz.Renderer
             Game.Camera.SetProjection(Matrix.Identity);
         }
 
-        protected override void LoadContent()
+        protected void LoadTextures()
         {
-            SpriteBatch = new SpriteBatch(Game.GraphicsDevice);
-            Font = Game.Content.Load<SpriteFont>("Fonts/MenuFont");
-            MipFont = new SpriteFont [4];
-            MipFont[0] = Game.Content.Load<SpriteFont>("Fonts/MenuFont");
-            MipFont[1] = Game.Content.Load<SpriteFont>("Fonts/halfMenuFont");
-            MipFont[2] = Game.Content.Load<SpriteFont>("Fonts/quarterMenuFont");
-            MipFont[3] = Game.Content.Load<SpriteFont>("Fonts/eigthMenuFont");
             SkyTexture = Game.Content.Load<Texture2D>("Textures/Sky");
             CloudTexture = Game.Content.Load<Texture2D>("Textures/Clouds");
 
@@ -67,6 +60,23 @@ namespace Ballz.Renderer
                 color[0] = Color.White;
                 WhiteTexture.SetData(color);
             }
+        }
+
+        protected void LoadFonts()
+        {
+            Font = Game.Content.Load<SpriteFont>("Fonts/MenuFont");
+            MipFont = new SpriteFont[4];
+            MipFont[0] = Game.Content.Load<SpriteFont>("Fonts/MenuFont");
+            MipFont[1] = Game.Content.Load<SpriteFont>("Fonts/halfMenuFont");
+            MipFont[2] = Game.Content.Load<SpriteFont>("Fonts/quarterMenuFont");
+            MipFont[3] = Game.Content.Load<SpriteFont>("Fonts/eigthMenuFont");
+        }
+
+        protected override void LoadContent()
+        {
+            SpriteBatch = new SpriteBatch(Game.GraphicsDevice);
+            LoadFonts();
+            LoadTextures();
 
             base.LoadContent();
         }
@@ -105,8 +115,9 @@ namespace Ballz.Renderer
         /// <param name="shadowOffset">Shadow offset.</param>
         /// <param name="centerVertical">If set to <c>true</c> center vertical.</param>
         /// <param name="centerHorizontal">If set to <c>true</c> center horizontal.</param>
-        public void DrawText(string text, Vector2 position, float size, Color color, int shadowOffset = 2, bool centerVertical = false, bool centerHorizontal = false)
+        public void DrawText(string _text, Vector2 position, float size, Color color, int shadowOffset = 2, bool centerVertical = false, bool centerHorizontal = false)
         {
+            string text = CheckLetters(_text);
             //scale the font with respect to the resolution 
             //the pt measure uses the width of the letter m so we only need the withd factor for scaling
             size *= resolutionFactor;
@@ -127,10 +138,9 @@ namespace Ballz.Renderer
             }
 
             if (shadowOffset > 0)
-            {
-                position += new Vector2(shadowOffset);
-                SpriteBatch.DrawString(MipFont[mipLevel], text, position, new Color(Color.Black, (color.A/255f) * 0.5f), 0, Vector2.Zero, size, SpriteEffects.None, 0);
-                position -= new Vector2(shadowOffset);
+            {                
+                SpriteBatch.DrawString(MipFont[mipLevel], text, position + new Vector2(shadowOffset),
+                    new Color(Color.Black, (color.A/255f) * 0.5f), 0, Vector2.Zero, size, SpriteEffects.None, 0);                
             }
 
             SpriteBatch.DrawString(MipFont[mipLevel], text, position, color, 0, Vector2.Zero, size, SpriteEffects.None, 0);
@@ -154,6 +164,48 @@ namespace Ballz.Renderer
                 Color.White
                 );
             SpriteBatch.End();
+        }
+
+        protected string CheckLetters(string toCheck)
+        {
+            char[] letters = toCheck.ToCharArray();
+            string checkedString = toCheck;
+            foreach (char letter in letters)
+            {
+                if (!Font.Characters.Contains(letter))
+                    checkedString = checkedString.Replace(letter, '?');
+            }
+
+            return checkedString;
+        }
+
+        public void DrawMessageOverlay(string header, string longtext = null, string footer = null)
+        {
+            SpriteBatch.Begin();
+
+            SpriteBatch.Draw(WhiteTexture, new Rectangle(0, 0, Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), new Color(Color.Black, 0.75f));
+
+            var screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width * 0.5f, Game.GraphicsDevice.Viewport.Height * 0.33f);
+            DrawText(header, screenPos, 1f, Color.Red, centerHorizontal: true);
+
+            if(!String.IsNullOrEmpty(longtext))
+            {
+                screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width * 0.5f, Game.GraphicsDevice.Viewport.Height * 0.5f);
+                DrawText(longtext, screenPos, 0.5f, Color.White, centerHorizontal: true);
+            }
+
+            if (!String.IsNullOrEmpty(footer))
+            {
+                screenPos = new Vector2(Game.GraphicsDevice.Viewport.Width * 0.5f, Game.GraphicsDevice.Viewport.Height * 0.66f);
+                DrawText(footer, screenPos, 1f, Color.White, centerHorizontal: true);
+            }
+
+            SpriteBatch.End();
+        }
+
+        public void DrawMessageOverlay(MessageOverlay overlay)
+        {
+            DrawMessageOverlay(overlay.HeaderText, overlay.MessageText, overlay.FooterText);
         }
     }
 }
