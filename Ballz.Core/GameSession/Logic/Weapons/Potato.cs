@@ -43,7 +43,7 @@ namespace Ballz.GameSession.Logic.Weapons
                 ExplosionRadius = (float)Math.Sqrt(damage) / 2.0f,
                 HealthDecreaseFromExplosionImpact = damage,
                 HealthDecreaseFromProjectileHit = damage,
-                ShotType = Shot.ShotType_T.Normal,
+				ShotType = Shot.ShotType_T.Normal,
                 ExplosionDelay = 0.0f,
                 Recoil = 0.0f,
                 Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.101f),

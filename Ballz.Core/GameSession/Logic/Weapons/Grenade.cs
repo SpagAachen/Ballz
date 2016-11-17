@@ -18,8 +18,6 @@ namespace Ballz.GameSession.Logic.Weapons
 
         public override string Name { get; } = "GrenadeBullet";
 
-        Random random = new Random();
-
         /*
         private double pdf(double x)
         {
@@ -50,7 +48,8 @@ namespace Ballz.GameSession.Logic.Weapons
                 Velocity = Ball.AimDirection * Ball.ShootCharge * 25f,
                 Radius = 0.3f,
                 Restitution = 0.3f,
-				Team = Ball.Player.TeamName
+				Team = Ball.Player.TeamName,
+				//SpawnEntity = 1
             };
         }
     }

@@ -117,7 +117,8 @@ namespace Ballz.GameSession.World
                     OpacityEnd = 0,
                 });
             }
-                
+			if (Health <= 0.0f)
+				Dispose ();
         }
 
         public override void OnTerrainCollision(Terrain terrain, Vector2 position)

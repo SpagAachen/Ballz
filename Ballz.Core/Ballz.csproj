@@ -139,6 +139,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Compile Include="Menu\MessageOverlay.cs" />
+    <Compile Include="GameSession\Logic\Weapons\Waterbomb.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
@@ -179,7 +180,7 @@
     <CreateItem Include="$(ContentSourceDirectory)\**\*.*">
       <Output TaskParameter="Include" ItemName="ContentFilesToCopy" />
     </CreateItem>
-    <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy->'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy-&gt;'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
   <ItemGroup />
 </Project>

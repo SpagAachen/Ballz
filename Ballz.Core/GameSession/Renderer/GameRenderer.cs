@@ -274,7 +274,7 @@ namespace Ballz.GameSession.Renderer
 
                 }
 
-                if (ball.IsAiming)
+                if (ball.IsAiming && (!Game.Match.UsePlayerTurns || ball == Game.Match.ActivePlayer?.ActiveBall))
                 {
                     int width = (int)(ball.ShootCharge * 100);
                     var aimIndicator = ball.Position + ball.AimDirection * 2.1f;
