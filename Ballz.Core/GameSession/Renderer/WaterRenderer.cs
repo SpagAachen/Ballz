@@ -81,7 +81,7 @@ namespace Ballz.GameSession.Renderer
 
         public void DrawWaterDebug(World.World world)
         {
-            if (NOWATER)
+            if (NOWATER || world.Water?.ParticleCount == 0)
                 return;
             
             var blending = new BlendState();
