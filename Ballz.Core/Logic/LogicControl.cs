@@ -242,8 +242,7 @@ namespace Ballz.Logic
                     case InputMessage.MessageType.ControlsRight:
                         (top.SelectedItem as IChooseable)?.SelectNext();                      
                         break;
-                    case InputMessage.MessageType.RawInput:
-                        if (msg.Key != null)
+                    case InputMessage.MessageType.RawInput:                        
                             (top.SelectedItem as IRawInputConsumer)?.HandleRawKey(msg.Key);
                         break;
                     case InputMessage.MessageType.RawBack:
