@@ -269,7 +269,7 @@ namespace Ballz
                     {
                         var team2 = new Team
                                         {
-                                            ControlledByAI = true,
+                                            ControlledByAI = false,
                                             Name = "Murica",
                                             Country = "Murica",
                                             NumberOfBallz = 2
