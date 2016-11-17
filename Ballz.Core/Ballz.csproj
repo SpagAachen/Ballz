@@ -139,7 +139,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Compile Include="Menu\MessageOverlay.cs" />
-    <Compile Include="GameSession\Logic\Weapons\Molotov.cs" />
     <Compile Include="GameSession\Logic\Weapons\Waterbomb.cs" />
   </ItemGroup>
   <ItemGroup>
