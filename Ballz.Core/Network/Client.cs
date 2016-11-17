@@ -88,7 +88,6 @@
                         localEntity.Dispose();
                         break;
                     default:
-                        Console.WriteLine("Unknown netMsg received: " + netMsg.Kind.ToString());
                         break;
                 }
 
@@ -101,11 +100,6 @@
                 Ballz.The().Match.World.StaticGeometry.ApplyModification(terrainModification);
                 return;
             }
-
-            if (data != null)
-                Console.WriteLine("Unknown object received: " + data.ToString());
-            else
-                Console.WriteLine("Empty data");
         }
 
         private void ParseEntities(List<Entity> entities)

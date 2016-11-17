@@ -14,6 +14,9 @@ namespace Ballz.Menu
 
         public InputBox(string name, bool selectable = false) : base(name, selectable)
         {
+            BackGroundColor = new Microsoft.Xna.Framework.Color(Microsoft.Xna.Framework.Color.Black, 127);
+            BorderColor = new Microsoft.Xna.Framework.Color(Microsoft.Xna.Framework.Color.Gray,191);
+            BorderWidth = 3;
         }
         
         public void HandleRawKey(char key)

@@ -187,6 +187,35 @@ namespace Ballz.Renderer
                 {
                     renderString = DecorateInputBox(menu, item, showUnderscore);
 
+                    //render background if necessary
+                        //compute width and height of box
+                        var width = item.Width == 0 ? Font.MeasureString(renderString).X * ItemFontSize* resolutionFactor : item.Width;
+                        var height = item.Height == 0 ? Font.MeasureString(renderString).Y * ItemFontSize* resolutionFactor : item.Height;
+                        var labelWidth = Font.MeasureString(item.Name).X * ItemFontSize * resolutionFactor;
+                        var labelHeight = Font.MeasureString(item.Name).Y * ItemFontSize * resolutionFactor;
+                    Rectangle rect = new Rectangle(new Point((int)(leftOffset+labelWidth-5),(int)topOffset), new Point((int)labelWidth, (int)height));
+                        SpriteBatch.Draw(WhiteTexture, rect, item.BackGroundColor);
+                        Rectangle topBorder = new Rectangle(new Point((int)(leftOffset+labelWidth-5),(int)topOffset), new Point((int)labelWidth, (int)item.BorderWidth));
+                    Rectangle bottomBorder = new Rectangle(new Point((int)(leftOffset+labelWidth-5),(int)(topOffset+labelHeight-item.BorderWidth)), new Point((int)labelWidth, (int)item.BorderWidth));
+                        Rectangle leftBorder = new Rectangle(new Point((int)(leftOffset+labelWidth-5),(int)topOffset), new Point((int)item.BorderWidth, (int)height));
+                        Rectangle rightBorder = new Rectangle(new Point((int)(leftOffset+2*labelWidth-5),(int)topOffset), new Point((int)item.BorderWidth, (int)height));
+                    SpriteBatch.Draw(WhiteTexture, topBorder, item.BorderColor);
+                    SpriteBatch.Draw(WhiteTexture, bottomBorder, item.BorderColor);
+                    SpriteBatch.Draw(WhiteTexture, leftBorder, item.BorderColor);
+                    SpriteBatch.Draw(WhiteTexture, rightBorder, item.BorderColor);
+
+                    if (item is InputBox)
+                    {
+                        int i = 0;
+                        //if string is too long remove characters until its not
+                        while (width > ( 2 * labelWidth - 5))
+                        {
+                            ++i;
+                            renderString = item.Name + renderString.Substring(item.Name.Length+i);
+                            width = Font.MeasureString(renderString).X * ItemFontSize * resolutionFactor;
+                        }
+                    }
+
                     DrawText(
                         renderString,
                         new Vector2(leftOffset, topOffset),

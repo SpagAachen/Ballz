@@ -12,6 +12,10 @@ namespace Ballz.Menu
         private readonly List<Item> members = new List<Item>();
         private int index; 
 
+        /// <summary>
+        /// Gets or sets the background texture which is used as screen Background.
+        /// </summary>
+        /// <value>The background texture.</value>
         public Texture2D BackgroundTexture { get; set; }
 
         public Composite(string name, bool selectable = false) : base(name, selectable)
