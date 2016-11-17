@@ -921,7 +921,7 @@ namespace Ballz.GameSession.World
 
             return PublicShape.TypeTexture;
         }
-
+        
         public void BuildTerrainTypeTexture()
         {
             

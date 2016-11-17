@@ -12,12 +12,14 @@ namespace Ballz.GameSession.Logic.Weapons
     public abstract class ChargedProjectileWeapon : WeaponControl
     {
         public ChargedProjectileWeapon(Ball ball, Ballz game) : base(ball, game) { }
+
+        public Shot ProjectileInAir = null;
         
         public virtual void FireProjectile()
         {
             Game.Services.GetService<SoundControl>().PlaySound(SoundControl.BazookaSound);
             Shot newShot = CreateShot();
-
+            ProjectileInAir = newShot;
             Game.Match.World.AddEntity(newShot);
             Ball.PhysicsBody.ApplyForce(-10000 * Ball.ShootCharge * newShot.Recoil * Ball.AimDirection);
         }

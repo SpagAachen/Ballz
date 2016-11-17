@@ -60,15 +60,17 @@ namespace Ballz.GameSession.Renderer
 
                 if (Game.Match.UsePlayerTurns && Game.Match.ActivePlayer?.ActiveBall != null)
                 {
-                    if (CurrentActiveBall == null)
-                        CurrentActiveBall = Game.Match.ActivePlayer?.ActiveBall;
+                    CurrentActiveBall = Game.Match.ActivePlayer?.ActiveBall;
 
                     if (CurrentActiveBall != null && Game.Match.TurnState == TurnState.Running && Game.Match.ActivePlayer?.ActiveBall != CurrentActiveBall && Game.Match.ActivePlayer?.ActiveBall != null)
                     {
                         CurrentActiveBall = Game.Match.ActivePlayer.ActiveBall;
                         Game.Camera.SwitchTarget(CurrentActiveBall.Position, time);
                     }
-                    Game.Camera.SetTargetPosition((Vector2)Game.Match.ActivePlayer.ActiveBall.Position, time);
+                    else if (Game.Match.FocussedEntity != null)
+                    {
+                        Game.Camera.SetTargetPosition((Vector2)Game.Match.FocussedEntity.Position, time);
+                    }
                 }
                 else
                 {

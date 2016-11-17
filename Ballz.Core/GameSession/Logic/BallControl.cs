@@ -58,6 +58,16 @@ namespace Ballz.GameSession.Logic
             }
             else
             {
+                var projectileInAir = (Weapon as Weapons.ChargedProjectileWeapon)?.ProjectileInAir;
+                if (projectileInAir != null && !projectileInAir.Disposed)
+                {
+                    Game.Match.FocussedEntity = projectileInAir;
+                }
+                else if (Ball == Game.Match.ActivePlayer?.ActiveBall)
+                {
+                    Game.Match.FocussedEntity = Ball;
+                }
+
 				bool weaponSwitchAllowed = true;
 				if (!(Game.Match.SessionLogic.Session.TurnState == TurnState.WaitingForEnd))
 					Weapon?.Update (elapsedSeconds, KeyPressed, out ballMadeAction, out weaponSwitchAllowed);

@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using Microsoft.Xna.Framework;
+using Ballz.GameSession.World;
 
 namespace Ballz
 {
@@ -39,6 +40,8 @@ namespace Ballz
         private Vector2 TargetPosition{ get; set;}
 
 		private CameraTrajectory CurrentCameraTrajectory;
+        private Entity FocussedEntity;
+
         private double lastMillis;
         private float AspectRatio;
 		private float Zoom;
@@ -125,51 +128,19 @@ namespace Ballz
 
         private void UpdateCurrentCameraPosition(GameTime t)
         {
-			if (CurrentCameraTrajectory == null) {
-				Vector2 DiffPos = TargetPosition - CurrentPosition;
-
-				double DiffTime = (t.TotalGameTime.TotalMilliseconds - lastMillis) / 1000.0;
-				lastMillis = t.TotalGameTime.TotalMilliseconds;
-
-				if (DiffPos.Length () == 0.0f) {
-					return;
-				}
-
-				float speed = 3.0f + DiffPos.Length () * 1.0f;
-				Vector2 delta = Vector2.Normalize (DiffPos) * speed * (float)DiffTime;
-
-				if (delta.Length () > DiffPos.Length ()) {
-					CurrentPosition = TargetPosition;
-				} else {
-					CurrentPosition += delta;
-				}
-
-				float dynamicZoom = Zoom - DiffPos.Length () * 0.01f;
-				float x_size = 40.0f / dynamicZoom;
-				float y_size = 40.0f / dynamicZoom / AspectRatio;
-
-                var left = CurrentPosition.X - x_size / 2.0f;
-                var right = CurrentPosition.X + x_size / 2.0f;
-                var bottom = CurrentPosition.Y - y_size / 2.0f;
-                var top = CurrentPosition.Y + y_size / 2.0f;
-
-                ClampToBoundary(ref top, ref right, ref bottom, ref left);
-
-                SetView(Matrix.CreateOrthographicOffCenter(
-					left, right, 
-					bottom, top, 
-					-20, 20));
-			} else {
-				if (CurrentCameraTrajectory.IsValid () == false) {
-					CurrentCameraTrajectory = null;
-					return;
-				}
-				Vector3 p = CurrentCameraTrajectory.GetCurrentPoint (t);
-				CurrentPosition.X = p.X;
-				CurrentPosition.Y = p.Y;
-				float dynamicZoom = p.Z;
-				float x_size = 40.0f / dynamicZoom;
-				float y_size = 40.0f / dynamicZoom / AspectRatio;
+            if (CurrentCameraTrajectory != null)
+            {
+                if (CurrentCameraTrajectory.IsValid() == false)
+                {
+                    CurrentCameraTrajectory = null;
+                    return;
+                }
+                Vector3 p = CurrentCameraTrajectory.GetCurrentPoint(t);
+                CurrentPosition.X = p.X;
+                CurrentPosition.Y = p.Y;
+                float dynamicZoom = p.Z;
+                float x_size = 40.0f / dynamicZoom;
+                float y_size = 40.0f / dynamicZoom / AspectRatio;
 
                 var left = p.X - x_size / 2.0f;
                 var right = p.X + x_size / 2.0f;
@@ -180,10 +151,51 @@ namespace Ballz
 
                 // Clamp view frustum to boundary
                 SetView(Matrix.CreateOrthographicOffCenter(
-					left, right, 
-					bottom, top, 
-					-20, 20));
-			}
+                    left, right, 
+                    bottom, top, 
+                    -20, 20));
+                
+            }
+            else
+            {
+                Vector2 DiffPos = TargetPosition - CurrentPosition;
+
+                double DiffTime = (t.TotalGameTime.TotalMilliseconds - lastMillis) / 1000.0;
+                lastMillis = t.TotalGameTime.TotalMilliseconds;
+
+                if (DiffPos.Length() == 0.0f)
+                {
+                    return;
+                }
+
+                float speed = 3.0f + DiffPos.Length() * 1.0f;
+                Vector2 delta = Vector2.Normalize(DiffPos) * speed * (float)DiffTime;
+
+                if (delta.Length() > DiffPos.Length())
+                {
+                    CurrentPosition = TargetPosition;
+                }
+                else
+                {
+                    CurrentPosition += delta;
+                }
+
+                float dynamicZoom = Zoom - DiffPos.Length() * 0.01f;
+                float x_size = 40.0f / dynamicZoom;
+                float y_size = 40.0f / dynamicZoom / AspectRatio;
+
+                var left = CurrentPosition.X - x_size / 2.0f;
+                var right = CurrentPosition.X + x_size / 2.0f;
+                var bottom = CurrentPosition.Y - y_size / 2.0f;
+                var top = CurrentPosition.Y + y_size / 2.0f;
+
+                ClampToBoundary(ref top, ref right, ref bottom, ref left);
+
+                SetView(Matrix.CreateOrthographicOffCenter(
+                    left, right, 
+                    bottom, top, 
+                    -20, 20));
+            }
         }
     }
 }
