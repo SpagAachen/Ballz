@@ -267,7 +267,7 @@ namespace Ballz.GameSession.Renderer
 
                     var weaponPosScreen = WorldToScreen(ball.Position - new Vector2(0, 0.33f));
                     var weaponTexture = Game.Content.Load<Texture2D>("Textures/" + ball.HoldingWeapon);
-                    var weaponTextureScale = 256f / weaponTexture.Width;
+                    var weaponTextureScale = 256f / weaponTexture.Width * (float)Game.Window.ClientBounds.Width / 1920f; //assume the weapon texture was designed for full HD 1080p resolution
 
                     // Draw weapon
                     SpriteBatch.Draw(weaponTexture, position: weaponPosScreen, color: Color.White, rotation: weaponRotation, scale: new Vector2(weaponTextureScale, weaponTextureScale), origin: new Vector2(weaponTexture.Width / 2f, weaponTexture.Height / 2f), effects: effects);
