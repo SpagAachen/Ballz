@@ -27,13 +27,14 @@ namespace Ballz.GameSession.Logic.Weapons
             return new Shot
             {
                 ExplosionRadius = 3.0f,
-                HealthDecreaseFromExplosionImpact = 25,
+                HealthDecreaseFromExplosionImpact = 50.0f,
                 HealthDecreaseFromProjectileHit = 100,
                 ShotType = Shot.ShotType_T.Normal,
                 ExplosionDelay = 0.0f,
                 Recoil = 1.0f,
                 Position = Ball.Position + Ball.AimDirection * (Ball.Radius + 0.101f),
                 Velocity = Ball.AimDirection * Ball.ShootCharge * 25f,
+				Team = Ball.Player.TeamName
             };
         }
 

@@ -56,6 +56,25 @@ namespace Ballz.GameSession.World
             _w = new float[ParticleCount, ParticleCount];
         }
 
+		public void AddParticles(Vector2 position, int count)
+		{
+			var particles = new List<Vector2>();
+			var velocities = new List<Vector2>();
+			for(var i=0; i < count; i++) { 
+				particles.Add(new Vector2(position.X + (float)Math.Cos(2 * Math.PI * i / count)*0.5f, position.Y + (float)Math.Sin(2 * Math.PI * i / count)*0.5f)); 
+				velocities.Add( new Vector2( (float)Math.Cos(2 * Math.PI * i / count)*3.0f, (float)Math.Sin(2 * Math.PI * i / count)*3.0f ) );
+			}
+			Particles = Particles.ToList().Concat(particles).ToArray();
+			Velocities = Velocities.ToList().Concat(velocities).ToArray();
+			_velocityBuffer = _velocityBuffer.ToList ().Concat (velocities).ToArray ();
+			var tmp = ParticleCount + count;
+			var tmp_arr = new float[tmp, tmp];
+			for (int i = 0; i < ParticleCount; i++)
+				for (int j = 0; j < ParticleCount; j++)
+					tmp_arr [i, j] = _w [i, j];
+			ParticleCount += count;
+			_w = tmp_arr;
+		}
         public int ParticleCount;
         public const float R = 0.05f;
         public const float D = 2*R;
