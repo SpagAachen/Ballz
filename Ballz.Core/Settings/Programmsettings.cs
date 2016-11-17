@@ -30,6 +30,7 @@ namespace Ballz.Settings
         public Setting<bool> Fullscreen = new Setting<bool>();
         public Setting<Resolution> ScreenResolution = new Setting<Resolution>();
         public Setting<int> MasterVolume = new Setting<int>();
+        public Setting<int> MSAASamples = new Setting<int>();
         public Setting<string> PlayerName = new Setting<string>();
 		public Setting<bool> FriendlyFire = new Setting<bool>();
         public ProgrammSettings()
@@ -38,6 +39,7 @@ namespace Ballz.Settings
             ScreenResolution.Value = new Resolution(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width,
                 GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height);
             MasterVolume.Value = 100;
+            MSAASamples.Value = 8;
 			FriendlyFire.Value = false;
         }
     }
