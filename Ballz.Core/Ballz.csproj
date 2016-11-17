@@ -140,6 +140,7 @@
     </None>
     <Compile Include="Menu\MessageOverlay.cs" />
     <Compile Include="GameSession\Logic\Weapons\Waterbomb.cs" />
+    <Compile Include="GameSession\Logic\Weapons\Drill.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Icon.png" />
