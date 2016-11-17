@@ -22,6 +22,7 @@ namespace Ballz.GameSession.Logic
             AvailableWeapons.Add(new Weapons.RopeTool(ball, game));
             AvailableWeapons.Add(new Weapons.Bazooka(ball, game));
             AvailableWeapons.Add(new Weapons.Pistol(ball, game));
+			AvailableWeapons.Add(new Weapons.Waterbomb(ball, game));
             Weapon = AvailableWeapons[SelectedWeaponIndex];
             Ball.HoldingWeapon = AvailableWeapons[SelectedWeaponIndex].Icon;
         }

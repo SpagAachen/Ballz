@@ -64,7 +64,8 @@ namespace Ballz.GameSession.World
         {
             Normal,         // simulated by physics ("flies" through the air)
             InstantHit,     // instantly reaches the first collision in aim direction
-            Droppable       // is dropped at the current position of the ball (e.g. mine)
+            Droppable,       // is dropped at the current position of the ball (e.g. mine)
+			Generating
         }
 
         // Determines how the shot is simulated
@@ -99,20 +100,24 @@ namespace Ballz.GameSession.World
 			foreach (var p in Ballz.The().Match.Players) {
 				foreach (var b in p.OwnedBalls) {
 					if (Vector2.Distance(b.Position, this.Position) < ExplosionRadius) {
+						
 						if (!Ballz.The().GameSettings.FriendlyFire.Value && b.Player.TeamName == Team )
 							break;
-						float impact = Velocity.Length() * ExplosionRadius;
+						
+						b.ChangeHealth ( -this.HealthDecreaseFromExplosionImpact * Vector2.Distance(b.Position, this.Position)/ExplosionRadius );
 
-                        b.ChangeHealth(-HealthDecreaseFromProjectileHit * Math.Min(1, impact / 20));
+						b.PhysicsBody.ApplyLinearImpulse(HealthDecreaseFromExplosionImpact * 
+							Vector2.Distance(b.Position, this.Position) / ExplosionRadius * 
+							Vector2.Normalize(b.Position - this.Position)
+						);
 
-						if (b.Health < 0)
-							b.Health = 0;
-
-						b.PhysicsBody.ApplyLinearImpulse(10 * this.Velocity);
 					}
 				}
 			}
-            // TODO: force on players within explosion radius (dir = playerpos - Position.X/Y)
+
+			if( ShotType == ShotType_T.Generating)
+				Ballz.The ().Match.World.Water.AddParticles(this.Position, 20);
+
 
             // Remove projectile
             Dispose();
