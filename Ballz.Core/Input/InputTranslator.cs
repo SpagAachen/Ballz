@@ -189,7 +189,7 @@ namespace Ballz.Input
         {
             //the back key is supposed to switch back to processed InputMode
             //note that the RAW inputs themselves are processed by the RawHandler function.
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape) || Keyboard.GetState().IsKeyDown(Keys.Enter))
             {
                 Mode = InputMode.PROCESSED;
                 OnInput(InputMessage.MessageType.ControlsBack,true);
