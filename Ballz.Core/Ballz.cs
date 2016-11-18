@@ -266,6 +266,8 @@ namespace Ballz
             {
                 Logic.ContinueGame();
             };
+			continueLabel.Visible = false;
+			continueLabel.Selectable = false;
             mainMenu.AddItem(continueLabel);
 
             var singlePlayerMenu = new Composite("Singleplayer", true);
@@ -322,13 +324,16 @@ namespace Ballz
             mainMenu.AddItem(multiplayerMenu);
             mainMenu.AddItem(optionsMenu);
 
-            mainMenu.SelectNext();
-            continueLabel.Visible = false;
-            continueLabel.Selectable = false;
+			var controlsMenu = new Composite("Controls", true);
+			controlsMenu.AddItem(new Back());
+			controlsMenu.BackgroundTexture = Content.Load<Texture2D>("Textures/Controls");
+			mainMenu.AddItem (controlsMenu);
 
-            var quit = new Label("Quit", true);
-            quit.OnSelect += Exit;
-            mainMenu.AddItem(quit);
+			var quit = new Label("Quit", true);
+			quit.OnSelect += Exit;
+			mainMenu.AddItem(quit);
+
+            mainMenu.SelectNext();
 
             return mainMenu;
         }
