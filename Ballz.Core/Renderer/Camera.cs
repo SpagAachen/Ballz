@@ -44,7 +44,13 @@ namespace Ballz
 
         private double lastMillis;
         private float AspectRatio;
-		private float Zoom;
+        public float Zoom { get; private set; }
+        public float ZoomTarget { get; private set; }
+        public float ZoomTargetTime { get; private set; }
+        const float ZoomPerSecond = 0.5f;
+        const float MaxZoom = 2f;
+        const float MinZoom = 0.25f;
+
         public Camera()
         {
             View = new Matrix();
@@ -54,11 +60,23 @@ namespace Ballz
             AspectRatio = 1;
             lastMillis = 0.0;
 			Zoom = 1.0f;
+            ZoomTarget = Zoom;
         }
 
-		public void SetZoom(float zoom)
+        public void SetZoom(float zoom, bool animate = false, float time = float.NaN)
 		{
-			Zoom = zoom;
+            if (zoom > MaxZoom || zoom < MinZoom)
+                return;
+            
+            ZoomTarget = zoom;
+            if (animate)
+            {
+                ZoomTargetTime = time;
+            }
+            else
+            {
+                Zoom = zoom;
+            }
 		}
 
         public Camera(float aspectratio) :this()
@@ -84,7 +102,6 @@ namespace Ballz
         public void SetTargetPosition(Vector2 Position, GameTime t)
         {
             TargetPosition = Position;
-            UpdateCurrentCameraPosition (t);
         }
 
 		public void SwitchTarget(Vector2 targetPosition, GameTime t)
@@ -126,8 +143,17 @@ namespace Ballz
             }
         }
 
-        private void UpdateCurrentCameraPosition(GameTime t)
+        public void Update(GameTime t)
         {
+            if (Zoom != ZoomTarget)
+            {
+                float zoomDirection = Math.Sign(ZoomTarget - Zoom);
+                Zoom += zoomDirection * ZoomPerSecond * (float)t.ElapsedGameTime.TotalSeconds;
+                if((zoomDirection < 0 && Zoom < ZoomTarget) || (zoomDirection > 0 && Zoom > ZoomTarget))
+                {
+                    Zoom = ZoomTarget;
+                }
+            }
             if (CurrentCameraTrajectory != null)
             {
                 if (CurrentCameraTrajectory.IsValid() == false)
@@ -163,21 +189,19 @@ namespace Ballz
                 double DiffTime = (t.TotalGameTime.TotalMilliseconds - lastMillis) / 1000.0;
                 lastMillis = t.TotalGameTime.TotalMilliseconds;
 
-                if (DiffPos.Length() == 0.0f)
+                if (DiffPos.Length() > 0f)
                 {
-                    return;
-                }
+                    float speed = 3.0f + DiffPos.Length() * 1.0f;
+                    Vector2 delta = Vector2.Normalize(DiffPos) * speed * (float)DiffTime;
 
-                float speed = 3.0f + DiffPos.Length() * 1.0f;
-                Vector2 delta = Vector2.Normalize(DiffPos) * speed * (float)DiffTime;
-
-                if (delta.Length() > DiffPos.Length())
-                {
-                    CurrentPosition = TargetPosition;
-                }
-                else
-                {
-                    CurrentPosition += delta;
+                    if (delta.Length() > DiffPos.Length())
+                    {
+                        CurrentPosition = TargetPosition;
+                    }
+                    else
+                    {
+                        CurrentPosition += delta;
+                    }
                 }
 
                 float dynamicZoom = Zoom - DiffPos.Length() * 0.01f;

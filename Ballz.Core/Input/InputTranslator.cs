@@ -307,6 +307,15 @@ namespace Ballz.Input
 					case Keys.D2:
 						OnInput(InputMessage.MessageType.ControlsPreviousWeapon, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
 						break;
+					case Keys.Add:
+						OnInput(InputMessage.MessageType.ControlsCameraZoomIn, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						break;
+					case Keys.Subtract:
+						OnInput(InputMessage.MessageType.ControlsCameraZoomOut, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						break;
+					case Keys.C:
+						OnInput(InputMessage.MessageType.ControlsCameraModeToggle, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						break;
 
 				}
 			}

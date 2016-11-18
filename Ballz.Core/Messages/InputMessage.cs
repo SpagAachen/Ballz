@@ -20,6 +20,9 @@ namespace Ballz.Messages
             ControlsBack,
             ControlsNextWeapon,
             ControlsPreviousWeapon,
+			ControlsCameraZoomIn,
+			ControlsCameraZoomOut,
+			ControlsCameraModeToggle,
             RawBack,
             RawInput
         }

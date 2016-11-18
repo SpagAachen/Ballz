@@ -37,6 +37,7 @@ namespace Ballz.Renderer
             ElapsedTime = gameTime.TotalGameTime;
             Game.Camera.SetAspectRatio(Game.GraphicsDevice.Viewport.AspectRatio);
             Game.Camera.SetProjection(Matrix.Identity);
+            Game.Camera.Update(gameTime);
         }
 
         protected void LoadTextures()
