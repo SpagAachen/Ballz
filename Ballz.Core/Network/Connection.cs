@@ -63,11 +63,19 @@ namespace Ballz.Network
         /// Serializes on object and send it to another game instance.
         /// </summary>
         /// <param name="obj">The object to send</param>
-        public void Send(object obj)
+        /// <returns>Returns true iff sending was successful.</returns>
+        public bool Send(object obj)
         {
-            streamSync.WriteUpdate(obj);
-            connectionStream.Flush();
-
+            try
+            {
+                streamSync.WriteUpdate(obj);
+                connectionStream.Flush();
+            }
+            catch(System.IO.IOException e)
+            {
+                return false;
+            }
+            return true;
         }
 
         public void ReadUpdates()

@@ -71,20 +71,20 @@
             var counter = 0;
 
             {
-                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1 };
+                counter++;
+                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1, Country = "Germoney" };
                 gameSettings.Teams.Add(team);
-                ++counter;
             }
             
             foreach(var client in connections)
             {
-                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1 };
+                counter++;
+                var team = new Team { ControlledByAI = false, Name = $"Team{counter}", NumberOfBallz = 1, Country = "Murica" };
 
                 client.ClientPlayerId = team.Id;
                 client.Send(new NetworkMessage(NetworkMessage.MessageType.YourPlayerId, client.ClientPlayerId));
 
                 gameSettings.Teams.Add(team);
-                ++counter;
             }
         }
 
