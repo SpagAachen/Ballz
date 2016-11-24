@@ -158,8 +158,8 @@ namespace Ballz.GameSession.Physics
                 segment.BodyType = BodyType.Dynamic;
                 segment.Friction = 0.5f;
                 segment.Restitution = 0.2f;
-                segment.AngularDamping = 1.1f;
-                segment.LinearDamping = 1.1f;
+                segment.AngularDamping = 0.2f;//1.1f;
+                segment.LinearDamping = 0.2f;// 1.1f;
                 segment.CollisionCategories = Category.Cat3;
                 segment.SetTransform(segmentCenter, -ropeRotation - 0.5f * (float)Math.PI);
 
@@ -220,7 +220,7 @@ namespace Ballz.GameSession.Physics
             for (int i = 0; i < rope.PhysicsSegmentJoints.Count; ++i)
             {
                 var joint = rope.PhysicsSegmentJoints[i];
-                if (Vector2.Distance(joint.WorldAnchorA, joint.WorldAnchorB) > 0.1f * Rope.SegmentLength)
+                if (Vector2.Distance(joint.WorldAnchorA, joint.WorldAnchorB) > 0.3f * Rope.SegmentLength)
                     return;
             }
 
