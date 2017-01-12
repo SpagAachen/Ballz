@@ -13,11 +13,11 @@ The game is currently under development. Basic gameplay and multiplayer are work
 
 On Windows, you need Visual Studio 2015.
 
-On Linux, you need:
+On Linux, you need dev libraries of:
 - Mono 4.6 or newer
 - Nuget
 - OpenAL
-- SDL2
+- SDL2 (including libSDL-mixer)
 
 Make sure the git submodules are updated.
 
