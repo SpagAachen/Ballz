@@ -9,8 +9,8 @@ namespace Ballz.Gui
 {
     public class Composite : Item
     {
-        private readonly List<Item> members = new List<Item>();
-        private int index; 
+        protected readonly List<Item> Members = new List<Item>();
+        private int SelectedIndex; 
 
         /// <summary>
         /// Gets or sets the background texture which is used as screen Background.
@@ -25,40 +25,40 @@ namespace Ballz.Gui
         public void AddItem(Item item, int index = -1)
         {
             if (index >= 0)
-                members.Insert(index, item);
+                Members.Insert(index, item);
             else
-                members.Add(item);
+                Members.Add(item);
         }
 
-        public override IReadOnlyList<Item> Items => members;
+        public override IReadOnlyList<Item> Items => Members;
 
-        public override Item SelectedItem => members[index].Selectable ? members[index] : null;
+        public override Item SelectedItem => Members.Skip(SelectedIndex).FirstOrDefault(i => i.Selectable);
 
         public void SelectNext()
         {
-            if (members.All(m => !m.Selectable))
+            if (Members.All(m => !m.Selectable))
                 return;
             do
             {
-                index = (index + 1) % members.Count;
+                SelectedIndex = (SelectedIndex + 1) % Members.Count;
             }
             while (SelectedItem == null || !SelectedItem.Selectable);
         }
 
         public void SelectPrevious()
         {
-            if (members.All(m => !m.Selectable))
+            if (Members.All(m => !m.Selectable))
                 return;
             do
             {
-                index = (index + members.Count - 1) % members.Count;
+                SelectedIndex = (SelectedIndex + Members.Count - 1) % Members.Count;
             }
             while (SelectedItem == null || !SelectedItem.Selectable);
         }
 
         public void SelectIndex(int i)
         {
-            index = i;
+            SelectedIndex = i;
         }
     }
 }

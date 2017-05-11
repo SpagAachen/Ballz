@@ -8,8 +8,9 @@ namespace Ballz.Gui
 {
     public class Label : Leaf
     {
-        public Label(string name, bool selectable = false) : base(name, selectable)
+        public Label(string name, bool selectable = false, float fontSize = 0.75f) : base(name, selectable)
         {
+            FontSize = fontSize;
         }
     }
 }

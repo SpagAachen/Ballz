@@ -78,13 +78,17 @@
     <Compile Include="Logic\LogicControl.cs" />
     <Compile Include="GameSession\Physics\PhysicsComponent.cs" />
     <Compile Include="GameSession\World\Entity.cs" />
-    <Compile Include="Menu\Back.cs" />
-    <Compile Include="Menu\InputBox.cs" />
-    <Compile Include="Menu\Leaf.cs" />
-    <Compile Include="Menu\Label.cs" />
-    <Compile Include="Menu\Composite.cs" />
-    <Compile Include="Menu\IRawInputConsumer.cs" />
-    <Compile Include="Menu\SpinBox.cs" />
+    <Compile Include="Gui\Back.cs" />
+    <Compile Include="Gui\InputBox.cs" />
+    <Compile Include="Gui\Leaf.cs" />
+    <Compile Include="Gui\Label.cs" />
+    <Compile Include="Gui\Composite.cs" />
+    <Compile Include="Gui\IRawInputConsumer.cs" />
+    <Compile Include="Gui\SpinBox.cs" />
+    <Compile Include="Menu\HostGameMenu.cs" />
+    <Compile Include="Menu\GameListMenu.cs" />
+    <Compile Include="Menu\LobbyMenu.cs" />
+    <Compile Include="Menu\MultiplayerMenu.cs" />
     <Compile Include="Messages\NetworkMessage.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="GameSession\World\Ball.cs" />
@@ -116,14 +120,14 @@
     <None Include="app.config" />
     <Compile Include="Messages\MenuMessage.cs" />
     <Compile Include="Messages\InputMessage.cs" />
-    <Compile Include="Menu\Item.cs" />
+    <Compile Include="Gui\Item.cs" />
     <Compile Include="Renderer\PerformanceRenderer.cs" />
     <Compile Include="Messages\LogicMessage.cs" />
-    <Compile Include="Menu\CheckBox.cs" />
+    <Compile Include="Gui\CheckBox.cs" />
     <Compile Include="Settings\Programmsettings.cs" />
     <Compile Include="Settings\SettingTypes.cs" />
-    <Compile Include="Menu\Choice.cs" />
-    <Compile Include="Menu\IChooseable.cs" />
+    <Compile Include="Gui\Choice.cs" />
+    <Compile Include="Gui\IChooseable.cs" />
     <None Include="packages.config" />
     <Compile Include="Renderer\Camera.cs" />
     <Compile Include="Sound\SoundControl.cs" />
@@ -137,7 +141,7 @@
     <None Include="Tao.Sdl.dll.config" Condition="'$(OS)' != 'Windows_NT'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Compile Include="Menu\MessageOverlay.cs" />
+    <Compile Include="Gui\MessageOverlay.cs" />
     <Compile Include="GameSession\Logic\Weapons\Waterbomb.cs" />
     <Compile Include="GameSession\Logic\Weapons\Drill.cs" />
   </ItemGroup>
@@ -145,6 +149,10 @@
     <None Include="Icon.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Ballz.Lobby\Ballz.Lobby.csproj">
+      <Project>{aefc23bd-197a-4d55-b085-05713fe03d9e}</Project>
+      <Name>Ballz.Lobby</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ObjectSync\ObjectSync\ObjectSync.csproj">
       <Project>{B186DF64-93E8-441E-8F43-85A8F9E4DD0B}</Project>
       <Name>ObjectSync</Name>
@@ -157,11 +165,12 @@
     <Reference Include="MathFloat, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\MathFloat.1.0.0.0\lib\net20\MathFloat.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="MonoGame.Framework">
       <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.5.1.1679\lib\net40\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="NVorbis">
       <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.5.1.1679\lib\net40\NVorbis.dll</HintPath>

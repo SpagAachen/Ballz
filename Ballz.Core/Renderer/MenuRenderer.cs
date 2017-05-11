@@ -110,6 +110,8 @@ namespace Ballz.Renderer
         {
             base.Draw(gameTime);
 
+            Menu?.Update();
+
             DrawSky();
 
             var fadeProgress = ComputeFadeProgress(gameTime);
@@ -127,7 +129,6 @@ namespace Ballz.Renderer
         }
 
         const float TitleFontSize = 1f;
-        const float ItemFontSize = 0.75f;
 
         float EaseOut(float t)
         {
@@ -189,10 +190,10 @@ namespace Ballz.Renderer
 
                     //render background if necessary
                         //compute width and height of box
-                        var width = item.Width == 0 ? Font.MeasureString(renderString).X * ItemFontSize* resolutionFactor : item.Width;
-                        var height = item.Height == 0 ? Font.MeasureString(renderString).Y * ItemFontSize* resolutionFactor : item.Height;
-                        var labelWidth = Font.MeasureString(item.Name).X * ItemFontSize * resolutionFactor;
-                        var labelHeight = Font.MeasureString(item.Name).Y * ItemFontSize * resolutionFactor;
+                        var width = item.Width == 0 ? Font.MeasureString(renderString).X * item.FontSize * resolutionFactor : item.Width;
+                        var height = item.Height == 0 ? Font.MeasureString(renderString).Y * item.FontSize * resolutionFactor : item.Height;
+                        var labelWidth = Font.MeasureString(item.Name).X * item.FontSize * resolutionFactor;
+                        var labelHeight = Font.MeasureString(item.Name).Y * item.FontSize * resolutionFactor;
                     Rectangle rect = new Rectangle(new Point((int)(leftOffset+labelWidth-5),(int)topOffset), new Point((int)labelWidth, (int)height));
                         SpriteBatch.Draw(WhiteTexture, rect, item.BackGroundColor);
                         Rectangle topBorder = new Rectangle(new Point((int)(leftOffset+labelWidth-5),(int)topOffset), new Point((int)labelWidth, (int)item.BorderWidth));
@@ -212,19 +213,19 @@ namespace Ballz.Renderer
                         {
                             ++i;
                             renderString = item.Name + renderString.Substring(item.Name.Length+i);
-                            width = Font.MeasureString(renderString).X * ItemFontSize * resolutionFactor;
+                            width = Font.MeasureString(renderString).X * item.FontSize * resolutionFactor;
                         }
                     }
 
                     DrawText(
                         renderString,
                         new Vector2(leftOffset, topOffset),
-                        ItemFontSize,
+                        item.FontSize,
                         new Color((menu.SelectedItem != null && menu.SelectedItem == item) ? Color.Red : Color.Black, Sqrt(fadeProgress)),
                         1
                         );
 
-                    topOffset += StringHeight(renderString)* ItemFontSize * resolutionFactor + 30 * resolutionFactor;
+                    topOffset += StringHeight(renderString)* item.FontSize * resolutionFactor + 30 * resolutionFactor;
                 }
             }
         }

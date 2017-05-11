@@ -47,6 +47,13 @@ namespace Ballz.Logic
             state = GameState.MenuState;
         }
 
+        public void OpenMenu(Composite menu)
+        {
+            activeMenu.Push(menu); //TODO: uncast
+            RegisterMenuEvents(menu);
+            state = GameState.MenuState;
+        }
+
         public void StartGame(GameSession.Logic.GameSettings settings, bool remoteControlled = false, int localPlayerId = -1)
         {
             ButtonRepeat.Stop();
@@ -274,10 +281,12 @@ namespace Ballz.Logic
         private void MenuGoBack()
         {
             var top = activeMenu.Peek();
-            if (top.SelectedItem != null)
+            if (top.SelectedItem != null && top.SelectedItem.Active)
                 top.SelectedItem.DeActivate();
             else
+            {
                 top.DeActivate();
+            }
         }
 
         /// <summary>

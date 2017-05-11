@@ -67,6 +67,11 @@ namespace Ballz.Gui
 
         public event UnSelectHandler OnUnSelect;
 
+        /// Called before rendering a menu, can be used to update GUI contents.
+        public virtual void Update()
+        {
+        }
+        
         public void Activate()
         {
             OnSelect?.Invoke();
@@ -89,7 +94,9 @@ namespace Ballz.Gui
         /// <value>The height.</value>
         public int Height{ get; set;}
 
-        public int BorderWidth{ get; set;}      
+        public int BorderWidth{ get; set;}
+
+        public float FontSize { get; set; } = 0.75f;
 
         public Microsoft.Xna.Framework.Color BackGroundColor{ get; set;}
 
