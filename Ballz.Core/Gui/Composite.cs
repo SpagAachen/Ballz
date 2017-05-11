@@ -32,7 +32,7 @@ namespace Ballz.Gui
 
         public override IReadOnlyList<Item> Items => Members;
 
-        public override Item SelectedItem => Members.Skip(SelectedIndex).FirstOrDefault(i => i.Selectable);
+        public override Item SelectedItem => Members.Where(i => i.Selectable).Skip(SelectedIndex).FirstOrDefault();
 
         public void SelectNext()
         {

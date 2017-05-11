@@ -51,6 +51,7 @@ namespace Ballz.Logic
         {
             activeMenu.Push(menu); //TODO: uncast
             RegisterMenuEvents(menu);
+            RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
             state = GameState.MenuState;
         }
 
@@ -87,14 +88,12 @@ namespace Ballz.Logic
 
             menu.BindSelectHandler<Composite>(c =>
             {
-                activeMenu.Push(c);
-                RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
+                OpenMenu(c);
             });
 
             menu.BindSelectHandler<Back>(b =>
             {
-                activeMenu.Pop();
-                RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
+                MenuGoBack();
             });
 
             menu.BindSelectHandler<InputBox>(ib =>
