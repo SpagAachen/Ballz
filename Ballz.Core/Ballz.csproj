@@ -76,7 +76,6 @@
     <Compile Include="GameSession\World\Water.cs" />
     <Compile Include="Input\InputTranslator.cs" />
     <Compile Include="Logic\LogicControl.cs" />
-    <Compile Include="GameSession\Network\NetworkComponent.cs" />
     <Compile Include="GameSession\Physics\PhysicsComponent.cs" />
     <Compile Include="GameSession\World\Entity.cs" />
     <Compile Include="Menu\Back.cs" />
@@ -181,7 +180,7 @@
     <CreateItem Include="$(ContentSourceDirectory)\**\*.*">
       <Output TaskParameter="Include" ItemName="ContentFilesToCopy" />
     </CreateItem>
-    <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy-&gt;'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy->'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
   <ItemGroup />
 </Project>

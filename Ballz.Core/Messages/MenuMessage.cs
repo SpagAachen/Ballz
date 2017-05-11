@@ -1,4 +1,4 @@
-﻿using Ballz.Menu;
+﻿using Ballz.Gui;
 
 namespace Ballz.Messages
 {

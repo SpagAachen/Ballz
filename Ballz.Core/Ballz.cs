@@ -1,7 +1,7 @@
 ﻿using Ballz.GameSession.World;
 using Ballz.Input;
 using Ballz.Logic;
-using Ballz.Menu;
+using Ballz.Gui;
 using Ballz.Renderer;
 using Ballz.Sound;
 using Microsoft.Xna.Framework;

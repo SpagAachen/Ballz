@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Ballz.Menu
+namespace Ballz.Gui
 {
     public abstract class Item
     {

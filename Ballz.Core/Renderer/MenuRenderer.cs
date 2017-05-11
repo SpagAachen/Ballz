@@ -1,4 +1,4 @@
-﻿using Ballz.Menu;
+﻿using Ballz.Gui;
 using Ballz.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

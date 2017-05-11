@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ballz.Menu
+namespace Ballz.Gui
 {
     public class Label : Leaf
     {

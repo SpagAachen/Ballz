@@ -3,7 +3,7 @@ using System.Timers;
 using System.Collections.Generic;
 using System.Linq;
 using Ballz.Input;
-using Ballz.Menu;
+using Ballz.Gui;
 using Ballz.Messages;
 using Ballz.Sound;
 

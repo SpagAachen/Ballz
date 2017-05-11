@@ -1,5 +1,5 @@
 ﻿//
-//  SpinBox.cs
+//  Choice.cs
 //
 //  Author:
 //       Martin <Martin.Schultz@RWTH-Aachen.de>
@@ -21,23 +21,22 @@
 using System;
 using System.Collections.Generic;
 
-namespace Ballz.Menu
+namespace Ballz.Gui
 {
-    public class SpinBox : Leaf, IChooseable
+    public class Choice<T> : Leaf, IChooseable 
     {
-        private Settings.Setting<int> SelectedChoice;
-        private int min, max;
+        private Settings.Setting<T> SelectedChoice;
+        private List<T> Choices;
         private string previousDecorator = "", nextDecorator = "";
 
-        public SpinBox(string name, Settings.Setting<int> selectedValue, int _min, int _max, bool selectable = true) : base(name, selectable)
+        public Choice(string name, Settings.Setting<T> selectedValue, List<T> chooseableValues, bool selectable = true) : base(name, selectable)
         {
             SelectedChoice = selectedValue;
-            min = _min;
-            max = _max;
+            Choices = chooseableValues;
 
             OnSelect += () =>
             {
-                if (!Active)
+                if(!Active)
                 {
                     ActiveChanged = true;
                     Active = true;
@@ -47,7 +46,7 @@ namespace Ballz.Menu
             };
             OnUnSelect += () =>
             {
-                if (Active)
+                if(Active)
                 {
                     ActiveChanged = true;
                     Active = false;
@@ -62,7 +61,7 @@ namespace Ballz.Menu
 
         private void SelectionChanged()
         {
-            if (Active)
+            if(Active)
             {
                 previousDecorator = "<< ";
                 nextDecorator = " >>";
@@ -74,14 +73,14 @@ namespace Ballz.Menu
             }
         }
 
-        public override string DisplayName => (Name + previousDecorator + SelectedChoice.Value.ToString() + nextDecorator);
+        public override string DisplayName => (Name + previousDecorator+SelectedChoice.Value.ToString()+nextDecorator);
 
         public void SelectNext()
         {
-            if (Active)
+            if(Active)
             {
-                if( SelectedChoice.Value < max)
-                SelectedChoice.Value++;
+                int index = Choices.IndexOf(SelectedChoice.Value);
+                SelectedChoice.Value = Choices[(index+1)%Choices.Count];
             }
         }
 
@@ -89,8 +88,9 @@ namespace Ballz.Menu
         {
             if (Active)
             {
-                if (min < SelectedChoice.Value )
-                    SelectedChoice.Value--;
+                int index = Choices.IndexOf(SelectedChoice.Value);
+                index = ((index - 1) + Choices.Count) % Choices.Count;
+                SelectedChoice.Value = Choices[index];
             }
         }
     }

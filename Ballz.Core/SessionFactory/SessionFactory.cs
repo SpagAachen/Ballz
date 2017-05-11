@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Ballz.GameSession;
-using Ballz.Menu;
+using Ballz.Gui;
 using Ballz.GameSession.Logic;
 
 namespace Ballz.SessionFactory
