@@ -75,6 +75,8 @@ namespace Ballz.GlobalLobby
             var dataReader = new StreamReader(ctx.Request.InputStream);
             var data = dataReader.ReadToEnd();
             var game = JsonConvert.DeserializeObject<FullGameInfo>(data);
+            
+            game.HostAddress = ctx.Request.RemoteEndPoint.Address.ToString();
             game.LastKeepAlive = DateTime.Now;
             AddGame(game);
 
