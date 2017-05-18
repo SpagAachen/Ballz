@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Ballz.Menu
+namespace Ballz.Gui
 {
     public abstract class Item
     {
@@ -67,6 +67,11 @@ namespace Ballz.Menu
 
         public event UnSelectHandler OnUnSelect;
 
+        /// Called before rendering a menu, can be used to update GUI contents.
+        public virtual void Update()
+        {
+        }
+        
         public void Activate()
         {
             OnSelect?.Invoke();
@@ -89,7 +94,9 @@ namespace Ballz.Menu
         /// <value>The height.</value>
         public int Height{ get; set;}
 
-        public int BorderWidth{ get; set;}      
+        public int BorderWidth{ get; set;}
+
+        public float FontSize { get; set; } = 0.75f;
 
         public Microsoft.Xna.Framework.Color BackGroundColor{ get; set;}
 

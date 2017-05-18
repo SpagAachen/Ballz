@@ -1,0 +1,12 @@
+version: '2'
+services:
+  ballz-global-lobby:
+    container_name: ballz-global-lobby
+    build: .
+    restart: always
+    logging:
+      driver: json-file
+    environment:
+      DOCKER_IS_RUNNING: 1
+    ports:
+     - "9162:9162"

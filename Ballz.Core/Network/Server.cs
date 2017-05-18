@@ -157,7 +157,6 @@
             
         private void OnData(object sender, object data)
         {
-
 			// Input Message
 			if (Ballz.The().Match != null && data.GetType() == typeof(InputMessage))
 			{

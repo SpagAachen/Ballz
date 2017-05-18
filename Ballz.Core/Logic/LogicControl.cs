@@ -3,7 +3,7 @@ using System.Timers;
 using System.Collections.Generic;
 using System.Linq;
 using Ballz.Input;
-using Ballz.Menu;
+using Ballz.Gui;
 using Ballz.Messages;
 using Ballz.Sound;
 
@@ -47,6 +47,14 @@ namespace Ballz.Logic
             state = GameState.MenuState;
         }
 
+        public void OpenMenu(Composite menu)
+        {
+            activeMenu.Push(menu); //TODO: uncast
+            RegisterMenuEvents(menu);
+            RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
+            state = GameState.MenuState;
+        }
+
         public void StartGame(GameSession.Logic.GameSettings settings, bool remoteControlled = false, int localPlayerId = -1)
         {
             ButtonRepeat.Stop();
@@ -80,14 +88,12 @@ namespace Ballz.Logic
 
             menu.BindSelectHandler<Composite>(c =>
             {
-                activeMenu.Push(c);
-                RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
+                OpenMenu(c);
             });
 
             menu.BindSelectHandler<Back>(b =>
             {
-                activeMenu.Pop();
-                RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
+                MenuGoBack();
             });
 
             menu.BindSelectHandler<InputBox>(ib =>
@@ -274,10 +280,12 @@ namespace Ballz.Logic
         private void MenuGoBack()
         {
             var top = activeMenu.Peek();
-            if (top.SelectedItem != null)
+            if (top.SelectedItem != null && top.SelectedItem.Active)
                 top.SelectedItem.DeActivate();
             else
+            {
                 top.DeActivate();
+            }
         }
 
         /// <summary>
