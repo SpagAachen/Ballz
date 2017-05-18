@@ -71,10 +71,7 @@ namespace Ballz.GlobalLobby
 
             if(ctx.Request.HttpMethod != "POST")
                 throw new InvalidDataException("Request must be POST");
-
-            if (ctx.Request.InputStream.Length > MaxRequestBodySize)
-                throw new InvalidDataException("Request too long");
-            
+                        
             var dataReader = new StreamReader(ctx.Request.InputStream);
             var data = dataReader.ReadToEnd();
             var game = JsonConvert.DeserializeObject<FullGameInfo>(data);
