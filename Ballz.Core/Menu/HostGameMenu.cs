@@ -18,10 +18,10 @@ namespace Ballz
             AddItem(new Gui.Label("Turn-based: Yes", true));
             if (isMultiplayer)
             {
-                var startGameLabel = new Gui.Label("Host Game", true);
+                var startGameLabel = new Gui.Label("Open Game", true);
                 startGameLabel.OnSelect += () =>
                 {
-                    Ballz.The().Logic.OpenMenu(new LobbyMenu(true));
+                    Ballz.The().Logic.OpenMenu(new LobbyMenu(true, "Testgame!!!!!!!!!!!!!!!!", false));
                 };
                 AddItem(startGameLabel);
             }
