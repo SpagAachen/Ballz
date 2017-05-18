@@ -36,12 +36,12 @@ namespace Ballz.GlobalLobby
                 LastKeepAlive = DateTime.MaxValue,
                 Secret = "6jhdf"
             });
-            
+
             app.AddView(@"^/game/list/$", ctx => gameList.RequestGetGames(ctx));
             app.AddView(@"^/game/add/$", ctx => gameList.RequestAddGame(ctx));
             app.AddView(@"^/game/remove/$", ctx => gameList.RequestRemoveGame(ctx));
             app.AddView(@"^/game/keepalive/$", ctx => gameList.RequestKeepalive(ctx));
-            app.RunHttpServer("http://localhost:18080/");
+            app.RunHttpServer("http://*:9162/");
         }
     }
 }
