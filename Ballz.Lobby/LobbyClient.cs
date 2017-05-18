@@ -10,17 +10,24 @@ using System.Threading.Tasks;
 
 namespace Ballz.Lobby
 {
-    public class LobbyClient
+    public class LobbyClient: IDisposable
     {
+#if __DEBUG_LOBBY_LOCALHOST
+        public const string GlobalLobbyScheme = "http";
         public const string GlobalLobbyHost = "localhost";
         public const int GlobalLobbyPort = 18080;
+#else
+        public const string GlobalLobbyScheme = "https";
+        public const string GlobalLobbyHost = "lobby.lb2.eu";
+        public const int GlobalLobbyPort = 443;
+#endif
 
         static RNGCryptoServiceProvider random = new RNGCryptoServiceProvider();
         static string GetRandomString()
         {
             var data = new byte[16];
             random.GetBytes(data);
-            return Convert.ToBase64String(data);
+            return BitConverter.ToString(data).Replace("-", string.Empty);
         }
 
         FullGameInfo HostedGame;
@@ -75,7 +82,7 @@ namespace Ballz.Lobby
             if(UpdatedGameList != null)
             {
                 // If a new list of games arrived, send an event
-                if (GameListTask != null && GameListTask.IsCompleted)
+                if (GameListTask != null && GameListTask.Status == TaskStatus.RanToCompletion)
                 {
                     var games = GameListTask.Result;
                     UpdatedGameList?.Invoke(this, games);
@@ -93,8 +100,7 @@ namespace Ballz.Lobby
         public async Task OpenHostedGameAsync()
         {
             var data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(HostedGame));
-            var result = RequestToLobbyAsync("/game/add", postBody: data, usePostMethod: true);
-            HostedGame = null;
+            var result = RequestToLobbyAsync("/game/add/", postBody: data, usePostMethod: true);
             var response = await result;
             if (response != "true")
                 throw new WebException("Opening Game request to global lobby was unsuccessful.");
@@ -104,7 +110,6 @@ namespace Ballz.Lobby
         {
             var requestParams = new Dictionary<string, string> { { "id", HostedGame.PublicId }, { "secret", HostedGame.Secret } };
             var result = RequestToLobbyAsync("/game/remove", requestParams, usePostMethod: true);
-            HostedGame = null;
             var response = await result;
             if (response != "true")
                 throw new WebException("Closing Game request to global lobby was unsuccessful.");
@@ -113,8 +118,7 @@ namespace Ballz.Lobby
         public async Task SendKeepaliveAsync()
         {
             var requestParams = new Dictionary<string, string> { { "id", HostedGame.PublicId }, { "secret", HostedGame.Secret } };
-            var result = RequestToLobbyAsync("/game/keepalive", requestParams, usePostMethod: true);
-            HostedGame = null;
+            var result = RequestToLobbyAsync("/game/keepalive/", requestParams, usePostMethod: true);
             var response = await result;
             if (response != "true")
                 throw new WebException("Sending Keepalive request to global lobby was unsuccessful.");
@@ -122,7 +126,7 @@ namespace Ballz.Lobby
 
         public async Task<PublicGameInfo[]> GetGameListAsync()
         {
-            var result = RequestToLobbyAsync("/game/list");
+            var result = RequestToLobbyAsync("/game/list/");
             var response = await result;
             return JsonConvert.DeserializeObject<PublicGameInfo[]>(response);
         }
@@ -130,27 +134,30 @@ namespace Ballz.Lobby
         public async Task<string> RequestToLobbyAsync(string path, Dictionary<string, string> getParams = null, byte[] postBody = null, bool usePostMethod = false)
         {
             Task<HttpResponseMessage> result;
-            using (HttpClient client = new HttpClient())
+            var client = new HttpClient();
+            var uri = new UriBuilder(GlobalLobbyScheme, GlobalLobbyHost, GlobalLobbyPort, path);
+                
+            if(getParams != null)
             {
-                var uri = new UriBuilder("http", GlobalLobbyHost, GlobalLobbyPort, path);
+                var paramArray = getParams
+                                .Select(kvp => Uri.EscapeUriString(kvp.Key) + "=" + Uri.EscapeUriString(kvp.Value))
+                                .ToArray();
+
+                uri.Query = string.Join("&", paramArray);
+            }
                 
-                if(getParams != null)
-                {
-                    uri.Query = getParams.Aggregate("?", (s, kvp) => s + Uri.EscapeUriString(kvp.Key) + "=" + Uri.EscapeUriString(kvp.Value));
-                }
-                
-                if (usePostMethod)
-                {
-                    var content = new ByteArrayContent(postBody ?? new byte[0]);
-                    result = client.PostAsync(uri.Uri, content);
-                }
-                else
-                {
-                    result = client.GetAsync(uri.Uri);
-                }
+            if (usePostMethod)
+            {
+                var content = new ByteArrayContent(postBody ?? new byte[0]);
+                result = client.PostAsync(uri.Uri, content);
+            }
+            else
+            {
+                result = client.GetAsync(uri.Uri);
             }
 
             var response = await result;
+
             if (!response.IsSuccessStatusCode)
                 throw new System.Net.WebException($"Lobby HTTP Request to path {path} failed with status code {response.StatusCode.ToString()}.");
 
@@ -158,6 +165,40 @@ namespace Ballz.Lobby
 
             return responseBody;
         }
+
+#region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    GameListTask?.Dispose();
+                    GameListTask = null;
+
+                    GameOpeningTask?.Dispose();
+                    GameOpeningTask = null;
+
+                    UpdatedGameList = null;
+                    HostedGame = null;
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+        
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+        }
+#endregion
 
     }
 }

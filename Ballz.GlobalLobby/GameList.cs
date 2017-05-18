@@ -75,8 +75,10 @@ namespace Ballz.GlobalLobby
             var dataReader = new StreamReader(ctx.Request.InputStream);
             var data = dataReader.ReadToEnd();
             var game = JsonConvert.DeserializeObject<FullGameInfo>(data);
-            
-            game.HostAddress = ctx.Request.RemoteEndPoint.Address.ToString();
+
+            var hostAddress = ctx.Request.Headers.GetValues("X-Real-IP")?.FirstOrDefault() ?? ctx.Request.RemoteEndPoint.Address.ToString();
+
+            game.HostAddress = hostAddress;
             game.LastKeepAlive = DateTime.Now;
             AddGame(game);
 
