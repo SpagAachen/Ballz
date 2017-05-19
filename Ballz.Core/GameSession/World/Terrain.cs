@@ -57,6 +57,11 @@ namespace Ballz.GameSession.World
             /// <summary>
             /// Contains type information for the terrain material shader. See Terrain.BuildTerrainTypeTexture()
             /// </summary>
+            public Color[] TypeData = null;
+
+            /// <summary>
+            /// The Texture object that contains the data from TypeData (see above).
+            /// </summary>
             public Texture2D TypeTexture = null;
         }
 
@@ -867,7 +872,7 @@ namespace Ballz.GameSession.World
             {
                 WorkingShape = new TerrainShape
                 {
-                        TerrainBitmap = PublicShape.TerrainBitmap.Clone() as TerrainType[,]
+                    TerrainBitmap = PublicShape.TerrainBitmap.Clone() as TerrainType[,],
                 };
             }
 
@@ -918,16 +923,19 @@ namespace Ballz.GameSession.World
         public Texture2D GetTerrainTypeTexture()
         {
             Update();
-
+            lock (PublicShape)
+            {
+                if (PublicShape.TypeTexture == null)
+                {
+                    PublicShape.TypeTexture = new Texture2D(Ballz.The().GraphicsDevice, width, height);
+                    PublicShape.TypeTexture.SetData(PublicShape.TypeData);
+                }
+            }
             return PublicShape.TypeTexture;
         }
         
         public void BuildTerrainTypeTexture()
         {
-            
-                if (WorkingShape.TypeTexture == null)
-                    WorkingShape.TypeTexture = new Texture2D(Ballz.The().GraphicsDevice, width, height);
-
                 var types = WorkingShape.TerrainBitmap;
 
                 // Blurring is done in two passes, first pass goes here, second one in typeWeights
@@ -1017,7 +1025,7 @@ namespace Ballz.GameSession.World
 
 
             }
-            WorkingShape.TypeTexture.SetData(TypeWeightsBufferA);
+            WorkingShape.TypeData = TypeWeightsBufferA.ToArray();
         }
         
         public struct IntVector2
