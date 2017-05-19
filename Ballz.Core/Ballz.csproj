@@ -9,6 +9,8 @@
     <AssemblyName>Ballz</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Windows' ">
     <CscToolPath>$(MSBuildProgramFiles32)\MSBuild\14.0\Bin</CscToolPath>
@@ -99,7 +101,7 @@
     <Compile Include="Network\Connection.cs" />
     <Compile Include="Network\Network.cs" />
     <Compile Include="Network\Server.cs" />
-    <Compile Include="Renderer\MenuRenderer.cs" />
+    <Compile Include="Renderer\GuiRenderer.cs" />
     <Compile Include="Ballz.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
@@ -157,11 +159,20 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="DataTypes, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GeonBit.UI.2.0.2.1\lib\geonbitui\DataTypes.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FarseerPhysics MonoGame">
       <HintPath>..\packages\FarseerPhysics.MonoGame.Unofficial.3.5.0\lib\FarseerPhysics MonoGame.dll</HintPath>
     </Reference>
-    <Reference Include="MathFloat, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\MathFloat.1.0.0.0\lib\net20\MathFloat.dll</HintPath>
+    <Reference Include="GeonBit.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GeonBit.UI.2.0.2.1\lib\geonbitui\GeonBit.UI.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MathFloat, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MathFloat.1.0.1.0\lib\net20\MathFloat.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="MonoGame.Framework, Version=3.6.0.1625, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.6.0.1625\lib\net40\MonoGame.Framework.dll</HintPath>

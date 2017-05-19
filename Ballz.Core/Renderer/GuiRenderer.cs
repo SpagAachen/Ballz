@@ -2,13 +2,15 @@
 using Ballz.Messages;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using GeonBit.UI;
+using GeonBit.UI.Entities;
 using System;
 
 using static MathFloat.MathF;
 
 namespace Ballz.Renderer
 {
-    public class MenuRenderer : BaseRenderer
+    public class GuiRenderer : BaseRenderer
     {
         Item _Menu;
         Item OldMenu;
@@ -36,9 +38,15 @@ namespace Ballz.Renderer
 
         Texture2D Underline;
 
-        public MenuRenderer(Ballz game, Item defaultMenu = null) : base(game)
+        public GuiRenderer(Ballz game, Item defaultMenu = null) : base(game)
         {
             Menu = defaultMenu;
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            UserInterface.Initialize(Ballz.The().Content, BuiltinThemes.hd);
         }
 
         protected override void LoadContent()
@@ -112,7 +120,11 @@ namespace Ballz.Renderer
 
             Menu?.Update();
 
+            UserInterface.Update(gameTime);
+
             DrawSky();
+
+            UserInterface.Draw(SpriteBatch);
 
             var fadeProgress = ComputeFadeProgress(gameTime);
 

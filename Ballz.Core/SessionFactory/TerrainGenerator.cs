@@ -7,7 +7,6 @@ using Ballz.GameSession.World;
 using Ballz.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using OpenTK.Graphics.OpenGL;
 
 namespace Ballz.SessionFactory
 {

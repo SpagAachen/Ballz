@@ -38,7 +38,7 @@ namespace Ballz
 
         public Settings.ProgrammSettings GameSettings { get; set; }
 
-        MenuRenderer MenuRenderer;
+        GuiRenderer GuiRenderer;
 
         public Label NetworkLobbyConnectedClients { get; set; } = new Label("test", true);
 
@@ -73,7 +73,7 @@ namespace Ballz
             
             Camera = new Camera();
             // create the Game Components
-            MenuRenderer = new MenuRenderer(this);
+            GuiRenderer = new GuiRenderer(this);
             //var physics = new PhysicsControl(this);
             Input = new InputTranslator(this);
             Network = new Network.Network(this);
@@ -81,7 +81,7 @@ namespace Ballz
             Components.Add(Input);
             //Components.Add(physics);
             Components.Add(Network);
-            Components.Add(MenuRenderer);
+            Components.Add(GuiRenderer);
             Components.Add(new PerformanceRenderer(this));
             
             Logic = new LogicControl(this);
@@ -99,7 +99,7 @@ namespace Ballz
             //Logic.Message += physics.HandleMessage;
             Logic.Message += Network.HandleMessage;
             //Logic.Message += gameRendering.HandleMessage;
-            Logic.Message += MenuRenderer.HandleMessage;
+            Logic.Message += GuiRenderer.HandleMessage;
 
             Network.Message += Logic.HandleNetworkMessage;
         }
@@ -338,7 +338,7 @@ namespace Ballz
 
             Logo = Content.Load<Texture2D>("Textures/Logo");
             MainMenu = DefaultMenu();
-            MenuRenderer.Menu = MainMenu;
+            GuiRenderer.Menu = MainMenu;
             Logic.SetMainMenu(MainMenu);
         }
 
