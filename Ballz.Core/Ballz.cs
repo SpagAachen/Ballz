@@ -311,7 +311,9 @@ namespace Ballz
             foreach(FileInfo file in Files )
             {
                 //str = str + ", " + file.Name;
-                Teamnames.Add(Path.GetFileNameWithoutExtension(file.Name));
+                var teamName = Path.GetFileNameWithoutExtension(file.Name);
+                if(!Teamnames.Contains(teamName))
+                    Teamnames.Add(teamName);
             }
         }
 
