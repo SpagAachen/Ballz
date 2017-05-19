@@ -21,6 +21,8 @@ namespace Ballz.Menu
         {
             Skin = PanelSkin.Default;
 
+            PlayerName.PlaceholderText = "Enter your Name";
+
             Resolution = new DropDown(new Vector2(0, 280));
             var resolutions = Ballz.The().GetResolutions();
             foreach (var resolution in resolutions)

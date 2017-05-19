@@ -25,7 +25,7 @@ namespace Ballz.Renderer
         public override void Initialize()
         {
             base.Initialize();
-            UserInterface.Initialize(Ballz.The().Content, BuiltinThemes.hd);
+            UserInterface.Initialize(Ballz.The().Content, "kenney");
             UserInterface.UseRenderTarget = true;
         }
 
