@@ -160,20 +160,20 @@ namespace Ballz
             foreach (DisplayMode dm in dmc)
             {
                 Settings.Resolution resolution = new Settings.Resolution(dm.Width, dm.Height);
-                if (!result.Contains(resolution))
+                if (!result.Contains(resolution) && resolution.Width >= 800 && resolution.Height >= 600)
                     result.Add(resolution);
             }
 
             return result;
         }
 
-        private void LoadSettings(FileStream stream)
+        public void LoadSettings(FileStream stream)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Settings.ProgrammSettings));
             GameSettings = (Settings.ProgrammSettings)serializer.Deserialize(stream);
         }
 
-        private void StoreSettings(FileStream stream)
+        public void StoreSettings(FileStream stream)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Settings.ProgrammSettings));
             serializer.Serialize(stream, GameSettings);
