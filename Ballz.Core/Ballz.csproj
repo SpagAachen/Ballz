@@ -128,6 +128,7 @@
     <Compile Include="Settings\SettingTypes.cs" />
     <Compile Include="Gui\Choice.cs" />
     <Compile Include="Gui\IChooseable.cs" />
+    <None Include="MonoGame.Framework.dll.config" />
     <None Include="packages.config" />
     <Compile Include="Renderer\Camera.cs" />
     <Compile Include="Sound\SoundControl.cs" />
@@ -135,9 +136,6 @@
     <Compile Include="Renderer\Camera\CameraTrajectory.cs" />
     <Compile Include="GameSession\Logic\Weapons\Potato.cs" />
     <Compile Include="GameSession\Logic\Weapons\Grenade.cs" />
-    <None Include="OpenTK.dll.config" Condition="'$(OS)' != 'Windows_NT'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Tao.Sdl.dll.config" Condition="'$(OS)' != 'Windows_NT'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -165,18 +163,13 @@
     <Reference Include="MathFloat, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\MathFloat.1.0.0.0\lib\net20\MathFloat.dll</HintPath>
     </Reference>
-    <Reference Include="MonoGame.Framework">
-      <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.5.1.1679\lib\net40\MonoGame.Framework.dll</HintPath>
+    <Reference Include="MonoGame.Framework, Version=3.6.0.1625, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.6.0.1625\lib\net40\MonoGame.Framework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="NVorbis">
-      <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.5.1.1679\lib\net40\NVorbis.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenTK">
-      <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.5.1.1679\lib\net40\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
@@ -191,5 +184,4 @@
     </CreateItem>
     <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy->'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
-  <ItemGroup />
 </Project>
