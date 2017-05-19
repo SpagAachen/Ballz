@@ -20,7 +20,7 @@ namespace Ballz.SessionFactory
             IsInitialized = true;
         }
 
-        public void CreateGameSettingsMenu(Composite menu)
+        public void CreateGameSettingsMenu(MenuPanel menu)
         {
             
         }

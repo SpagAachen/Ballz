@@ -15,7 +15,7 @@ namespace Ballz.Logic
     /// </summary>
     public class LogicControl
     {
-        private readonly Stack<Composite> activeMenu = new Stack<Composite>();
+        private readonly Stack<MenuPanel> activeMenu = new Stack<MenuPanel>();
         private GameState state;
         private bool rawInput;
         private Ballz Game;
@@ -39,20 +39,31 @@ namespace Ballz.Logic
             };
         }
 
-        public void SetMainMenu(Composite menu)
+        public void SetMainMenu(MenuPanel menu)
         {
             activeMenu.Clear();
             activeMenu.Push(menu); //TODO: uncast
-            RegisterMenuEvents(menu);
             state = GameState.MenuState;
+            menu.OnOpen();
         }
 
-        public void OpenMenu(Composite menu)
+        public void OpenMenu(MenuPanel newMenu)
         {
-            activeMenu.Push(menu); //TODO: uncast
-            RegisterMenuEvents(menu);
+            var oldMenu = activeMenu.Peek();
+            oldMenu.OnClose();
+            newMenu.OnOpen();
+
+            activeMenu.Push(newMenu);
             RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
             state = GameState.MenuState;
+        }
+        
+        public void MenuGoBack()
+        {
+            var oldMenu = activeMenu.Pop();
+            oldMenu.OnClose();
+            var newMenu = activeMenu.Peek();
+            newMenu.OnOpen();
         }
 
         public void StartGame(GameSession.Logic.GameSettings settings, bool remoteControlled = false, int localPlayerId = -1)
@@ -80,38 +91,7 @@ namespace Ballz.Logic
             state = GameState.SimulationState;
             RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }
-
-        private void RegisterMenuEvents(Item menu)
-        {
-            if (menu == null)
-                return;
-
-            menu.BindSelectHandler<Composite>(c =>
-            {
-                OpenMenu(c);
-            });
-
-            menu.BindSelectHandler<Back>(b =>
-            {
-                MenuGoBack();
-            });
-
-            menu.BindSelectHandler<InputBox>(ib =>
-            {
-                rawInput = true;
-                RaiseMessageEvent(new MenuMessage(ib));
-            });
-
-            menu.BindUnSelectHandler<Item>(i =>
-            {
-                if (!i.Selectable || !i.Active && !i.ActiveChanged)
-                {
-                    activeMenu.Pop();
-                    RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
-                }
-            });
-        }
-
+        
         public event EventHandler<Message> Message;
 
         protected virtual void RaiseMessageEvent(Message msg)
@@ -192,7 +172,7 @@ namespace Ballz.Logic
 
         private void MenuLogic(InputMessage msg)
         {
-            Composite top = activeMenu.Peek();
+            MenuPanel top = activeMenu.Peek();
             //KeyPress Events
             if (msg.Kind == InputMessage.MessageType.RawInput || msg.Kind == InputMessage.MessageType.RawBack || msg.Pressed)
             {
@@ -205,7 +185,7 @@ namespace Ballz.Logic
                 switch (msg.Kind)
                 {
                     case InputMessage.MessageType.ControlsAction:
-                        top.SelectedItem?.Activate();
+                        (top.SelectedItem as MenuButton)?.DoClick();
                         Ballz.The().Services.GetService<SoundControl>().PlaySound(SoundControl.AcceptSound);
                         break;
                     case InputMessage.MessageType.ControlsBack:
@@ -277,16 +257,6 @@ namespace Ballz.Logic
             }
         }
 
-        private void MenuGoBack()
-        {
-            var top = activeMenu.Peek();
-            if (top.SelectedItem != null && top.SelectedItem.Active)
-                top.SelectedItem.DeActivate();
-            else
-            {
-                top.DeActivate();
-            }
-        }
 
         /// <summary>
         /// Checks the input mode.

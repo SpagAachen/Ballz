@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GeonBit.UI.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,30 +7,30 @@ using System.Threading.Tasks;
 
 namespace Ballz
 {
-    class HostGameMenu : Gui.Composite
+    class HostGameMenu : Gui.MenuPanel
     {
-        public HostGameMenu(bool isMultiplayer) : base(isMultiplayer ? "Host Game" : "Singleplayer Game", true)
+        public HostGameMenu(bool isMultiplayer) : base(isMultiplayer ? "Host Game" : "Singleplayer Game")
         {
             if (isMultiplayer)
             {
-                AddItem(new Gui.InputBox("Public Name", true));
+                //AddItem(new Gui.InputBox("Public Name", true));
             }
-            AddItem(new Gui.Label("Map: Desert", true));
-            AddItem(new Gui.Label("Turn-based: Yes", true));
+            AddItem(new Label("Map: Desert"));
+            AddItem(new Label("Turn-based: Yes"));
             if (isMultiplayer)
             {
-                var startGameLabel = new Gui.Label("Open Game", true);
-                startGameLabel.OnSelect += () =>
-                {
-                    Ballz.The().Logic.OpenMenu(new LobbyMenu(true, "Testgame!!!!!!!!!!!!!!!!", false));
-                };
+                var startGameLabel = new Label("Open Game");
+                //startGameLabel.OnSelect += () =>
+                //{
+                //    Ballz.The().Logic.OpenMenu(new LobbyMenu(true, "Testgame!!!!!!!!!!!!!!!!", false));
+                //};
                 AddItem(startGameLabel);
             }
             else
             {
-                AddItem(new Gui.Label("Start Game"));
+                AddItem(new Label("Start Game"));
             }
-            AddItem(new Gui.Back());
+            AddItem(new Gui.BackButton());
         }
     }
 }

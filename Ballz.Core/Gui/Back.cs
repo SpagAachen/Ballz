@@ -4,12 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using GeonBit.UI.Entities;
+
 namespace Ballz.Gui
 {
-    public class Back : Label
+    public class BackButton : Button
     {
-        public Back() : base("Back", true)
+        public BackButton() : base("Back", ButtonSkin.Alternative)
         {
+            OnClick += (e) => Ballz.The().Logic.MenuGoBack();
         }
     }
 }

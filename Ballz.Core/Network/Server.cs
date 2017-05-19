@@ -104,10 +104,10 @@
 
         public void UpdateLobbyList()
         {
-            Ballz.The().NetworkLobbyConnectedClients.Name = "Myself";
+            //Ballz.The().NetworkLobbyConnectedClients.Name = "Myself";
             foreach(var c in connections)
             {
-                Ballz.The().NetworkLobbyConnectedClients.Name += ", " + c.Id;
+                //Ballz.The().NetworkLobbyConnectedClients.Name += ", " + c.Id;
             }
         }
 

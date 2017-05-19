@@ -5,27 +5,28 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Ballz.Lobby;
+using GeonBit.UI.Entities;
 
 namespace Ballz
 {
-    class GameListMenu : Gui.Composite
+    class GameListMenu : Gui.MenuPanel
     {
         LobbyClient Lobby = null;
-        public GameListMenu() : base("Join Online Game", true)
+        public GameListMenu() : base("Join Online Game")
         {
-            OnSelect += () =>
+            Open += (s,e) =>
             {
                 Lobby = new LobbyClient();
                 Lobby.UpdatedGameList += UpdateGameList;
             };
-            OnUnSelect += () =>
+            Close += (s, e) =>
             {
                 Lobby?.Dispose();
                 Lobby = null;
             };
 
-            AddItem(new Gui.Label("Loading Games..."));
-            AddItem(new Gui.Back());
+            AddItem(new Label("Loading Games..."));
+            AddItem(new Gui.BackButton());
         }
 
         string SelectedGameId = "";
@@ -42,15 +43,15 @@ namespace Ballz
 
             foreach(PublicGameInfo g in games)
             {
-                AddItem(new Gui.Label(g.Name, true));
+                //AddItem(new Label(g.Name,));
             }
 
             if(games.Length == 0)
             {
-                AddItem(new Gui.Label("No games found."));
+                //AddItem(new Gui.Label("No games found."));
             }
 
-            AddItem(new Gui.Back());
+            AddItem(new Gui.BackButton());
         }
     }
 }
