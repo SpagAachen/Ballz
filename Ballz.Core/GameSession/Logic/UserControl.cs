@@ -44,8 +44,14 @@ namespace Ballz.GameSession.Logic
 
             if (Ball.IsAlive)
             {
-                Vector2 upDir = Vector2.Normalize(Ball.Position - worldState.StaticGeometry.gravityPoint);
-                Vector2 rightDir = new Vector2(upDir.Y, -upDir.X);
+                Vector2 upDir = new Vector2(0, 1);
+
+                if (worldState.StaticGeometry.HasGravityPoint)
+                {
+                    upDir = Vector2.Normalize(Ball.Position - worldState.StaticGeometry.GravityPoint);
+                }
+
+                Vector2 rightDir = new Vector2(upDir.Y, -upDir.X); ;
 
                 // Calculate movement in local coordinate system that has the x axis orthogonal to the gravity
                 Matrix toGlobalOrientation = new Matrix(

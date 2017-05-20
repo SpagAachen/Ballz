@@ -376,7 +376,8 @@ namespace Ballz.GameSession.Physics
             PhysicsWorld.Step(elapsedSeconds);
             worldState.Water.Step(worldState, elapsedSeconds);
 
-            Vector2 gravityPoint = worldState.StaticGeometry.gravityPoint;
+            bool useCustomGravity = worldState.StaticGeometry.HasGravityPoint;
+            Vector2 gravityPoint = worldState.StaticGeometry.GravityPoint;
 
             // Sync back the positions and velocities
             foreach (var e in worldState.Entities)
@@ -387,7 +388,14 @@ namespace Ballz.GameSession.Physics
                     continue;
 
                 // Manually apply gravity
-                body.ApplyForce(9.81f * Vector2.Normalize(gravityPoint - body.Position) * body.Mass);
+                if (useCustomGravity)
+                {
+                    body.ApplyForce(9.81f * Vector2.Normalize(gravityPoint - body.Position) * body.Mass);
+                }
+                else
+                {
+                    body.ApplyForce(9.81f * new Vector2(0, -1) * body.Mass);
+                }
 
                 e.Position = body.Position;
                 e.Velocity = body.LinearVelocity;

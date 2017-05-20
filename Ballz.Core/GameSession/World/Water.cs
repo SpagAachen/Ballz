@@ -266,10 +266,19 @@ namespace Ballz.GameSession.World
             Viscosity(elapsedSeconds);
             Avoidance(elapsedSeconds);
 
-
-            for (var i = 0; i < ParticleCount; ++i)
+            if (worldState.StaticGeometry.HasGravityPoint)
             {
-                Velocities[i] += -9.81f*elapsedSeconds * (Particles[i] - worldState.StaticGeometry.gravityPoint);
+                for (var i = 0; i < ParticleCount; ++i)
+                {
+                    Velocities[i] += -9.81f * elapsedSeconds * (Particles[i] - worldState.StaticGeometry.GravityPoint);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < ParticleCount; ++i)
+                {
+                    Velocities[i] += new Vector2(0, -9.81f * elapsedSeconds);
+                }
             }
 
             WorldCollision(elapsedSeconds);

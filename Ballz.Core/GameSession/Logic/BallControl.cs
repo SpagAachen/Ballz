@@ -149,7 +149,12 @@ namespace Ballz.GameSession.Logic
                 if (closestDist < float.MaxValue)
                 {
                     //Ball.Velocity = new Vector2(Ball.Velocity.X, 0) - 5f * Vector2.Normalize(bestPos - Ball.Position);
-                    Vector2 VecUp = Vector2.Normalize(Ball.Position - Ballz.The().Match.World.StaticGeometry.gravityPoint);
+                    Vector2 VecUp = new Vector2(0, 1);
+                    if (Ballz.The().Match.World.StaticGeometry.HasGravityPoint)
+                    {
+                        Vector2.Normalize(Ball.Position - Ballz.The().Match.World.StaticGeometry.GravityPoint);
+                    }
+
                     Ball.Velocity = 5f * VecUp;
 					JumpCoolDown = PauseBetweenJumps;
 

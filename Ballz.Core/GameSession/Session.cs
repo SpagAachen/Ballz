@@ -92,6 +92,7 @@ namespace Ballz.GameSession
         public Session(Ballz _game, World.World world, GameSession.Logic.GameSettings settings)
         {
             World = world;
+            Terrain = World.StaticGeometry;
             GameSettings = settings;
 
             Physics = new Physics.PhysicsControl(_game);

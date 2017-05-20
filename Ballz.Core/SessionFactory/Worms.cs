@@ -39,7 +39,10 @@ namespace Ballz.SessionFactory
 
         public List<Vector2> SpawnPoints = new List<Vector2>();
 
-        public void FindSpawnPoints(Texture2D map, float terrainScale)
+        bool HasGravityPoint = false;
+        Vector2 GravityPoint = Vector2.Zero;
+
+        public void FindSpecialMarkers(Texture2D map, float terrainScale)
         {
             var w = map.Width;
             var h = map.Height;
@@ -48,13 +51,20 @@ namespace Ballz.SessionFactory
 
             // Spawn points are identified by green pixels in the map
             var spawnPointColor = new Color(1f, 0f, 0f);
-            
-            for(int x = 0; x < w; x++)
+            var gravityPointColor = new Color(0f, 1f, 1f);
+
+            for (int x = 0; x < w; x++)
             {
                 for(int y = 0; y < h; y++)
                 {
-                    if (pixels[y * w + x] == spawnPointColor)
+                    Color c = pixels[y * w + x];
+                    if(c == spawnPointColor)
                         SpawnPoints.Add(new Vector2(x * terrainScale, (h - y) * terrainScale));
+                    else if(c == gravityPointColor)
+                    {
+                        HasGravityPoint = true;
+                        GravityPoint = new Vector2(x * terrainScale, (h - y) * terrainScale);
+                    }
                 }
             }
         }
@@ -101,14 +111,15 @@ namespace Ballz.SessionFactory
         {
             var session = new Session(game, new World(new Terrain(settings.MapTexture)), settings)
                               {
-                                  UsePlayerTurns = this.UsePlayerTurns,
-                                  Terrain = new Terrain(settings.MapTexture)
+                                  UsePlayerTurns = this.UsePlayerTurns
                               };
 
-            FindSpawnPoints(settings.MapTexture, session.Terrain.Scale);
+            FindSpecialMarkers(settings.MapTexture, session.Terrain.Scale);
 
             var spawnPoints = SelectSpawnpoints(settings.Teams.Select(t=>t.NumberOfBallz).Sum());
-            
+
+            session.Terrain.GravityPoint = GravityPoint;
+            session.Terrain.HasGravityPoint = HasGravityPoint;
 
             // Create players and Ballz
             var currBallCreating = 0;
