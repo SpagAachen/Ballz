@@ -257,6 +257,11 @@ namespace Ballz.Logic
             }
         }
 
+        public void Update(Microsoft.Xna.Framework.GameTime time)
+        {
+            if (activeMenu.Count > 0)
+                activeMenu.Peek().Update();
+        }
 
         /// <summary>
         /// Checks the input mode.

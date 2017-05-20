@@ -235,6 +235,8 @@ namespace Ballz
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            Logic.Update(gameTime);
         }
 
         /// <summary>
