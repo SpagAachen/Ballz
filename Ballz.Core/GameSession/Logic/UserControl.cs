@@ -12,9 +12,9 @@ using static MathFloat.MathF;
 
 namespace Ballz.GameSession.Logic
 {
-    public class UserControl: BallControl
+    public class UserControl : BallControl
     {
-        public UserControl(Ballz game, Session match, Ball ball):
+        public UserControl(Ballz game, Session match, Ball ball) :
             base(game, match, ball)
         {
             AvailableWeapons.Add(new Weapons.Potato(ball, game));
@@ -41,19 +41,37 @@ namespace Ballz.GameSession.Logic
         public override bool Update(float elapsedSeconds, World.World worldState)
         {
             bool ballMadeAction = base.Update(elapsedSeconds, worldState);
-            
-            if(Ball.IsAlive)
+
+            if (Ball.IsAlive)
             {
                 Vector2 upDir = Vector2.Normalize(Ball.Position - worldState.StaticGeometry.gravityPoint);
-                Vector2 leftDir = new Vector2(-upDir.Y, upDir.X);
+                Vector2 rightDir = new Vector2(upDir.Y, -upDir.X);
+
+                // Calculate movement in local coordinate system that has the x axis orthogonal to the gravity
+                Matrix toGlobalOrientation = new Matrix(
+                        new Vector4(rightDir.X, rightDir.Y, 0, 0),
+                        new Vector4(upDir.X, upDir.Y, 0, 0),
+                        new Vector4(0, 0, 1, 0),
+                        new Vector4(0, 0, 0, 1)
+                );
+
+                Matrix toLocalOrientation = Matrix.Invert(toGlobalOrientation);
+
                 if (KeyPressed[InputMessage.MessageType.ControlsLeft] || KeyPressed[InputMessage.MessageType.ControlsRight])
                 {
                     var speed = WalkingTime < SlowWalkTime ? WalkingSpeedSlow : WalkingSpeedNormal;
-
-                    Vector2 movement = speed * (KeyPressed[InputMessage.MessageType.ControlsRight] ? -leftDir : leftDir);
                     
-                    Vector2 proj = Vector2.Dot(Ball.Velocity, movement) * Vector2.Normalize(Ball.Velocity);
-                    Ball.Velocity = proj.LengthSquared() > movement.LengthSquared() ? Ball.Velocity :  movement;
+                    float localMovementTarget = speed * (KeyPressed[InputMessage.MessageType.ControlsRight] ? 1 : -1);
+                    Vector2 localVelocity = Vector2.Transform(Ball.Velocity, toLocalOrientation);
+
+                    // In local coordinates, movement only influences the velocity on the X axis.
+                    // Only apply the movement velocity if it would either increase the current velocity or change the direction.
+                    if(Abs(localMovementTarget) > Abs(localVelocity.X) || Math.Sign(localMovementTarget) != Math.Sign(localVelocity.X))
+                    {
+                        localVelocity.X = localMovementTarget;
+                    }
+
+                    Ball.Velocity = Vector2.Transform(localVelocity, toGlobalOrientation);
 
                     WalkingTime += elapsedSeconds;
                 }
@@ -88,9 +106,9 @@ namespace Ballz.GameSession.Logic
                     Ball.AimDirection = v.Rotate(radians);
                 }
 
-                if(KeyPressed[InputMessage.MessageType.ControlsLeft])
+                if (KeyPressed[InputMessage.MessageType.ControlsLeft])
                     Ball.AimDirection = new Vector2(-Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
-                else if(KeyPressed[InputMessage.MessageType.ControlsRight])
+                else if (KeyPressed[InputMessage.MessageType.ControlsRight])
                     Ball.AimDirection = new Vector2(Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
 
                 // Handle single-shot input events
@@ -123,7 +141,7 @@ namespace Ballz.GameSession.Logic
                         cam.SetZoom(cam.Zoom * 1.2f, true, time);
                     }
                     break;
-                case InputMessage.MessageType.ControlsCameraZoomOut:   
+                case InputMessage.MessageType.ControlsCameraZoomOut:
                     {
                         var cam = Game.Camera;
                         var time = Game.Match.GameTime;
@@ -163,7 +181,7 @@ namespace Ballz.GameSession.Logic
         public override void HandleMessage(object sender, Message message)
         {
             base.HandleMessage(sender, message);
-            
+
             InputMessage input = message as InputMessage;
             if (input?.Pressed ?? false)
             {
