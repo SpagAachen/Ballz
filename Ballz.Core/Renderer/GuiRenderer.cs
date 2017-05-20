@@ -68,7 +68,7 @@ namespace Ballz.Renderer
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
-
+            UserInterface.GlobalScale = 0.75f;
             UserInterface.Update(gameTime);
             UserInterface.Draw(SpriteBatch);
             Game.GraphicsDevice.Clear(Color.CornflowerBlue);

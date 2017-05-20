@@ -14,44 +14,8 @@ namespace Ballz.Menu
         {
             AddItem(new MenuButton("SinglePlayer", () => OpenMenu(new SinglePlayerMenu())));
             AddItem(new MenuButton("Multiplayer", () => OpenMenu(new MultiplayerMenu())));
-            AddItem(new MenuButton("Options", () => OpenMenu(new OptionsMenu())));
+            AddItem(new MenuButton("Settings", () => OpenMenu(new OptionsMenu())));
             AddItem(new MenuButton("Exit", () => Ballz.The().Quit()));
-
-            //// options menu
-            //var optionsMenu = new MenuPanel("Options", true);
-            ////optionsMenu.AddItem(new Label("Not Implemented", false));
-            //optionsMenu.AddItem(new CheckBox("FullScreen: ", GameSettings.Fullscreen));
-            //optionsMenu.AddItem(new Choice<Settings.Resolution>("Resolution: ", GameSettings.ScreenResolution, GetResolutions()));
-            //optionsMenu.AddItem(new SpinBox("Multisampling: ", GameSettings.MSAASamples, 1, 16));
-            //optionsMenu.AddItem(new SpinBox("MasterVolume: ", GameSettings.MasterVolume, 0, 100));
-            //InputBox ipb = new InputBox("PlayerName: ", true);
-            //ipb.Setting = GameSettings.PlayerName;
-            //ipb.internalValue = false;
-            //optionsMenu.AddItem(ipb);
-            //optionsMenu.AddItem(new CheckBox("Friendly Fire: ", GameSettings.FriendlyFire, true));
-            //Label apply = new Label("Apply", true);
-            //apply.OnSelect += () =>
-            //{
-            //    File.Delete("Settings.xml");
-            //    FileStream stream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
-            //    StoreSettings(stream);
-            //    stream.Close();
-            //    Graphics.IsFullScreen = GameSettings.Fullscreen.Value;
-            //    Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
-            //    Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Value.Height;
-            //    //might be redundant as MSAA seems only to be changed before game is created (restart required)
-            //    if (GameSettings.MSAASamples.Value > 1)
-            //    {
-            //        Graphics.PreferMultiSampling = true;
-            //        Graphics.PreparingDeviceSettings -= msaaSettingsHandler;
-            //        msaaSettingsHandler = (object sender, PreparingDeviceSettingsEventArgs args) => {
-            //            args.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = GameSettings.MSAASamples.Value;
-            //        };
-            //        Graphics.PreparingDeviceSettings += msaaSettingsHandler;
-            //    }
-            //    Graphics.ApplyChanges();
-            //};
-            //optionsMenu.AddItem(apply);
 
             //// multiplayer menu
             //var multiplayerMenu = new MultiplayerMenu();
