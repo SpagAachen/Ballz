@@ -14,6 +14,7 @@ using Ballz.GameSession.Logic;
 
 namespace Ballz
 {
+    using System.Diagnostics;
     using System.Linq;
 
     /// <summary>
@@ -24,7 +25,7 @@ namespace Ballz
         //SpriteBatch spriteBatch;
         static Ballz _instance;
 
-        public List<string> Teamnames{ get; private set; }
+        public List<string> Teamnames { get; private set; }
 
         public GraphicsDeviceManager Graphics { get; set; }
 
@@ -38,13 +39,11 @@ namespace Ballz
 
         public Settings.ProgrammSettings GameSettings { get; set; }
 
-        MenuRenderer MenuRenderer;
+        GuiRenderer GuiRenderer;
 
-        public Label NetworkLobbyConnectedClients { get; set; } = new Label("test", true);
+        public MenuPanel MainMenu { get; set; }
 
-        public Composite MainMenu { get; set; }
-
-        public MessageOverlay MessageOverlay  { get; set; }
+        public MessageOverlay MessageOverlay { get; set; }
 
         public Camera Camera { get; set; }
         private EventHandler<PreparingDeviceSettingsEventArgs> msaaSettingsHandler;
@@ -54,13 +53,14 @@ namespace Ballz
         private Ballz()
         {
             Teamnames = new List<string>();
-            Graphics = new GraphicsDeviceManager(this);            
+            Graphics = new GraphicsDeviceManager(this);
             InitSettings();
             Content.RootDirectory = "Content";
-            if(GameSettings.MSAASamples.Value > 1)
+            if (GameSettings.MSAASamples.Value > 1)
             {
                 Graphics.PreferMultiSampling = true;
-                msaaSettingsHandler = (object sender, PreparingDeviceSettingsEventArgs args) => {
+                msaaSettingsHandler = (object sender, PreparingDeviceSettingsEventArgs args) =>
+                {
                     args.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = GameSettings.MSAASamples.Value;
                 };
                 Graphics.PreparingDeviceSettings += msaaSettingsHandler;
@@ -70,10 +70,10 @@ namespace Ballz
             Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
             Window.AllowUserResizing = true;
             IsFixedTimeStep = false;
-            
+
             Camera = new Camera();
             // create the Game Components
-            MenuRenderer = new MenuRenderer(this);
+            GuiRenderer = new GuiRenderer(this);
             //var physics = new PhysicsControl(this);
             Input = new InputTranslator(this);
             Network = new Network.Network(this);
@@ -81,9 +81,9 @@ namespace Ballz
             Components.Add(Input);
             //Components.Add(physics);
             Components.Add(Network);
-            Components.Add(MenuRenderer);
+            Components.Add(GuiRenderer);
             Components.Add(new PerformanceRenderer(this));
-            
+
             Logic = new LogicControl(this);
 
             Services.AddService(Logic);
@@ -99,7 +99,7 @@ namespace Ballz
             //Logic.Message += physics.HandleMessage;
             Logic.Message += Network.HandleMessage;
             //Logic.Message += gameRendering.HandleMessage;
-            Logic.Message += MenuRenderer.HandleMessage;
+            Logic.Message += GuiRenderer.HandleMessage;
 
             Network.Message += Logic.HandleNetworkMessage;
         }
@@ -153,153 +153,37 @@ namespace Ballz
                 throw new Exception("Settings.xml holds bogus values");
         }
 
-        private List<Settings.Resolution> GetResolutions()
+        public List<Settings.Resolution> GetResolutions()
         {
             List<Settings.Resolution> result = new List<Settings.Resolution>();
             DisplayModeCollection dmc = GraphicsAdapter.DefaultAdapter.SupportedDisplayModes;
             foreach (DisplayMode dm in dmc)
             {
                 Settings.Resolution resolution = new Settings.Resolution(dm.Width, dm.Height);
-                if (!result.Contains(resolution))
+                if (!result.Contains(resolution) && resolution.Width >= 800 && resolution.Height >= 600)
                     result.Add(resolution);
             }
 
             return result;
         }
 
-        private void LoadSettings(FileStream stream)
+        public void LoadSettings(FileStream stream)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Settings.ProgrammSettings));
             GameSettings = (Settings.ProgrammSettings)serializer.Deserialize(stream);
         }
 
-        private void StoreSettings(FileStream stream)
+        public void StoreSettings(FileStream stream)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(Settings.ProgrammSettings));
             serializer.Serialize(stream, GameSettings);
         }
 
-        private Composite DefaultMenu()
+        private MenuPanel DefaultMenu()
         {
             // Music!
             Ballz.The().Services.GetService<SoundControl>().StartMusic(SoundControl.MenuMusic);
-            // options menu
-            var optionsMenu = new Composite("Options", true);
-            //optionsMenu.AddItem(new Label("Not Implemented", false));
-            optionsMenu.AddItem(new CheckBox("FullScreen: ", GameSettings.Fullscreen));
-            optionsMenu.AddItem(new Choice<Settings.Resolution>("Resolution: ", GameSettings.ScreenResolution, GetResolutions()));
-            optionsMenu.AddItem(new SpinBox("Multisampling: ", GameSettings.MSAASamples, 1, 16));
-            optionsMenu.AddItem(new SpinBox("MasterVolume: ", GameSettings.MasterVolume, 0, 100));
-            InputBox ipb = new InputBox("PlayerName: ", true);
-            ipb.Setting = GameSettings.PlayerName;
-            ipb.internalValue = false;
-            optionsMenu.AddItem(ipb);
-			optionsMenu.AddItem (new CheckBox ("Friendly Fire: ", GameSettings.FriendlyFire, true));
-            Label apply = new Label("Apply", true);
-            apply.OnSelect += () =>
-            {
-                File.Delete("Settings.xml");
-                FileStream stream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
-                StoreSettings(stream);
-                stream.Close();
-                Graphics.IsFullScreen = GameSettings.Fullscreen.Value;
-                Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
-                Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Value.Height;
-                //might be redundant as MSAA seems only to be changed before game is created (restart required)
-                if(GameSettings.MSAASamples.Value > 1)
-                {
-                    Graphics.PreferMultiSampling = true;
-                    Graphics.PreparingDeviceSettings -= msaaSettingsHandler;
-                    msaaSettingsHandler = (object sender, PreparingDeviceSettingsEventArgs args) => {
-                        args.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = GameSettings.MSAASamples.Value;
-                    };
-                    Graphics.PreparingDeviceSettings += msaaSettingsHandler;                    
-                }
-                Graphics.ApplyChanges();                
-            };
-            optionsMenu.AddItem(apply);
-
-            // multiplayer menu
-            var multiplayerMenu = new MultiplayerMenu();
-
-            // main menu
-            var mainMenu = new Composite("Main Menu");
-
-            var continueLabel = new Label("Continue", true);
-            continueLabel.OnSelect += () =>
-            {
-                Logic.ContinueGame();
-            };
-			continueLabel.Visible = false;
-			continueLabel.Selectable = false;
-            mainMenu.AddItem(continueLabel);
-
-            var singlePlayerMenu = new Composite("Singleplayer", true);
-            {
-                var currGameSettings = new GameSettings();
-                // hard-coded game settings
-                //TODO(MS): Make a "build team, game-settings whatsoever" menu and store it in currGameSettings
-                {
-                    // Player 1
-                    {
-                        var team1 = new Team
-                                        {
-                                            ControlledByAI = false,
-                                            Name = "Germoney",
-                                            Country = "Germoney",
-                                            NumberOfBallz = 2
-                                        };
-                        currGameSettings.Teams.Add(team1);
-                    }
-                    // Player 2
-                    {
-                        var team2 = new Team
-                                        {
-                                            ControlledByAI = false,
-                                            Name = "Murica",
-                                            Country = "Murica",
-                                            NumberOfBallz = 2
-                                        };
-                        currGameSettings.Teams.Add(team2);
-                    }
-                }
-
-                // Select GameMode
-                foreach (var factory in SessionFactory.SessionFactory.AvailableFactories)
-                {
-                    var factoryLabel = new Label(factory.Name, true);
-                    factoryLabel.OnSelect += () =>
-                        {
-                            if (Match == null)
-                            {
-                                continueLabel.Visible = true;
-                                continueLabel.Selectable = true;
-                            }
-
-                            currGameSettings.GameMode = factory;
-                            Logic.StartGame(currGameSettings);
-                        };
-                    singlePlayerMenu.AddItem(factoryLabel);
-                }
-            }
-
-            mainMenu.BackgroundTexture = Logo;
-            mainMenu.AddItem(singlePlayerMenu);
-            mainMenu.AddItem(multiplayerMenu);
-            mainMenu.AddItem(optionsMenu);
-
-			var controlsMenu = new Composite("Controls", true);
-			controlsMenu.AddItem(new Back());
-			controlsMenu.BackgroundTexture = Content.Load<Texture2D>("Textures/Controls");
-			mainMenu.AddItem (controlsMenu);
-
-			var quit = new Label("Quit", true);
-			quit.OnSelect += Exit;
-			mainMenu.AddItem(quit);
-
-            mainMenu.SelectNext();
-
-            return mainMenu;
+            return new Menu.MainMenu();
         }
 
         void loadTeamnames()
@@ -308,10 +192,12 @@ namespace Ballz
             DirectoryInfo d = new DirectoryInfo(path);
             FileInfo[] Files = d.GetFiles(); //Getting Text files
             //string str = "";
-            foreach(FileInfo file in Files )
+            foreach (FileInfo file in Files)
             {
                 //str = str + ", " + file.Name;
-                Teamnames.Add(Path.GetFileNameWithoutExtension(file.Name));
+                var teamName = Path.GetFileNameWithoutExtension(file.Name);
+                if (!Teamnames.Contains(teamName))
+                    Teamnames.Add(teamName);
             }
         }
 
@@ -338,7 +224,6 @@ namespace Ballz
 
             Logo = Content.Load<Texture2D>("Textures/Logo");
             MainMenu = DefaultMenu();
-            MenuRenderer.Menu = MainMenu;
             Logic.SetMainMenu(MainMenu);
         }
 
@@ -350,6 +235,8 @@ namespace Ballz
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            Logic.Update(gameTime);
         }
 
         /// <summary>
@@ -361,6 +248,20 @@ namespace Ballz
             Graphics.GraphicsDevice.Clear(Color.White);
 
             base.Draw(gameTime);
+        }
+
+        public void Quit()
+        {
+            OnExiting(this, new EventArgs());
+        }
+
+        public event EventHandler Exiting;
+
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            Exiting?.Invoke(this, new EventArgs());
+            base.OnExiting(sender, args);
+            Process.GetCurrentProcess().Kill();
         }
     }
 }

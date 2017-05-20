@@ -86,10 +86,11 @@ namespace Ballz.Lobby
                 {
                     var games = GameListTask.Result;
                     UpdatedGameList?.Invoke(this, games);
+                    GameListTask = null;
                 }
 
                 // Refresh the game list if we never did so before, or if the last refresh was more than 5 seconds ago
-                if (GameListTask == null || (now - LastGameListRefresh).TotalSeconds > 5.0)
+                if (GameListTask == null && (now - LastGameListRefresh).TotalSeconds > 5.0)
                 {
                     GameListTask = GetGameListAsync();
                     LastGameListRefresh = now;

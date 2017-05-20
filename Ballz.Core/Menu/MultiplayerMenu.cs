@@ -8,14 +8,14 @@ using Ballz.Gui;
 
 namespace Ballz
 {
-    class MultiplayerMenu : Gui.Composite
+    class MultiplayerMenu : Gui.MenuPanel
     {
-        public MultiplayerMenu() : base("Multiplayer", true)
+        public MultiplayerMenu() : base("Multiplayer")
         {
-            AddItem(new GameListMenu());
-            AddItem(new Label("Join IP", true));
-            AddItem(new HostGameMenu(isMultiplayer: true));
-            AddItem(new Back());
+            AddItem(new MenuButton("Join Game", ()=>OpenMenu(new GameListMenu())));
+            AddItem(new MenuButton("Join by IP"));
+            AddItem(new MenuButton("Host Game", () => OpenMenu(new HostGameMenu(true))));
+            AddItem(new BackButton());
 
             //// - connect to server
             //var networkConnectToMenu = new Composite("Connect to", true);

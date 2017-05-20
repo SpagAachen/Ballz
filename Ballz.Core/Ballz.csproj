@@ -9,6 +9,8 @@
     <AssemblyName>Ballz</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Windows' ">
     <CscToolPath>$(MSBuildProgramFiles32)\MSBuild\14.0\Bin</CscToolPath>
@@ -74,21 +76,21 @@
     <Compile Include="GameSession\World\Rope.cs" />
     <Compile Include="GameSession\World\Shot.cs" />
     <Compile Include="GameSession\World\Water.cs" />
+    <Compile Include="Gui\MenuButton.cs" />
     <Compile Include="Input\InputTranslator.cs" />
     <Compile Include="Logic\LogicControl.cs" />
     <Compile Include="GameSession\Physics\PhysicsComponent.cs" />
     <Compile Include="GameSession\World\Entity.cs" />
     <Compile Include="Gui\Back.cs" />
-    <Compile Include="Gui\InputBox.cs" />
-    <Compile Include="Gui\Leaf.cs" />
-    <Compile Include="Gui\Label.cs" />
-    <Compile Include="Gui\Composite.cs" />
+    <Compile Include="Gui\MenuPanel.cs" />
     <Compile Include="Gui\IRawInputConsumer.cs" />
-    <Compile Include="Gui\SpinBox.cs" />
     <Compile Include="Menu\HostGameMenu.cs" />
     <Compile Include="Menu\GameListMenu.cs" />
     <Compile Include="Menu\LobbyMenu.cs" />
+    <Compile Include="Menu\MainMenu.cs" />
     <Compile Include="Menu\MultiplayerMenu.cs" />
+    <Compile Include="Menu\OptionsMenu.cs" />
+    <Compile Include="Menu\SinglePlayerMenu.cs" />
     <Compile Include="Messages\NetworkMessage.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="GameSession\World\Ball.cs" />
@@ -99,7 +101,7 @@
     <Compile Include="Network\Connection.cs" />
     <Compile Include="Network\Network.cs" />
     <Compile Include="Network\Server.cs" />
-    <Compile Include="Renderer\MenuRenderer.cs" />
+    <Compile Include="Renderer\GuiRenderer.cs" />
     <Compile Include="Ballz.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
@@ -120,14 +122,12 @@
     <None Include="app.config" />
     <Compile Include="Messages\MenuMessage.cs" />
     <Compile Include="Messages\InputMessage.cs" />
-    <Compile Include="Gui\Item.cs" />
     <Compile Include="Renderer\PerformanceRenderer.cs" />
     <Compile Include="Messages\LogicMessage.cs" />
-    <Compile Include="Gui\CheckBox.cs" />
     <Compile Include="Settings\Programmsettings.cs" />
     <Compile Include="Settings\SettingTypes.cs" />
-    <Compile Include="Gui\Choice.cs" />
     <Compile Include="Gui\IChooseable.cs" />
+    <None Include="MonoGame.Framework.dll.config" />
     <None Include="packages.config" />
     <Compile Include="Renderer\Camera.cs" />
     <Compile Include="Sound\SoundControl.cs" />
@@ -135,9 +135,6 @@
     <Compile Include="Renderer\Camera\CameraTrajectory.cs" />
     <Compile Include="GameSession\Logic\Weapons\Potato.cs" />
     <Compile Include="GameSession\Logic\Weapons\Grenade.cs" />
-    <None Include="OpenTK.dll.config" Condition="'$(OS)' != 'Windows_NT'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Tao.Sdl.dll.config" Condition="'$(OS)' != 'Windows_NT'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -159,24 +156,28 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="DataTypes, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GeonBit.UI.2.0.2.1\lib\geonbitui\DataTypes.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FarseerPhysics MonoGame">
       <HintPath>..\packages\FarseerPhysics.MonoGame.Unofficial.3.5.0\lib\FarseerPhysics MonoGame.dll</HintPath>
     </Reference>
-    <Reference Include="MathFloat, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\MathFloat.1.0.0.0\lib\net20\MathFloat.dll</HintPath>
+    <Reference Include="GeonBit.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GeonBit.UI.2.0.2.1\lib\geonbitui\GeonBit.UI.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="MonoGame.Framework">
-      <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.5.1.1679\lib\net40\MonoGame.Framework.dll</HintPath>
+    <Reference Include="MathFloat, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MathFloat.1.0.1.0\lib\net20\MathFloat.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MonoGame.Framework, Version=3.6.0.1625, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.6.0.1625\lib\net40\MonoGame.Framework.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="NVorbis">
-      <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.5.1.1679\lib\net40\NVorbis.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenTK">
-      <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.5.1.1679\lib\net40\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
@@ -191,5 +192,4 @@
     </CreateItem>
     <Copy SkipUnchangedFiles="true" SourceFiles="@(ContentFilesToCopy)" DestinationFiles="@(ContentFilesToCopy->'$(ContentDestinationDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
-  <ItemGroup />
 </Project>

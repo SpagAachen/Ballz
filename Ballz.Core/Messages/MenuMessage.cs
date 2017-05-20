@@ -4,11 +4,11 @@ namespace Ballz.Messages
 {
     public class MenuMessage : Message
     {
-        public MenuMessage(Item value) : base(MessageType.MenuMessage)
+        public MenuMessage(MenuPanel value) : base(MessageType.MenuMessage)
         {
             Value = value;
         }
 
-        public Item Value { get; private set; }
+        public MenuPanel Value { get; private set; }
     }
 }

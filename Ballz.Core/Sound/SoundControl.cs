@@ -56,20 +56,25 @@ namespace Ballz.Sound
 
         private SoundEffect LoadSound(string name)
         {
-            SoundEffect sound;
-            try
+            if (SoundsEnabled)
             {
-                sound = Game.Content.Load<SoundEffect>(name);
+                SoundEffect sound;
+                try
+                {
+                    sound = Game.Content.Load<SoundEffect>(name);
+                }
+                catch (Microsoft.Xna.Framework.Audio.NoAudioHardwareException e)
+                {
+                    // If no audio hardware is installed, print a warning and don't try to load sounds again
+                    MessageOverlay.ShowAlert("Audio error", e.Message);
+                    SoundsEnabled = false;
+                    return null;
+                }
+                loadedSounds.Add(name, sound);
+                return sound;
             }
-            catch (Microsoft.Xna.Framework.Audio.NoAudioHardwareException e)
-            {
-                // If no audio hardware is installed, print a warning and don't try to load sounds again
-                MessageOverlay.ShowAlert("Audio error", e.Message);
-                SoundsEnabled = false;
+            else
                 return null;
-            }
-            loadedSounds.Add(name, sound);
-            return sound;
         }
 
 		public SoundEffect GetSound(string name)
