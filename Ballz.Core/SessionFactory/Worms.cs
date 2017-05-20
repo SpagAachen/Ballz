@@ -47,7 +47,7 @@ namespace Ballz.SessionFactory
             map.GetData<Color>(pixels);
 
             // Spawn points are identified by green pixels in the map
-            var spawnPointColor = new Color(0f, 1f, 0f);
+            var spawnPointColor = new Color(1f, 0f, 0f);
             
             for(int x = 0; x < w; x++)
             {

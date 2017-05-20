@@ -269,7 +269,7 @@ namespace Ballz.GameSession.World
 
             for (var i = 0; i < ParticleCount; ++i)
             {
-                Velocities[i].Y += -9.81f*elapsedSeconds;
+                Velocities[i] += -9.81f*elapsedSeconds * (Particles[i] - worldState.StaticGeometry.gravityPoint);
             }
 
             WorldCollision(elapsedSeconds);

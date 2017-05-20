@@ -44,10 +44,15 @@ namespace Ballz.SessionFactory
         {
             new Worms("TestWorld2", true),
             new Worms("Beach", true),
+
             new Worms("Beach", false),
             new Worms(500,250), 
             new Worms("RopeWorld", true),
             new Worms("Mining", true),
+
+            new Worms("Gravity"),
+            new Worms("Gravity", true),
+
             /*new Worms("TestWorld2"),
             new Worms("TestWorld2", true),
             new Worms("TestWorld2", true),
