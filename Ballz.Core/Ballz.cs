@@ -14,6 +14,7 @@ using Ballz.GameSession.Logic;
 
 namespace Ballz
 {
+    using Microsoft.Xna.Framework.Input;
     using System.Diagnostics;
     using System.Linq;
 
@@ -201,6 +202,9 @@ namespace Ballz
             }
         }
 
+        public bool LockMouse { get; set; } = false;
+        public Vector2 MouseAimDirection { get; protected set; } = Vector2.Zero;
+
         /// <summary>
         ///     Allows the game to perform any initialization it needs to before starting to run.
         ///     This is where it can query for any required services and load any non-graphic
@@ -235,6 +239,32 @@ namespace Ballz
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            if(LockMouse)
+            {
+                var pos = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
+                var center = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
+                var maxMouseDistance = 70;
+
+                var d = pos - center;
+                var len = d.Length();
+
+                var clampedLen = Math.Min(len, maxMouseDistance);
+                if(clampedLen > 3f)
+                {
+                    d.Normalize();
+                    MouseAimDirection = d * new Vector2(1, -1);
+                    d *= clampedLen;
+                }
+                else
+                {
+                    MouseAimDirection = Vector2.Zero;
+                }
+                pos = center + d;
+                
+                
+                Mouse.SetPosition((int)Math.Round(pos.X), (int)Math.Round(pos.Y));
+            }
 
             Logic.Update(gameTime);
         }

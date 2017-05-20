@@ -16,8 +16,10 @@ namespace Ballz.Input
 		private bool subscribed = false;
 		private InputMode mMode;
 
-		private KeyboardState previousState;
-		private KeyboardState currentState;
+		private KeyboardState PreviousKeyboardState;
+		private KeyboardState CurrentKeyboardState;
+        private MouseState CurrentMouseState;
+        private MouseState PreviousMouseState;
 		private GamePadState[] previousGamePadState;
 		private PlayerIndex[] gamePadPlayerIndex;
 
@@ -60,8 +62,8 @@ namespace Ballz.Input
 			: base(game)
 		{
 			Mode = InputMode.PROCESSED;
-			previousState = Keyboard.GetState();
-			currentState = previousState;
+			PreviousKeyboardState = Keyboard.GetState();
+			CurrentKeyboardState = PreviousKeyboardState;
 			previousGamePadState = new GamePadState[4];
 
 			gamePadPlayerIndex = new PlayerIndex[4];
@@ -163,22 +165,23 @@ namespace Ballz.Input
 				ProcessGamePadInput(i);
 			}
 
-			currentState = Keyboard.GetState();
-			if (currentState != previousState)
-			{
-				if (Mode == InputMode.PROCESSED)
-				{
-					ProcessInput();
-				}
-				else
-				{
-					ProcessRawInput();
-				}
+            CurrentKeyboardState = Keyboard.GetState();
+            CurrentMouseState = Mouse.GetState();
 
-				previousState = currentState;
-			}
+            if (Mode == InputMode.PROCESSED)
+            {
+                ProcessKeyboardInput();
+                ProcessMouseInput();
+            }
+            else
+            {
+                ProcessRawInput();
+            }
 
-			base.Update(gameTime);
+            PreviousKeyboardState = CurrentKeyboardState;
+            PreviousMouseState = CurrentMouseState;
+            
+            base.Update(gameTime);
 		}
 
 		/// <summary>
@@ -230,13 +233,24 @@ namespace Ballz.Input
 
 			return result;
 		}
+        
+        private void ProcessMouseInput()
+        {
+            if (CurrentMouseState.LeftButton != PreviousMouseState.LeftButton)
+            {
+                var isPressed = CurrentMouseState.LeftButton == ButtonState.Pressed;
+                var player = Ballz.The().Match?.PlayerByNumber(1);
+                OnInput(InputMessage.MessageType.ControlsAction, pressed: isPressed, player: player);
+            }
 
-		private void ProcessInput()
+        }
+
+		private void ProcessKeyboardInput()
 		{
 			//Keys that are pressed now but where not pressed previously are keys that got pressed
-			List<Keys> pressedKeys = ChangedKeys(currentState.GetPressedKeys(), previousState.GetPressedKeys());
+			List<Keys> pressedKeys = ChangedKeys(CurrentKeyboardState.GetPressedKeys(), PreviousKeyboardState.GetPressedKeys());
 			//keys that where pressed previously but are not currently are Keys that got released
-			List<Keys> releasedKeys = ChangedKeys(previousState.GetPressedKeys(), currentState.GetPressedKeys());
+			List<Keys> releasedKeys = ChangedKeys(PreviousKeyboardState.GetPressedKeys(), CurrentKeyboardState.GetPressedKeys());
 
 			EmitKeyMessages(pressedKeys, true);
 			EmitKeyMessages(releasedKeys, false);
@@ -256,65 +270,68 @@ namespace Ballz.Input
 						OnInput(InputMessage.MessageType.ControlsBack, pressed);
 						break;
 					case Keys.LeftControl:
-						OnInput(InputMessage.MessageType.ControlsAction, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						OnInput(InputMessage.MessageType.ControlsAction, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
 						break;
 					case Keys.Up:
-						OnInput(InputMessage.MessageType.ControlsUp, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						OnInput(InputMessage.MessageType.ControlsUp, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
 						break;
 					case Keys.Down:
-						OnInput(InputMessage.MessageType.ControlsDown, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						OnInput(InputMessage.MessageType.ControlsDown, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
 						break;
 					case Keys.Left:
-						OnInput(InputMessage.MessageType.ControlsLeft, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						OnInput(InputMessage.MessageType.ControlsLeft, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
 						break;
 					case Keys.Right:
-						OnInput(InputMessage.MessageType.ControlsRight, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						OnInput(InputMessage.MessageType.ControlsRight, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
 						break;
 					case Keys.Enter:
-					case Keys.RightControl:
-						OnInput(InputMessage.MessageType.ControlsAction, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
-						break;
-					case Keys.Space:
+                    case Keys.RightShift:
+                        OnInput(InputMessage.MessageType.ControlsAction, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
+                        break;
+                    case Keys.RightControl:
+                        OnInput(InputMessage.MessageType.ControlsJump, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
+                        break;
+                    case Keys.Space:
 						OnInput(InputMessage.MessageType.ControlsJump, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
 						break;
 					case Keys.PageUp:
-						OnInput(InputMessage.MessageType.ControlsPreviousWeapon, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
-						break;
-					case Keys.PageDown:
-						OnInput(InputMessage.MessageType.ControlsNextWeapon, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
-						break;
-					case Keys.W:
-						OnInput(InputMessage.MessageType.ControlsUp, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
-						break;
-					case Keys.S:
-						OnInput(InputMessage.MessageType.ControlsDown, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
-						break;
-					case Keys.A:
-						OnInput(InputMessage.MessageType.ControlsLeft, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
-						break;
-					case Keys.D:
-						OnInput(InputMessage.MessageType.ControlsRight, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
-						break;
-					case Keys.E:
-						OnInput(InputMessage.MessageType.ControlsAction, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
-						break;
-					case Keys.Q:
-						OnInput(InputMessage.MessageType.ControlsJump, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
-						break;
-					case Keys.D1:
-						OnInput(InputMessage.MessageType.ControlsNextWeapon, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
-						break;
-					case Keys.D2:
 						OnInput(InputMessage.MessageType.ControlsPreviousWeapon, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
 						break;
+					case Keys.PageDown:
+						OnInput(InputMessage.MessageType.ControlsNextWeapon, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
+						break;
+					case Keys.W:
+						OnInput(InputMessage.MessageType.ControlsUp, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						break;
+					case Keys.S:
+						OnInput(InputMessage.MessageType.ControlsDown, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						break;
+					case Keys.A:
+						OnInput(InputMessage.MessageType.ControlsLeft, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						break;
+					case Keys.D:
+						OnInput(InputMessage.MessageType.ControlsRight, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						break;
+					case Keys.E:
+						OnInput(InputMessage.MessageType.ControlsAction, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						break;
+					case Keys.Q:
+						OnInput(InputMessage.MessageType.ControlsJump, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						break;
+					case Keys.D1:
+						OnInput(InputMessage.MessageType.ControlsNextWeapon, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						break;
+					case Keys.D2:
+						OnInput(InputMessage.MessageType.ControlsPreviousWeapon, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						break;
 					case Keys.Add:
-						OnInput(InputMessage.MessageType.ControlsCameraZoomIn, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						OnInput(InputMessage.MessageType.ControlsCameraZoomIn, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
 						break;
 					case Keys.Subtract:
-						OnInput(InputMessage.MessageType.ControlsCameraZoomOut, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						OnInput(InputMessage.MessageType.ControlsCameraZoomOut, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
 						break;
 					case Keys.C:
-						OnInput(InputMessage.MessageType.ControlsCameraModeToggle, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(1));
+						OnInput(InputMessage.MessageType.ControlsCameraModeToggle, pressed, char.MinValue, Ballz.The().Match?.PlayerByNumber(2));
 						break;
 
 				}

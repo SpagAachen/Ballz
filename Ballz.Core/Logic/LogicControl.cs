@@ -45,6 +45,7 @@ namespace Ballz.Logic
             activeMenu.Push(menu); //TODO: uncast
             state = GameState.MenuState;
             menu.OnOpen();
+            Ballz.The().LockMouse = false;
         }
 
         public void OpenMenu(MenuPanel newMenu)
@@ -56,6 +57,7 @@ namespace Ballz.Logic
             activeMenu.Push(newMenu);
             RaiseMessageEvent(new MenuMessage(activeMenu.Peek()));
             state = GameState.MenuState;
+            Ballz.The().LockMouse = false;
         }
         
         public void MenuGoBack()
@@ -76,6 +78,7 @@ namespace Ballz.Logic
             activeMenu.Peek().SelectIndex(0);
 
             state = GameState.SimulationState;
+            Ballz.The().LockMouse = true;
             if (Game.Match != null)
                 Game.Match.Dispose();
 
@@ -185,8 +188,8 @@ namespace Ballz.Logic
                 switch (msg.Kind)
                 {
                     case InputMessage.MessageType.ControlsAction:
-                        (top.SelectedItem as MenuButton)?.DoClick();
-                        Ballz.The().Services.GetService<SoundControl>().PlaySound(SoundControl.AcceptSound);
+                        //(top.SelectedItem as MenuButton)?.DoClick();
+                        //Ballz.The().Services.GetService<SoundControl>().PlaySound(SoundControl.AcceptSound);
                         break;
                     case InputMessage.MessageType.ControlsBack:
                         Ballz.The().Services.GetService<SoundControl>().PlaySound(SoundControl.DeclineSound);

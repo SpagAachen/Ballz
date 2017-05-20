@@ -95,27 +95,35 @@ namespace Ballz.GameSession.Logic
 
                 Ball.ViewRotation = Max(-1, Min(Ball.ViewRotation, 1));
 
-                // Up/Down keys rotate the aim vector
-                if (KeyPressed[InputMessage.MessageType.ControlsUp])
-                {
-                    var v = Ball.AimDirection;
-                    // Rotate at 60°/s. Use sign of v.x to determine the direction, so that the up key always moves the crosshair upwards.
-                    var radians = (v.X > 0 ? 1 : -1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
-                    Ball.AimDirection = v.Rotate(radians);
-                }
 
-                if (KeyPressed[InputMessage.MessageType.ControlsDown])
+                if (Ball.Player == Match.PlayerByNumber(1) || Match.UsePlayerTurns)
                 {
-                    var v = Ball.AimDirection;
-                    // Rotate at 60°/s. Use sign of v.x to determine the direction, so that the up key always moves the crosshair upwards.
-                    var radians = (v.X > 0 ? -1 : 1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
-                    Ball.AimDirection = v.Rotate(radians);
+                    Ball.AimDirection = Ballz.The().MouseAimDirection;
                 }
+                else
+                {
+                    // Up/Down keys rotate the aim vector
+                    if (KeyPressed[InputMessage.MessageType.ControlsUp])
+                    {
+                        var v = Ball.AimDirection;
+                        // Rotate at 60°/s. Use sign of v.x to determine the direction, so that the up key always moves the crosshair upwards.
+                        var radians = (v.X > 0 ? 1 : -1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
+                        Ball.AimDirection = v.Rotate(radians);
+                    }
 
-                if (KeyPressed[InputMessage.MessageType.ControlsLeft])
-                    Ball.AimDirection = new Vector2(-Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
-                else if (KeyPressed[InputMessage.MessageType.ControlsRight])
-                    Ball.AimDirection = new Vector2(Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
+                    if (KeyPressed[InputMessage.MessageType.ControlsDown])
+                    {
+                        var v = Ball.AimDirection;
+                        // Rotate at 60°/s. Use sign of v.x to determine the direction, so that the up key always moves the crosshair upwards.
+                        var radians = (v.X > 0 ? -1 : 1) * elapsedSeconds * 2 * (float)Math.PI * 60f / 360f;
+                        Ball.AimDirection = v.Rotate(radians);
+                    }
+
+                    if (KeyPressed[InputMessage.MessageType.ControlsLeft])
+                        Ball.AimDirection = new Vector2(-Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
+                    else if (KeyPressed[InputMessage.MessageType.ControlsRight])
+                        Ball.AimDirection = new Vector2(Math.Abs(Ball.AimDirection.X), Ball.AimDirection.Y);
+                }
 
                 // Handle single-shot input events
                 ProcessInput(controlInput);
