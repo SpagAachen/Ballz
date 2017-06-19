@@ -14,29 +14,28 @@
     using GameSession.World;
     using System.Linq;
     using GameSession;
+    using Lidgren.Network;
+
     class Server
     {
         static Server()
         {
-            ObjectSync.Sync.RegisterClass<Entity>(() => new Entity());
-            ObjectSync.Sync.RegisterClass<Ball>(() => new Ball());
-            ObjectSync.Sync.RegisterClass<Shot>(() => new Shot());
-            ObjectSync.Sync.RegisterClass<Message>(() => new Message());
-            ObjectSync.Sync.RegisterClass<NetworkMessage>(() => new NetworkMessage());
-            ObjectSync.Sync.RegisterClass<InputMessage>(() => new InputMessage());
-            ObjectSync.Sync.RegisterClass<Terrain.TerrainModification>(() => new Terrain.TerrainModification());
+
         }
 
         private static int nextId = 1;
-        TcpListener listener;
-        private readonly Network network;
-        private readonly List<Connection> connections = new List<Connection>();
+        
+        NetServer Net;
+        ObjectSynchronizer Sync = null;
 
         public double TicksPerSecond = 30;
 
-        public Server(Network net)
+        public Server()
         {
-            network = net;
+            var config = new NetPeerConfiguration("SpagAachen.Ballz");
+            config.Port = 16116; // TODO: make port configurable
+            Net = new NetServer(config);
+            Sync = new ObjectSynchronizer(Net);
         }
 
         public void StartNetworkGame(GameSettings gameSettings)
@@ -76,105 +75,102 @@
                 gameSettings.Teams.Add(team);
             }
             
-            foreach(var client in connections)
-            {
-                counter++;
-                var team = new Team { ControlledByAI = false, Name = $"Team{counter}", NumberOfBallz = 1, Country = "Murica" };
+            //foreach(var client in connections)
+            //{
+            //    counter++;
+            //    var team = new Team { ControlledByAI = false, Name = $"Team{counter}", NumberOfBallz = 1, Country = "Murica" };
 
-                client.ClientPlayerId = team.Id;
-                client.Send(new NetworkMessage(NetworkMessage.MessageType.YourPlayerId, client.ClientPlayerId));
+            //    client.ClientPlayerId = team.Id;
+            //    client.Send(new NetworkMessage(NetworkMessage.MessageType.YourPlayerId, client.ClientPlayerId));
 
-                gameSettings.Teams.Add(team);
-            }
+            //    gameSettings.Teams.Add(team);
+            //}
         }
 
 	    public int NumberOfClients()
 	    {
-	        return connections.Count;
+	        return Net.ConnectionsCount;
 	    }
 
-        public void Listen(int port)
+        public void Listen()
         {
-            listener = new TcpListener(IPAddress.Any, port);
-            listener.Start();
-            // start lobby first
-            network.GameState = Network.GameStateT.InLobby;
-            this.UpdateLobbyList();
+            Net.Start();
         }
-
-        public void UpdateLobbyList()
-        {
-            //Ballz.The().NetworkLobbyConnectedClients.Name = "Myself";
-            foreach(var c in connections)
-            {
-                //Ballz.The().NetworkLobbyConnectedClients.Name += ", " + c.Id;
-            }
-        }
+        
 
         DateTime LastUpdate = DateTime.Now;
 
         public void Update(GameTime time)
         {
-            // new clients
-            if (listener.Pending())
+            NetIncomingMessage msg;
+            while((msg = Net.ReadMessage()) != null)
             {
-                if (network.GameState == Network.GameStateT.InLobby)
+                switch(msg.MessageType)
                 {
-                    // add new player in lobby
-                    var client = listener.AcceptTcpClient();
-                    var connection = new Connection(client, nextId++);
-                    connection.ObjectReceived += OnData;
-                    connections.Add(connection);
-                    network.RaiseMessageEvent(NetworkMessage.MessageType.NewClient);
-                    // update lobby list
-                    this.UpdateLobbyList();
-                }
-                else
-                {
-                    //TODO: Re-add Players that lost connection
-                }
-            }
-            // receive data
-            foreach (var c in connections)
-            {
-                c.ReadUpdates();
-            }
-
-            if (network.GameState == Network.GameStateT.InGame && Ballz.The().Match.State == SessionState.Running)
-            {
-                var now = DateTime.Now;
-                if ((now - LastUpdate).TotalSeconds > 1.0 / TicksPerSecond)
-                {
-                    foreach (var e in Ballz.The().Match.World.Entities)
-                    {
-                        Broadcast(e);
-                    }
-                    LastUpdate = DateTime.Now;
+                    case NetIncomingMessageType.Data:
+                        Sync.ReadMessage(msg);
+                        break;
                 }
 
+                Net.Recycle(msg);
             }
+
+            //// new clients
+            //if (listener.Pending())
+            //{
+            //    if (network.GameState == Network.GameStateT.InLobby)
+            //    {
+            //        // add new player in lobby
+            //        var client = listener.AcceptTcpClient();
+            //        var connection = new Connection(client, nextId++);
+            //        connection.ObjectReceived += OnData;
+            //        connections.Add(connection);
+            //        network.RaiseMessageEvent(NetworkMessage.MessageType.NewClient);
+            //        // update lobby list
+            //        this.UpdateLobbyList();
+            //    }
+            //    else
+            //    {
+            //        //TODO: Re-add Players that lost connection
+            //    }
+            //}
+            //// receive data
+            //foreach (var c in connections)
+            //{
+            //    c.ReadUpdates();
+            //}
+
+            //if (network.GameState == Network.GameStateT.InGame && Ballz.The().Match.State == SessionState.Running)
+            //{
+            //    var now = DateTime.Now;
+            //    if ((now - LastUpdate).TotalSeconds > 1.0 / TicksPerSecond)
+            //    {
+            //        foreach (var e in Ballz.The().Match.World.Entities)
+            //        {
+            //            Broadcast(e);
+            //        }
+            //        LastUpdate = DateTime.Now;
+            //    }
+
+            //}
         }
             
         private void OnData(object sender, object data)
         {
 			// Input Message
-			if (Ballz.The().Match != null && data.GetType() == typeof(InputMessage))
-			{
-                var playerId = (sender as Connection).ClientPlayerId;
-                var player = Ballz.The().Match.PlayerById(playerId);
-                if(player != null)
-                    Ballz.The().Input.InjectInputMessage((InputMessage)data, player);
-            }
+			//if (Ballz.The().Match != null && data.GetType() == typeof(InputMessage))
+			//{
+   //             var playerId = (sender as Connection).ClientPlayerId;
+   //             var player = Ballz.The().Match.PlayerById(playerId);
+   //             if(player != null)
+   //                 Ballz.The().Input.InjectInputMessage((InputMessage)data, player);
+   //         }
 
         }
 
         public void Broadcast(object data)
         {
-            //Console.WriteLine($"Broadcasting {data}");
-            foreach (var c in connections)
-            {
-                c.Send(data);
-            }
+            Sync.SendObject(data);
         }
 
         public void HandleMessage(object sender, Message message)

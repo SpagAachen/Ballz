@@ -57,6 +57,7 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="GameSession\Gui\WeaponSelect.cs" />
     <Compile Include="GameSession\Logic\AIControl.cs" />
     <Compile Include="GameSession\Logic\BallControl.cs" />
     <Compile Include="GameSession\Logic\GameLogic.cs" />
@@ -98,8 +99,9 @@
     <Compile Include="GameSession\World\World.cs" />
     <Compile Include="GameSession\Renderer\GameRenderer.cs" />
     <Compile Include="Network\Client.cs" />
-    <Compile Include="Network\Connection.cs" />
+    <Compile Include="Network\ObjectSynchronizer.cs" />
     <Compile Include="Network\Network.cs" />
+    <Compile Include="Network\LobbyPlayerList.cs" />
     <Compile Include="Network\Server.cs" />
     <Compile Include="Renderer\GuiRenderer.cs" />
     <Compile Include="Ballz.cs">
@@ -167,6 +169,10 @@
       <HintPath>..\packages\GeonBit.UI.2.0.2.1\lib\geonbitui\GeonBit.UI.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Lidgren.Network, Version=2012.1.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lidgren.Network.1.0.2\lib\net451\Lidgren.Network.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="MathFloat, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MathFloat.1.0.1.0\lib\net20\MathFloat.dll</HintPath>
       <Private>True</Private>
@@ -182,6 +188,7 @@
     <Reference Include="System" />
     <Reference Include="System.Xml" />
   </ItemGroup>
+  <ItemGroup />
   <Target Name="BeforeBuild">
     <PropertyGroup>
       <ContentDestinationDirectory>$(OutputPath)\Content</ContentDestinationDirectory>

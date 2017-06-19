@@ -8,6 +8,7 @@
     using global::Ballz.GameSession.World;
 
     using ObjectSync;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Network takes care of all network related stuff independent of an existing game session.
@@ -18,22 +19,27 @@
     /// </summary>
     public class Network : GameComponent
     {
-        public enum StateT { None, Client, Server }
 
-        public enum GameStateT { None, InLobby, InGame }
+        public enum NetworkRole { None, Client, Server }
+
+        public enum NetworkGameState { None, Connecting, InLobby, InGame }
 
         private Server server;
 
         private Client client;
 
         public event EventHandler<Message> Message;
+        public event EventHandler<object> DataReceived;
+        public event EventHandler<LobbyPlayerList> PlayerListChanged;
+
+        Task StartupTask = null;
 
         /// <summary>
         /// The state of the game: Unconnected/None, Client or Server
         /// </summary>
-        public StateT State { get; private set; } = StateT.None;
+        public NetworkRole Role { get; private set; } = NetworkRole.None;
 
-        public GameStateT GameState { get; set; } = GameStateT.None;
+        public NetworkGameState GameState { get; set; } = NetworkGameState.None;
 
         public void RaiseMessageEvent(NetworkMessage.MessageType msg)
         {
@@ -42,57 +48,72 @@
 
         public int GetNumberOfPlayers()
         {
-            if (State == StateT.Client) return client.NumberOfPlayers;
-            if (State == StateT.Server) return server.NumberOfClients() + 1; // +1 for ourselfs
+            if (Role == NetworkRole.Client) return client.NumberOfPlayers;
+            if (Role == NetworkRole.Server) return server.NumberOfClients() + 1; // +1 for ourselfs
             return -1;
         }
 
-        public void StartServer(int port)
+        public void StartServer()
         {
-            if (State != StateT.None)
+            if (Role != NetworkRole.None)
                 Disconnect();
-            State = StateT.Server;
-            server = new Server(this);
-            server.Listen(port);
+            Role = NetworkRole.Server;
+            GameState = NetworkGameState.InLobby;
+            server = new Server();
+            server.Listen();
             RaiseMessageEvent(NetworkMessage.MessageType.ServerStarted);
         }
 
         public void StartNetworkGame(GameSettings gameSettings)
         {
-            if (State == StateT.Server)
+            if (Role == NetworkRole.Server)
             {
                 server.StartNetworkGame(gameSettings);
-                GameState = GameStateT.InGame;
+                GameState = NetworkGameState.InGame;
             }
         }
 
-        public bool ConnectToServer(string hostname, int port)
+        public void ConnectToServer(string hostname, int port, Action onSuccess = null, Action onFail = null)
         {
-            if (State != StateT.None)
+            if (StartupTask != null)
+                throw new Exception("Trying to connect to server while network is already trying to start something else");
+
+            if (Role != NetworkRole.None)
                 Disconnect();
-            State = StateT.Client;
+
+            Role = NetworkRole.Client;
             client = new Client(this);
             RaiseMessageEvent(NetworkMessage.MessageType.ConnectingToServer);
 
-            try
-            {
-                client.ConnectToServer(hostname, port); // blocking atm
-            }
-            catch(Exception e)
-            {
-                RaiseMessageEvent(NetworkMessage.MessageType.ConnectionErrorOccured);
-                MessageOverlay.ShowAlert("Error while connecting", e.Message);
-                return false;
-            }
+            GameState = NetworkGameState.Connecting;
 
-            RaiseMessageEvent(NetworkMessage.MessageType.ConnectedToServer);
-            return true;
+            StartupTask = new Task(() =>
+            {
+                try
+                {
+                    client.ConnectToServer(hostname, port); // blocking atm
+                }
+                catch (Exception e)
+                {
+                    RaiseMessageEvent(NetworkMessage.MessageType.ConnectionErrorOccured);
+                    MessageOverlay.ShowAlert("Error while connecting", e.Message);
+                    GameState = NetworkGameState.None;
+                    onFail?.Invoke();
+                    return;
+                }
+
+                GameState = NetworkGameState.InLobby;
+                RaiseMessageEvent(NetworkMessage.MessageType.ConnectedToServer);
+                StartupTask = null;
+                onSuccess?.Invoke();
+            });
+            StartupTask.Start();
         }
 
         public void Disconnect()
         {
-            if (State == StateT.None) return;
-            State = StateT.None;
+            if (Role == NetworkRole.None) return;
+            Role = NetworkRole.None;
             client = null;
             server = null;
             RaiseMessageEvent(NetworkMessage.MessageType.Disconnected);
@@ -101,19 +122,24 @@
 
         public Network(Game game) : base(game)
         {
-            Sync.RegisterClass(() => new Entity());
+            SynchronizingInfo.Register(new SynchronizingInfo
+            {
+                Type = typeof(LobbyPlayerList),
+                IsIdentifiable = false,
+                ObjectConstructor = () => new LobbyPlayerList()
+            });
         }
 
         public override void Update(GameTime time)
         {
-            switch (State)
+            switch (Role)
             {
-                case StateT.None:
+                case NetworkRole.None:
                     return;
-                case StateT.Client:
+                case NetworkRole.Client:
                     client.Update(time);
                     break;
-                case StateT.Server:
+                case NetworkRole.Server:
                     server.Update(time);
                     break;
                 default:
@@ -123,15 +149,15 @@
 
         public void HandleMessage(object sender, Message message)
         {
-            switch (State)
+            switch (Role)
             {
-                case StateT.None:
+                case NetworkRole.None:
                     //TODO: Implement
                     break;
-                case StateT.Client:
+                case NetworkRole.Client:
                     client.HandleMessage(sender, message);
                     break;
-                case StateT.Server:
+                case NetworkRole.Server:
                     server.HandleMessage(sender, message);
                     break;
                 default:

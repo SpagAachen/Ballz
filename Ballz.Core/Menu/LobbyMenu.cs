@@ -17,6 +17,8 @@ namespace Ballz
         bool IsHost;
         bool IsPrivate;
 
+        SelectList PlayerList;
+
         public LobbyMenu(bool isHost, string gameName, bool isPrivate) : base("Lobby")
         {
             GameName = gameName;
@@ -28,6 +30,9 @@ namespace Ballz
                 Lobby?.CloseHostedGameAsync();
                 Lobby?.Dispose();
                 Lobby = null;
+
+                Ballz.The().Network.PlayerListChanged -= UpdatePlayerList;
+                Ballz.The().Network.Disconnect();
             };
 
             Open += (s, e) =>
@@ -35,21 +40,29 @@ namespace Ballz
                 Lobby = new LobbyClient();
                 Lobby.HostGame(gameName, isPrivate);
 
-                AddItem(new Label("Player in Lobby:"));
-                //AddItem(new Label("Player1", fontSize: 0.33f));
-                //AddItem(new Label("Player2", fontSize: 0.33f));
+                Ballz.The().Network.PlayerListChanged += UpdatePlayerList;
 
                 if (isHost)
                 {
-                    AddItem(new Label("Start Game"));
+                    Ballz.The().Network.StartServer();
                 }
-                else
-                {
-                    AddItem(new Label("Waiting for Host to start the Game"));
-                }
-
-                AddItem(new Label("Leave Game"));
             };
+
+            AddItem(new Label("Players in Lobby:"));
+            PlayerList = new SelectList();
+            PlayerList.LockSelection = true;
+            AddItem(PlayerList);
+
+            if (isHost)
+            {
+                AddItem(new Button("Start Game"));
+            }
+            else
+            {
+                AddItem(new Label("Waiting for Host to start the Game"));
+            }
+
+            AddItem(new Button("Leave Game"));
         }
 
         public override void Update()
@@ -57,6 +70,15 @@ namespace Ballz
             base.Update();
 
             Lobby?.Update();
+        }
+
+        public void UpdatePlayerList(object sender, LobbyPlayerList list)
+        {
+            PlayerList.ClearItems();
+            foreach(var name in list.PlayerNames)
+            {
+                PlayerList.AddItem(name);
+            }
         }
     }
 }

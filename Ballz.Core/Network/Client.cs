@@ -8,6 +8,7 @@
     using System.Diagnostics;
     using System.IO;
     using ObjectSync;
+    
 
     using global::Ballz.GameSession.Logic;
 
@@ -27,9 +28,7 @@
         private Network network = null;
 
         public int NumberOfPlayers { get; private set; } = -1;
-
-        private Connection connectionToServer = null;
-
+        
         public Client(Network net)
         {
             network = net;
@@ -43,13 +42,10 @@
         /// <param name="port">Port</param>
         public void ConnectToServer(string host, int port)
         {
-            connectionToServer = new Connection(host, port, 0);
-            connectionToServer.ObjectReceived += OnData;
         }
 
         public void Update(GameTime time)
         {
-            connectionToServer?.ReadUpdates();
         }
 
         private void OnData(object sender, object data)
@@ -79,7 +75,7 @@
                         ParseGameSettings((GameSettings)netMsg.Data);
                         break;
                     case NetworkMessage.MessageType.YourPlayerId:
-                        connectionToServer.ClientPlayerId = (int)netMsg.Data;
+                        //connectionToServer.ClientPlayerId = (int)netMsg.Data;
                         break;
                     case NetworkMessage.MessageType.EntityRemoved:
                         var e = netMsg.Data as Entity;
@@ -116,9 +112,9 @@
         private void ParseGameSettings(GameSettings settings)
         {
             Ballz.The().Logic.StartGame(settings);
-            var localPlayer = Ballz.The().Match.PlayerById(connectionToServer.ClientPlayerId);
-            localPlayer.IsLocal = true;
-            Ballz.The().Match.LocalPlayers = new List<Player>() { localPlayer };
+            //var localPlayer = Ballz.The().Match.PlayerById(connectionToServer.ClientPlayerId);
+            //localPlayer.IsLocal = true;
+            //Ballz.The().Match.LocalPlayers = new List<Player>() { localPlayer };
             Ballz.The().Match.IsRemoteControlled = true;
         }
 
@@ -135,7 +131,7 @@
                 case InputMessage.MessageType.ControlsJump:
                 case InputMessage.MessageType.ControlsNextWeapon:
                 case InputMessage.MessageType.ControlsPreviousWeapon:
-                    connectionToServer?.Send(message);
+                    //connectionToServer?.Send(message);
                     break;
             }
         }

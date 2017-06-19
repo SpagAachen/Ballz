@@ -2,12 +2,13 @@
 using Microsoft.Xna.Framework;
 using ObjectSync;
 
+using Ballz.Network;
+
 namespace Ballz.GameSession.World
 {
     /// <summary>
     ///     Entity is the Base class for all types of Entities in our Game.
     /// </summary>
-    [Serializable]
     public class Entity : IDisposable
     {
         public int ID
@@ -111,6 +112,16 @@ namespace Ballz.GameSession.World
 
         public virtual void OnEntityCollision(Entity other)
         {
+        }
+
+        public static SynchronizingInfo GetSyncInfo()
+        {
+            return new SynchronizingInfo
+            {
+                ObjectConstructor = () => new Entity(),
+                IdToObject = (id) => Ballz.The().Match?.World.EntityById((int)id),
+                ObjectToId = (e) => (e as Entity).ID,
+            };
         }
     }
 }

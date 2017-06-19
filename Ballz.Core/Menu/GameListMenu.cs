@@ -15,6 +15,8 @@ namespace Ballz
         LobbyClient Lobby = null;
 
         Label StatusLabel = new Label("Updating Game List");
+
+        PublicGameInfo[] GameListData = null;
         SelectList GameList = new SelectList(new Vector2(0, 350));
         Button JoinButton = new Gui.MenuButton("Join", anchor: Anchor.BottomRight, size: new Vector2(0.45f, -1));
 
@@ -35,7 +37,8 @@ namespace Ballz
             AddItem(StatusLabel);
             AddItem(GameList);
             var panel = new Panel(new Vector2(0, 150));
-            JoinButton.Disabled = true;
+
+            JoinButton.OnClick += (e) => JoinSelectedGame();
             panel.AddChild(JoinButton);
             panel.AddChild(new Gui.BackButton(Anchor.BottomLeft, new Vector2(0.45f, -1)));
             AddItem(panel);
@@ -56,6 +59,8 @@ namespace Ballz
             var selection = GameList.SelectedValue;
             var scrollPos = GameList.ScrollPosition;
             var isFocussed = GameList.IsFocused;
+
+            GameListData = games;
 
             GameList.ClearItems();
             if (games.Length == 0)
@@ -83,6 +88,20 @@ namespace Ballz
             {
                 GameList.SelectedIndex = 0;
             }
+        }
+
+        public void JoinSelectedGame()
+        {
+            if (GameListData == null || GameListData.Length < GameList.SelectedIndex+1)
+                return;
+
+            PublicGameInfo selectedGame = GameListData[GameList.SelectedIndex];
+
+            MessageOverlay.ShowAlert("Connecting to Game...", message: "Please wait.", footer: "Press Escape to cancel");
+
+            Ballz.The().Network.ConnectToServer(selectedGame.HostAddress, selectedGame.HostPort, onSuccess: () => {
+                Ballz.The().Logic.OpenMenu(new LobbyMenu(isHost: false, gameName: selectedGame.Name, isPrivate: selectedGame.IsPrivate));
+            });
         }
     }
 }
