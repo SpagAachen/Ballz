@@ -6,9 +6,12 @@
 
     using global::Ballz.GameSession.Logic;
     using global::Ballz.GameSession.World;
-
-    using ObjectSync;
+    
     using System.Threading.Tasks;
+    using System.Net;
+    using System.Diagnostics;
+    using System.Threading;
+    using System.Linq;
 
     /// <summary>
     /// Network takes care of all network related stuff independent of an existing game session.
@@ -19,17 +22,23 @@
     /// </summary>
     public class Network : GameComponent
     {
+        public const int DefaultPort = 16116;
+        public const string ApplicationIdentifier = "SpagAachen.Ballz";
+        public const float ConnectionTimeoutSeconds = 5.0f;
 
         public enum NetworkRole { None, Client, Server }
 
         public enum NetworkGameState { None, Connecting, InLobby, InGame }
 
-        private Server server;
+        private Server server = null;
 
-        private Client client;
+        private Client client = null;
 
         public event EventHandler<Message> Message;
         public event EventHandler<object> DataReceived;
+
+        public LobbyPlayerList PlayerList { get; private set; } = new LobbyPlayerList { PlayerNames = new string[0] };
+        
         public event EventHandler<LobbyPlayerList> PlayerListChanged;
 
         Task StartupTask = null;
@@ -40,6 +49,37 @@
         public NetworkRole Role { get; private set; } = NetworkRole.None;
 
         public NetworkGameState GameState { get; set; } = NetworkGameState.None;
+        
+        public Network(Game game) : base(game)
+        {
+            SynchronizingInfo.Register(new SynchronizingInfo
+            {
+                Type = typeof(LobbyPlayerList),
+                IsIdentifiable = false,
+                ObjectConstructor = () => new LobbyPlayerList()
+            });
+
+            SynchronizingInfo.Register(new SynchronizingInfo
+            {
+                Type = typeof(LobbyPlayerGreeting),
+                IsIdentifiable = false,
+                ObjectConstructor = () => new LobbyPlayerGreeting()
+            });
+
+            ObjectSync.Sync.RegisterClass<LobbyPlayerList>(() => new LobbyPlayerList());
+            ObjectSync.Sync.RegisterClass<LobbyPlayerGreeting>(() => new LobbyPlayerGreeting());
+            ObjectSync.Sync.RegisterClass<Entity>(() => new Entity());
+            ObjectSync.Sync.RegisterClass<Ball>(() => new Ball());
+            ObjectSync.Sync.RegisterClass<Shot>(() => new Shot());
+            ObjectSync.Sync.RegisterClass<Message>(() => new Message());
+            ObjectSync.Sync.RegisterClass<NetworkMessage>(() => new NetworkMessage());
+            ObjectSync.Sync.RegisterClass<InputMessage>(() => new InputMessage());
+            ObjectSync.Sync.RegisterClass<Terrain.TerrainModification>(() => new Terrain.TerrainModification());
+
+            PlayerListChanged += (s, list) => {
+                PlayerList = list;
+            };
+        }
 
         public void RaiseMessageEvent(NetworkMessage.MessageType msg)
         {
@@ -60,7 +100,8 @@
             Role = NetworkRole.Server;
             GameState = NetworkGameState.InLobby;
             server = new Server();
-            server.Listen();
+            server.PlayerListChanged += PlayerListChanged;
+            server.Start();
             RaiseMessageEvent(NetworkMessage.MessageType.ServerStarted);
         }
 
@@ -73,7 +114,7 @@
             }
         }
 
-        public void ConnectToServer(string hostname, int port, Action onSuccess = null, Action onFail = null)
+        public void ConnectToServer(IPAddress hostname, int port, Action onSuccess = null, Action onFail = null)
         {
             if (StartupTask != null)
                 throw new Exception("Trying to connect to server while network is already trying to start something else");
@@ -82,68 +123,55 @@
                 Disconnect();
 
             Role = NetworkRole.Client;
-            client = new Client(this);
             RaiseMessageEvent(NetworkMessage.MessageType.ConnectingToServer);
-
             GameState = NetworkGameState.Connecting;
 
-            StartupTask = new Task(() =>
-            {
-                try
-                {
-                    client.ConnectToServer(hostname, port); // blocking atm
-                }
-                catch (Exception e)
-                {
-                    RaiseMessageEvent(NetworkMessage.MessageType.ConnectionErrorOccured);
-                    MessageOverlay.ShowAlert("Error while connecting", e.Message);
-                    GameState = NetworkGameState.None;
-                    onFail?.Invoke();
-                    return;
-                }
+            client = new Client(new IPEndPoint(hostname, port));
 
+            client.Connected += (s, e) =>
+            {
                 GameState = NetworkGameState.InLobby;
                 RaiseMessageEvent(NetworkMessage.MessageType.ConnectedToServer);
-                StartupTask = null;
                 onSuccess?.Invoke();
-            });
-            StartupTask.Start();
-        }
+            };
 
+            client.PlayerListChanged += (s, e) => { PlayerListChanged?.Invoke(s, e); };
+
+            client.Start();
+        }
+        
         public void Disconnect()
         {
-            if (Role == NetworkRole.None) return;
+            if(client != null)
+            {
+                client.Stop();
+                client.PlayerListChanged -= PlayerListChanged;
+                client = null;
+            }
+
+            if(server != null)
+            {
+                server.Stop();
+                server.PlayerListChanged -= PlayerListChanged;
+                server = null;
+            }
+
             Role = NetworkRole.None;
-            client = null;
-            server = null;
+            GameState = NetworkGameState.None;
             RaiseMessageEvent(NetworkMessage.MessageType.Disconnected);
-            //TODO: Implement
         }
 
-        public Network(Game game) : base(game)
-        {
-            SynchronizingInfo.Register(new SynchronizingInfo
-            {
-                Type = typeof(LobbyPlayerList),
-                IsIdentifiable = false,
-                ObjectConstructor = () => new LobbyPlayerList()
-            });
-        }
 
         public override void Update(GameTime time)
         {
             switch (Role)
             {
-                case NetworkRole.None:
-                    return;
                 case NetworkRole.Client:
-                    client.Update(time);
+                    client?.Update(time);
                     break;
                 case NetworkRole.Server:
-                    server.Update(time);
+                    server?.Update(time);
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -155,7 +183,7 @@
                     //TODO: Implement
                     break;
                 case NetworkRole.Client:
-                    client.HandleMessage(sender, message);
+                    client.HandleGameMessage(sender, message);
                     break;
                 case NetworkRole.Server:
                     server.HandleMessage(sender, message);

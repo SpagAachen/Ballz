@@ -8,12 +8,12 @@ using Ballz.Gui;
 
 namespace Ballz
 {
-    class MultiplayerMenu : Gui.MenuPanel
+    class MultiplayerMenu: Gui.MenuPanel
     {
         public MultiplayerMenu() : base("Multiplayer")
         {
             AddItem(new MenuButton("Join Game", ()=>OpenMenu(new GameListMenu())));
-            AddItem(new MenuButton("Join by IP"));
+            AddItem(new MenuButton("Join by IP", ()=>OpenMenu(new JoinByIpMenu())));
             AddItem(new MenuButton("Host Game", () => OpenMenu(new HostGameMenu(true))));
             AddItem(new BackButton());
 

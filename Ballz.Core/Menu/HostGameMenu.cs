@@ -15,6 +15,7 @@ namespace Ballz
     {
         Label ErrorLabel = new Label("");
         TextInput GameName = new TextInput(false);
+        TextInput Port = new TextInput(false);
         DropDown ModeSelect = new DropDown(new Microsoft.Xna.Framework.Vector2(0, -1));
         CheckBox TurnBased = new CheckBox("Turn-based");
 
@@ -30,7 +31,7 @@ namespace Ballz
 
             AddItem(new Label("Game Name:"));
             AddItem(GameName);
-
+            
             AddItem(new Label("Map:"));
             // TODO: Map Select
             ModeSelect.AddItem("TestWorld2");

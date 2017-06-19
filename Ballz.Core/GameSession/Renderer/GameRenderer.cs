@@ -177,11 +177,6 @@ namespace Ballz.GameSession.Renderer
                 PostProcess();
 
                 DrawStatusOverlay();
-
-                if (Ballz.The().MessageOverlay != null)
-                {
-                    DrawMessageOverlay(Ballz.The().MessageOverlay);
-                }
             }
         }
 

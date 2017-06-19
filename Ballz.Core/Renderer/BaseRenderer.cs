@@ -203,10 +203,5 @@ namespace Ballz.Renderer
 
             SpriteBatch.End();
         }
-
-        public void DrawMessageOverlay(MessageOverlay overlay)
-        {
-            DrawMessageOverlay(overlay.HeaderText, overlay.MessageText, overlay.FooterText);
-        }
     }
 }

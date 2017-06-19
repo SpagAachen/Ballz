@@ -87,6 +87,7 @@
     <Compile Include="Gui\IRawInputConsumer.cs" />
     <Compile Include="Menu\HostGameMenu.cs" />
     <Compile Include="Menu\GameListMenu.cs" />
+    <Compile Include="Menu\JoinByIpMenu.cs" />
     <Compile Include="Menu\LobbyMenu.cs" />
     <Compile Include="Menu\MainMenu.cs" />
     <Compile Include="Menu\MultiplayerMenu.cs" />
@@ -101,7 +102,7 @@
     <Compile Include="Network\Client.cs" />
     <Compile Include="Network\ObjectSynchronizer.cs" />
     <Compile Include="Network\Network.cs" />
-    <Compile Include="Network\LobbyPlayerList.cs" />
+    <Compile Include="Network\LobbyMessages.cs" />
     <Compile Include="Network\Server.cs" />
     <Compile Include="Renderer\GuiRenderer.cs" />
     <Compile Include="Ballz.cs">

@@ -76,11 +76,6 @@ namespace Ballz.Renderer
             DrawSky();
             
             UserInterface.DrawMainRenderTarget(SpriteBatch);
-
-            if (Ballz.The().MessageOverlay != null)
-            {
-                DrawMessageOverlay(Ballz.The().MessageOverlay);
-            }
         }
 
         const float TitleFontSize = 1f;

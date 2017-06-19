@@ -15,6 +15,7 @@
     using System.Linq;
     using GameSession;
     using Lidgren.Network;
+    using System.Threading;
 
     class Server
     {
@@ -25,17 +26,30 @@
 
         private static int nextId = 1;
         
-        NetServer Net;
+        NetServer Peer;
         ObjectSynchronizer Sync = null;
+
+        List<string> PlayerNames = new List<string>();
+
+        public event EventHandler<LobbyPlayerList> PlayerListChanged;
 
         public double TicksPerSecond = 30;
 
         public Server()
         {
-            var config = new NetPeerConfiguration("SpagAachen.Ballz");
-            config.Port = 16116; // TODO: make port configurable
-            Net = new NetServer(config);
-            Sync = new ObjectSynchronizer(Net);
+            var config = new NetPeerConfiguration(Network.ApplicationIdentifier);
+            config.Port = Network.DefaultPort; // TODO: make port configurable
+            config.ConnectionTimeout = Network.ConnectionTimeoutSeconds;
+            config.AcceptIncomingConnections = true;
+            Peer = new NetServer(config);
+            Sync = new ObjectSynchronizer(Peer);
+            Sync.NewObjectReceived += (s, data) => OnData(data);
+        }
+
+        public void Start()
+        {
+            Peer.Start();
+            NewPlayer(new LobbyPlayerGreeting { PlayerName = Environment.MachineName });
         }
 
         public void StartNetworkGame(GameSettings gameSettings)
@@ -89,88 +103,79 @@
 
 	    public int NumberOfClients()
 	    {
-	        return Net.ConnectionsCount;
+	        return Peer.ConnectionsCount;
 	    }
-
-        public void Listen()
-        {
-            Net.Start();
-        }
         
-
         DateTime LastUpdate = DateTime.Now;
+
+        public event EventHandler<NetConnection> NewConnection;
+
+        public string[] GetConnectionNames() => Peer.Connections.Select(c => c.RemoteUniqueIdentifier.ToString()).ToArray();
 
         public void Update(GameTime time)
         {
-            NetIncomingMessage msg;
-            while((msg = Net.ReadMessage()) != null)
+            NetIncomingMessage im;
+            while((im = Peer.ReadMessage()) != null)
             {
-                switch(msg.MessageType)
+                switch (im.MessageType)
                 {
+                    case NetIncomingMessageType.StatusChanged:
+                        NetConnectionStatus status = (NetConnectionStatus)im.ReadByte();
+
+                        string reason = im.ReadString();
+                        Console.WriteLine(NetUtility.ToHexString(im.SenderConnection.RemoteUniqueIdentifier) + " " + status + ": " + reason);
+
+                        if(status == NetConnectionStatus.Connected)
+                        {
+                            Sync.AddConnection(im.SenderConnection);
+                            NewConnection?.Invoke(this, im.SenderConnection);
+                        }
+
+                        break;
                     case NetIncomingMessageType.Data:
-                        Sync.ReadMessage(msg);
+                        Sync.ReadMessage(im);
                         break;
                 }
 
-                Net.Recycle(msg);
+                Peer.Recycle(im);
+            }
+            
+        }
+
+        internal void Stop()
+        {
+            Peer.Shutdown("Graceful Shutdown");
+        }
+
+        private void OnData(object data)
+        {
+            if(data is LobbyPlayerGreeting)
+            {
+                NewPlayer(data as LobbyPlayerGreeting);
             }
 
-            //// new clients
-            //if (listener.Pending())
+            //// Keyboad/Mouse Input from clients
+            //if (Ballz.The().Match != null && data is InputMessage)
             //{
-            //    if (network.GameState == Network.GameStateT.InLobby)
-            //    {
-            //        // add new player in lobby
-            //        var client = listener.AcceptTcpClient();
-            //        var connection = new Connection(client, nextId++);
-            //        connection.ObjectReceived += OnData;
-            //        connections.Add(connection);
-            //        network.RaiseMessageEvent(NetworkMessage.MessageType.NewClient);
-            //        // update lobby list
-            //        this.UpdateLobbyList();
-            //    }
-            //    else
-            //    {
-            //        //TODO: Re-add Players that lost connection
-            //    }
+            //    var playerId = (sender as Connection).ClientPlayerId;
+            //    var player = Ballz.The().Match.PlayerById(playerId);
+            //    if (player != null)
+            //        Ballz.The().Input.InjectInputMessage((InputMessage)data, player);
             //}
-            //// receive data
-            //foreach (var c in connections)
-            //{
-            //    c.ReadUpdates();
-            //}
-
-            //if (network.GameState == Network.GameStateT.InGame && Ballz.The().Match.State == SessionState.Running)
-            //{
-            //    var now = DateTime.Now;
-            //    if ((now - LastUpdate).TotalSeconds > 1.0 / TicksPerSecond)
-            //    {
-            //        foreach (var e in Ballz.The().Match.World.Entities)
-            //        {
-            //            Broadcast(e);
-            //        }
-            //        LastUpdate = DateTime.Now;
-            //    }
-
-            //}
-        }
-            
-        private void OnData(object sender, object data)
-        {
-			// Input Message
-			//if (Ballz.The().Match != null && data.GetType() == typeof(InputMessage))
-			//{
-   //             var playerId = (sender as Connection).ClientPlayerId;
-   //             var player = Ballz.The().Match.PlayerById(playerId);
-   //             if(player != null)
-   //                 Ballz.The().Input.InjectInputMessage((InputMessage)data, player);
-   //         }
 
         }
 
-        public void Broadcast(object data)
+        private void NewPlayer(LobbyPlayerGreeting player)
         {
-            Sync.SendObject(data);
+            PlayerNames.Add(player.PlayerName);
+            var lobbyPlayerList = new LobbyPlayerList { PlayerNames = PlayerNames.ToArray() };
+            PlayerListChanged?.Invoke(this, lobbyPlayerList);
+            Broadcast(lobbyPlayerList);
+        }
+
+        public void Broadcast(object data, bool reliable = true)
+        {
+            Sync.SendObject(data, reliable);
         }
 
         public void HandleMessage(object sender, Message message)

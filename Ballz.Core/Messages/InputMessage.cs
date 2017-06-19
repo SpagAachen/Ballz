@@ -24,7 +24,8 @@ namespace Ballz.Messages
 			ControlsCameraZoomOut,
 			ControlsCameraModeToggle,
             RawBack,
-            RawInput
+            RawInput,
+            None
         }
 
         [JsonProperty(PropertyName = "Key")]

@@ -43,7 +43,7 @@ namespace Ballz
         GuiRenderer GuiRenderer;
 
         public MenuPanel MainMenu { get; set; }
-
+        
         public MessageOverlay MessageOverlay { get; set; }
 
         public Camera Camera { get; set; }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Ballz.Lobby;
 using GeonBit.UI.Entities;
 using Microsoft.Xna.Framework;
+using System.Net;
 
 namespace Ballz
 {
@@ -97,10 +98,17 @@ namespace Ballz
 
             PublicGameInfo selectedGame = GameListData[GameList.SelectedIndex];
 
-            MessageOverlay.ShowAlert("Connecting to Game...", message: "Please wait.", footer: "Press Escape to cancel");
+            var overlay = MessageOverlay.ShowWaitMessage("Connecting to Game...", onCancel: () => { Ballz.The().Network.Disconnect(); });
 
-            Ballz.The().Network.ConnectToServer(selectedGame.HostAddress, selectedGame.HostPort, onSuccess: () => {
+            IPAddress host = null;
+            if(!IPAddress.TryParse(selectedGame.HostAddress, out host))
+            {
+                return;
+            }
+
+            Ballz.The().Network.ConnectToServer(host, selectedGame.HostPort, onSuccess: () => {
                 Ballz.The().Logic.OpenMenu(new LobbyMenu(isHost: false, gameName: selectedGame.Name, isPrivate: selectedGame.IsPrivate));
+                overlay.Hide();
             });
         }
     }

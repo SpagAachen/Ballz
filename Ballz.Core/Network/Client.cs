@@ -8,48 +8,99 @@
     using System.Diagnostics;
     using System.IO;
     using ObjectSync;
-    
+
 
     using global::Ballz.GameSession.Logic;
+    using Lidgren.Network;
+    using System.Net;
+    using System.Threading;
 
     class Client
     {
-        static Client()
-        {
-            ObjectSync.Sync.RegisterClass<Entity>(() => new Entity());
-            ObjectSync.Sync.RegisterClass<Ball>(() => new Ball());
-            ObjectSync.Sync.RegisterClass<Shot>(() => new Shot());
-            ObjectSync.Sync.RegisterClass<Message>(() => new Message());
-            ObjectSync.Sync.RegisterClass<NetworkMessage>(() => new NetworkMessage());
-            ObjectSync.Sync.RegisterClass<InputMessage>(() => new InputMessage());
-            ObjectSync.Sync.RegisterClass<Terrain.TerrainModification>(() => new Terrain.TerrainModification());
-        }
-
-        private Network network = null;
-
-        public int NumberOfPlayers { get; private set; } = -1;
+        ObjectSynchronizer Sync;
+        NetClient Peer;
         
-        public Client(Network net)
+        public int NumberOfPlayers { get; private set; } = -1;
+
+        public event EventHandler Connected;
+        public event EventHandler Disconnected;
+        public event EventHandler<LobbyPlayerList> PlayerListChanged;
+
+        public bool IsConnected { get; private set; } = false;
+
+        IPEndPoint Host;
+
+        public Client(IPEndPoint host)
         {
-            network = net;
+            Host = host;
+            var conf = new NetPeerConfiguration("SpagAachen.Ballz");
+            conf.ConnectionTimeout = 10;
+            conf.PingInterval = 2;
+            Peer = new NetClient(conf);
+
+            Sync = new ObjectSynchronizer(Peer);
+            Sync.NewObjectReceived += (s, data) => OnData(data);
         }
 
-        /// <summary>
-        /// Connects to server
-        /// Blocking atm
-        /// </summary>
-        /// <param name="host">Host</param>
-        /// <param name="port">Port</param>
-        public void ConnectToServer(string host, int port)
+        public void Start()
         {
+            Peer.Start();
+            Peer.Connect(Host);
         }
-
+        
         public void Update(GameTime time)
         {
+            NetIncomingMessage im;
+            while ((im = Peer.ReadMessage()) != null)
+            {
+                // handle incoming message
+                switch (im.MessageType)
+                {
+                    case NetIncomingMessageType.DebugMessage:
+                    case NetIncomingMessageType.ErrorMessage:
+                    case NetIncomingMessageType.WarningMessage:
+                    case NetIncomingMessageType.VerboseDebugMessage:
+                        Console.WriteLine($"NetMessage {im.MessageType}: {im.ReadString()}");
+                        break;
+                    case NetIncomingMessageType.StatusChanged:
+                        NetConnectionStatus status = (NetConnectionStatus)im.ReadByte();
+
+                        if (status == NetConnectionStatus.Connected)
+                        {
+                            IsConnected = true;
+                            Sync.AddConnection(im.SenderConnection);
+                            Connected?.Invoke(this, null);
+                            SendToServer(new LobbyPlayerGreeting { PlayerName = Environment.MachineName }); // TODO: Use actual player name
+                        }
+                        else
+                        {
+                            IsConnected = false;
+                        }
+
+                        if (status == NetConnectionStatus.Disconnected)
+                        {
+                            Disconnected?.Invoke(this, null);
+                        }
+
+                        break;
+                    case NetIncomingMessageType.Data:
+                        Sync.ReadMessage(im);
+                        break;
+                    default:
+                        Console.WriteLine($"Unhandled message type: {im.MessageType} {im.LengthBytes} bytes");
+                        break;
+                }
+                Peer.Recycle(im);
+            }
         }
 
-        private void OnData(object sender, object data)
+        private void OnData(object data)
         {
+            if(data is LobbyPlayerList)
+            {
+                PlayerListChanged?.Invoke(this, data as LobbyPlayerList);
+            }
+
             // Entities
             var entity = data as Entity;
             if (entity != null)
@@ -72,7 +123,6 @@
                         break;
                     case NetworkMessage.MessageType.StartGame:
                         Debug.Assert(netMsg.Data != null, "Received invalid game-settings");
-                        ParseGameSettings((GameSettings)netMsg.Data);
                         break;
                     case NetworkMessage.MessageType.YourPlayerId:
                         //connectionToServer.ClientPlayerId = (int)netMsg.Data;
@@ -98,24 +148,14 @@
             }
         }
 
-        private void ParseEntities(List<Entity> entities)
+        public void Stop()
         {
-            // synch local entities
-            foreach(var e in entities)
-            {
-                var rId = e.ID;
-                var localEntity = Ballz.The().Match.World.EntityById(rId);
-                Sync.SyncState(e, localEntity);
-            }
+            Peer.Shutdown("Graceful Shutdown");
         }
 
-        private void ParseGameSettings(GameSettings settings)
+        public void SendToServer(object data, bool reliable = true)
         {
-            Ballz.The().Logic.StartGame(settings);
-            //var localPlayer = Ballz.The().Match.PlayerById(connectionToServer.ClientPlayerId);
-            //localPlayer.IsLocal = true;
-            //Ballz.The().Match.LocalPlayers = new List<Player>() { localPlayer };
-            Ballz.The().Match.IsRemoteControlled = true;
+            Sync.SendObject(data, reliable);
         }
 
         public void HandleInputMessage(InputMessage message)
@@ -136,7 +176,7 @@
             }
         }
 
-        public void HandleMessage(object sender, Message message)
+        public void HandleGameMessage(object sender, Message message)
         {
             if (message.Kind == Message.MessageType.InputMessage)
             {

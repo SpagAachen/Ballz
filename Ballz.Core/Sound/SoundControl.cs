@@ -66,7 +66,7 @@ namespace Ballz.Sound
                 catch (Microsoft.Xna.Framework.Audio.NoAudioHardwareException e)
                 {
                     // If no audio hardware is installed, print a warning and don't try to load sounds again
-                    MessageOverlay.ShowAlert("Audio error", e.Message);
+                    MessageOverlay.Show("Audio error", e.Message);
                     SoundsEnabled = false;
                     return null;
                 }

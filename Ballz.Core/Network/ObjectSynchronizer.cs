@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Ballz.Network
 {
@@ -33,7 +34,7 @@ namespace Ballz.Network
     public class ObjectSynchronizer
     {
         NetPeer Peer;
-        List<NetConnection> Connections;
+        List<NetConnection> Connections = new List<NetConnection>();
 
         public enum MessageType:byte
         {
@@ -62,6 +63,9 @@ namespace Ballz.Network
 
         public void SendObject(object obj, bool reliableTransfer = false)
         {
+            if (Connections.Count == 0)
+                return;
+
             var msg = Peer.CreateMessage();
             WriteHeader(msg, MessageType.Object);
 
@@ -74,11 +78,12 @@ namespace Ballz.Network
             msg.Write(typeId);
 
             // Write the 32-bit object id
-            var objId = sync.ObjectToId(obj);
+            var objId = sync.IsIdentifiable ? sync.ObjectToId(obj) : 0;
             msg.Write(objId);
 
             // Write the actual object contents
-            msg.WriteAllFields(obj);
+            string serialized = JsonConvert.SerializeObject(obj);
+            msg.Write(serialized);
 
             Peer.SendMessage(msg, Connections, reliableTransfer ? NetDeliveryMethod.ReliableOrdered : NetDeliveryMethod.UnreliableSequenced, reliableTransfer ? 0 : 1);
         }
@@ -100,7 +105,8 @@ namespace Ballz.Network
                     obj = sync.ObjectConstructor();
                 }
 
-                msg.ReadAllFields(obj);
+                var deserialized = JsonConvert.DeserializeObject(msg.ReadString(), sync.Type);
+                ObjectSync.Sync.SyncState(deserialized, obj);
 
                 if (isNew)
                 {
@@ -113,9 +119,8 @@ namespace Ballz.Network
             }
             else
             {
-                var obj = sync.ObjectConstructor();
-                msg.ReadAllFields(obj);
-                NewObjectReceived?.Invoke(this, obj);
+                var deserialized = JsonConvert.DeserializeObject(msg.ReadString(), sync.Type);
+                NewObjectReceived?.Invoke(this, deserialized);
             }
         }
         

@@ -27,9 +27,12 @@ namespace Ballz
 
             Close += (s,e) =>
             {
-                Lobby?.CloseHostedGameAsync();
-                Lobby?.Dispose();
-                Lobby = null;
+                if (isHost)
+                {
+                    Lobby?.CloseHostedGameAsync();
+                    Lobby?.Dispose();
+                    Lobby = null;
+                }
 
                 Ballz.The().Network.PlayerListChanged -= UpdatePlayerList;
                 Ballz.The().Network.Disconnect();
@@ -37,13 +40,14 @@ namespace Ballz
 
             Open += (s, e) =>
             {
-                Lobby = new LobbyClient();
-                Lobby.HostGame(gameName, isPrivate);
-
                 Ballz.The().Network.PlayerListChanged += UpdatePlayerList;
+
+                UpdatePlayerList(this, Ballz.The().Network.PlayerList);
 
                 if (isHost)
                 {
+                    Lobby = new LobbyClient();
+                    Lobby.HostGame(gameName, isPrivate);
                     Ballz.The().Network.StartServer();
                 }
             };
@@ -63,6 +67,7 @@ namespace Ballz
             }
 
             AddItem(new Button("Leave Game"));
+
         }
 
         public override void Update()
