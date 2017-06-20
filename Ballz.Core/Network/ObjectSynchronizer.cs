@@ -110,17 +110,17 @@ namespace Ballz.Network
 
                 if (isNew)
                 {
-                    NewObjectReceived?.Invoke(this, obj);
+                    NewObjectReceived?.Invoke(msg.SenderConnection, obj);
                 }
                 else
                 {
-                    ObjectUpdateReceived?.Invoke(this, obj);
+                    ObjectUpdateReceived?.Invoke(msg.SenderConnection, obj);
                 }
             }
             else
             {
                 var deserialized = JsonConvert.DeserializeObject(msg.ReadString(), sync.Type);
-                NewObjectReceived?.Invoke(this, deserialized);
+                NewObjectReceived?.Invoke(msg.SenderConnection, deserialized);
             }
         }
         
