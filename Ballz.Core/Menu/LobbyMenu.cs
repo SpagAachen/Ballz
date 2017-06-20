@@ -7,24 +7,23 @@ using System.Threading.Tasks;
 using Ballz.Lobby;
 using GeonBit.UI.Entities;
 using Ballz.Gui;
+using Ballz.GameSession.Logic;
 
 namespace Ballz
 {
     class LobbyMenu : Gui.MenuPanel
     {
         LobbyClient Lobby = null;
-
-        string GameName;
+        
         bool IsHost;
-        bool IsPrivate;
-
+        
         SelectList PlayerList;
+        MatchSettings MatchSettings;
 
-        public LobbyMenu(bool isHost, string gameName, bool isPrivate) : base("Lobby")
+        public LobbyMenu(bool isHost, MatchSettings settings = null) : base("Lobby")
         {
-            GameName = gameName;
             IsHost = isHost;
-            IsPrivate = isPrivate;
+            MatchSettings = settings;
 
             Close += (s,e) =>
             {
@@ -36,7 +35,7 @@ namespace Ballz
                 }
 
                 Ballz.The().Network.PlayerListChanged -= UpdatePlayerList;
-                Ballz.The().Network.Disconnect();
+                //Ballz.The().Network.Disconnect();
             };
 
             Open += (s, e) =>
@@ -48,7 +47,7 @@ namespace Ballz
                 if (isHost)
                 {
                     Lobby = new LobbyClient();
-                    Lobby.HostGame(gameName, isPrivate);
+                    Lobby.HostGame(MatchSettings.GameName, MatchSettings.IsPrivate);
                     Ballz.The().Network.StartServer();
                 }
             };
@@ -60,7 +59,12 @@ namespace Ballz
 
             if (isHost)
             {
-                AddItem(new Button("Start Game"));
+                var startGameBtn = new Button("Start Game");
+                startGameBtn.OnClick += (e) =>
+                {
+                    Ballz.The().Network.StartNetworkGame(MatchSettings);
+                };
+                AddItem(startGameBtn);
             }
             else
             {

@@ -49,7 +49,7 @@ namespace Ballz
                     host,
                     port,
                     onSuccess: () => {
-                        Ballz.The().Logic.OpenMenu(new LobbyMenu(isHost: false, gameName: "", isPrivate: false));
+                        Ballz.The().Logic.OpenMenu(new LobbyMenu(isHost: false));
                         overlay.Hide();
                     },
                     onFail: () => {

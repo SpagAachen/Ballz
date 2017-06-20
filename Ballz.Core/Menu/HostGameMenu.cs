@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Ballz.Gui;
 using Microsoft.Xna.Framework;
 using GeonBit.UI.DataTypes;
+using Ballz.GameSession.Logic;
 
 namespace Ballz
 {
@@ -39,6 +40,7 @@ namespace Ballz
             ModeSelect.AddItem("TestWorld2");
             ModeSelect.AddItem("Procedural");
             ModeSelect.AddItem("Desert");
+            ModeSelect.SelectedIndex = 0;
             AddItem(ModeSelect);
             AddItem(TurnBased);
 
@@ -56,7 +58,21 @@ namespace Ballz
                         ErrorLabel.Text = "Invalid Game Name!";
                         return;
                     }
-                    Ballz.The().Logic.OpenMenu(new LobbyMenu(true, GameName.Value, false));
+
+                    var mapName = ModeSelect.SelectedValue;
+                    var usePlayerTurns = TurnBased.Checked;
+
+                    var settings = new MatchSettings
+                    {
+                        GameName = name,
+                        IsPrivate = false,
+                        GameMode = SessionFactory.SessionFactory.AvailableFactories.First(), // Todo: Select game modes
+                        UsePlayerTurns = usePlayerTurns,
+                        MapName = mapName,
+                        Teams = new List<Team>()
+                    };
+
+                    Ballz.The().Logic.OpenMenu(new LobbyMenu(true, settings));
                 });
 
                 AddItem(startGameButton);

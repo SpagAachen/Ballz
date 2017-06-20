@@ -6,25 +6,14 @@ namespace Ballz.Messages
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
     using Utils;
-
-    [Serializable]
-    [JsonObject(MemberSerialization.OptIn)]
+    
     public class NetworkMessage : Message
     {
         public new enum MessageType
         {
             Invalid,
-            Disconnected,
-            ConnectingToServer,
             ConnectedToServer,
-            ConnectionErrorOccured,
-            ServerStarted,
-            NewClient,
-            StartGame,
-            NumberOfPlayers,
-            YourPlayerId,
-            EntityAdded,
-            EntityRemoved
+            Disconnected,
         }
 
         public NetworkMessage()
@@ -37,23 +26,12 @@ namespace Ballz.Messages
         {
             Kind = type;
         }
-
-        public NetworkMessage(MessageType type, object data) : base(Message.MessageType.NetworkMessage)
-        {
-            Kind = type;
-            Data = data;
-        }
-
-        [JsonProperty("NetworkMessageKind")]
+        
         public new MessageType Kind { get; private set; }
-
-        [JsonProperty("NetworkMessageData")]
-        [JsonConverter(typeof(TypeInfoConverter))]
-        public object Data { get; set; }
-
+        
         public override string ToString()
         {
-            return $"{{NetworkMessage Kind:{Kind}, Data: {Data}}}";
+            return $"{{NetworkMessage Kind:{Kind}}}";
         }
     }
 }

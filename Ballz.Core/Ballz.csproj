@@ -61,7 +61,7 @@
     <Compile Include="GameSession\Logic\AIControl.cs" />
     <Compile Include="GameSession\Logic\BallControl.cs" />
     <Compile Include="GameSession\Logic\GameLogic.cs" />
-    <Compile Include="GameSession\Logic\GameSettings.cs" />
+    <Compile Include="GameSession\Logic\MatchSettings.cs" />
     <Compile Include="GameSession\Logic\Player.cs" />
     <Compile Include="GameSession\Logic\UserControl.cs" />
     <Compile Include="GameSession\Logic\Weapons\ChargedProjectileWeapon.cs" />
@@ -100,6 +100,7 @@
     <Compile Include="GameSession\World\World.cs" />
     <Compile Include="GameSession\Renderer\GameRenderer.cs" />
     <Compile Include="Network\Client.cs" />
+    <Compile Include="Network\NetworkTypeRegistry.cs" />
     <Compile Include="Network\ObjectSynchronizer.cs" />
     <Compile Include="Network\Network.cs" />
     <Compile Include="Network\LobbyMessages.cs" />

@@ -176,10 +176,10 @@ namespace Ballz.Lobby
             {
                 if (disposing)
                 {
-                    GameListTask?.Dispose();
+                    //GameListTask?.Dispose();
                     GameListTask = null;
 
-                    GameOpeningTask?.Dispose();
+                    //GameOpeningTask?.Dispose();
                     GameOpeningTask = null;
 
                     UpdatedGameList = null;

@@ -20,8 +20,6 @@
         ObjectSynchronizer Sync;
         NetClient Peer;
         
-        public int NumberOfPlayers { get; private set; } = -1;
-
         public event EventHandler Connected;
         public event EventHandler Disconnected;
         public event EventHandler<LobbyPlayerList> PlayerListChanged;
@@ -70,7 +68,7 @@
                             IsConnected = true;
                             Sync.AddConnection(im.SenderConnection);
                             Connected?.Invoke(this, null);
-                            SendToServer(new LobbyPlayerGreeting { PlayerName = Environment.MachineName }); // TODO: Use actual player name
+                            SendToServer(new LobbyPlayerGreeting { PlayerName = Ballz.The().Settings.PlayerName }); // TODO: Use actual player name
                         }
                         else
                         {
@@ -101,10 +99,17 @@
                 PlayerListChanged?.Invoke(this, data as LobbyPlayerList);
             }
 
+            if(data is SerializedMatchSettings)
+            {
+                HandleMatchStart(data as SerializedMatchSettings);
+            }
+
             // Entities
             var entity = data as Entity;
             if (entity != null)
             {
+                Console.WriteLine("Got new Entity");
+                // Same entity already exists?
                 var localEntity = Ballz.The().Match.World.EntityById(entity.ID);
                 if (localEntity != null)
                     ObjectSync.Sync.SyncState(entity, localEntity);
@@ -118,21 +123,15 @@
             {
                 switch (netMsg.Kind)
                 {
-                    case NetworkMessage.MessageType.NumberOfPlayers:
-                        NumberOfPlayers = (int)netMsg.Data;
-                        break;
-                    case NetworkMessage.MessageType.StartGame:
-                        Debug.Assert(netMsg.Data != null, "Received invalid game-settings");
-                        break;
-                    case NetworkMessage.MessageType.YourPlayerId:
-                        //connectionToServer.ClientPlayerId = (int)netMsg.Data;
-                        break;
-                    case NetworkMessage.MessageType.EntityRemoved:
-                        var e = netMsg.Data as Entity;
-                        var localEntity = Ballz.The().Match.World.EntityById(e.ID);
-                        Ballz.The().Match.World.RemoveEntity(localEntity);
-                        localEntity.Dispose();
-                        break;
+                    //case NetworkMessage.MessageType.YourPlayerId:
+                    //    //connectionToServer.ClientPlayerId = (int)netMsg.Data;
+                    //    break;
+                    //case NetworkMessage.MessageType.EntityRemoved:
+                    //    var e = netMsg.Data as Entity;
+                    //    var localEntity = Ballz.The().Match.World.EntityById(e.ID);
+                    //    Ballz.The().Match.World.RemoveEntity(localEntity);
+                    //    localEntity.Dispose();
+                    //    break;
                     default:
                         break;
                 }
@@ -146,6 +145,12 @@
                 Ballz.The().Match.World.StaticGeometry.ApplyModification(terrainModification);
                 return;
             }
+        }
+
+        private void HandleMatchStart(SerializedMatchSettings serializedMatchSettings)
+        {
+            var settings = MatchSettings.Deserialize(serializedMatchSettings);
+            Ballz.The().Network.StartNetworkGame(settings);
         }
 
         public void Stop()
@@ -171,7 +176,7 @@
                 case InputMessage.MessageType.ControlsJump:
                 case InputMessage.MessageType.ControlsNextWeapon:
                 case InputMessage.MessageType.ControlsPreviousWeapon:
-                    //connectionToServer?.Send(message);
+                    SendToServer(message);
                     break;
             }
         }

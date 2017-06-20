@@ -109,16 +109,7 @@ namespace Ballz.Logic
 
         public void HandleNetworkMessage(object sender, Message message)
         {
-            if (message.Kind != Messages.Message.MessageType.NetworkMessage)
-                return;
-            var msg = (NetworkMessage)message;
-            switch (msg.Kind)
-            {
-                case NetworkMessage.MessageType.ConnectedToServer:
-                    //TODO: show lobby!!!!<<<<<<<<<<<<<<<<<<<<<<<<<
-                    //Game is started by a message from server
-                    break;
-            }
+
         }
 
         public void HandleInputMessage(object sender, Message message)

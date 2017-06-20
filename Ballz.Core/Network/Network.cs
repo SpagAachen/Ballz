@@ -20,11 +20,12 @@
     /// - Synch entities
     /// - Synch keystrokes
     /// </summary>
-    public class Network : GameComponent
+    public partial class Network : GameComponent
     {
         public const int DefaultPort = 16116;
         public const string ApplicationIdentifier = "SpagAachen.Ballz";
         public const float ConnectionTimeoutSeconds = 5.0f;
+        public const float WorldSyncIntervalMs = 100.0f;
 
         public enum NetworkRole { None, Client, Server }
 
@@ -52,29 +53,7 @@
         
         public Network(Game game) : base(game)
         {
-            SynchronizingInfo.Register(new SynchronizingInfo
-            {
-                Type = typeof(LobbyPlayerList),
-                IsIdentifiable = false,
-                ObjectConstructor = () => new LobbyPlayerList()
-            });
-
-            SynchronizingInfo.Register(new SynchronizingInfo
-            {
-                Type = typeof(LobbyPlayerGreeting),
-                IsIdentifiable = false,
-                ObjectConstructor = () => new LobbyPlayerGreeting()
-            });
-
-            ObjectSync.Sync.RegisterClass<LobbyPlayerList>(() => new LobbyPlayerList());
-            ObjectSync.Sync.RegisterClass<LobbyPlayerGreeting>(() => new LobbyPlayerGreeting());
-            ObjectSync.Sync.RegisterClass<Entity>(() => new Entity());
-            ObjectSync.Sync.RegisterClass<Ball>(() => new Ball());
-            ObjectSync.Sync.RegisterClass<Shot>(() => new Shot());
-            ObjectSync.Sync.RegisterClass<Message>(() => new Message());
-            ObjectSync.Sync.RegisterClass<NetworkMessage>(() => new NetworkMessage());
-            ObjectSync.Sync.RegisterClass<InputMessage>(() => new InputMessage());
-            ObjectSync.Sync.RegisterClass<Terrain.TerrainModification>(() => new Terrain.TerrainModification());
+            RegisterTypes();
 
             PlayerListChanged += (s, list) => {
                 PlayerList = list;
@@ -85,14 +64,7 @@
         {
             Message?.Invoke(this, new NetworkMessage(msg));
         }
-
-        public int GetNumberOfPlayers()
-        {
-            if (Role == NetworkRole.Client) return client.NumberOfPlayers;
-            if (Role == NetworkRole.Server) return server.NumberOfClients() + 1; // +1 for ourselfs
-            return -1;
-        }
-
+        
         public void StartServer()
         {
             if (Role != NetworkRole.None)
@@ -102,7 +74,6 @@
             server = new Server();
             server.PlayerListChanged += PlayerListChanged;
             server.Start();
-            RaiseMessageEvent(NetworkMessage.MessageType.ServerStarted);
         }
 
         public void StartNetworkGame(MatchSettings gameSettings)
@@ -110,8 +81,15 @@
             if (Role == NetworkRole.Server)
             {
                 server.StartNetworkGame(gameSettings);
-                GameState = NetworkGameState.InGame;
+                
             }
+            else if (Role == NetworkRole.Client)
+            {
+                gameSettings.GameMode.InitializeSession(Ballz.The(), gameSettings);
+                Ballz.The().Logic.StartGame(gameSettings, true, 1);
+            }
+
+            GameState = NetworkGameState.InGame;
         }
 
         public void ConnectToServer(IPAddress hostname, int port, Action onSuccess = null, Action onFail = null)
@@ -123,7 +101,6 @@
                 Disconnect();
 
             Role = NetworkRole.Client;
-            RaiseMessageEvent(NetworkMessage.MessageType.ConnectingToServer);
             GameState = NetworkGameState.Connecting;
 
             client = new Client(new IPEndPoint(hostname, port));

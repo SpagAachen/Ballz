@@ -107,7 +107,7 @@ namespace Ballz
             }
 
             Ballz.The().Network.ConnectToServer(host, selectedGame.HostPort, onSuccess: () => {
-                Ballz.The().Logic.OpenMenu(new LobbyMenu(isHost: false, gameName: selectedGame.Name, isPrivate: selectedGame.IsPrivate));
+                Ballz.The().Logic.OpenMenu(new LobbyMenu(isHost: false));
                 overlay.Hide();
             });
         }

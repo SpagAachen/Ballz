@@ -14,7 +14,33 @@ namespace Ballz.Network
         public static Dictionary<Type, SynchronizingInfo> InfoByType = new Dictionary<Type, SynchronizingInfo>();
         public static Dictionary<Int16, SynchronizingInfo> InfoByTypeId = new Dictionary<short, SynchronizingInfo>();
 
-        public static void Register(SynchronizingInfo info)
+        public static void RegisterClass<T>() 
+            where T : class, new()
+        {
+            SynchronizingInfo.RegisterSyncInfo(new SynchronizingInfo
+            {
+                Type = typeof(T),
+                IsIdentifiable = false,
+                ObjectConstructor = () => new T()
+            });
+            ObjectSync.Sync.RegisterClass<T>(() => new T());
+        }
+
+        public static void RegisterIdentifiable<T>(Func<long,object> idToObject, Func<object,long> objectToId)
+            where T : class, new()
+        {
+            SynchronizingInfo.RegisterSyncInfo(new SynchronizingInfo
+            {
+                Type = typeof(T),
+                IsIdentifiable = true,
+                ObjectConstructor = () => new T(),
+                IdToObject = idToObject,
+                ObjectToId = objectToId
+            });
+            ObjectSync.Sync.RegisterClass<T>(() => new T());
+        }
+
+        private static void RegisterSyncInfo(SynchronizingInfo info)
         {
             InfoByType[info.Type] = info;
             InfoByTypeId[info.TypeId] = info;
@@ -61,8 +87,14 @@ namespace Ballz.Network
             Peer = peer;
         }
 
-        public void SendObject(object obj, bool reliableTransfer = false)
+        public void SendObject(object obj, bool reliableTransfer = false, NetConnection connection = null)
         {
+            var connections = Connections;
+            if(connection != null)
+            {
+                connections = new List<NetConnection>() { connection };
+            }
+
             if (Connections.Count == 0)
                 return;
 
@@ -100,13 +132,16 @@ namespace Ballz.Network
                 var obj = sync.IdToObject(objId);
                 var isNew = obj == null;
 
+                var deserialized = JsonConvert.DeserializeObject(msg.ReadString(), sync.Type);
+
                 if (isNew)
                 {
-                    obj = sync.ObjectConstructor();
+                    obj = deserialized;
                 }
-
-                var deserialized = JsonConvert.DeserializeObject(msg.ReadString(), sync.Type);
-                ObjectSync.Sync.SyncState(deserialized, obj);
+                else
+                {
+                    ObjectSync.Sync.SyncState(deserialized, obj);
+                }
 
                 if (isNew)
                 {
@@ -115,6 +150,7 @@ namespace Ballz.Network
                 else
                 {
                     ObjectUpdateReceived?.Invoke(msg.SenderConnection, obj);
+                    Console.WriteLine($"Updated {obj}");
                 }
             }
             else

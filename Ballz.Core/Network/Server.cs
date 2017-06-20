@@ -16,7 +16,7 @@
     using GameSession;
     using Lidgren.Network;
     using System.Threading;
-
+    using SessionFactory;
     public class PlayerConnection
     {
         public string PlayerName;
@@ -37,11 +37,16 @@
         NetServer Peer;
         ObjectSynchronizer Sync = null;
 
-        Dictionary<long,PlayerConnection> ConnectedPlayers = new Dictionary<long, PlayerConnection>();
+        Dictionary<long, PlayerConnection> PlayersByConnection = new Dictionary<long, PlayerConnection>();
+        Dictionary<int, PlayerConnection> PlayersById = new Dictionary<int, PlayerConnection>();
 
         public event EventHandler<LobbyPlayerList> PlayerListChanged;
 
         public double TicksPerSecond = 30;
+
+        public Stopwatch WorldSyncTimer = new Stopwatch();
+
+        public bool GameRunning = false;
 
         public Server()
         {
@@ -57,58 +62,62 @@
         public void Start()
         {
             Peer.Start();
-            HandleNewPlayer(null, new LobbyPlayerGreeting { PlayerName = Environment.MachineName });
+            HandleNewPlayer(null, new LobbyPlayerGreeting { PlayerName = Ballz.The().Settings.PlayerName });
         }
 
         public void StartNetworkGame(MatchSettings gameSettings)
         {
-            // create teams
-            CreateTeams(gameSettings);
+            gameSettings.Teams = new List<Team>();
+            var idCounter = 0;
+            foreach (var playerCon in PlayersByConnection.Values)
+            {
+                var team = new Team
+                {
+                    Id = idCounter++,
+                    Name = playerCon.PlayerName,
+                    ControlledByAI = false,
+                    NumberOfBallz = 1,
+                };
+
+                gameSettings.Teams.Add(team);
+
+                playerCon.MatchPlayerId = team.Id;
+                PlayersById[team.Id] = playerCon;
+            }
+
+            gameSettings.Teams.Add(new Team
+            {
+                Id = idCounter++,
+                Name = "None",
+                ControlledByAI = false,
+                NumberOfBallz = 1,
+            });
+
             // Create map etc.
             gameSettings.GameMode.InitializeSession(Ballz.The(), gameSettings);
             //// Broadcast gameSettings incl. map to clients
-            Broadcast(new NetworkMessage(NetworkMessage.MessageType.NumberOfPlayers, this.NumberOfClients() + 1)); // +1 for ourselfs
-            Broadcast(new NetworkMessage(NetworkMessage.MessageType.StartGame, gameSettings));
+            Broadcast(gameSettings.Serialize());
             // Start our game session
             Ballz.The().Logic.StartGame(gameSettings);
 
             Ballz.The().Match.World.StaticGeometry.TerrainModified += OnTerrainModified;
             Ballz.The().Match.World.EntityRemoved += OnEntityRemoved;
+
+            SendWorldState();
+            WorldSyncTimer.Start();
+            GameRunning = true;
         }
 
         private void OnEntityRemoved(object sender, Entity e)
         {
-            Broadcast(new NetworkMessage(NetworkMessage.MessageType.EntityRemoved, e));
+            //TODO: Broadcast entity removal
         }
 
         private void OnTerrainModified(object sender, Terrain.TerrainModification modification)
         {
             Broadcast(modification);
         }
-
-        private void CreateTeams(MatchSettings gameSettings)
-        {
-            Debug.Assert(gameSettings.Teams.Count == 0);
-            var counter = 0;
-
-            {
-                counter++;
-                var team = new Team { ControlledByAI = false, Name = "Team1", NumberOfBallz = 1, Country = "Germoney" };
-                gameSettings.Teams.Add(team);
-            }
-            
-            //foreach(var client in connections)
-            //{
-            //    counter++;
-            //    var team = new Team { ControlledByAI = false, Name = $"Team{counter}", NumberOfBallz = 1, Country = "Murica" };
-
-            //    client.ClientPlayerId = team.Id;
-            //    client.Send(new NetworkMessage(NetworkMessage.MessageType.YourPlayerId, client.ClientPlayerId));
-
-            //    gameSettings.Teams.Add(team);
-            //}
-        }
-
+        
 	    public int NumberOfClients()
 	    {
 	        return Peer.ConnectionsCount;
@@ -147,6 +156,23 @@
                 Peer.Recycle(im);
             }
             
+            if(GameRunning && WorldSyncTimer.ElapsedMilliseconds > Network.WorldSyncIntervalMs)
+            {
+                // Send full world state on every frame.
+                //Todo: Only send updates for world synchronization
+                SendWorldState();
+                WorldSyncTimer.Restart();
+            }
+        }
+
+        private void SendWorldState()
+        {
+            Console.WriteLine("Sending ws");
+            var entities = Ballz.The().Match.World.Entities;
+            foreach(var e in entities)
+            {
+                Broadcast(e);
+            }
         }
 
         internal void Stop()
@@ -171,31 +197,35 @@
             {
                 HandleRemoteInput(connection, data as InputMessage);
             }
-
         }
 
         private void HandleNewPlayer(NetConnection sender, LobbyPlayerGreeting player)
         {
             long remoteId = sender == null ? -1 : sender.RemoteUniqueIdentifier;
-            ConnectedPlayers[remoteId] = new PlayerConnection
+            PlayersByConnection[remoteId] = new PlayerConnection
             {
                 Connection = sender,
                 PlayerName = player.PlayerName
             };
             
-            var lobbyPlayerList = new LobbyPlayerList { PlayerNames = ConnectedPlayers.Values.Select(p=>p.PlayerName).ToArray() };
+            var lobbyPlayerList = new LobbyPlayerList { PlayerNames = PlayersByConnection.Values.Select(p=>p.PlayerName).ToArray() };
             PlayerListChanged?.Invoke(this, lobbyPlayerList);
             Broadcast(lobbyPlayerList);
         }
 
         private void HandleRemoteInput(NetConnection sender, InputMessage msg)
         {
-            var player = ConnectedPlayers[sender.RemoteUniqueIdentifier].MatchPlayer;
+            var player = PlayersByConnection[sender.RemoteUniqueIdentifier].MatchPlayer;
             if (player != null)
                 Ballz.The().Input.InjectInputMessage(msg, player);
         }
 
         public void Broadcast(object data, bool reliable = true)
+        {
+            Sync.SendObject(data, reliable);
+        }
+
+        public void SendToPlayer(int playerId, object data, bool reliable = true)
         {
             Sync.SendObject(data, reliable);
         }
