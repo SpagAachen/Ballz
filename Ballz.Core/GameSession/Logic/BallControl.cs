@@ -169,7 +169,11 @@ namespace Ballz.GameSession.Logic
                 InputMessage input = message as InputMessage;
                 if (input?.Pressed != null)
                 {
-                    Weapon?.HandleInput(input);
+                    // Weapons are only controlled by the server
+                    if (!Match.IsRemoteControlled)
+                    {
+                        Weapon?.HandleInput(input);
+                    }
                     KeyPressed[input.Kind] = input.Pressed;
                 }
             }

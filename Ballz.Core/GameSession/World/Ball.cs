@@ -1,7 +1,9 @@
 ﻿using Ballz.GameSession.Logic;
+using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using ObjectSync;
 using System;
+using System.IO;
 
 namespace Ballz.GameSession.World
 {
@@ -124,6 +126,29 @@ namespace Ballz.GameSession.World
         public override void OnTerrainCollision(Terrain terrain, Vector2 position)
         {
             base.OnTerrainCollision(terrain, position);
+        }
+
+        public override void Serialize(NetOutgoingMessage writer)
+        {
+            base.Serialize(writer);
+            writer.Write(Health);
+            writer.Write(IsAiming);
+            writer.Write(IsCharging);
+            writer.Write(ShootCharge);
+            writer.Write(AimDirection.X);
+            writer.Write(AimDirection.Y);
+            writer.Write(HoldingWeapon);
+        }
+
+        public override void Deserialize(NetIncomingMessage data)
+        {
+            base.Deserialize(data);
+            Health = data.ReadDouble();
+            IsAiming = data.ReadBoolean();
+            IsCharging = data.ReadBoolean();
+            ShootCharge = data.ReadSingle();
+            AimDirection = new Vector2(data.ReadSingle(), data.ReadSingle());
+            HoldingWeapon = data.ReadString();
         }
     }
 }

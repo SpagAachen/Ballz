@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ObjectSync;
+using Ballz.GameSession.Logic;
 
 namespace Ballz
 {
@@ -16,5 +17,11 @@ namespace Ballz
     {
         [Synced]
         public string PlayerName;
+    }
+
+    public class GameStartInfo
+    {
+        public SerializedMatchSettings Settings;
+        public int YourPlayerId;
     }
 }

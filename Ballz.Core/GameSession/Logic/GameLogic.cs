@@ -115,7 +115,7 @@ namespace Ballz.GameSession.Logic
                 var currentControllers = ActiveControllers.Values.ToArray();
                 foreach (var controller in currentControllers)
                 {
-                    if(controller != null && (controller.Ball.Player == Session.ActivePlayer || !Session.UsePlayerTurns))
+                    if(controller != null && controller.Ball.Player.IsLocal && (controller.Ball.Player == Session.ActivePlayer || !Session.UsePlayerTurns))
                     {
                         var playerMadeAction = controller.Update(elapsedSeconds, worldState);
                         if (playerMadeAction)
@@ -171,12 +171,12 @@ namespace Ballz.GameSession.Logic
                 InputMessage msg = (InputMessage)message;
 
                 // When using turn mode in hot-seat, direct all input messages to the active player
-                if (Session.UsePlayerTurns && Session.ActivePlayer != null && ActiveControllers.ContainsKey(Session.ActivePlayer))
+                if (Session.UsePlayerTurns && msg.Player != null && msg.Player.IsLocal &&  Session.ActivePlayer != null && ActiveControllers.ContainsKey(Session.ActivePlayer))
                 {
                     ActiveControllers[Session.ActivePlayer]?.HandleMessage(sender, msg);
                 }
                 // Otherwise, redirect input messages to the player given by msg.Player
-                else if(msg.Player != null && ActiveControllers.ContainsKey(msg.Player) && ActiveControllers.ContainsKey(msg.Player))
+                else if(msg.Player != null && msg.Player.IsLocal && ActiveControllers.ContainsKey(msg.Player) && ActiveControllers.ContainsKey(msg.Player))
                 {
                     ActiveControllers[msg.Player]?.HandleMessage(sender, msg);
                 }

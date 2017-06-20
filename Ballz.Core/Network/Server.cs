@@ -96,7 +96,18 @@
             // Create map etc.
             gameSettings.GameMode.InitializeSession(Ballz.The(), gameSettings);
             //// Broadcast gameSettings incl. map to clients
-            Broadcast(gameSettings.Serialize());
+            var serializedSettings = gameSettings.Serialize();
+            foreach(var playerCon in PlayersByConnection.Values)
+            {
+                var startInfo = new GameStartInfo
+                {
+                    YourPlayerId = playerCon.MatchPlayerId,
+                    Settings = serializedSettings
+                };
+
+                SendToPlayer(playerCon.MatchPlayerId, startInfo);
+            }
+
             // Start our game session
             Ballz.The().Logic.StartGame(gameSettings);
 
@@ -141,7 +152,7 @@
 
                         string reason = im.ReadString();
 
-                        if(status == NetConnectionStatus.Connected)
+                        if(!GameRunning && status == NetConnectionStatus.Connected)
                         {
                             Sync.AddConnection(im.SenderConnection);
                             NewConnection?.Invoke(this, im.SenderConnection);
@@ -155,7 +166,7 @@
 
                 Peer.Recycle(im);
             }
-            
+
             if(GameRunning && WorldSyncTimer.ElapsedMilliseconds > Network.WorldSyncIntervalMs)
             {
                 // Send full world state on every frame.
@@ -167,7 +178,6 @@
 
         private void SendWorldState()
         {
-            Console.WriteLine("Sending ws");
             var entities = Ballz.The().Match.World.Entities;
             foreach(var e in entities)
             {

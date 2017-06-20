@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace Ballz.Network
 {
@@ -26,7 +27,11 @@ namespace Ballz.Network
             ObjectSync.Sync.RegisterClass<T>(() => new T());
         }
 
-        public static void RegisterIdentifiable<T>(Func<long,object> idToObject, Func<object,long> objectToId)
+        public static void RegisterIdentifiable<T>(
+            Func<long,object> idToObject,
+            Func<object,long> objectToId,
+            Action<NetOutgoingMessage, object> customSerializer = null,
+            Action<NetIncomingMessage, object> customDeserializer = null)
             where T : class, new()
         {
             SynchronizingInfo.RegisterSyncInfo(new SynchronizingInfo
@@ -35,7 +40,9 @@ namespace Ballz.Network
                 IsIdentifiable = true,
                 ObjectConstructor = () => new T(),
                 IdToObject = idToObject,
-                ObjectToId = objectToId
+                ObjectToId = objectToId,
+                CustomSerializer = customSerializer,
+                CustomDeserializer = customDeserializer
             });
             ObjectSync.Sync.RegisterClass<T>(() => new T());
         }
@@ -55,6 +62,9 @@ namespace Ballz.Network
         public bool IsIdentifiable = false;
         public Func<Int64, object> IdToObject = null;
         public Func<object, Int64> ObjectToId = null;
+
+        public Action<NetOutgoingMessage, object> CustomSerializer = null;
+        public Action<NetIncomingMessage, object> CustomDeserializer = null;
     }
 
     public class ObjectSynchronizer
@@ -114,11 +124,23 @@ namespace Ballz.Network
             msg.Write(objId);
 
             // Write the actual object contents
-            string serialized = JsonConvert.SerializeObject(obj);
-            msg.Write(serialized);
+            if(sync.CustomSerializer != null)
+            {
+                sync.CustomSerializer(msg, obj);
+            }
+            else
+            {
+                string serialized = JsonConvert.SerializeObject(obj);
+                msg.Write(serialized);
+            }
+            
+            TotalBytes += msg.LengthBytes;
+            Console.WriteLine($"Sent {TotalBytes / 1024} kb");
 
             Peer.SendMessage(msg, Connections, reliableTransfer ? NetDeliveryMethod.ReliableOrdered : NetDeliveryMethod.UnreliableSequenced, reliableTransfer ? 0 : 1);
         }
+
+        long TotalBytes = 0;
 
         protected void ReadObject(NetIncomingMessage msg)
         {
@@ -132,16 +154,28 @@ namespace Ballz.Network
                 var obj = sync.IdToObject(objId);
                 var isNew = obj == null;
 
-                var deserialized = JsonConvert.DeserializeObject(msg.ReadString(), sync.Type);
-
-                if (isNew)
+                if(sync.CustomDeserializer != null)
                 {
-                    obj = deserialized;
+                    if (isNew)
+                    {
+                        obj = sync.ObjectConstructor();
+                    }
+                    sync.CustomDeserializer(msg, obj);
                 }
                 else
                 {
-                    ObjectSync.Sync.SyncState(deserialized, obj);
+                    var deserialized = JsonConvert.DeserializeObject(msg.ReadString(), sync.Type);
+
+                    if (isNew)
+                    {
+                        obj = deserialized;
+                    }
+                    else
+                    {
+                        ObjectSync.Sync.SyncState(deserialized, obj);
+                    }
                 }
+
 
                 if (isNew)
                 {
@@ -150,7 +184,6 @@ namespace Ballz.Network
                 else
                 {
                     ObjectUpdateReceived?.Invoke(msg.SenderConnection, obj);
-                    Console.WriteLine($"Updated {obj}");
                 }
             }
             else

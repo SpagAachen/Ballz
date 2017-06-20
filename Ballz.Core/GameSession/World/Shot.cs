@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using Lidgren.Network;
 
 namespace Ballz.GameSession.World
 {
@@ -60,7 +62,7 @@ namespace Ballz.GameSession.World
         // Detonation when countdown reaches zero (if negative then inactive)
         private float explosionCountdown = -1.0f;
 
-        public enum ShotType_T
+        public enum ShotType_T: byte
         {
             Normal,         // simulated by physics ("flies" through the air)
             InstantHit,     // instantly reaches the first collision in aim direction
@@ -161,6 +163,38 @@ namespace Ballz.GameSession.World
             }
 
             onAnyCollision();
+        }
+
+        public override void Serialize(NetOutgoingMessage writer)
+        {
+            base.Serialize(writer);
+            writer.Write(ProjectileTexture);
+            writer.Write(BulletHoleRadius);
+            writer.Write(ExplosionDelay);
+            writer.Write(ExplosionRadius);
+            writer.Write(HealthDecreaseFromProjectileHit);
+            writer.Write(HealthDecreaseFromExplosionImpact);
+            writer.Write(Recoil);
+            writer.Write(Restitution);
+            writer.Write(Team);
+            writer.Write(explosionCountdown);
+            writer.Write((byte)ShotType);
+        }
+
+        public override void Deserialize(NetIncomingMessage data)
+        {
+            base.Deserialize(data);
+            ProjectileTexture = data.ReadString();
+            BulletHoleRadius = data.ReadSingle();
+            ExplosionDelay = data.ReadSingle();
+            ExplosionRadius = data.ReadSingle();
+            HealthDecreaseFromProjectileHit = data.ReadSingle();
+            HealthDecreaseFromExplosionImpact = data.ReadSingle();
+            Recoil = data.ReadSingle();
+            Restitution = data.ReadSingle();
+            Team = data.ReadString();
+            explosionCountdown = data.ReadSingle();
+            ShotType = (ShotType_T)data.ReadByte();
         }
     }
 }

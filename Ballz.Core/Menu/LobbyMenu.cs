@@ -62,7 +62,7 @@ namespace Ballz
                 var startGameBtn = new Button("Start Game");
                 startGameBtn.OnClick += (e) =>
                 {
-                    Ballz.The().Network.StartNetworkGame(MatchSettings);
+                    Ballz.The().Network.StartNetworkGame(MatchSettings, 0);
                 };
                 AddItem(startGameBtn);
             }

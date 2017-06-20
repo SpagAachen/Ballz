@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework;
 using ObjectSync;
 
 using Ballz.Network;
+using System.IO;
+using Lidgren.Network;
 
 namespace Ballz.GameSession.World
 {
@@ -112,6 +114,30 @@ namespace Ballz.GameSession.World
 
         public virtual void OnEntityCollision(Entity other)
         {
+        }
+
+        public virtual void Serialize(NetOutgoingMessage writer)
+        {
+            writer.Write(ID);
+            writer.Write(Position.X);
+            writer.Write(Position.Y);
+            writer.Write(Velocity.X);
+            writer.Write(Velocity.Y);
+            writer.Write(Rotation);
+            writer.Write(ViewRotation);
+            writer.Write(Radius);
+            writer.Write(IsStatic);
+        }
+
+        public virtual void Deserialize(NetIncomingMessage data)
+        {
+            ID = data.ReadInt32();
+            Position = new Vector2(data.ReadSingle(), data.ReadSingle());
+            Velocity = new Vector2(data.ReadSingle(), data.ReadSingle());
+            Rotation = (float)data.ReadSingle();
+            ViewRotation = data.ReadSingle();
+            Radius = data.ReadSingle();
+            IsStatic = data.ReadBoolean();
         }
 
         public static SynchronizingInfo GetSyncInfo()

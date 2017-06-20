@@ -99,16 +99,15 @@
                 PlayerListChanged?.Invoke(this, data as LobbyPlayerList);
             }
 
-            if(data is SerializedMatchSettings)
+            if(data is GameStartInfo)
             {
-                HandleMatchStart(data as SerializedMatchSettings);
+                HandleMatchStart(data as GameStartInfo);
             }
 
             // Entities
             var entity = data as Entity;
             if (entity != null)
             {
-                Console.WriteLine("Got new Entity");
                 // Same entity already exists?
                 var localEntity = Ballz.The().Match.World.EntityById(entity.ID);
                 if (localEntity != null)
@@ -147,10 +146,10 @@
             }
         }
 
-        private void HandleMatchStart(SerializedMatchSettings serializedMatchSettings)
+        private void HandleMatchStart(GameStartInfo startInfo)
         {
-            var settings = MatchSettings.Deserialize(serializedMatchSettings);
-            Ballz.The().Network.StartNetworkGame(settings);
+            var settings = MatchSettings.Deserialize(startInfo.Settings);
+            Ballz.The().Network.StartNetworkGame(settings, startInfo.YourPlayerId);
         }
 
         public void Stop()

@@ -121,6 +121,8 @@ namespace Ballz.SessionFactory
             session.Terrain.GravityPoint = GravityPoint;
             session.Terrain.HasGravityPoint = HasGravityPoint;
 
+            Console.WriteLine($"remoteControlled: {remoteControlled}");
+
             // Create players and Ballz
             var currBallCreating = 0;
             foreach (var team in settings.Teams)

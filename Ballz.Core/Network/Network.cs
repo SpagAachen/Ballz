@@ -25,7 +25,7 @@
         public const int DefaultPort = 16116;
         public const string ApplicationIdentifier = "SpagAachen.Ballz";
         public const float ConnectionTimeoutSeconds = 5.0f;
-        public const float WorldSyncIntervalMs = 100.0f;
+        public const float WorldSyncIntervalMs = 30.0f;
 
         public enum NetworkRole { None, Client, Server }
 
@@ -76,7 +76,7 @@
             server.Start();
         }
 
-        public void StartNetworkGame(MatchSettings gameSettings)
+        public void StartNetworkGame(MatchSettings gameSettings, int localPlayerId)
         {
             if (Role == NetworkRole.Server)
             {
@@ -86,7 +86,7 @@
             else if (Role == NetworkRole.Client)
             {
                 gameSettings.GameMode.InitializeSession(Ballz.The(), gameSettings);
-                Ballz.The().Logic.StartGame(gameSettings, true, 1);
+                Ballz.The().Logic.StartGame(gameSettings, true, localPlayerId);
             }
 
             GameState = NetworkGameState.InGame;
