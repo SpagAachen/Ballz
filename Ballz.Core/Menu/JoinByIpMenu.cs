@@ -19,6 +19,7 @@ namespace Ballz
         public JoinByIpMenu(): base("Join by IP")
         {
             AddItem(new Label("Host IP Address:"));
+            IpInput.Value = "127.0.0.1";
             AddItem(IpInput);
             AddItem(new Label("Host Port:"));
 
