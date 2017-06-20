@@ -22,12 +22,7 @@ using System;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Ballz.Settings
-{   
-    [Serializable]
-    public class Setting<T> 
-    {
-        public T Value{ get; set;}
-    }
+{
 
     [Serializable]
     public class Resolution : IComparable
