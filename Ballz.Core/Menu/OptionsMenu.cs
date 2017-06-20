@@ -67,45 +67,40 @@ namespace Ballz.Menu
 
         public void LoadSettings()
         {
-            var GameSettings = Ballz.The().GameSettings;
+            var GameSettings = Ballz.The().Settings;
 
-            EnableFullscreen.Checked = GameSettings.Fullscreen.Value;
-            PlayerName.Value = GameSettings.PlayerName.Value ?? "";
-            if (Ballz.The().GetResolutions().Contains(Ballz.The().GameSettings.ScreenResolution?.Value))
+            EnableFullscreen.Checked = GameSettings.Fullscreen;
+            PlayerName.Value = GameSettings.PlayerName ?? "";
+            if (Ballz.The().GetResolutions().Contains(Ballz.The().Settings.ScreenResolution))
             {
-                Resolution.SelectedIndex = Ballz.The().GetResolutions().IndexOf(Ballz.The().GameSettings.ScreenResolution.Value);
+                Resolution.SelectedIndex = Ballz.The().GetResolutions().IndexOf(Ballz.The().Settings.ScreenResolution);
             }
 
-            MasterVolume.Value = GameSettings.MasterVolume.Value;
-            MusicVolume.Value = GameSettings.MusicVolume.Value;
+            MasterVolume.Value = GameSettings.MasterVolume;
+            MusicVolume.Value = GameSettings.MusicVolume;
         }
 
         public void SaveSettings()
         {
             var Graphics = Ballz.The().Graphics;
-            var GameSettings = Ballz.The().GameSettings;
+            var GameSettings = Ballz.The().Settings;
 
-            GameSettings.Fullscreen.Value = EnableFullscreen.Checked;
-            GameSettings.PlayerName.Value = PlayerName.Value;
+            GameSettings.Fullscreen = EnableFullscreen.Checked;
+            GameSettings.PlayerName = PlayerName.Value;
             if (Resolution.SelectedIndex >= 0)
             {
-                GameSettings.ScreenResolution.Value = Ballz.The().GetResolutions()[Resolution.SelectedIndex];
+                GameSettings.ScreenResolution = Ballz.The().GetResolutions()[Resolution.SelectedIndex];
             }
-            GameSettings.MasterVolume.Value = MasterVolume.Value;
-            GameSettings.MusicVolume.Value = MusicVolume.Value;
+            GameSettings.MasterVolume = MasterVolume.Value;
+            GameSettings.MusicVolume = MusicVolume.Value;
 
             // Store Settings in File
-            FileStream stream = new FileStream("Settings.tmp.xml", FileMode.OpenOrCreate);
-            Ballz.The().StoreSettings(stream);
-            stream.Close();
-
-            // Atomic move operation prevents corrupted settings file
-            File.Replace("Settings.tmp.xml", "Settings.xml", "Settings.bak.xml");
-
+            Ballz.The().StoreSettings();
+            
             // Apply Graphics Settings
-            Graphics.IsFullScreen = GameSettings.Fullscreen.Value;
-            Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
-            Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Value.Height;
+            Graphics.IsFullScreen = GameSettings.Fullscreen;
+            Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Width;
+            Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Height;
 
             Graphics.ApplyChanges();
         }

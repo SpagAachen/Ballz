@@ -14,7 +14,7 @@ namespace Ballz.SessionFactory
     {
         // Must be called before StartSession
         // Can modify GameSettings! E.g., sets the map texture and mapName
-        public void InitializeSession(Ballz game, GameSettings settings)
+        public void InitializeSession(Ballz game, MatchSettings settings)
         {
             ImplInitializeSession(game, settings);
             IsInitialized = true;
@@ -26,15 +26,15 @@ namespace Ballz.SessionFactory
         }
 
         // StartSession must _not_ modify GameSettings
-        public Session StartSession(Ballz game, GameSettings settings, bool remoteControlled, int localPlayerId)
+        public Session StartSession(Ballz game, MatchSettings settings, bool remoteControlled, int localPlayerId)
         {
             if (!IsInitialized) InitializeSession(game, settings);
             return ImplStartSession(game, settings, remoteControlled, localPlayerId);
         }
 
-        protected abstract void ImplInitializeSession(Ballz game, GameSettings settings);
+        protected abstract void ImplInitializeSession(Ballz game, MatchSettings settings);
 
-        protected abstract Session ImplStartSession(Ballz game, GameSettings settings, bool remoteControlled, int localPlayerId);
+        protected abstract Session ImplStartSession(Ballz game, MatchSettings settings, bool remoteControlled, int localPlayerId);
 
         public abstract string Name { get; }
 

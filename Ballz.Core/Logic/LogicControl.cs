@@ -6,6 +6,7 @@ using Ballz.Input;
 using Ballz.Gui;
 using Ballz.Messages;
 using Ballz.Sound;
+using Ballz.GameSession.Logic;
 
 namespace Ballz.Logic
 {
@@ -68,7 +69,7 @@ namespace Ballz.Logic
             newMenu.OnOpen();
         }
 
-        public void StartGame(GameSession.Logic.GameSettings settings, bool remoteControlled = false, int localPlayerId = -1)
+        public void StartGame(MatchSettings settings, bool remoteControlled = false, int localPlayerId = -1)
         {
             ButtonRepeat.Stop();
             ButtonDelay.Stop();

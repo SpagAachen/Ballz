@@ -29,8 +29,8 @@ namespace Ballz.GameSession.Logic
     }
 
     [Serializable]
-    [JsonConverter(typeof(GameSettingsSerializer))]
-    public class GameSettings
+    [JsonConverter(typeof(MatchSettingsSerializer))]
+    public class MatchSettings
     {
         public string MapName { get; set; } = "Invalid";
 
@@ -43,12 +43,12 @@ namespace Ballz.GameSession.Logic
         public bool UsePlayerTurns { get; set; } = false;
     }
 
-    public class GameSettingsSerializer : JsonConverter
+    public class MatchSettingsSerializer : JsonConverter
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             writer.WriteStartObject();
-            var gameSettings = value as GameSettings;
+            var gameSettings = value as MatchSettings;
             Debug.Assert(gameSettings != null);
             // MapName
             {
@@ -92,7 +92,7 @@ namespace Ballz.GameSession.Logic
             var jsonObject = JObject.Load(reader);
             var properties = jsonObject.Properties().ToList();
             var mapTex = (string)properties[2].Value;
-            return new GameSettings
+            return new MatchSettings
             {
                 MapName = (string)properties[0].Value,
                 UsePlayerTurns = (bool)properties[1].Value,
@@ -104,7 +104,7 @@ namespace Ballz.GameSession.Logic
 
         public override bool CanConvert(Type objectType)
         {
-            return typeof(GameSettings).IsAssignableFrom(objectType);
+            return typeof(MatchSettings).IsAssignableFrom(objectType);
         }
     }
 }

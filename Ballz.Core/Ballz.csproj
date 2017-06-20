@@ -127,7 +127,7 @@
     <Compile Include="Messages\InputMessage.cs" />
     <Compile Include="Renderer\PerformanceRenderer.cs" />
     <Compile Include="Messages\LogicMessage.cs" />
-    <Compile Include="Settings\Programmsettings.cs" />
+    <Compile Include="Settings\GameSettings.cs" />
     <Compile Include="Settings\SettingTypes.cs" />
     <Compile Include="Gui\IChooseable.cs" />
     <None Include="MonoGame.Framework.dll.config" />

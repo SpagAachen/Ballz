@@ -14,7 +14,7 @@ namespace Ballz.Menu
     {
         public SinglePlayerMenu() : base("Singleplayer")
         {
-            var currGameSettings = new GameSettings();
+            var currGameSettings = new MatchSettings();
             // hard-coded game settings
             {
                 // Player 1

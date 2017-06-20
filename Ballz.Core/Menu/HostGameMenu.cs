@@ -30,6 +30,8 @@ namespace Ballz
 
 
             AddItem(new Label("Game Name:"));
+
+            GameName.Value = Ballz.The().Settings.HostGameName;
             AddItem(GameName);
             
             AddItem(new Label("Map:"));
@@ -48,7 +50,8 @@ namespace Ballz
                 var startGameButton = new MenuButton("Open Game", () =>
                 {
                     var name = GameName.Value;
-                    if(String.IsNullOrWhiteSpace(name))
+                    Ballz.The().Settings.HostGameName = name;
+                    if (String.IsNullOrWhiteSpace(name))
                     {
                         ErrorLabel.Text = "Invalid Game Name!";
                         return;

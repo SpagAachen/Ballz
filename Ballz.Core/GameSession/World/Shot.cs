@@ -101,7 +101,7 @@ namespace Ballz.GameSession.World
 				foreach (var b in p.OwnedBalls) {
 					if (Vector2.Distance(b.Position, this.Position) < ExplosionRadius) {
 						
-						if (!Ballz.The().GameSettings.FriendlyFire.Value && b.Player.TeamName == Team )
+						if (!Ballz.The().Settings.FriendlyFire && b.Player.TeamName == Team )
 							break;
 						
 						b.ChangeHealth ( -this.HealthDecreaseFromExplosionImpact * Vector2.Distance(b.Position, this.Position)/ExplosionRadius );

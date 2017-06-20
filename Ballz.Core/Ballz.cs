@@ -15,6 +15,7 @@ using Ballz.GameSession.Logic;
 namespace Ballz
 {
     using Microsoft.Xna.Framework.Input;
+    using Settings;
     using System.Diagnostics;
     using System.Linq;
 
@@ -38,7 +39,7 @@ namespace Ballz
 
         public GameSession.Session Match { get; set; }
 
-        public Settings.ProgrammSettings GameSettings { get; set; }
+        public Settings.GameSettings Settings { get; set; }
 
         GuiRenderer GuiRenderer;
 
@@ -57,18 +58,18 @@ namespace Ballz
             Graphics = new GraphicsDeviceManager(this);
             InitSettings();
             Content.RootDirectory = "Content";
-            if (GameSettings.MSAASamples.Value > 1)
+            if (Settings.MSAASamples > 1)
             {
                 Graphics.PreferMultiSampling = true;
                 msaaSettingsHandler = (object sender, PreparingDeviceSettingsEventArgs args) =>
                 {
-                    args.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = GameSettings.MSAASamples.Value;
+                    args.GraphicsDeviceInformation.PresentationParameters.MultiSampleCount = Settings.MSAASamples;
                 };
                 Graphics.PreparingDeviceSettings += msaaSettingsHandler;
             }
-            Graphics.IsFullScreen = GameSettings.Fullscreen.Value;
-            Graphics.PreferredBackBufferHeight = GameSettings.ScreenResolution.Value.Height;
-            Graphics.PreferredBackBufferWidth = GameSettings.ScreenResolution.Value.Width;
+            Graphics.IsFullScreen = Settings.Fullscreen;
+            Graphics.PreferredBackBufferHeight = Settings.ScreenResolution.Height;
+            Graphics.PreferredBackBufferWidth = Settings.ScreenResolution.Width;
             Window.AllowUserResizing = true;
             IsFixedTimeStep = false;
 
@@ -119,39 +120,17 @@ namespace Ballz
         /// </summary>
         private void InitSettings()
         {
-            try
-            {
-                FileStream stream = new FileStream("Settings.xml", FileMode.Open);
-                //found an existing Settings file try to deserialize it
-                try
-                {
-                    LoadSettings(stream);
-                    SanitizeSettings();
-                }
-                catch (Exception) // Loading failed so throw away the old xml
-                {
-                    stream.Close();
-                    File.Delete("Settings.xml");
-                    FileStream theStream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
-                    GameSettings = new Settings.ProgrammSettings();
-                    StoreSettings(theStream);
-                }
-
-                stream.Close();
-            }
-            catch (Exception)
-            {
-                //no settings file was found, create one.
-                FileStream theStream = new FileStream("Settings.xml", FileMode.OpenOrCreate);
-                GameSettings = new Settings.ProgrammSettings();
-                StoreSettings(theStream);
-            }
+            Settings = GameSettings.Load();
         }
 
         private void SanitizeSettings()
         {
-            if (!GetResolutions().Contains(GameSettings.ScreenResolution.Value))
-                throw new Exception("Settings.xml holds bogus values");
+            if (Settings.Fullscreen && !GetResolutions().Contains(Settings.ScreenResolution))
+            {
+                Settings.ScreenResolution = GetResolutions().First();
+                StoreSettings();
+                Console.WriteLine("Settings.xml holds unsupported resolution, resetting to one that should work");
+            }
         }
 
         public List<Settings.Resolution> GetResolutions()
@@ -168,16 +147,14 @@ namespace Ballz
             return result;
         }
 
-        public void LoadSettings(FileStream stream)
+        public void LoadSettings()
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(Settings.ProgrammSettings));
-            GameSettings = (Settings.ProgrammSettings)serializer.Deserialize(stream);
+            Settings = GameSettings.Load();
         }
 
-        public void StoreSettings(FileStream stream)
+        public void StoreSettings()
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(Settings.ProgrammSettings));
-            serializer.Serialize(stream, GameSettings);
+            Settings.Save();
         }
 
         private MenuPanel DefaultMenu()

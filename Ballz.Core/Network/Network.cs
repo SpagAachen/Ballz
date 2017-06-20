@@ -105,7 +105,7 @@
             RaiseMessageEvent(NetworkMessage.MessageType.ServerStarted);
         }
 
-        public void StartNetworkGame(GameSettings gameSettings)
+        public void StartNetworkGame(MatchSettings gameSettings)
         {
             if (Role == NetworkRole.Server)
             {

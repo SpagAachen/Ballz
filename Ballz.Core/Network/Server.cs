@@ -17,7 +17,15 @@
     using Lidgren.Network;
     using System.Threading;
 
-    class Server
+    public class PlayerConnection
+    {
+        public string PlayerName;
+        public int MatchPlayerId;
+        public Player MatchPlayer;
+        public NetConnection Connection;
+    }
+
+    public class Server
     {
         static Server()
         {
@@ -29,7 +37,7 @@
         NetServer Peer;
         ObjectSynchronizer Sync = null;
 
-        List<string> PlayerNames = new List<string>();
+        Dictionary<long,PlayerConnection> ConnectedPlayers = new Dictionary<long, PlayerConnection>();
 
         public event EventHandler<LobbyPlayerList> PlayerListChanged;
 
@@ -43,16 +51,16 @@
             config.AcceptIncomingConnections = true;
             Peer = new NetServer(config);
             Sync = new ObjectSynchronizer(Peer);
-            Sync.NewObjectReceived += (s, data) => OnData(data);
+            Sync.NewObjectReceived += OnData;
         }
 
         public void Start()
         {
             Peer.Start();
-            NewPlayer(new LobbyPlayerGreeting { PlayerName = Environment.MachineName });
+            HandleNewPlayer(null, new LobbyPlayerGreeting { PlayerName = Environment.MachineName });
         }
 
-        public void StartNetworkGame(GameSettings gameSettings)
+        public void StartNetworkGame(MatchSettings gameSettings)
         {
             // create teams
             CreateTeams(gameSettings);
@@ -78,7 +86,7 @@
             Broadcast(modification);
         }
 
-        private void CreateTeams(GameSettings gameSettings)
+        private void CreateTeams(MatchSettings gameSettings)
         {
             Debug.Assert(gameSettings.Teams.Count == 0);
             var counter = 0;
@@ -123,7 +131,6 @@
                         NetConnectionStatus status = (NetConnectionStatus)im.ReadByte();
 
                         string reason = im.ReadString();
-                        Console.WriteLine(NetUtility.ToHexString(im.SenderConnection.RemoteUniqueIdentifier) + " " + status + ": " + reason);
 
                         if(status == NetConnectionStatus.Connected)
                         {
@@ -147,30 +154,45 @@
             Peer.Shutdown("Graceful Shutdown");
         }
 
-        private void OnData(object data)
+        private void OnData(object sender, object data)
         {
-            if(data is LobbyPlayerGreeting)
+            if (!(sender is NetConnection))
+                throw new ArgumentException("Sender is not a NetConnection");
+            
+            var connection = sender as NetConnection;
+            
+            if (data is LobbyPlayerGreeting)
             {
-                NewPlayer(data as LobbyPlayerGreeting);
+                HandleNewPlayer(connection, data as LobbyPlayerGreeting);
             }
 
             //// Keyboad/Mouse Input from clients
-            //if (Ballz.The().Match != null && data is InputMessage)
-            //{
-            //    var playerId = (sender as Connection).ClientPlayerId;
-            //    var player = Ballz.The().Match.PlayerById(playerId);
-            //    if (player != null)
-            //        Ballz.The().Input.InjectInputMessage((InputMessage)data, player);
-            //}
+            if (data is InputMessage)
+            {
+                HandleRemoteInput(connection, data as InputMessage);
+            }
 
         }
 
-        private void NewPlayer(LobbyPlayerGreeting player)
+        private void HandleNewPlayer(NetConnection sender, LobbyPlayerGreeting player)
         {
-            PlayerNames.Add(player.PlayerName);
-            var lobbyPlayerList = new LobbyPlayerList { PlayerNames = PlayerNames.ToArray() };
+            long remoteId = sender == null ? -1 : sender.RemoteUniqueIdentifier;
+            ConnectedPlayers[remoteId] = new PlayerConnection
+            {
+                Connection = sender,
+                PlayerName = player.PlayerName
+            };
+            
+            var lobbyPlayerList = new LobbyPlayerList { PlayerNames = ConnectedPlayers.Values.Select(p=>p.PlayerName).ToArray() };
             PlayerListChanged?.Invoke(this, lobbyPlayerList);
             Broadcast(lobbyPlayerList);
+        }
+
+        private void HandleRemoteInput(NetConnection sender, InputMessage msg)
+        {
+            var player = ConnectedPlayers[sender.RemoteUniqueIdentifier].MatchPlayer;
+            if (player != null)
+                Ballz.The().Input.InjectInputMessage(msg, player);
         }
 
         public void Broadcast(object data, bool reliable = true)

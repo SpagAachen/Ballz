@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Ballz.Lobby;
 using GeonBit.UI.Entities;
+using Ballz.Gui;
 
 namespace Ballz
 {
@@ -66,7 +67,7 @@ namespace Ballz
                 AddItem(new Label("Waiting for Host to start the Game"));
             }
 
-            AddItem(new Button("Leave Game"));
+            AddItem(new BackButton(text: "Leave Game"));
 
         }
 

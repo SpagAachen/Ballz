@@ -100,14 +100,14 @@ namespace Ballz.SessionFactory
             return spawns.Select((i)=>SpawnPoints[i]).ToList();
         }
 
-        protected override void ImplInitializeSession(Ballz game, GameSession.Logic.GameSettings settings)
+        protected override void ImplInitializeSession(Ballz game, MatchSettings settings)
         {
             var mapTexture = MapName == "Generated" ? TerrainGenerator.GenerateTerrain(width,height): game.Content.Load<Texture2D>("Worlds/" + MapName);
             settings.MapName = MapName;
             settings.MapTexture = mapTexture;
         }
 
-        protected override Session ImplStartSession(Ballz game, GameSettings settings, bool remoteControlled, int localPlayerId)
+        protected override Session ImplStartSession(Ballz game, MatchSettings settings, bool remoteControlled, int localPlayerId)
         {
             var session = new Session(game, new World(new Terrain(settings.MapTexture)), settings)
                               {

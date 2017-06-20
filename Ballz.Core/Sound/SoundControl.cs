@@ -95,14 +95,14 @@ namespace Ballz.Sound
 			if(sndEffect != null)
             {
                 SoundEffectInstance soundInstance = sndEffect.CreateInstance();
-                soundInstance.Volume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
+                soundInstance.Volume = (float)Game.Settings.MasterVolume / (float)100;
                 soundInstance.Play();
             }
         }
 
         private void UpdateMusicVolume()
         {
-            currentVolume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
+            currentVolume = (float)Game.Settings.MasterVolume / (float)100;
             if (music.Volume != currentVolume)
                 music.Volume = currentVolume;
         }
@@ -111,7 +111,7 @@ namespace Ballz.Sound
         {
             music = sndEffect.CreateInstance();
             music.IsLooped = true;
-            music.Volume = (float)Game.GameSettings.MasterVolume.Value / (float)100;
+            music.Volume = (float)Game.Settings.MasterVolume / (float)100;
             music.Play();
         }
 
