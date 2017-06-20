@@ -139,15 +139,6 @@ namespace Ballz.GameSession.World
             Radius = data.ReadSingle();
             IsStatic = data.ReadBoolean();
         }
-
-        public static SynchronizingInfo GetSyncInfo()
-        {
-            return new SynchronizingInfo
-            {
-                ObjectConstructor = () => new Entity(),
-                IdToObject = (id) => Ballz.The().Match?.World.EntityById((int)id),
-                ObjectToId = (e) => (e as Entity).ID,
-            };
-        }
+        
     }
 }
