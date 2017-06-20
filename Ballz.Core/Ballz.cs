@@ -217,7 +217,7 @@ namespace Ballz
         {
             base.Update(gameTime);
 
-            if(LockMouse)
+            if(LockMouse && IsActive)
             {
                 var pos = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
                 var center = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
