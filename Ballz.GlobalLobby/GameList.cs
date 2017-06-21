@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using RailPhase;
 using Newtonsoft.Json;
 using System.IO;
+using Lidgren.Network;
 
 using Ballz.Lobby;
 
@@ -45,7 +46,7 @@ namespace Ballz.GlobalLobby
                 if (Games.Count > MaxLobbySize)
                     throw new InvalidOperationException("Too many games in list.");
 
-                Games.Add(game.PublicId, game);
+                Games[game.PublicId] = game;
             }
         }
 
@@ -65,25 +66,18 @@ namespace Ballz.GlobalLobby
             ctx.WriteResponse(JsonConvert.SerializeObject(gameList));
         }
 
-        public void RequestAddGame(Context ctx)
+        public void RequestAddGame(NetIncomingMessage msg)
         {
-            RemoveOldEntries();
-
-            if(ctx.Request.HttpMethod != "POST")
-                throw new InvalidDataException("Request must be POST");
-                        
-            var dataReader = new StreamReader(ctx.Request.InputStream);
-            var data = dataReader.ReadToEnd();
+            var data = msg.ReadString();
             var game = JsonConvert.DeserializeObject<FullGameInfo>(data);
 
-            var hostAddress = ctx.Request.Headers.GetValues("X-Real-IP")?.FirstOrDefault() ?? ctx.Request.RemoteEndPoint.Address.ToString();
+            var hostAddress = msg.SenderEndPoint.Address.ToString();
+            var hostPort = msg.SenderEndPoint.Port;
 
             game.HostAddress = hostAddress;
+            game.HostPort = hostPort;
             game.LastKeepAlive = DateTime.Now;
             AddGame(game);
-
-            ctx.Response.ContentType = "text/json";
-            ctx.WriteResponse("true");
         }
         
         public void RequestRemoveGame(Context ctx)

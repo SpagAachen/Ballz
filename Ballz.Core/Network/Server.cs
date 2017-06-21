@@ -34,9 +34,8 @@
 
         }
 
-        private static int nextId = 1;
+        public NetServer Peer { get; private set; }
 
-        NetServer Peer;
         ObjectSynchronizer Sync = null;
 
         Dictionary<long, PlayerConnection> PlayersByConnection = new Dictionary<long, PlayerConnection>();

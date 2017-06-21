@@ -34,6 +34,7 @@ namespace Ballz
                 Lobby = new LobbyClient();
                 Lobby.UpdatedOnlineGameList += UpdateOnlineGameList;
                 Lobby.UpdatedLocalGameList += UpdateLocalGameList;
+                Lobby.StartLocalDiscovery();
             };
             Close += (s, e) =>
             {

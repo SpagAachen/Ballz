@@ -18,7 +18,7 @@
     class Client
     {
         ObjectSynchronizer Sync;
-        NetClient Peer;
+        public NetClient Peer { get; private set; }
         
         public event EventHandler Connected;
         public event EventHandler Disconnected;

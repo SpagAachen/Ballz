@@ -51,8 +51,9 @@ namespace Ballz
                 if (isHost)
                 {
                     Lobby = new LobbyClient();
-                    var gameInfo = Lobby.HostGame(MatchSettings.GameName, MatchSettings.IsPrivate);
-                    Ballz.The().Network.StartServer(gameInfo);
+                    var gameInfo = Lobby.MakeGameInfo(MatchSettings.GameName, MatchSettings.IsPrivate);
+					Ballz.The().Network.StartServer(gameInfo);
+                    Lobby.OpenGame(gameInfo, Ballz.The().Network.NetworkPeer);
                 }
             };
 

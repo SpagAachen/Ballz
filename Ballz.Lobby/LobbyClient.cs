@@ -34,12 +34,11 @@ namespace Ballz.Lobby
         }
 
         FullGameInfo HostedGame;
-        Task GameOpeningTask;
         Task<PublicGameInfo[]> GameListTask;
         DateTime LastKeepalive = DateTime.MinValue;
         DateTime LastGameListRefresh = DateTime.MinValue;
 
-        NetClient LocalDiscovery;
+        NetClient LocalDiscoveryPeer;
         Stopwatch LocalDiscoveryTimer = new Stopwatch();
         Dictionary<string, PublicGameInfo> LocalGamesById = new Dictionary<string, PublicGameInfo>();
 
@@ -50,18 +49,19 @@ namespace Ballz.Lobby
 
         public LobbyClient()
         {
-            var localDiscoveryConfig = new NetPeerConfiguration("SpagAachen.Ballz");
-            localDiscoveryConfig.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
-            LocalDiscovery = new NetClient(localDiscoveryConfig);
-            LocalDiscovery.Start();
-            LocalDiscoveryTimer.Start();
         }
 
-        public FullGameInfo HostGame(string name, bool isPrivate)
+        public void StartLocalDiscovery()
         {
-            if (HostedGame != null)
-                throw new InvalidOperationException("Already hosting a game");
+			var peerConfig = new NetPeerConfiguration("SpagAachen.Ballz");
+			peerConfig.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
+			LocalDiscoveryPeer = new NetClient(peerConfig);
+			LocalDiscoveryPeer.Start();
+			LocalDiscoveryTimer.Start();
+		}
 
+        public FullGameInfo MakeGameInfo(string name, bool isPrivate)
+        {
             var id = GetRandomString();
             var secret = GetRandomString();
 
@@ -73,11 +73,16 @@ namespace Ballz.Lobby
                 Secret = secret
             };
 
-            HostedGame = game;
-            GameOpeningTask = OpenHostedGameAsync();
-            LastKeepalive = DateTime.Now;
-
             return game;
+        }
+        public void OpenGame(FullGameInfo game, NetPeer serverPeer)
+        {
+			if (HostedGame != null)
+				throw new InvalidOperationException("Already hosting a game");
+
+			HostedGame = game;
+            OpenHostedGame(serverPeer);
+            LastKeepalive = DateTime.Now;
         }
         
         public void Update()
@@ -85,18 +90,9 @@ namespace Ballz.Lobby
             var now = DateTime.Now;
             if (HostedGame != null)
             {
-                if (GameOpeningTask.IsCompleted && (now - LastKeepalive).TotalSeconds > 2.0)
+                if ((now - LastKeepalive).TotalSeconds > 2.0)
                 {
-                    // If registering the game at the lobby failed, try to open it again.
-                    if ((GameOpeningTask.IsFaulted || GameOpeningTask.IsCanceled))
-                    {
-                        GameOpeningTask = OpenHostedGameAsync();
-                    }
-                    else
-                    {
-                        SendKeepaliveAsync();
-                    }
-
+                    SendKeepaliveAsync();
                     LastKeepalive = now;
                 }
             }
@@ -118,45 +114,51 @@ namespace Ballz.Lobby
                 }
             }
 
-            bool newLocalGames = false;
-            NetIncomingMessage msg;
-            while((msg = LocalDiscovery.ReadMessage()) != null)
+            if (LocalDiscoveryPeer != null)
             {
-                switch(msg.MessageType)
+                bool newLocalGames = false;
+                NetIncomingMessage msg;
+                while ((msg = LocalDiscoveryPeer.ReadMessage()) != null)
                 {
-                    case NetIncomingMessageType.DiscoveryResponse:
-                        var gameInfoSerialized = msg.ReadString();
-                        var gameInfo = JsonConvert.DeserializeObject<PublicGameInfo>(gameInfoSerialized);
-                        gameInfo.HostAddress = msg.SenderEndPoint.Address.ToString();
-                        gameInfo.HostPort = msg.SenderEndPoint.Port;
-                        LocalGamesById[gameInfo.PublicId] = gameInfo;
-                        newLocalGames = true;
-                        break;
+                    switch (msg.MessageType)
+                    {
+                        case NetIncomingMessageType.ErrorMessage:
+                            var error = msg.ReadString();
+                            Console.WriteLine("Lidgren Error: " + error);
+                            break;
+                        case NetIncomingMessageType.DiscoveryResponse:
+                            var gameInfoSerialized = msg.ReadString();
+                            var gameInfo = JsonConvert.DeserializeObject<PublicGameInfo>(gameInfoSerialized);
+                            gameInfo.HostAddress = msg.SenderEndPoint.Address.ToString();
+                            gameInfo.HostPort = msg.SenderEndPoint.Port;
+                            LocalGamesById[gameInfo.PublicId] = gameInfo;
+                            newLocalGames = true;
+                            break;
 
+                    }
+                    LocalDiscoveryPeer.Recycle(msg);
                 }
-                LocalDiscovery.Recycle(msg);
-            }
 
-            if(newLocalGames)
-            {
-                UpdatedLocalGameList?.Invoke(this, LocalGamesById.Values.ToArray());
-            }
+                if (newLocalGames)
+                {
+                    UpdatedLocalGameList?.Invoke(this, LocalGamesById.Values.ToArray());
+                }
 
-            if(LocalDiscoveryTimer.ElapsedMilliseconds > 1000)
-            {
-                LocalDiscovery.DiscoverLocalPeers(16116);
-                Console.WriteLine("Discovering");
-                LocalDiscoveryTimer.Restart();
+                if (LocalDiscoveryTimer.ElapsedMilliseconds > 1000)
+                {
+                    LocalDiscoveryPeer.DiscoverLocalPeers(16116);
+                    LocalDiscoveryTimer.Restart();
+                }
             }
         }
 
-        public async Task OpenHostedGameAsync()
+        public void OpenHostedGame(NetPeer serverPeer)
         {
-            var data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(HostedGame));
-            var result = RequestToLobbyAsync("/game/add/", postBody: data, usePostMethod: true);
-            var response = await result;
-            if (response != "true")
-                throw new WebException("Opening Game request to global lobby was unsuccessful.");
+            Console.WriteLine("Open Game");
+            var msg = serverPeer.CreateMessage();
+            var data = JsonConvert.SerializeObject(HostedGame);
+            msg.Write(data);
+            serverPeer.SendUnconnectedMessage(msg, GlobalLobbyHost, 16117);
         }
 
         public async Task CloseHostedGameAsync()
@@ -230,9 +232,6 @@ namespace Ballz.Lobby
                 {
                     //GameListTask?.Dispose();
                     GameListTask = null;
-
-                    //GameOpeningTask?.Dispose();
-                    GameOpeningTask = null;
 
                     UpdatedOnlineGameList = null;
                     HostedGame = null;

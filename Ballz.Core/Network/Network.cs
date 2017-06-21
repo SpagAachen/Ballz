@@ -39,6 +39,16 @@
         public event EventHandler<object> DataReceived;
 
         public LobbyPlayerList PlayerList { get; private set; } = new LobbyPlayerList { PlayerNames = new string[0] };
+
+        public Lidgren.Network.NetPeer NetworkPeer { get {
+                if (server != null)
+                    return server.Peer;
+                else if (client != null)
+                    return client.Peer;
+                else
+                    return null;
+            }
+        }
         
         public event EventHandler<LobbyPlayerList> PlayerListChanged;
 
