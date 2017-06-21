@@ -8,6 +8,10 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
+using Lidgren.Network;
+using Newtonsoft.Json;
+using System.Diagnostics;
+
 namespace Ballz.Lobby
 {
     public class LobbyClient: IDisposable
@@ -36,9 +40,25 @@ namespace Ballz.Lobby
         DateTime LastKeepalive = DateTime.MinValue;
         DateTime LastGameListRefresh = DateTime.MinValue;
 
-        public event EventHandler<PublicGameInfo[]> UpdatedGameList = null;
+        NetClient LocalDiscovery;
+        Stopwatch LocalDiscoveryTimer = new Stopwatch();
+        Dictionary<string, PublicGameInfo> LocalGamesById = new Dictionary<string, PublicGameInfo>();
 
-        public void HostGame(string name, bool isPrivate)
+        public IEnumerable<PublicGameInfo> LocalGames { get { return LocalGamesById.Values; } }
+
+        public event EventHandler<PublicGameInfo[]> UpdatedOnlineGameList = null;
+        public event EventHandler<PublicGameInfo[]> UpdatedLocalGameList = null;
+
+        public LobbyClient()
+        {
+            var localDiscoveryConfig = new NetPeerConfiguration("SpagAachen.Ballz");
+            localDiscoveryConfig.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
+            localDiscoveryConfig.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
+            LocalDiscovery = new NetClient(localDiscoveryConfig);
+            LocalDiscoveryTimer.Start();
+        }
+
+        public FullGameInfo HostGame(string name, bool isPrivate)
         {
             if (HostedGame != null)
                 throw new InvalidOperationException("Already hosting a game");
@@ -57,8 +77,10 @@ namespace Ballz.Lobby
             HostedGame = game;
             GameOpeningTask = OpenHostedGameAsync();
             LastKeepalive = DateTime.Now;
-        }
 
+            return game;
+        }
+        
         public void Update()
         {
             var now = DateTime.Now;
@@ -79,13 +101,13 @@ namespace Ballz.Lobby
                     LastKeepalive = now;
                 }
             }
-            if(UpdatedGameList != null)
+            if(UpdatedOnlineGameList != null)
             {
                 // If a new list of games arrived, send an event
                 if (GameListTask != null && GameListTask.Status == TaskStatus.RanToCompletion)
                 {
                     var games = GameListTask.Result;
-                    UpdatedGameList?.Invoke(this, games);
+                    UpdatedOnlineGameList?.Invoke(this, games);
                     GameListTask = null;
                 }
 
@@ -95,6 +117,34 @@ namespace Ballz.Lobby
                     GameListTask = GetGameListAsync();
                     LastGameListRefresh = now;
                 }
+            }
+
+            bool newLocalGames = false;
+            NetIncomingMessage msg;
+            while((msg = LocalDiscovery.ReadMessage()) != null)
+            {
+                switch(msg.MessageType)
+                {
+                    case NetIncomingMessageType.DiscoveryResponse:
+                        var gameInfoSerialized = msg.ReadString();
+                        var gameInfo = JsonConvert.DeserializeObject<PublicGameInfo>(gameInfoSerialized);
+                        LocalGamesById[gameInfo.PublicId] = gameInfo;
+                        newLocalGames = true;
+                        break;
+
+                }
+                LocalDiscovery.Recycle(msg);
+            }
+
+            if(newLocalGames)
+            {
+                UpdatedLocalGameList?.Invoke(this, LocalGamesById.Values.ToArray());
+            }
+
+            if(LocalDiscoveryTimer.ElapsedMilliseconds > 1000)
+            {
+                LocalDiscovery.DiscoverLocalPeers(16116);
+                LocalDiscoveryTimer.Restart();
             }
         }
 
@@ -182,7 +232,7 @@ namespace Ballz.Lobby
                     //GameOpeningTask?.Dispose();
                     GameOpeningTask = null;
 
-                    UpdatedGameList = null;
+                    UpdatedOnlineGameList = null;
                     HostedGame = null;
                 }
 

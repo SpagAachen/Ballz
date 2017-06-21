@@ -17,6 +17,8 @@
     using Lidgren.Network;
     using System.Threading;
     using SessionFactory;
+    using Lobby;
+    using Newtonsoft.Json;
     public class PlayerConnection
     {
         public string PlayerName;
@@ -33,7 +35,7 @@
         }
 
         private static int nextId = 1;
-        
+
         NetServer Peer;
         ObjectSynchronizer Sync = null;
 
@@ -48,12 +50,17 @@
 
         public bool GameRunning = false;
 
-        public Server()
+        public FullGameInfo GameInfo { get; private set; }
+
+        public Server(FullGameInfo info)
         {
+            GameInfo = info;
             var config = new NetPeerConfiguration(Network.ApplicationIdentifier);
             config.Port = Network.DefaultPort; // TODO: make port configurable
             config.ConnectionTimeout = Network.ConnectionTimeoutSeconds;
             config.AcceptIncomingConnections = true;
+            config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
+            config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
             Peer = new NetServer(config);
             Sync = new ObjectSynchronizer(Peer);
             Sync.NewObjectReceived += OnData;
@@ -137,9 +144,7 @@
         DateTime LastUpdate = DateTime.Now;
 
         public event EventHandler<NetConnection> NewConnection;
-
-        public string[] GetConnectionNames() => Peer.Connections.Select(c => c.RemoteUniqueIdentifier.ToString()).ToArray();
-
+        
         public void Update(GameTime time)
         {
             NetIncomingMessage im;
@@ -158,6 +163,15 @@
                             NewConnection?.Invoke(this, im.SenderConnection);
                         }
 
+                        break;
+                    case NetIncomingMessageType.DiscoveryRequest:
+                        // Respond to discovery requests with a json-serialized game info
+                        // But only send the non-secret parts
+                        var publicInfo = GameInfo.PublicInfo();
+                        var serializedInfo = JsonConvert.SerializeObject(publicInfo);
+                        var response = Peer.CreateMessage();
+                        response.Write(serializedInfo);
+                        Peer.SendDiscoveryResponse(response, im.SenderEndPoint);
                         break;
                     case NetIncomingMessageType.Data:
                         Sync.ReadMessage(im);

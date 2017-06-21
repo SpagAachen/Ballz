@@ -6,13 +6,13 @@
 
     using global::Ballz.GameSession.Logic;
     using global::Ballz.GameSession.World;
-    
+
     using System.Threading.Tasks;
     using System.Net;
     using System.Diagnostics;
     using System.Threading;
     using System.Linq;
-
+    using Lobby;
     /// <summary>
     /// Network takes care of all network related stuff independent of an existing game session.
     /// TODO
@@ -65,13 +65,13 @@
             Message?.Invoke(this, new NetworkMessage(msg));
         }
         
-        public void StartServer()
+        public void StartServer(FullGameInfo gameInfo)
         {
             if (Role != NetworkRole.None)
                 Disconnect();
             Role = NetworkRole.Server;
             GameState = NetworkGameState.InLobby;
-            server = new Server();
+            server = new Server(gameInfo);
             server.PlayerListChanged += PlayerListChanged;
             server.Start();
         }

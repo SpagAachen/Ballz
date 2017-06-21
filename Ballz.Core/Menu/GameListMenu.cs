@@ -17,17 +17,22 @@ namespace Ballz
 
         Label StatusLabel = new Label("Updating Game List");
 
-        PublicGameInfo[] GameListData = null;
-        SelectList GameList = new SelectList(new Vector2(0, 350));
-        Button JoinButton = new Gui.MenuButton("Join", anchor: Anchor.BottomRight, size: new Vector2(0.45f, -1));
+        PanelTabs OnlineLocalTabs = new PanelTabs();
 
-        public GameListMenu() : base("Join Online Game")
+        PublicGameInfo[] OnlineGameListData = null;
+        SelectList OnlineGameList = new SelectList(new Vector2(0, 350));
+        Button JoinOnlineButton = new Gui.MenuButton("Join");
+        PublicGameInfo[] LocalGameListData = null;
+        SelectList LocalGameList = new SelectList(new Vector2(0, 350));
+        Button JoinLocalButton = new Gui.MenuButton("Join");
+
+        public GameListMenu() : base("Join Game")
         {
             Size = new Vector2(800, 0);
             Open += (s,e) =>
             {
                 Lobby = new LobbyClient();
-                Lobby.UpdatedGameList += UpdateGameList;
+                Lobby.UpdatedOnlineGameList += UpdateOnlineGameList;
             };
             Close += (s, e) =>
             {
@@ -35,14 +40,26 @@ namespace Ballz
                 Lobby = null;
             };
 
-            AddItem(StatusLabel);
-            AddItem(GameList);
-            var panel = new Panel(new Vector2(0, 150));
+            var panel = new Panel(new Vector2(0, -1), PanelSkin.None);
 
-            JoinButton.OnClick += (e) => JoinSelectedGame();
-            panel.AddChild(JoinButton);
-            panel.AddChild(new Gui.BackButton(Anchor.BottomLeft, new Vector2(0.45f, -1)));
-            AddItem(panel);
+            var onlineTab = OnlineLocalTabs.AddTab("Online", PanelSkin.None);
+            onlineTab.panel.AddChild(new Header("Join Online Game"));
+            onlineTab.panel.AddChild(OnlineGameList);
+            onlineTab.panel.AddChild(StatusLabel);
+            JoinOnlineButton.OnClick += (e) => JoinSelectedGame(online: true);
+            onlineTab.panel.AddChild(JoinOnlineButton);
+            onlineTab.panel.AddChild(new Gui.BackButton());
+
+            var localTab = OnlineLocalTabs.AddTab("Local", PanelSkin.None);
+            localTab.panel.AddChild(new Header("Join Local Game"));
+            localTab.panel.AddChild(LocalGameList);
+            JoinLocalButton.OnClick += (e) => JoinSelectedGame(online: false);
+            localTab.panel.AddChild(JoinLocalButton);
+            localTab.panel.AddChild(new Gui.BackButton());
+
+            panel.AddChild(OnlineLocalTabs);
+
+            AddChild(panel);
         }
 
         string SelectedGameId = "";
@@ -53,51 +70,67 @@ namespace Ballz
             Lobby?.Update();
         }
 
-        public void UpdateGameList(object sender, PublicGameInfo[] games)
+        public void UpdateSelectList(SelectList list, PublicGameInfo[] games)
         {
-            StatusLabel.Text = "Successfully updated game list.";
-
-            var selection = GameList.SelectedValue;
-            var scrollPos = GameList.ScrollPosition;
-            var isFocussed = GameList.IsFocused;
-
-            GameListData = games;
-
-            GameList.ClearItems();
+            var selection = list.SelectedValue;
+            var scrollPos = list.ScrollPosition;
+            var isFocussed = list.IsFocused;
+            
+            list.ClearItems();
             if (games.Length == 0)
             {
-                GameList.AddItem("[No games found]");
+                list.AddItem("[No games found]");
             }
             else
             {
                 foreach (PublicGameInfo g in games)
                 {
-                    GameList.AddItem(g.Name);
+                    list.AddItem(g.Name);
                 }
             }
 
             try
             {
-                GameList.ScrollPosition = scrollPos;
+                list.ScrollPosition = scrollPos;
                 if (isFocussed)
                 {
-                    GeonBit.UI.UserInterface.ActiveEntity = GameList;
+                    GeonBit.UI.UserInterface.ActiveEntity = list;
                 }
-                GameList.SelectedValue = selection;
+                list.SelectedValue = selection;
             }
-            catch(System.Exception e)
+            catch (System.Exception e)
             {
-                GameList.SelectedIndex = 0;
+                list.SelectedIndex = 0;
             }
         }
-
-        public void JoinSelectedGame()
+        public void UpdateOnlineGameList(object sender, PublicGameInfo[] games)
         {
-            if (GameListData == null || GameListData.Length < GameList.SelectedIndex+1)
+            StatusLabel.Text = "Successfully updated game list.";
+            OnlineGameListData = games;
+            UpdateSelectList(OnlineGameList, games);
+        }
+
+        public void UpdateLocalGameList(object sender, PublicGameInfo[] games)
+        {
+            LocalGameListData = games;
+            UpdateSelectList(LocalGameList, games);
+        }
+
+        public void JoinSelectedGame(bool online)
+        {
+            if (OnlineGameListData == null || OnlineGameListData.Length < OnlineGameList.SelectedIndex+1)
                 return;
 
-            PublicGameInfo selectedGame = GameListData[GameList.SelectedIndex];
-
+            PublicGameInfo selectedGame;
+            if(online)
+            {
+                selectedGame = OnlineGameListData[OnlineGameList.SelectedIndex];
+            }
+            else
+            {
+                selectedGame = LocalGameListData[LocalGameList.SelectedIndex];
+            }
+            
             var overlay = MessageOverlay.ShowWaitMessage("Connecting to Game...", onCancel: () => { Ballz.The().Network.Disconnect(); });
 
             IPAddress host = null;

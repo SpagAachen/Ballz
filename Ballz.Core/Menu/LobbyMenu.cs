@@ -22,6 +22,11 @@ namespace Ballz
 
         public LobbyMenu(bool isHost, MatchSettings settings = null) : base("Lobby")
         {
+            if(isHost && settings == null)
+            {
+                throw new ArgumentNullException("settings must not be null when isHost is true");
+            }
+
             IsHost = isHost;
             MatchSettings = settings;
 
@@ -35,7 +40,6 @@ namespace Ballz
                 }
 
                 Ballz.The().Network.PlayerListChanged -= UpdatePlayerList;
-                //Ballz.The().Network.Disconnect();
             };
 
             Open += (s, e) =>
@@ -47,8 +51,8 @@ namespace Ballz
                 if (isHost)
                 {
                     Lobby = new LobbyClient();
-                    Lobby.HostGame(MatchSettings.GameName, MatchSettings.IsPrivate);
-                    Ballz.The().Network.StartServer();
+                    var gameInfo = Lobby.HostGame(MatchSettings.GameName, MatchSettings.IsPrivate);
+                    Ballz.The().Network.StartServer(gameInfo);
                 }
             };
 
