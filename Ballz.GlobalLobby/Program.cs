@@ -16,7 +16,7 @@ namespace Ballz.GlobalLobby
         static void UdpMain(GameList gameList)
         {
             var config = new NetPeerConfiguration("SpagAachen.Ballz");
-            config.Port = 16117;
+            config.Port = 43117;
             config.EnableMessageType(NetIncomingMessageType.UnconnectedData);
             var peer = new NetPeer(config);
             peer.Start();

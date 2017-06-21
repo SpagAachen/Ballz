@@ -158,7 +158,7 @@ namespace Ballz.Lobby
             var msg = serverPeer.CreateMessage();
             var data = JsonConvert.SerializeObject(HostedGame);
             msg.Write(data);
-            serverPeer.SendUnconnectedMessage(msg, GlobalLobbyHost, 16117);
+            serverPeer.SendUnconnectedMessage(msg, GlobalLobbyHost, 43117);
         }
 
         public async Task CloseHostedGameAsync()
