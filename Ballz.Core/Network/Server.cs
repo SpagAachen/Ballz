@@ -60,7 +60,6 @@
             config.ConnectionTimeout = Network.ConnectionTimeoutSeconds;
             config.AcceptIncomingConnections = true;
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
-            config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
             Peer = new NetServer(config);
             Sync = new ObjectSynchronizer(Peer);
             Sync.NewObjectReceived += OnData;

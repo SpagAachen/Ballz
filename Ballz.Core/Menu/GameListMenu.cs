@@ -33,6 +33,7 @@ namespace Ballz
             {
                 Lobby = new LobbyClient();
                 Lobby.UpdatedOnlineGameList += UpdateOnlineGameList;
+                Lobby.UpdatedLocalGameList += UpdateLocalGameList;
             };
             Close += (s, e) =>
             {
@@ -131,13 +132,13 @@ namespace Ballz
                 selectedGame = LocalGameListData[LocalGameList.SelectedIndex];
             }
             
-            var overlay = MessageOverlay.ShowWaitMessage("Connecting to Game...", onCancel: () => { Ballz.The().Network.Disconnect(); });
-
             IPAddress host = null;
             if(!IPAddress.TryParse(selectedGame.HostAddress, out host))
             {
                 return;
             }
+
+            var overlay = MessageOverlay.ShowWaitMessage("Connecting to Game...", onCancel: () => { Ballz.The().Network.Disconnect(); });
 
             Ballz.The().Network.ConnectToServer(host, selectedGame.HostPort, onSuccess: () => {
                 Ballz.The().Logic.OpenMenu(new LobbyMenu(isHost: false));

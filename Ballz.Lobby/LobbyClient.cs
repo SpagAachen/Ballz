@@ -51,9 +51,9 @@ namespace Ballz.Lobby
         public LobbyClient()
         {
             var localDiscoveryConfig = new NetPeerConfiguration("SpagAachen.Ballz");
-            localDiscoveryConfig.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
             localDiscoveryConfig.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
             LocalDiscovery = new NetClient(localDiscoveryConfig);
+            LocalDiscovery.Start();
             LocalDiscoveryTimer.Start();
         }
 
@@ -127,6 +127,8 @@ namespace Ballz.Lobby
                     case NetIncomingMessageType.DiscoveryResponse:
                         var gameInfoSerialized = msg.ReadString();
                         var gameInfo = JsonConvert.DeserializeObject<PublicGameInfo>(gameInfoSerialized);
+                        gameInfo.HostAddress = msg.SenderEndPoint.Address.ToString();
+                        gameInfo.HostPort = msg.SenderEndPoint.Port;
                         LocalGamesById[gameInfo.PublicId] = gameInfo;
                         newLocalGames = true;
                         break;
@@ -143,6 +145,7 @@ namespace Ballz.Lobby
             if(LocalDiscoveryTimer.ElapsedMilliseconds > 1000)
             {
                 LocalDiscovery.DiscoverLocalPeers(16116);
+                Console.WriteLine("Discovering");
                 LocalDiscoveryTimer.Restart();
             }
         }
