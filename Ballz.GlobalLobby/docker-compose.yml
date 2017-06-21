@@ -10,4 +10,4 @@ services:
       DOCKER_IS_RUNNING: 1
     ports:
      - "9162:9162"
-     - "43117":"43117"
+     - "43117:43117"
