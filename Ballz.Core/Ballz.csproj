@@ -131,7 +131,9 @@
     <Compile Include="Settings\GameSettings.cs" />
     <Compile Include="Settings\SettingTypes.cs" />
     <Compile Include="Gui\IChooseable.cs" />
-    <None Include="MonoGame.Framework.dll.config" />
+    <None Include="MonoGame.Framework.dll.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <Compile Include="Renderer\Camera.cs" />
     <Compile Include="Sound\SoundControl.cs" />
@@ -139,9 +141,6 @@
     <Compile Include="Renderer\Camera\CameraTrajectory.cs" />
     <Compile Include="GameSession\Logic\Weapons\Potato.cs" />
     <Compile Include="GameSession\Logic\Weapons\Grenade.cs" />
-    <None Include="Tao.Sdl.dll.config" Condition="'$(OS)' != 'Windows_NT'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <Compile Include="Gui\MessageOverlay.cs" />
     <Compile Include="GameSession\Logic\Weapons\Waterbomb.cs" />
     <Compile Include="GameSession\Logic\Weapons\Drill.cs" />
@@ -183,12 +182,11 @@
       <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.6.0.1625\lib\net40\MonoGame.Framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup />
   <Target Name="BeforeBuild">
