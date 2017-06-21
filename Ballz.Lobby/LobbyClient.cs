@@ -19,10 +19,12 @@ namespace Ballz.Lobby
         public const string GlobalLobbyScheme = "http";
         public const string GlobalLobbyHost = "localhost";
         public const int GlobalLobbyPort = 18080;
+        public const int GlobalLobbyUdpPort = 43117;
 #else
         public const string GlobalLobbyScheme = "https";
         public const string GlobalLobbyHost = "lobby.lb2.eu";
         public const int GlobalLobbyPort = 443;
+        public const int GlobalLobbyUdpPort = 43117;
 #endif
 
         static RNGCryptoServiceProvider random = new RNGCryptoServiceProvider();
@@ -158,7 +160,7 @@ namespace Ballz.Lobby
             var msg = serverPeer.CreateMessage();
             var data = JsonConvert.SerializeObject(HostedGame);
             msg.Write(data);
-            serverPeer.SendUnconnectedMessage(msg, GlobalLobbyHost, 43117);
+            serverPeer.SendUnconnectedMessage(msg, GlobalLobbyHost, GlobalLobbyUdpPort);
         }
 
         public async Task CloseHostedGameAsync()
