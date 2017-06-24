@@ -15,14 +15,18 @@ namespace Ballz.Network
         public static Dictionary<Type, SynchronizingInfo> InfoByType = new Dictionary<Type, SynchronizingInfo>();
         public static Dictionary<Int16, SynchronizingInfo> InfoByTypeId = new Dictionary<short, SynchronizingInfo>();
 
-        public static void RegisterClass<T>() 
+        public static void RegisterClass<T>(
+            Action<NetOutgoingMessage, object> customSerializer = null,
+            Action<NetIncomingMessage, object> customDeserializer = null)
             where T : class, new()
         {
             SynchronizingInfo.RegisterSyncInfo(new SynchronizingInfo
             {
                 Type = typeof(T),
                 IsIdentifiable = false,
-                ObjectConstructor = () => new T()
+                ObjectConstructor = () => new T(),
+                CustomSerializer = customSerializer,
+                CustomDeserializer = customDeserializer
             });
             ObjectSync.Sync.RegisterClass<T>(() => new T());
         }

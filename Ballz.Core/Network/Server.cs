@@ -195,6 +195,9 @@
             {
                 Broadcast(e);
             }
+
+            var sessionState = Ballz.The().Match.GetState();
+            Broadcast(sessionState);
         }
 
         internal void Stop()

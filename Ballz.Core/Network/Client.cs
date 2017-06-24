@@ -14,6 +14,7 @@
     using Lidgren.Network;
     using System.Net;
     using System.Threading;
+    using GameSession;
 
     class Client
     {
@@ -102,6 +103,11 @@
             if(data is GameStartInfo)
             {
                 HandleMatchStart(data as GameStartInfo);
+            }
+
+            if(data is Session.NetSessionState)
+            {
+                Ballz.The().Match.ApplyState(data as Session.NetSessionState);
             }
 
             // Entities

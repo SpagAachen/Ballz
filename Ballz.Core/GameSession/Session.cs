@@ -1,6 +1,7 @@
 ﻿using Ballz.GameSession.Logic;
 using Ballz.GameSession.World;
 using Ballz.Logic;
+using Lidgren.Network;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -188,5 +189,53 @@ namespace Ballz.GameSession
             GC.SuppressFinalize(this);
         }
         #endregion
+
+        public class NetSessionState
+        {
+            public int FocussedEntityId;
+            public int ActivePlayerId;
+            public int WinnerId;
+            public byte TurnState;
+            public byte SessionState;
+
+            public void Serialize(NetOutgoingMessage msg)
+            {
+                msg.Write(FocussedEntityId);
+                msg.Write(ActivePlayerId);
+                msg.Write(WinnerId);
+                msg.Write(TurnState);
+                msg.Write(SessionState);
+            }
+
+            public void Deserialize(NetIncomingMessage msg)
+            {
+                FocussedEntityId = msg.ReadInt32();
+                ActivePlayerId = msg.ReadInt32();
+                WinnerId = msg.ReadInt32();
+                TurnState = msg.ReadByte();
+                SessionState = msg.ReadByte();
+            }
+        }
+
+        public NetSessionState GetState()
+        {
+            return new NetSessionState
+            {
+                FocussedEntityId = FocussedEntity != null ? FocussedEntity.ID : -1,
+                ActivePlayerId = ActivePlayer != null ? ActivePlayer.Id : -1,
+                WinnerId = Winner != null ? Winner.Id : -1,
+                TurnState = (byte)TurnState,
+                SessionState = (byte)State
+            };
+        }
+
+        public void ApplyState(NetSessionState sessionState)
+        {
+            FocussedEntity = World.EntityById(sessionState.FocussedEntityId);
+            ActivePlayer = PlayerById(sessionState.ActivePlayerId);
+            Winner = PlayerById(sessionState.WinnerId);
+            TurnState = (TurnState)sessionState.TurnState;
+            State = (SessionState)sessionState.SessionState;
+        }
     }
 }

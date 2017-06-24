@@ -1,4 +1,5 @@
-﻿using Ballz.GameSession.Logic;
+﻿using Ballz.GameSession;
+using Ballz.GameSession.Logic;
 using Ballz.GameSession.World;
 using Ballz.Messages;
 using Microsoft.Xna.Framework;
@@ -23,6 +24,12 @@ namespace Ballz.Network
             SynchronizingInfo.RegisterClass<NetworkMessage>();
             SynchronizingInfo.RegisterClass<InputMessage>();
             SynchronizingInfo.RegisterClass<Terrain.TerrainModification>();
+
+            SynchronizingInfo.RegisterClass<Session.NetSessionState>(
+                (msg, obj) => ((Session.NetSessionState)obj).Serialize(msg),
+                (msg, obj) => ((Session.NetSessionState)obj).Deserialize(msg)
+                );
+
 
             SynchronizingInfo.RegisterIdentifiable<Entity>(
                 (id) => Ballz.The().Match.World.EntityById((int)id),
