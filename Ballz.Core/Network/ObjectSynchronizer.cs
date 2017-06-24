@@ -153,47 +153,46 @@ namespace Ballz.Network
 
             var sync = SynchronizingInfo.InfoByTypeId[typeId];
 
+            object obj = null;
+
             if (sync.IsIdentifiable)
             {
-                var obj = sync.IdToObject(objId);
-                var isNew = obj == null;
+                obj = sync.IdToObject(objId);
+                
+            }
 
-                if(sync.CustomDeserializer != null)
-                {
-                    if (isNew)
-                    {
-                        obj = sync.ObjectConstructor();
-                    }
-                    sync.CustomDeserializer(msg, obj);
-                }
-                else
-                {
-                    var deserialized = JsonConvert.DeserializeObject(msg.ReadString(), sync.Type);
-
-                    if (isNew)
-                    {
-                        obj = deserialized;
-                    }
-                    else
-                    {
-                        ObjectSync.Sync.SyncState(deserialized, obj);
-                    }
-                }
-
-
+            bool isNew = obj == null;
+            
+            if(sync.CustomDeserializer != null)
+            {
                 if (isNew)
                 {
-                    NewObjectReceived?.Invoke(msg.SenderConnection, obj);
+                    obj = sync.ObjectConstructor();
                 }
-                else
-                {
-                    ObjectUpdateReceived?.Invoke(msg.SenderConnection, obj);
-                }
+                sync.CustomDeserializer(msg, obj);
             }
             else
             {
                 var deserialized = JsonConvert.DeserializeObject(msg.ReadString(), sync.Type);
-                NewObjectReceived?.Invoke(msg.SenderConnection, deserialized);
+
+                if (isNew)
+                {
+                    obj = deserialized;
+                }
+                else
+                {
+                    ObjectSync.Sync.SyncState(deserialized, obj);
+                }
+            }
+
+
+            if (isNew)
+            {
+                NewObjectReceived?.Invoke(msg.SenderConnection, obj);
+            }
+            else
+            {
+                ObjectUpdateReceived?.Invoke(msg.SenderConnection, obj);
             }
         }
         
