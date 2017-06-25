@@ -121,6 +121,11 @@
             Ballz.The().Match.World.StaticGeometry.TerrainModified += OnTerrainModified;
             Ballz.The().Match.World.EntityRemoved += OnEntityRemoved;
 
+            foreach (var playerCon in PlayersByConnection.Values)
+            {
+                playerCon.MatchPlayer = Ballz.The().Match.PlayerById(playerCon.MatchPlayerId);
+            }
+
             SendWorldState();
             WorldSyncTimer.Start();
             GameRunning = true;
@@ -243,6 +248,7 @@
         private void HandleRemoteInput(NetConnection sender, InputMessage msg)
         {
             var player = PlayersByConnection[sender.RemoteUniqueIdentifier].MatchPlayer;
+            msg.Player = player;
             if (player != null)
                 Ballz.The().Input.InjectInputMessage(msg, player);
         }
