@@ -25,7 +25,7 @@ namespace Ballz.GameSession.World
             if (ExplosionDelay < 0)
             {
                 // Explosion countdown starts on release
-                explosionCountdown = Math.Abs(ExplosionDelay);
+                ExplosionCountdown = Math.Abs(ExplosionDelay);
             }
         }
 
@@ -59,8 +59,10 @@ namespace Ballz.GameSession.World
 
 		[Synced]
 		public string Team;
+        
         // Detonation when countdown reaches zero (if negative then inactive)
-        private float explosionCountdown = -1.0f;
+        [Synced]
+        private float ExplosionCountdown = -1.0f;
 
         public enum ShotType_T: byte
         {
@@ -77,11 +79,11 @@ namespace Ballz.GameSession.World
 
         public void update (float elapsedSeconds)
         {
-            if (explosionCountdown > 0)
+            if (ExplosionCountdown > 0)
             {
-                explosionCountdown -= elapsedSeconds;
+                ExplosionCountdown -= elapsedSeconds;
 
-                if (explosionCountdown <= 0.0f)
+                if (ExplosionCountdown <= 0.0f)
                 {
                     Explode();
                 }
@@ -129,10 +131,13 @@ namespace Ballz.GameSession.World
 
         private void onAnyCollision()
         {
+            if (Ballz.The().Match.IsRemoteControlled)
+                return;
+
             // Should the explosion countdown start on collision and has not yet started?
-            if (ExplosionDelay > 0.0f && explosionCountdown < 0.0f)
+            if (ExplosionDelay > 0.0f && ExplosionCountdown < 0.0f)
             {
-                explosionCountdown = ExplosionDelay;
+                ExplosionCountdown = ExplosionDelay;
             }
                 
 
@@ -177,7 +182,7 @@ namespace Ballz.GameSession.World
             writer.Write(Recoil);
             writer.Write(Restitution);
             writer.Write(Team);
-            writer.Write(explosionCountdown);
+            writer.Write(ExplosionCountdown);
             writer.Write((byte)ShotType);
         }
 
@@ -193,7 +198,7 @@ namespace Ballz.GameSession.World
             Recoil = data.ReadSingle();
             Restitution = data.ReadSingle();
             Team = data.ReadString();
-            explosionCountdown = data.ReadSingle();
+            ExplosionCountdown = data.ReadSingle();
             ShotType = (ShotType_T)data.ReadByte();
         }
     }

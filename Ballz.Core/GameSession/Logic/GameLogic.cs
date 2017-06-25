@@ -28,7 +28,7 @@ namespace Ballz.GameSession.Logic
         
         public void StartNextTurn()
         {
-            if (Session.UsePlayerTurns)
+            if (Session.UsePlayerTurns && !Session.IsRemoteControlled)
             {
                 var activePlayerIndex = Session.Players.IndexOf(Session.ActivePlayer);
 
@@ -54,7 +54,7 @@ namespace Ballz.GameSession.Logic
 
         public void EndTurn()
         {
-            if (Session.UsePlayerTurns)
+            if (Session.UsePlayerTurns && !Session.IsRemoteControlled)
             {
                 ActiveControllers[Session.ActivePlayer]?.OnTurnEnd();
                 Session.TurnTime = 0;
@@ -109,7 +109,7 @@ namespace Ballz.GameSession.Logic
 
             var worldState = Session.World;
 
-            if (Game.Match.State == SessionState.Running)
+            if (Game.Match.State == SessionState.Running && !Session.IsRemoteControlled)
             {
                 // Update all active balls
                 var currentControllers = ActiveControllers.Values.ToArray();

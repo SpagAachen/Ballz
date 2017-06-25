@@ -113,8 +113,10 @@
                 SendToPlayer(playerCon.MatchPlayerId, startInfo);
             }
 
+            var localPlayer = PlayersByConnection[-1];
+
             // Start our game session
-            Ballz.The().Logic.StartGame(gameSettings);
+            Ballz.The().Logic.StartGame(gameSettings, isMultiplayer: true, localPlayerId: localPlayer.MatchPlayerId);
 
             Ballz.The().Match.World.StaticGeometry.TerrainModified += OnTerrainModified;
             Ballz.The().Match.World.EntityRemoved += OnEntityRemoved;

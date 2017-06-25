@@ -107,7 +107,7 @@ namespace Ballz.SessionFactory
             settings.MapTexture = mapTexture;
         }
 
-        protected override Session ImplStartSession(Ballz game, MatchSettings settings, bool remoteControlled, int localPlayerId)
+        protected override Session ImplStartSession(Ballz game, MatchSettings settings, bool isMultiplayer, int localPlayerId)
         {
             var session = new Session(game, new World(new Terrain(settings.MapTexture)), settings)
                               {
@@ -121,8 +121,6 @@ namespace Ballz.SessionFactory
             session.Terrain.GravityPoint = GravityPoint;
             session.Terrain.HasGravityPoint = HasGravityPoint;
 
-            Console.WriteLine($"remoteControlled: {remoteControlled}");
-
             // Create players and Ballz
             var currBallCreating = 0;
             foreach (var team in settings.Teams)
@@ -132,7 +130,7 @@ namespace Ballz.SessionFactory
                     Id = team.Id,
                     Name = team.Name,
                     TeamName = team.Country,
-                    IsLocal = !remoteControlled || localPlayerId == team.Id
+                    IsLocal = !isMultiplayer || localPlayerId == team.Id
                 };
                 
                 session.Players.Add(player);

@@ -26,10 +26,10 @@ namespace Ballz.SessionFactory
         }
 
         // StartSession must _not_ modify GameSettings
-        public Session StartSession(Ballz game, MatchSettings settings, bool remoteControlled, int localPlayerId)
+        public Session StartSession(Ballz game, MatchSettings settings, bool isMultiplayer, int localPlayerId)
         {
             if (!IsInitialized) InitializeSession(game, settings);
-            return ImplStartSession(game, settings, remoteControlled, localPlayerId);
+            return ImplStartSession(game, settings, isMultiplayer, localPlayerId);
         }
 
         protected abstract void ImplInitializeSession(Ballz game, MatchSettings settings);

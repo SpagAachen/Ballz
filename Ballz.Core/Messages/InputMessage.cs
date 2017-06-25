@@ -29,13 +29,13 @@ namespace Ballz.Messages
         }
 
         [JsonProperty(PropertyName = "Key")]
-        public char Key{ get; private set;}
+        public char Key{ get; set;}
 
         [JsonProperty(PropertyName = "Pressed")]
-        public bool Pressed{ get; private set;}
+        public bool Pressed{ get; set;}
 
         [JsonIgnore]
-        public Player Player { get; private set; }
+        public Player Player { get; set; }
 
         public InputMessage() { }
 

@@ -122,28 +122,7 @@
                     Ballz.The().Match.World.AddEntity(entity);
                 return;
             }
-            // network message
-            var netMsg = data as NetworkMessage;
-            if (netMsg != null)
-            {
-                switch (netMsg.Kind)
-                {
-                    //case NetworkMessage.MessageType.YourPlayerId:
-                    //    //connectionToServer.ClientPlayerId = (int)netMsg.Data;
-                    //    break;
-                    //case NetworkMessage.MessageType.EntityRemoved:
-                    //    var e = netMsg.Data as Entity;
-                    //    var localEntity = Ballz.The().Match.World.EntityById(e.ID);
-                    //    Ballz.The().Match.World.RemoveEntity(localEntity);
-                    //    localEntity.Dispose();
-                    //    break;
-                    default:
-                        break;
-                }
-
-                return;
-            }
-
+            
             var terrainModification = data as Terrain.TerrainModification;
             if(terrainModification != null)
             {
@@ -156,6 +135,7 @@
         {
             var settings = MatchSettings.Deserialize(startInfo.Settings);
             Ballz.The().Network.StartNetworkGame(settings, startInfo.YourPlayerId);
+            Ballz.The().Match.IsRemoteControlled = true;
         }
 
         public void Stop()
@@ -170,6 +150,7 @@
 
         public void HandleInputMessage(InputMessage message)
         {
+            Console.WriteLine($"Input {message.Kind}");
             switch (message.Kind)
             {
                 // Intentional fallthrough

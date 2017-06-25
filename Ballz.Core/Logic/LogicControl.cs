@@ -69,7 +69,7 @@ namespace Ballz.Logic
             newMenu.OnOpen();
         }
 
-        public void StartGame(MatchSettings settings, bool remoteControlled = false, int localPlayerId = -1)
+        public void StartGame(MatchSettings settings, bool isMultiplayer = false, int localPlayerId = -1)
         {
             ButtonRepeat.Stop();
             ButtonDelay.Stop();
@@ -83,7 +83,7 @@ namespace Ballz.Logic
             if (Game.Match != null)
                 Game.Match.Dispose();
 
-            Game.Match = settings.GameMode.StartSession(Game, settings, remoteControlled, localPlayerId);
+            Game.Match = settings.GameMode.StartSession(Game, settings, isMultiplayer, localPlayerId);
             Game.Match.Start();
             RaiseMessageEvent(new LogicMessage(LogicMessage.MessageType.GameMessage));
         }

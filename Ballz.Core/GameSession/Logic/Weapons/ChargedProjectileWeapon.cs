@@ -17,6 +17,11 @@ namespace Ballz.GameSession.Logic.Weapons
         
         public virtual void FireProjectile()
         {
+            if(Ballz.The().Match.IsRemoteControlled)
+            {
+                return;
+            }
+
             Game.Services.GetService<SoundControl>().PlaySound(SoundControl.BazookaSound);
             Shot newShot = CreateShot();
             ProjectileInAir = newShot;
