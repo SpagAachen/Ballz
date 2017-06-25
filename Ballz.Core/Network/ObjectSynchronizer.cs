@@ -138,14 +138,9 @@ namespace Ballz.Network
                 msg.Write(serialized);
             }
             
-            TotalBytes += msg.LengthBytes;
-            Console.WriteLine($"Sent {TotalBytes / 1024} kb");
-
             Peer.SendMessage(msg, Connections, reliableTransfer ? NetDeliveryMethod.ReliableOrdered : NetDeliveryMethod.UnreliableSequenced, reliableTransfer ? 0 : 1);
         }
-
-        long TotalBytes = 0;
-
+        
         protected void ReadObject(NetIncomingMessage msg)
         {
             var typeId = msg.ReadInt16();
